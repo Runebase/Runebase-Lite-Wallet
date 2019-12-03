@@ -1,7 +1,7 @@
 {
   "name": "RunebaseChrome",
   "description": "Runebase light wallet and transaction signing client.",
-  "version": "1.4.6",
+  "version": "1.4.7",
   "manifest_version": 2,
   "icons": {
     "16": "images/logo-main-16.png",
@@ -16,7 +16,7 @@
     "default_popup": "popup.html"
   },
   "permissions": [
-    "storage", 
+    "storage",
     "*://*/*"
   ],
   "background": {

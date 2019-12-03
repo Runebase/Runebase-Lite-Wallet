@@ -96,6 +96,6 @@ export default class Wallet implements ISigner {
    */
   private maxRunebaseSendToAddress = (networkName: string) => {
     return networkName === NETWORK_NAMES.MAINNET ?
-      'QN8HYBmMxVyf7MQaDvBNtneBN8np5dZwoW' : 'qLJsx41F8Uv1KFF3RbrZfdLnyWQzvPdeF9';
+      'RasfBnAjGidRrwmbve42Uacrp3sXFFkzaj' : '5ZiLJ5LuCyhLTmwF2MYjVrc82gCFuJuocB';
   }
 }

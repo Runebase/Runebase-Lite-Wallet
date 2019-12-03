@@ -5659,19 +5659,18 @@ runebased-rpc@^0.0.4:
   resolved "https://registry.yarnpkg.com/runebased-rpc/-/runebased-rpc-0.0.4.tgz#935de06eb20b10e174470ce0a2767539d817da07"
   integrity sha1-k13gbrILEOF0RwzgonZ1OdgX2gc=
 
-runebasejs-lib@^0.0.7:
+"runebasejs-lib@git://github.com/runebase/runebasejs-lib.git#7631300c94241447d0c2388df886ae855900c354":
   version "0.0.7"
-  resolved "https://registry.yarnpkg.com/runebasejs-lib/-/runebasejs-lib-0.0.7.tgz#39c34114bac6783ed3c7ccf0ef338c704377bd5a"
-  integrity sha1-OcNBFLrGeD7Tx8zw7zOMcEN3vVo=
+  resolved "git://github.com/runebase/runebasejs-lib.git#7631300c94241447d0c2388df886ae855900c354"
   dependencies:
     bignumber.js "^4.1.0"
     bitcoinjs-lib "^3.3.2"
     runebase-opcodes "^1.0.0"
     safe-buffer "^5.1.1"
 
-"runebasejs-wallet@https://github.com/runebase/runebasejs-wallet":
+"runebasejs-wallet@git://github.com/runebase/runebasejs-wallet.git#26b98972023246d0d1d4a857d02973b9485e5ff3":
   version "0.2.1"
-  resolved "https://github.com/runebase/runebasejs-wallet#7ebaf97d397b6849d69ea9e0ed372473f97021e4"
+  resolved "git://github.com/runebase/runebasejs-wallet.git#26b98972023246d0d1d4a857d02973b9485e5ff3"
   dependencies:
     "@types/bip38" "^2.0.0"
     "@types/secp256k1" "^3.5.0"
@@ -5683,7 +5682,7 @@ runebasejs-lib@^0.0.7:
     coinselect "^3.1.11"
     hash.js "^1.1.5"
     runebased-rpc "^0.0.4"
-    runebasejs-lib "^0.0.7"
+    runebasejs-lib "git://github.com/runebase/runebasejs-lib.git#7631300c94241447d0c2388df886ae855900c354"
     safe-buffer "^5.1.1"
     scryptsy "^2.0.0"
     secp256k1 "^3.5.0"

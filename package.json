@@ -71,7 +71,7 @@
     "mobx-react-router": "^4.0.4",
     "moment": "^2.22.2",
     "qrcode.react": "^0.8.0",
-    "runebasejs-wallet": "git://github.com/runebase/runebasejs-wallet.git#master",
+    "runebasejs-wallet": "git://github.com/runebase/runebasejs-wallet.git#369ecdb43fd7ad93582c0d448e9cab0f34488ae5",
     "rweb3": "git://github.com/runebase/rweb3.js.git#v1.1.0",
     "react": "^16.2.0",
     "react-dom": "^16.2.0",
