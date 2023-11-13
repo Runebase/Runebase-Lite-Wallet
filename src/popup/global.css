@@ -5,16 +5,17 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-:global #root {
+#root {
   width: 350px;
-  height: 550px;
+  min-height: 450px;
+  /* height: 550px; */
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
   align-items: stretch;
 }
 
-:global .container {
+.container {
   background-color: #282c34;
   display: flex;
   flex-direction: column;

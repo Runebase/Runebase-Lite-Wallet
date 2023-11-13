@@ -2,6 +2,7 @@ const webpack = require('webpack');
 const path = require('path');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
+// const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
 
 const styleLoaders = [
   MiniCssExtractPlugin.loader,
@@ -9,12 +10,10 @@ const styleLoaders = [
     loader: require.resolve('css-loader'),
     options: {
       importLoaders: 1,
-      minimize: true,
     },
   },
   'sass-loader',
 ];
-
 
 module.exports = {
   entry: {
@@ -121,6 +120,12 @@ module.exports = {
       },
     ],
   },
+  // optimization: {
+  //   minimize: true,
+  //   minimizer: [
+  //     // new CssMinimizerPlugin(),
+  //   ],
+  // },
   plugins: [
     new webpack.ProvidePlugin({
       process: 'process/browser',

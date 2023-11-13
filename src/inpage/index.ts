@@ -41,6 +41,8 @@ function handleInpageMessage(event: MessageEvent) {
   }
 
   const message: IExtensionAPIMessage<any> = event.data.message;
+  let accountWrapper: IInpageAccountWrapper;
+
   switch (message.type) {
     case API_TYPE.SIGN_TX_URL_RESOLVED:
       signTxUrl = message.payload.url;
@@ -51,12 +53,12 @@ function handleInpageMessage(event: MessageEvent) {
     case API_TYPE.RPC_RESPONSE:
       return runebasechromeProvider.handleRpcCallResponse(message.payload);
     case API_TYPE.SEND_INPAGE_RUNEBASECHROME_ACCOUNT_VALUES:
-      const accountWrapper: IInpageAccountWrapper = message.payload;
+      accountWrapper = message.payload;
       runebasechrome.account = accountWrapper.account;
       if (accountWrapper.error) {
         throw accountWrapper.error;
       } else {
-        console.log('window.runebasechrome.account has been updated,\n Reason:',  accountWrapper.statusChangeReason);
+        console.log('window.runebasechrome.account has been updated,\n Reason:', accountWrapper.statusChangeReason);
       }
       break;
     case API_TYPE.PORT_DISCONNECTED:
