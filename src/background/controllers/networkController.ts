@@ -77,7 +77,7 @@ export default class NetworkController extends IController {
       }
     } catch (err) {
       console.error(err);
-      this.main.displayErrorOnPopup(err);
+      this.main.displayErrorOnPopup(err as any);
     }
   }
 }

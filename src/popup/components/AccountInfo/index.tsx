@@ -18,12 +18,17 @@ class AccountInfo extends Component<WithStyles & IProps, {}> {
   public handleClick = (id: string, event: React.MouseEvent<HTMLElement>) => {
     event.stopPropagation();
 
-    const location = {
+    const locations: Record<string, string> = {
       mainCard: '/account-detail',
       sendButton: '/send',
       receiveButton: '/receive',
-    }[id];
-    this.props.store!.routerStore.push(location);
+    };
+
+    const location = locations[id];
+
+    if (location) {
+      this.props.store!.routerStore.push(location);
+    }
   }
 
   public render() {
@@ -34,7 +39,7 @@ class AccountInfo extends Component<WithStyles & IProps, {}> {
       return null;
     }
 
-    return info && (
+    return (
       <div className={classes.root}>
         <Typography className={classes.acctName}>{loggedInAccountName}</Typography>
         <Typography className={classes.address}>{info.addrStr}</Typography>
@@ -52,9 +57,9 @@ class AccountInfo extends Component<WithStyles & IProps, {}> {
             size="small"
             className={classes.actionButton}
             onClick={(e) => this.handleClick('sendButton', e)}
-            >
-              Send
-            </Button>
+          >
+            Send
+          </Button>
           <Button
             id="receiveButton"
             color="secondary"
@@ -62,9 +67,9 @@ class AccountInfo extends Component<WithStyles & IProps, {}> {
             size="small"
             className={classes.actionButton}
             onClick={(e) => this.handleClick('receiveButton', e)}
-            >
-              Receive
-            </Button>
+          >
+            Receive
+          </Button>
         </div>
       </div>
     );

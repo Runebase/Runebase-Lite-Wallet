@@ -27,6 +27,7 @@ class CreateWallet extends Component<WithStyles & IProps, {}> {
 
   public render() {
     const { classes, store: { createWalletStore } } = this.props;
+    console.log('CreateWallet render');
 
     return (
       <div className={classes.root}>
@@ -80,6 +81,8 @@ class CreateWallet extends Component<WithStyles & IProps, {}> {
 
   private handleEnterPress = () => {
     const { createWalletStore } = this.props.store;
+    console.log('handleEnterPress');
+    console.log(createWalletStore);
     if (!!createWalletStore.walletName) {
       createWalletStore.routeToSaveMnemonic();
     }

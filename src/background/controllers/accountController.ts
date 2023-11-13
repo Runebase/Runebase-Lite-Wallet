@@ -90,6 +90,7 @@ export default class AccountController extends IController {
 
   public finishLogin = async () => {
     if (!this.hasAccounts) {
+      console.log('finished login');
       // New user. No created wallets yet. No need to validate.
       this.routeToAccountPage();
       return;
@@ -110,6 +111,9 @@ export default class AccountController extends IController {
   * @param mnemonic The mnemonic to derive the wallet from.
   */
   public addAccountAndLogin = async (accountName: string, privateKeyHash: string, wallet: RunebaseWallet) => {
+    console.log(accountName);
+    console.log(privateKeyHash);
+    console.log(wallet);
     this.loggedInAccount = new Account(accountName, privateKeyHash);
     this.loggedInAccount.wallet = new Wallet(wallet);
 
@@ -145,7 +149,9 @@ export default class AccountController extends IController {
     assert(mnemonic, 'invalid mnemonic');
 
     const network = this.main.network.network;
-    const wallet = network.fromMnemonic(mnemonic);
+    console.log('importMnemonic');
+    const wallet = await network.fromMnemonic(mnemonic);
+    console.log(wallet);
     const privateKeyHash = this.getPrivateKeyHash(wallet);
 
     // Validate that we don't already have the wallet in our accountList
@@ -169,7 +175,7 @@ export default class AccountController extends IController {
 
     // recover wallet and privateKeyHash
     const network = this.main.network.network;
-    const wallet = network.fromWIF(privateKey);
+    const wallet = await network.fromWIF(privateKey);
     const privateKeyHash = this.getPrivateKeyHash(wallet);
 
     // validate that we don't already have the wallet in our accountList accountList
@@ -178,6 +184,8 @@ export default class AccountController extends IController {
       chrome.runtime.sendMessage({ type: MESSAGE_TYPE.IMPORT_MNEMONIC_PRKEY_FAILURE });
       return;
     }
+
+    console.log('importPrivateKey');
 
     await this.addAccountAndLogin(accountName, privateKeyHash, wallet);
   }
@@ -497,7 +505,7 @@ export default class AccountController extends IController {
       }
     } catch (err) {
       console.error(err);
-      this.main.displayErrorOnPopup(err);
+      this.main.displayErrorOnPopup(err as any);
     }
   }
 }

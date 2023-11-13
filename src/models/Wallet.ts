@@ -49,7 +49,7 @@ export default class Wallet implements ISigner {
         return true;
       }
     } catch (e) {
-      throw(Error(e));
+      throw(Error(e as any));
     }
 
     return false;

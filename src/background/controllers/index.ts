@@ -24,7 +24,7 @@ export default class RunebaseChromeController {
   public session: SessionController;
   public onInstall: OnInstallController;
 
-  private initialized: object = {};
+  private initialized: Record<string, boolean> = {};
 
   constructor() {
     this.crypto = new CryptoController(this);

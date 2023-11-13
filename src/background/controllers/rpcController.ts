@@ -48,8 +48,8 @@ export default class RPCController extends IController {
       ];
       result = await this.main.account.loggedInAccount!.wallet!.sendTransaction(newArgs) as Insight.ISendRawTxResult;
     } catch (err) {
-      error = err.message;
       console.error(error);
+      error = (err as Error).message;
     }
 
     return { id, result, error };
@@ -74,7 +74,7 @@ export default class RPCController extends IController {
 
       result = await rpcProvider.rawCall(RPC_METHOD.CALL_CONTRACT, args) as Insight.IContractCall;
     } catch (err) {
-      error = err.message;
+      error = (err as Error).message;
       console.error(error);
     }
 
@@ -120,7 +120,7 @@ export default class RPCController extends IController {
 
       result = await rpcProvider.rawCall(method, args);
     } catch (e) {
-      error = e.message;
+      error = (e as Error).message;
     }
 
     this.sendRpcResponseToActiveTab(id, result, error);
@@ -171,7 +171,7 @@ export default class RPCController extends IController {
       }
     } catch (err) {
       console.error(err);
-      this.main.displayErrorOnPopup(err);
+      this.main.displayErrorOnPopup(err as any);
     }
   }
 }

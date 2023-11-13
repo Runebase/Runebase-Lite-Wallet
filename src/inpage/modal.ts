@@ -22,7 +22,7 @@ function getHeight(element: HTMLElement) {
     return 0;
   }
 
-  const styles = window.getComputedStyle(element, null);
+  const styles = window.getComputedStyle(element, null) as any;
 
   which.forEach((name) => {
     height -= parseFloat(styles['border' + name + 'Width']) || 0;

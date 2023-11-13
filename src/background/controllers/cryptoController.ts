@@ -85,6 +85,7 @@ export default class CryptoController extends IController {
       });
 
       sww.onmessage = (e) => {
+        console.log(e);
         if (e.data.err) {
           throw Error('scrypt failed to calculate derivedKey');
         }
