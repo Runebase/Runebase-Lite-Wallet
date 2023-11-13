@@ -223,7 +223,7 @@ export default createMuiTheme({
   overrides: {
     MuiCardContent: {
       root: {
-        padding: `0px !important`,
+        padding: '0px !important',
       },
     },
     MuiButton: {

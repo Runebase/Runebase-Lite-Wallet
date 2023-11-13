@@ -1,6 +1,7 @@
 import { each, findIndex, isEmpty } from 'lodash';
 import BigNumber from 'bignumber.js';
 import { Insight } from 'runebasejs-wallet';
+// eslint-disable-next-line @typescript-eslint/naming-convention
 const { Rweb3 } = require('rweb3');
 
 import RunebaseChromeController from '.';
@@ -36,7 +37,7 @@ export default class TokenController extends IController {
 
   public resetTokenList = () => {
     this.tokens = INIT_VALUES.tokens;
-  }
+  };
 
   /*
   * Init the token list based on the environment.
@@ -57,7 +58,7 @@ export default class TokenController extends IController {
         this.tokens = regtestTokenList;
       }
     });
-  }
+  };
 
   /*
   * Starts polling for periodic info updates.
@@ -69,7 +70,7 @@ export default class TokenController extends IController {
         this.getBalances();
       }, TokenController.GET_BALANCES_INTERVAL_MS);
     }
-  }
+  };
 
   /*
   * Stops polling for the periodic info updates.
@@ -79,7 +80,7 @@ export default class TokenController extends IController {
       clearInterval(this.getBalancesInterval);
       this.getBalancesInterval = undefined;
     }
-  }
+  };
 
   /*
   * Fetch the tokens balances via RPC calls.
@@ -88,7 +89,7 @@ export default class TokenController extends IController {
     each(this.tokens, async (token: QRCToken) => {
       await this.getQRCTokenBalance(token);
     });
-  }
+  };
 
   /*
   * Makes an RPC call to the contract to get the token balance of this current wallet address.
@@ -130,7 +131,7 @@ export default class TokenController extends IController {
     }
 
     chrome.runtime.sendMessage({ type: MESSAGE_TYPE.QRC_TOKENS_RETURN, tokens: this.tokens });
-  }
+  };
 
   /**
    * Gets the QRC token details (name, symbol, decimals) given a contract address.
@@ -198,7 +199,7 @@ export default class TokenController extends IController {
     }
 
     chrome.runtime.sendMessage(msg);
-  }
+  };
 
   /*
   * Send QRC tokens.
@@ -223,20 +224,20 @@ export default class TokenController extends IController {
     }
 
     chrome.runtime.sendMessage({ type: MESSAGE_TYPE.SEND_TOKENS_SUCCESS });
-  }
+  };
 
   private addToken = async (contractAddress: string, name: string, symbol: string, decimals: number) => {
     const newToken = new QRCToken(name, symbol, decimals, contractAddress);
     this.tokens!.push(newToken);
     this.setTokenListInChromeStorage();
     await this.getQRCTokenBalance(newToken);
-  }
+  };
 
   private removeToken = (contractAddress: string) => {
     const index = findIndex(this.tokens, { address: contractAddress });
     this.tokens!.splice(index, 1);
     this.setTokenListInChromeStorage();
-  }
+  };
 
   private setTokenListInChromeStorage = () => {
     chrome.storage.local.set({
@@ -247,12 +248,13 @@ export default class TokenController extends IController {
         tokens: this.tokens,
       });
     });
-  }
+  };
 
   private chromeStorageAccountTokenListKey = () => {
     return `${STORAGE.ACCOUNT_TOKEN_LIST}-${this.main.account.loggedInAccount!.name}-${this.main.network.networkName}`;
-  }
+  };
 
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   private handleMessage = (request: any, _: chrome.runtime.MessageSender, sendResponse: (response: any) => void) => {
     try {
       switch (request.type) {
@@ -276,7 +278,7 @@ export default class TokenController extends IController {
       }
     } catch (err) {
       console.error(err);
-      this.main.displayErrorOnPopup(err);
+      this.main.displayErrorOnPopup(err as any);
     }
-  }
+  };
 }

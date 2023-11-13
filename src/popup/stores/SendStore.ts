@@ -89,7 +89,7 @@ export default class SendStore {
     chrome.runtime.sendMessage({
       type: MESSAGE_TYPE.GET_MAX_RUNEBASE_SEND,
     });
-  }
+  };
 
   @action
   public changeToken = (tokenSymbol: string) => {
@@ -97,12 +97,12 @@ export default class SendStore {
     if (token) {
       this.token = token;
     }
-  }
+  };
 
   @action
   public routeToSendConfirm = () => {
     this.app.routerStore.push('/send-confirm');
-  }
+  };
 
   @action
   public send = () => {
@@ -128,10 +128,11 @@ export default class SendStore {
         gasPrice: Number(this.gasPrice),
       });
     }
-  }
+  };
 
   @action
   private handleMessage = (request: any) => {
+    let runebaseToken;
     switch (request.type) {
       case MESSAGE_TYPE.SEND_TOKENS_SUCCESS:
         this.app.routerStore.push('/home'); // so pressing back won't go back to sendConfirm page
@@ -143,11 +144,11 @@ export default class SendStore {
         this.errorMessage = request.error.message;
         break;
       case MESSAGE_TYPE.GET_MAX_RUNEBASE_SEND_RETURN:
-        const runebaseToken = this.tokens[0];
+        runebaseToken = this.tokens[0];
         this.maxRunebaseSend = request.maxRunebaseAmount / (10 ** runebaseToken.decimals);
         break;
       default:
         break;
     }
-  }
+  };
 }

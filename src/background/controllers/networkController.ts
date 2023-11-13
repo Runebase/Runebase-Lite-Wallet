@@ -55,8 +55,9 @@ export default class NetworkController extends IController {
       chrome.runtime.sendMessage({ type: MESSAGE_TYPE.CHANGE_NETWORK_SUCCESS, networkIndex });
       this.main.account.logoutAccount();
     }
-  }
+  };
 
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   private handleMessage = (request: any, _: chrome.runtime.MessageSender, sendResponse: (response: any) => void) => {
     try {
       switch (request.type) {
@@ -79,5 +80,5 @@ export default class NetworkController extends IController {
       console.error(err);
       this.main.displayErrorOnPopup(err as any);
     }
-  }
+  };
 }
