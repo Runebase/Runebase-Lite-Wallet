@@ -127,7 +127,7 @@ You can connect RunebaseChrome to regtest. You will need to set the following in
 }
 ```
 
-## Running Dev Version (NodeJs v15)
+## Running Dev Version (NodeJs v20)
 ### Chrome
 1. `npm run start` in the project folder to build the dev version and wait for it to be built
 2. Open Chrome and load URL: `chrome://extensions`
