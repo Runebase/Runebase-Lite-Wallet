@@ -22,10 +22,10 @@ export default class SaveMnemonicStore {
   @action
   public generateMnemonic = () => {
     this.mnemonic = generateMnemonic();
-  }
+  };
 
   @action
-  public reset = () => Object.assign(this, INIT_VALUES)
+  public reset = () => Object.assign(this, INIT_VALUES);
 
   public createWallet = (saveFile: boolean) => {
     this.app.routerStore.push('/loading');
@@ -34,5 +34,5 @@ export default class SaveMnemonicStore {
       accountName: this.walletName,
       mnemonicPrivateKey: this.mnemonic,
     });
-  }
+  };
 }

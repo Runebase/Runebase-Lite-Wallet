@@ -40,14 +40,14 @@ export default class LoginStore {
   public init = () => {
     this.password = INIT_VALUES.password;
     this.confirmPassword = INIT_VALUES.confirmPassword;
-  }
+  };
 
   public login = () => {
     if (this.error === false) {
       this.app.routerStore.push('/loading');
       chrome.runtime.sendMessage({ type: MESSAGE_TYPE.LOGIN, password: this.password });
     }
-  }
+  };
 
   private getMatchError = (): string | undefined => {
     let error;
@@ -55,5 +55,5 @@ export default class LoginStore {
       error = 'Passwords do not match.';
     }
     return error;
-  }
+  };
 }

@@ -45,7 +45,7 @@ export default class AccountLoginStore {
         }
       }
     });
-  }
+  };
 
   /**
    * In some rare instances, the user can navigate to the AccountLogin page while on a
@@ -62,7 +62,7 @@ export default class AccountLoginStore {
     if (this.app.sessionStore.networkIndex !== this.selectedWalletNetworkIndex) {
       this.app.navBarStore.changeNetwork(this.selectedWalletNetworkIndex);
     }
-  }
+  };
 
   @action
   public setSelectedWallet = () => {
@@ -70,7 +70,7 @@ export default class AccountLoginStore {
       this.selectedWalletName = this.accounts[0].name;
       this.selectedWalletNetworkIndex = this.app.sessionStore.networkIndex;
     }
-  }
+  };
 
   @action
   public loginAccount = () => {
@@ -79,13 +79,13 @@ export default class AccountLoginStore {
       type: MESSAGE_TYPE.ACCOUNT_LOGIN,
       selectedWalletName: this.selectedWalletName,
     });
-  }
+  };
 
   @action
   public routeToCreateWallet = () => {
     this.app.routerStore.push('/create-wallet');
-  }
+  };
 
   @action
-  public reset = () => Object.assign(this, INIT_VALUES)
+  public reset = () => Object.assign(this, INIT_VALUES);
 }

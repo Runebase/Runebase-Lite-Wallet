@@ -36,44 +36,44 @@ export default class AccountDetailStore {
   public init = () => {
     chrome.runtime.onMessage.addListener(this.handleMessage);
     this.activeTabIdx === 0 ? this.onTransactionTabSelected() : this.onTokenTabSelected();
-  }
+  };
 
   public deinit = () => {
     chrome.runtime.onMessage.removeListener(this.handleMessage);
     chrome.runtime.sendMessage({ type: MESSAGE_TYPE.STOP_TX_POLLING });
-  }
+  };
 
   public fetchMoreTxs = () => {
     chrome.runtime.sendMessage({ type: MESSAGE_TYPE.GET_MORE_TXS });
-  }
+  };
 
   public onTransactionClick = (txid: string) => {
     chrome.runtime.sendMessage({ type: MESSAGE_TYPE.GET_NETWORK_EXPLORER_URL }, (response: any) => {
       chrome.tabs.create({ url: `${response}/${txid}` });
     });
-  }
+  };
 
   public removeToken = (contractAddress: string) => {
     chrome.runtime.sendMessage({
       type: MESSAGE_TYPE.REMOVE_TOKEN,
       contractAddress,
     });
-  }
+  };
 
   public routeToAddToken = () => {
     this.app.routerStore.push('/add-token');
-  }
+  };
 
   private onTransactionTabSelected = () => {
     chrome.runtime.sendMessage({ type: MESSAGE_TYPE.START_TX_POLLING });
-  }
+  };
 
   private onTokenTabSelected = () => {
     chrome.runtime.sendMessage({ type: MESSAGE_TYPE.GET_QRC_TOKEN_LIST }, (response: any) => {
       this.tokens = response;
     });
     chrome.runtime.sendMessage({ type: MESSAGE_TYPE.STOP_TX_POLLING });
-  }
+  };
 
   @action
   private handleMessage = (request: any) => {
@@ -88,5 +88,5 @@ export default class AccountDetailStore {
       default:
         break;
     }
-  }
+  };
 }

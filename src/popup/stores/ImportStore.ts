@@ -53,14 +53,14 @@ export default class ImportStore {
   @action
   public changeImportType = (type: string) => {
     this.importType = type;
-  }
+  };
 
   @action
   public reset = () => {
     const tempImportType = this.importType;
     Object.assign(this, INIT_VALUES);
     this.importType = tempImportType;
-  }
+  };
 
   @action
   public importMnemonicOrPrKey = () => {
@@ -74,10 +74,10 @@ export default class ImportStore {
         mnemonicPrivateKey: this.mnemonicPrivateKey,
       });
     }
-  }
+  };
 
   @action
   public cancelImport = () => {
     this.app.routerStore.goBack();
-  }
+  };
 }

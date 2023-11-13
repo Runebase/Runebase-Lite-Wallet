@@ -12,9 +12,9 @@ export default abstract class IController {
 
   public initFinished = () => {
     this.main.controllerInitialized(this.name);
-  }
+  };
 
   private registerController = () => {
     this.main.registerController(this.name);
-  }
+  };
 }
