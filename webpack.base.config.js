@@ -2,7 +2,6 @@ const webpack = require('webpack');
 const path = require('path');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
-// const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
 
 const styleLoaders = [
   MiniCssExtractPlugin.loader,
@@ -48,14 +47,17 @@ module.exports = {
   module: {
     rules: [
       {
-        test: /\.(ts|tsx)$/,
+        test: /\.(ts|tsx|js)$/,
         enforce: 'pre',
+        exclude: /node_modules/,
         use: [
           {
-            loader: require.resolve('tslint-loader'),
+            loader: require.resolve('eslint-loader'),
+            options: {
+              fix: true,
+            },
           },
         ],
-        include: path.resolve(__dirname, './src'),
       },
       {
         test: /\.js$/,

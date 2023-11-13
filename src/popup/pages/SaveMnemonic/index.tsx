@@ -15,7 +15,7 @@ interface IProps {
 
 @inject('store')
 @observer
-class SaveMnemonic extends Component<WithStyles & IProps, {}> {
+class SaveMnemonic extends Component<WithStyles & IProps, NonNullable<unknown>> {
   public componentDidMount() {
     console.log('SaveMnemonic');
     this.props.store.saveMnemonicStore.generateMnemonic();

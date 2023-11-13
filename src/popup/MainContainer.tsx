@@ -27,7 +27,7 @@ interface IProps {
 
 @inject('store')
 @observer
-export default class MainContainer extends Component<IProps, {}> {
+export default class MainContainer extends Component<IProps, NonNullable<unknown>> {
   public componentDidMount() {
     this.props.store!.mainContainerStore.init();
   }

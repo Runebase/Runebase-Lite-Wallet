@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 import scrypt from 'scryptsy';
 import { Buffer } from 'buffer';
 

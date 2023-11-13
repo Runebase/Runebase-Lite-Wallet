@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 import React, { Component } from 'react';
 import { Typography, Select, MenuItem, TextField, Button, withStyles, WithStyles } from '@material-ui/core';
 import { ArrowDropDown } from '@material-ui/icons';
@@ -17,7 +18,7 @@ interface IProps {
 
 @inject('store')
 @observer
-class Send extends Component<WithStyles & IProps, {}> {
+class Send extends Component<WithStyles & IProps, NonNullable<unknown>> {
   public componentDidMount() {
     this.props.store.sendStore.init();
   }

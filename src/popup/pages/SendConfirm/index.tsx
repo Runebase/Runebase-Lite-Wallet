@@ -15,7 +15,7 @@ interface IProps {
 
 @inject('store')
 @observer
-class SendConfirm extends Component<WithStyles & IProps, {}> {
+class SendConfirm extends Component<WithStyles & IProps, NonNullable<unknown>> {
 
   public render() {
     const { classes, store: { sendStore } } = this.props;
