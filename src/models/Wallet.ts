@@ -1,5 +1,9 @@
 import { action } from 'mobx';
-import { Wallet as RunebaseWallet, Insight, WalletRPCProvider } from 'runebasejs-wallet';
+import {
+  Wallet as RunebaseWallet,
+  Insight,
+  WalletRPCProvider,
+} from 'runebasejs-wallet';
 import deepEqual from 'deep-equal';
 
 import { ISigner } from '../types';
@@ -81,8 +85,13 @@ export default class Wallet implements ISigner {
     if (!this.qjsWallet || !this.info) {
       throw Error('Cannot calculate max send amount without wallet or this.info.');
     }
-    this.maxRunebaseSend = await this.qjsWallet.sendEstimateMaxValue(this.maxRunebaseSendToAddress(networkName));
-    return this.maxRunebaseSend;
+    try {
+      this.maxRunebaseSend = await this.qjsWallet.sendEstimateMaxValue(this.maxRunebaseSendToAddress(networkName));
+      return this.maxRunebaseSend;
+    } catch (error) {
+      console.error('Error calculating max Runebase send amount:', error);
+      throw error;
+    }
   };
 
   /**
