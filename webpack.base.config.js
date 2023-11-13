@@ -2,6 +2,7 @@ const webpack = require('webpack');
 const path = require('path');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
+const ESLintPlugin = require('eslint-webpack-plugin');
 
 const styleLoaders = [
   MiniCssExtractPlugin.loader,
@@ -51,12 +52,7 @@ module.exports = {
         enforce: 'pre',
         exclude: /node_modules/,
         use: [
-          {
-            loader: require.resolve('eslint-loader'),
-            options: {
-              fix: true,
-            },
-          },
+          // Remove eslint-loader configuration
         ],
       },
       {
@@ -134,6 +130,10 @@ module.exports = {
     }),
     new MiniCssExtractPlugin({
       filename: '[name].css',
+    }),
+    new ESLintPlugin({
+      overrideConfigFile: path.resolve(__dirname, '.eslintrc.js'),
+      fix: true,
     }),
     new CopyWebpackPlugin({
       patterns: [
