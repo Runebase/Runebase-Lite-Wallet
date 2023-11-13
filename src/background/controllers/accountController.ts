@@ -1,6 +1,7 @@
 import { isEmpty, find, cloneDeep } from 'lodash';
 import { Wallet as RunebaseWallet } from 'runebasejs-wallet';
 import assert from 'assert';
+import { Buffer } from 'buffer'; // Add this line to import Buffer
 
 import RunebaseChromeController from '.';
 import IController from './iController';
@@ -8,6 +9,8 @@ import { MESSAGE_TYPE, STORAGE, NETWORK_NAMES, RUNEBASECHROME_ACCOUNT_CHANGE } f
 import Account from '../../models/Account';
 import Wallet from '../../models/Wallet';
 import { TRANSACTION_SPEED } from '../../constants';
+
+globalThis.Buffer = Buffer;
 
 const INIT_VALUES = {
   mainnetAccounts: [],
@@ -223,15 +226,19 @@ export default class AccountController extends IController {
     this.loggedInAccount = cloneDeep(account);
 
     if (!this.loggedInAccount) {
+      console.error('Logged in account is undefined');
       throw Error('Account should not be undefined');
     }
 
     try {
+      console.log('Attempting to recover wallet from private key hash');
       const wallet = this.recoverFromPrivateKeyHash(this.loggedInAccount.privateKeyHash);
       this.loggedInAccount.wallet = new Wallet(wallet);
 
+      console.log('Login successful. Performing actions after login...');
       await this.onAccountLoggedIn();
     } catch (err) {
+      console.error('Error during login:', err);
       this.resetAccount();
       throw err;
     }
@@ -332,19 +339,24 @@ export default class AccountController extends IController {
     } else if (!isEmpty(this.regtestAccounts)) {
       account = this.regtestAccounts[0];
     } else {
+      console.error('No accounts found when trying to validate password');
       throw Error('Trying to validate password without existing account');
     }
 
     try {
+      console.log('Attempting to recover wallet from private key hash');
       this.recoverFromPrivateKeyHash(account.privateKeyHash);
+      console.log('Password validation successful');
       return true;
     } catch (err) {
+      console.error('Error validating password:', err);
       /*
       * If the user provides an invalid password, privateKeyHash will be invalid,
-      * and recoverFromPrivateKeyHash will throw an error. In this case it is not
+      * and recoverFromPrivateKeyHash will throw an error. In this case, it is not
       * an unexpected error for us, so we don't do anything with the error.
       */
     }
+    console.log('Password validation failed');
     return false;
   }
 
@@ -452,52 +464,67 @@ export default class AccountController extends IController {
     try {
       switch (request.type) {
         case MESSAGE_TYPE.LOGIN:
+          console.log(`Logging in with password: ${request.password}`);
           this.login(request.password);
           break;
         case MESSAGE_TYPE.IMPORT_MNEMONIC:
+          console.log(`Importing mnemonic: ${request.accountName}, ${request.mnemonicPrivateKey}`);
           await this.importMnemonic(request.accountName, request.mnemonicPrivateKey);
           break;
         case MESSAGE_TYPE.IMPORT_PRIVATE_KEY:
+          console.log(`Importing private key: ${request.accountName}, ${request.mnemonicPrivateKey}`);
           await this.importPrivateKey(request.accountName, request.mnemonicPrivateKey);
           break;
         case MESSAGE_TYPE.SAVE_TO_FILE:
+          console.log(`Saving to file: ${request.accountName}, ${request.mnemonicPrivateKey}`);
           this.saveToFile(request.accountName, request.mnemonicPrivateKey);
           break;
         case MESSAGE_TYPE.ACCOUNT_LOGIN:
+          console.log(`Logging into account: ${request.selectedWalletName}`);
           await this.loginAccount(request.selectedWalletName);
           break;
         case MESSAGE_TYPE.SEND_TOKENS:
+          console.log(`Sending tokens: ${request.receiverAddress}, Amount: ${request.amount}, Speed: ${request.transactionSpeed}`);
           this.sendTokens(request.receiverAddress, request.amount, request.transactionSpeed);
           break;
         case MESSAGE_TYPE.LOGOUT:
+          console.log('Logging out');
           this.logoutAccount();
           break;
         case MESSAGE_TYPE.HAS_ACCOUNTS:
+          console.log('Checking if accounts exist');
           sendResponse(this.hasAccounts);
           break;
         case MESSAGE_TYPE.GET_ACCOUNTS:
+          console.log('Getting accounts');
           sendResponse(this.accounts);
           break;
         case MESSAGE_TYPE.GET_LOGGED_IN_ACCOUNT:
+          console.log('Getting logged-in account');
           sendResponse(this.loggedInAccount && this.loggedInAccount.wallet && this.loggedInAccount.wallet.info
             ? { name: this.loggedInAccount.name, address: this.loggedInAccount!.wallet!.info!.addrStr }
             : undefined);
           break;
         case MESSAGE_TYPE.GET_LOGGED_IN_ACCOUNT_NAME:
+          console.log('Getting logged-in account name');
           sendResponse(this.loggedInAccount ? this.loggedInAccount.name : undefined);
           break;
         case MESSAGE_TYPE.GET_WALLET_INFO:
+          console.log('Getting wallet info');
           sendResponse(this.loggedInAccount && this.loggedInAccount.wallet
             ? this.loggedInAccount.wallet.info : undefined);
           break;
         case MESSAGE_TYPE.GET_RUNEBASE_USD:
+          console.log('Getting RUNEBASE to USD conversion');
           sendResponse(this.loggedInAccount && this.loggedInAccount.wallet
             ? this.loggedInAccount.wallet.runebaseUSD : undefined);
           break;
         case MESSAGE_TYPE.VALIDATE_WALLET_NAME:
+          console.log(`Validating wallet name: ${request.name}`);
           sendResponse(this.isWalletNameTaken(request.name));
           break;
         case MESSAGE_TYPE.GET_MAX_RUNEBASE_SEND:
+          console.log('Getting max RUNEBASE send amount');
           this.updateAndSendMaxRunebaseAmountToPopup();
           break;
         default:

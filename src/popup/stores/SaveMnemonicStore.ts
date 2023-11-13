@@ -1,5 +1,5 @@
 import { observable, action } from 'mobx';
-import bip39 from 'bip39';
+import { generateMnemonic } from 'bip39';
 
 import AppStore from './AppStore';
 import { MESSAGE_TYPE } from '../../constants';
@@ -21,7 +21,7 @@ export default class SaveMnemonicStore {
 
   @action
   public generateMnemonic = () => {
-    this.mnemonic = bip39.generateMnemonic();
+    this.mnemonic = generateMnemonic();
   }
 
   @action

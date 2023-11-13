@@ -1,7 +1,7 @@
+const webpack = require('webpack');
 const path = require('path');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
-const autoprefixer = require('autoprefixer');
 
 const styleLoaders = [
   MiniCssExtractPlugin.loader,
@@ -12,20 +12,9 @@ const styleLoaders = [
       minimize: true,
     },
   },
-  {
-    loader: require.resolve('postcss-loader'),
-    options: {
-      ident: 'postcss',
-      plugins: () => [
-        require('postcss-flexbugs-fixes'),
-        autoprefixer({
-          flexbox: 'no-2009',
-        }),
-      ],
-    },
-  },
   'sass-loader',
 ];
+
 
 module.exports = {
   entry: {
@@ -41,19 +30,32 @@ module.exports = {
     publicPath: 'chrome-extension://__MSG_@@extension_id__/',
   },
   resolve: {
+    alias: {
+      'scryptsy/browser': 'scryptsy',
+    },
     extensions: ['.ts', '.tsx', '.js', '.jsx', '.json'],
+    fallback: {
+      "http": require.resolve("stream-http"),
+      "https": require.resolve("https-browserify"),
+      "zlib": require.resolve("browserify-zlib"),
+      "url": require.resolve("url/"),
+      "crypto": require.resolve("crypto-browserify"),
+      "stream": require.resolve("stream-browserify"),
+      "assert": require.resolve("assert/"),
+      'util': require.resolve('util/'),
+      "buffer": require.resolve("buffer/"),
+    },
   },
   module: {
     rules: [
       {
-        parser: {
-          amd: false,
-        },
-      },
-      {
         test: /\.(ts|tsx)$/,
-        loaders: require.resolve('tslint-loader'),
         enforce: 'pre',
+        use: [
+          {
+            loader: require.resolve('tslint-loader'),
+          },
+        ],
         include: path.resolve(__dirname, './src'),
       },
       {
@@ -93,10 +95,9 @@ module.exports = {
         oneOf: [
           {
             test: [/\.bmp$/, /\.gif$/, /\.jpe?g$/, /\.png$/],
-            loader: require.resolve('url-loader'),
-            options: {
-              limit: 10000,
-              name: 'static/[name].[hash:8].[ext]',
+            type: 'asset/resource',
+            generator: {
+              filename: 'static/[name].[hash:8][ext]',
             },
           },
           {
@@ -110,10 +111,10 @@ module.exports = {
             use: styleLoaders,
           },
           {
-            loader: require.resolve('file-loader'),
+            type: 'asset/resource',
             exclude: [/\.js$/, /\.html$/, /\.json$/],
-            options: {
-              name: 'static/[name].[hash:8].[ext]',
+            generator: {
+              filename: 'static/[name].[hash:8][ext]',
             },
           },
         ],
@@ -121,9 +122,16 @@ module.exports = {
     ],
   },
   plugins: [
+    new webpack.ProvidePlugin({
+      process: 'process/browser',
+    }),
     new MiniCssExtractPlugin({
       filename: '[name].css',
     }),
-    new CopyWebpackPlugin([{ from: 'static' }]),
+    new CopyWebpackPlugin({
+      patterns: [
+        { from: 'static', to: './' },
+      ],
+    }),
   ],
 };
