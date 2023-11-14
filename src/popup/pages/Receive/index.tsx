@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import { inject, observer } from 'mobx-react';
-import { Typography, withStyles, WithStyles } from '@material-ui/core';
+import { Typography } from '@mui/material';
+import { WithStyles } from '@mui/styles';
+import withStyles from '@mui/styles/withStyles';
 import QRCode from 'qrcode.react';
 
 import styles from './styles';
@@ -14,7 +16,7 @@ interface IProps {
 
 @inject('store')
 @observer
-class Receive extends Component<WithStyles & IProps, NonNullable<unknown>> {
+class Receive extends Component<WithStyles<typeof styles> & IProps, NonNullable<unknown>> {
   public render() {
     const { classes } = this.props;
     const { loggedInAccountName, info, runebaseBalanceUSD, networkBalAnnotation } = this.props.store.sessionStore;

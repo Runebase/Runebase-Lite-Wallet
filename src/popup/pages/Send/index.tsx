@@ -1,7 +1,9 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import React, { Component } from 'react';
-import { Typography, Select, MenuItem, TextField, Button, withStyles, WithStyles } from '@material-ui/core';
-import { ArrowDropDown } from '@material-ui/icons';
+import { Typography, Select, MenuItem, TextField, Button } from '@mui/material';
+import { WithStyles } from '@mui/styles';
+import withStyles from '@mui/styles/withStyles';
+import { ArrowDropDown } from '@mui/icons-material';
 import { inject, observer } from 'mobx-react';
 import { map } from 'lodash';
 
@@ -18,7 +20,7 @@ interface IProps {
 
 @inject('store')
 @observer
-class Send extends Component<WithStyles & IProps, NonNullable<unknown>> {
+class Send extends Component<WithStyles<typeof styles> & IProps, NonNullable<unknown>> {
   public componentDidMount() {
     this.props.store.sendStore.init();
   }

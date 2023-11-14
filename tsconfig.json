@@ -11,9 +11,10 @@
     "noUnusedParameters": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
-    "moduleResolution": "node",
+    "moduleResolution": "nodenext",
     "experimentalDecorators": true,
     "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
     "typeRoots": ["node_modules/@types", "node_modules/web-ext-types"]
   },
   "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.d.ts"]

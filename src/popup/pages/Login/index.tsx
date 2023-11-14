@@ -7,16 +7,15 @@ import {
   DialogContent,
   DialogContentText,
   DialogActions,
-  withStyles,
-  WithStyles,
-} from '@material-ui/core';
+} from '@mui/material';
+import { WithStyles } from '@mui/styles';
+import withStyles from '@mui/styles/withStyles';
 import { inject, observer } from 'mobx-react';
 
 import styles from './styles';
 import PasswordInput from '../../components/PasswordInput';
 import Logo from '../../components/Logo';
 import AppStore from '../../stores/AppStore';
-
 interface IProps {
   classes: Record<string, string>;
   store: AppStore;
@@ -24,7 +23,7 @@ interface IProps {
 
 @inject('store')
 @observer
-class Login extends Component<WithStyles & IProps, {}> {
+class Login extends Component<WithStyles<typeof styles> & IProps, {}> {
   public componentDidMount() {
     this.props.store.loginStore.init();
   }
@@ -78,10 +77,8 @@ class Login extends Component<WithStyles & IProps, {}> {
 
 const ErrorDialog: React.FC<any> = observer(({ store: { loginStore }}: any) => (
   <Dialog
-    disableBackdropClick
     open={!!loginStore.invalidPassword}
-    onClose={() => loginStore.invalidPassword = undefined}
-  >
+    onClose={() => loginStore.invalidPassword = undefined}>
     <DialogTitle>Invalid Password</DialogTitle>
     <DialogContent>
       <DialogContentText>You have entered an invalid password. Please try again.</DialogContentText>

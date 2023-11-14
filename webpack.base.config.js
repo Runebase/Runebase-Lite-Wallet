@@ -31,6 +31,7 @@ module.exports = {
   resolve: {
     alias: {
       'scryptsy/browser': 'scryptsy',
+      'clsx': require.resolve('clsx'),
     },
     extensions: ['.ts', '.tsx', '.js', '.jsx', '.json'],
     fallback: {
@@ -142,4 +143,5 @@ module.exports = {
       ],
     }),
   ],
+  devtool: 'source-map',
 };

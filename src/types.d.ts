@@ -79,10 +79,7 @@ export interface IInpageAccountWrapper {
   statusChangeReason: RUNEBASECHROME_ACCOUNT_CHANGE;
 }
 
-// mui.d.ts
-import '@material-ui/core/styles';
-
-declare module '@material-ui/core/styles' {
+declare module '@mui/material/styles' {
   interface Theme {
     font?: {
       xs?: string;
@@ -154,10 +151,7 @@ declare module '@material-ui/core/styles' {
   }
 }
 
-// mui.d.ts
-import '@material-ui/core/styles/createTypography';
-
-declare module '@material-ui/core/styles/createTypography' {
+declare module '@mui/material/styles/createTypography' {
   interface Typography {
     fontSizeMedium?: React.CSSProperties['fontSize'];
     fontSizeSmall?: React.CSSProperties['fontSize'];
@@ -173,7 +167,7 @@ declare module '@material-ui/core/styles/createTypography' {
 }
 
 
-declare module '@material-ui/core/styles/createPalette' {
+declare module '@mui/material/styles/createPalette' {
   interface Palette {
     gradientPurple: {
       main: string,
@@ -188,11 +182,8 @@ declare module '@material-ui/core/styles/createPalette' {
   }
 }
 
-// mui.d.ts
-import '@material-ui/core/styles/createMuiTheme';
-
-declare module '@material-ui/core/styles/createMuiTheme' {
-  interface ThemeOptions {
+declare module '@mui/material/styles/createMuiTheme' {
+  interface DeprecatedThemeOptions {
     color: {
       gray: string;
       orange: string;

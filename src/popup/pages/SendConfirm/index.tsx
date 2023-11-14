@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import { inject, observer } from 'mobx-react';
-import { Typography, withStyles, Button, WithStyles } from '@material-ui/core';
+import { Typography, Button } from '@mui/material';
+import { WithStyles } from '@mui/styles';
+import withStyles from '@mui/styles/withStyles';
 import cx from 'classnames';
 
 import styles from './styles';
@@ -15,7 +17,7 @@ interface IProps {
 
 @inject('store')
 @observer
-class SendConfirm extends Component<WithStyles & IProps, NonNullable<unknown>> {
+class SendConfirm extends Component<WithStyles<typeof styles> & IProps, NonNullable<unknown>> {
 
   public render() {
     const { classes, store: { sendStore } } = this.props;

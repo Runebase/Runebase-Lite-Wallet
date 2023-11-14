@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
-import { Typography, TextField, Button, withStyles, WithStyles } from '@material-ui/core';
+import { Typography, TextField, Button } from '@mui/material';
+import { WithStyles } from '@mui/styles';
+import withStyles from '@mui/styles/withStyles';
 import { inject, observer } from 'mobx-react';
 import cx from 'classnames';
 
@@ -15,7 +17,7 @@ interface IProps {
 
 @inject('store')
 @observer
-class AddToken extends Component<WithStyles & IProps, {}> {
+class AddToken extends Component<WithStyles<typeof styles> & IProps, {}> {
   public componentDidMount() {
     this.props.store.addTokenStore.init();
   }

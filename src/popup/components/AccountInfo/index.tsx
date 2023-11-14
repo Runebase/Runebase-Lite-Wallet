@@ -1,7 +1,9 @@
 import React, { Component } from 'react';
 import { inject, observer } from 'mobx-react';
-import { Typography, Button, withStyles, WithStyles } from '@material-ui/core';
-import { KeyboardArrowRight } from '@material-ui/icons';
+import { Typography, Button } from '@mui/material';
+import { WithStyles } from '@mui/styles';
+import withStyles from '@mui/styles/withStyles';
+import { KeyboardArrowRight } from '@mui/icons-material';
 
 import styles from './styles';
 import AppStore from '../../stores/AppStore';
@@ -14,7 +16,7 @@ interface IProps {
 
 @inject('store')
 @observer
-class AccountInfo extends Component<WithStyles & IProps, {}> {
+class AccountInfo extends Component<WithStyles<typeof styles> & IProps, {}> {
   public handleClick = (id: string, event: React.MouseEvent<HTMLElement>) => {
     event.stopPropagation();
 
@@ -29,7 +31,7 @@ class AccountInfo extends Component<WithStyles & IProps, {}> {
     if (location) {
       this.props.store!.routerStore.push(location);
     }
-  }
+  };
 
   public render() {
     const { classes, hasRightArrow } = this.props;

@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
-import { Paper, Select, MenuItem, Typography, Button, withStyles, WithStyles } from '@material-ui/core';
+import { Paper, Select, MenuItem, Typography, Button } from '@mui/material';
+import { WithStyles } from '@mui/styles';
+import withStyles from '@mui/styles/withStyles';
 import { inject, observer } from 'mobx-react';
 
 import styles from './styles';
@@ -14,7 +16,7 @@ interface IProps {
 
 @inject('store')
 @observer
-class AccountLogin extends Component<WithStyles & IProps, {}> {
+class AccountLogin extends Component<WithStyles<typeof styles> & IProps, {}> {
 
   public componentDidMount() {
     this.props.store.accountLoginStore.getAccounts(true);

@@ -1,4 +1,6 @@
-import { createStyles, Theme } from '@material-ui/core/styles';
+import { Theme } from '@mui/material/styles';
+
+import createStyles from '@mui/styles/createStyles';
 
 const styles = (theme: Theme) => createStyles({
   root: {
@@ -16,7 +18,7 @@ const styles = (theme: Theme) => createStyles({
   },
   masterPwNote: {
     // fontSize: theme.typography.fontSize, // Use typography instead of font
-    color: theme.palette.text.secondary,
+    //color: theme.palette.text.secondary,
     marginBottom: theme.spacing(2), // Use spacing instead of padding
   },
   loginButton: {

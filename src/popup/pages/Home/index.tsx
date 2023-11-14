@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { inject, observer } from 'mobx-react';
-import { withStyles, WithStyles } from '@material-ui/core';
+import { WithStyles } from '@mui/styles';
+import withStyles from '@mui/styles/withStyles';
 import NavBar from '../../components/NavBar';
 import MainAccount from './MainAccount';
 import AppStore from '../../stores/AppStore';

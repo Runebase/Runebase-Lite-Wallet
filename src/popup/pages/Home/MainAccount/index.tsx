@@ -1,6 +1,9 @@
 import React, { Component } from 'react';
 import { inject, observer } from 'mobx-react';
-import { Card, CardContent, withStyles, WithStyles } from '@material-ui/core';
+import { Card, CardContent } from '@mui/material';
+
+import { WithStyles } from '@mui/styles';
+import withStyles from '@mui/styles/withStyles';
 
 import AccountInfo from '../../../components/AccountInfo';
 import AppStore from '../../../stores/AppStore';

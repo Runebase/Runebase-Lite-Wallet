@@ -1,8 +1,9 @@
 import React, { Fragment, FC } from 'react';
 import { inject, observer } from 'mobx-react';
 
-import { Typography, Menu, MenuItem, IconButton, withStyles } from '@material-ui/core';
-import { ArrowBack, Settings } from '@material-ui/icons';
+import { Typography, Menu, MenuItem, IconButton } from '@mui/material';
+import withStyles from '@mui/styles/withStyles';
+import { ArrowBack, Settings } from '@mui/icons-material';
 import cx from 'classnames';
 
 import DropDownMenu from '../DropDownMenu';
@@ -52,7 +53,10 @@ const NavBar: FC<IProps> = inject('store')(observer((props: IProps) => {
 }));
 
 const BackButton: FC<IProps> = ({ classes, isDarkTheme, store: { routerStore } }: any) => (
-  <IconButton onClick={() => routerStore.goBack()} className={classes.backIconButton}>
+  <IconButton
+    onClick={() => routerStore.goBack()}
+    className={classes.backIconButton}
+    size="large">
     <ArrowBack className={cx(classes.backButton, isDarkTheme ? 'white' : '')} />
   </IconButton>
 );
@@ -66,7 +70,7 @@ const SettingsButton: FC<IProps> =
       color="primary"
       onClick={(e) => navBarStore.settingsMenuAnchor = e.currentTarget}
       className={classes.settingsIconButton}
-    >
+      size="large">
       <Settings className={cx(classes.settingsButton, isDarkTheme ? 'white' : '')} />
     </IconButton>
     <Menu

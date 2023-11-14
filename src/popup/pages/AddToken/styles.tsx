@@ -1,5 +1,6 @@
-import { createStyles, Theme } from '@material-ui/core/styles';
-import { FontWeightProperty } from 'csstype';
+import { Theme } from '@mui/material/styles';
+import createStyles from '@mui/styles/createStyles';
+//import { FontWeightProperty } from 'csstype';
 
 const styles = (theme: Theme) => createStyles({
   root: {
@@ -21,7 +22,7 @@ const styles = (theme: Theme) => createStyles({
   },
   fieldHeading: {
     marginBottom: theme.spacing(1), // Use spacing instead of unit
-    fontSize: theme.typography.fontSize, // Use typography instead of font
+    //fontSize: theme.typography.fontSize, // Use typography instead of font
     fontWeight: 'bold',
   },
   fieldContainer: {
@@ -40,8 +41,8 @@ const styles = (theme: Theme) => createStyles({
     // borderRadius: theme.border.radius,
   },
   errorText: {
-    fontSize: theme.typography.fontSize, // Use typography instead of font
-    color: theme.palette.error.main, // Use error color from the palette
+    //fontSize: theme.typography.fontSize, // Use typography instead of font
+    //color: theme.palette.error.main, // Use error color from the palette
     marginTop: theme.spacing(1), // Use spacing instead of unit
   },
   labelContainer: {
@@ -49,10 +50,10 @@ const styles = (theme: Theme) => createStyles({
     alignItems: 'center',
   },
   detailLabel: {
-    color: theme.palette.text.primary,
-    fontSize: theme.typography.fontSize, // Use typography instead of font
-    fontWeight: theme.typography.fontWeightBold as FontWeightProperty, // Use typography instead of fontWeight
-    lineHeight: theme.typography.lineHeight, // Use typography instead of lineHeight
+    //color: theme.palette.text.primary,
+    //fontSize: theme.typography.fontSize, // Use typography instead of font
+    //fontWeight: theme.typography.fontWeightBold as FontWeightProperty, // Use typography instead of fontWeight
+    //lineHeight: theme.typography.lineHeight, // Use typography instead of lineHeight
   },
   valueContainer: {
     flex: 1,
@@ -62,7 +63,7 @@ const styles = (theme: Theme) => createStyles({
   },
   detailValue: {
     fontSize: theme.typography.fontSizeLarge, // Adjust to your desired value
-    color: theme.palette.text.primary,
+    //color: theme.palette.text.primary,
     lineHeight: theme.typography.lineHeightLarge, // Adjust to your desired value
   },
   addButton: {

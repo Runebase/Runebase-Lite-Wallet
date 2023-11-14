@@ -1,4 +1,5 @@
-import { createStyles, Theme } from '@material-ui/core/styles';
+import { Theme } from '@mui/material/styles';
+import createStyles from '@mui/styles/createStyles';
 // import { FontWeightProperty } from 'csstype';
 
 const styles = (theme: Theme) => createStyles({
@@ -35,7 +36,7 @@ const styles = (theme: Theme) => createStyles({
   },
   errorText: {
     fontSize: '10px', // Use typography instead of font
-    color: theme.palette.error.main, // Use error color from the palette
+    //color: theme.palette.error.main, // Use error color from the palette
     marginTop: theme.spacing(1), // Use spacing instead of unit
   },
   fieldTextOrInput: {

@@ -1,5 +1,6 @@
 import React from 'react';
-import { TextField, withStyles, Typography } from '@material-ui/core';
+import { TextField, Typography } from '@mui/material';
+import withStyles from '@mui/styles/withStyles';
 import cx from 'classnames';
 
 import styles from './styles';

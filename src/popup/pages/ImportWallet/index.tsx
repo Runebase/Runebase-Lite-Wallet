@@ -3,16 +3,16 @@ import {
   Typography,
   TextField,
   Button,
-  withStyles,
-  WithStyles,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogContentText,
   DialogActions,
   Select,
-  MenuItem
-} from '@material-ui/core';
+  MenuItem,
+} from '@mui/material';
+import { WithStyles } from '@mui/styles';
+import withStyles from '@mui/styles/withStyles';
 import { inject, observer } from 'mobx-react';
 
 import styles from './styles';
@@ -33,7 +33,7 @@ interface IState {
 
 @inject('store')
 @observer
-class ImportWallet extends Component<WithStyles & IProps, IState> {
+class ImportWallet extends Component<WithStyles<typeof styles> & IProps, IState> {
   public componentWillUnmount() {
     this.props.store.importStore.reset();
   }
@@ -130,10 +130,8 @@ const TypeField = observer(({ classes, store: { importStore } }: any) => (
 
 const ErrorDialog: FC<any> = observer(({ store: { importStore }}: any) => (
   <Dialog
-    disableBackdropClick
     open={importStore.importMnemonicPrKeyFailed}
-    onClose={() => importStore.importMnemonicPrKeyFailed = false}
-  >
+    onClose={() => importStore.importMnemonicPrKeyFailed = false}>
     <DialogTitle>{`Invalid ${importStore.importType}`}</DialogTitle>
     <DialogContent>
       <DialogContentText>This wallet has already been imported.</DialogContentText>
