@@ -2,9 +2,10 @@ import React, { Component } from 'react';
 import { inject, observer } from 'mobx-react';
 import { Card, CardContent, withStyles, WithStyles } from '@material-ui/core';
 
-import styles from './styles';
 import AccountInfo from '../../../components/AccountInfo';
 import AppStore from '../../../stores/AppStore';
+
+import styles from '../styles';
 
 interface IProps {
   classes: Record<string, string>;
@@ -13,7 +14,7 @@ interface IProps {
 
 @inject('store')
 @observer
-class MainAccount extends Component<WithStyles & IProps, {}> {
+class MainAccount extends Component<WithStyles<typeof styles> & IProps, {}> {
   public handleClick = (id: string, event: React.MouseEvent<HTMLElement>) => {
     event.stopPropagation();
 
@@ -26,7 +27,7 @@ class MainAccount extends Component<WithStyles & IProps, {}> {
         break;
       }
     }
-  }
+  };
 
   public render() {
     const { classes } = this.props;
@@ -38,7 +39,12 @@ class MainAccount extends Component<WithStyles & IProps, {}> {
 
     return (
       <div>
-        <Card raised id="mainCard" onClick={(e) => this.handleClick('mainCard', e)} className={classes.card}>
+        <Card
+          raised
+          id="mainCard"
+          onClick={(e) => this.handleClick('mainCard', e)}
+          className={classes.card}
+        >
           <CardContent className={classes.cardContent}>
             <AccountInfo hasRightArrow />
           </CardContent>

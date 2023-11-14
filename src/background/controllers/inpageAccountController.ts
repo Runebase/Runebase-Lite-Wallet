@@ -20,7 +20,7 @@ export default class InpageAccountController extends IController {
     for (const port of this.ports) {
       this.sendInpageAccount(port, statusChangeReason);
     }
-  }
+  };
 
   // bg -> content script
   public sendInpageAccount = (port: any, statusChangeReason: RUNEBASECHROME_ACCOUNT_CHANGE) => {
@@ -28,7 +28,7 @@ export default class InpageAccountController extends IController {
       type: MESSAGE_TYPE.SEND_INPAGE_RUNEBASECHROME_ACCOUNT_VALUES,
       accountWrapper: this.inpageAccountWrapper(statusChangeReason),
     });
-  }
+  };
 
   private inpageAccountWrapper = (statusChangeReason: RUNEBASECHROME_ACCOUNT_CHANGE) => {
     const inpageAccount = new InpageAccount();
@@ -48,7 +48,7 @@ export default class InpageAccountController extends IController {
       }
     }
     return { account: inpageAccount, error: null, statusChangeReason };
-  }
+  };
 
   // when a port connects
   private handleLongLivedConnection = (port: any) => {
@@ -67,7 +67,7 @@ export default class InpageAccountController extends IController {
         this.sendInpageAccount(port, RUNEBASECHROME_ACCOUNT_CHANGE.DAPP_CONNECTION);
       }
     });
-  }
+  };
 
   // remove disconnected port from ports array
   private handleDisconnect = (port: any) => {
@@ -75,5 +75,5 @@ export default class InpageAccountController extends IController {
     if (portIdx !== -1) {
       this.ports.splice(portIdx, 1);
     }
-  }
+  };
 }

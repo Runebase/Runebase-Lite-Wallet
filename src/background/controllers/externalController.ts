@@ -22,7 +22,7 @@ export default class ExternalController extends IController {
 
   public calculateRunebaseToUSD = (balance: number): number => {
     return this.runebasePriceUSD ? Number((this.runebasePriceUSD * balance).toFixed(2)) : 0;
-  }
+  };
 
   /*
   * Starts polling for periodic info updates.
@@ -34,7 +34,7 @@ export default class ExternalController extends IController {
         this.getRunebasePrice();
       }, ExternalController.GET_PRICE_INTERVAL_MS);
     }
-  }
+  };
 
   /*
   * Stops polling for the periodic info updates.
@@ -44,7 +44,7 @@ export default class ExternalController extends IController {
       clearInterval(this.getPriceInterval);
       this.getPriceInterval = undefined;
     }
-  }
+  };
 
   /*
   * Gets the current Runebase market price.
@@ -71,5 +71,5 @@ export default class ExternalController extends IController {
     } catch (err) {
       console.log(err);
     }
-  }
+  };
 }

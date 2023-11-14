@@ -5,6 +5,7 @@ import { inject, observer } from 'mobx-react';
 import styles from './styles';
 import NavBar from '../../components/NavBar';
 import AppStore from '../../stores/AppStore';
+import Account from '../../../models/Account';
 
 interface IProps {
   classes: Record<string, string>;
@@ -21,6 +22,7 @@ class AccountLogin extends Component<WithStyles & IProps, {}> {
 
   public render() {
     const { classes } = this.props;
+    console.log('AccountLogin render');
 
     return (
       <div className={classes.root}>
@@ -51,7 +53,14 @@ const AccountSection = observer(({ classes, store: { accountLoginStore } }: any)
     </Select>
     <div className={classes.createAccountContainer}>
       <Typography className={classes.orText}>or</Typography>
-      <Button className={classes.createAccountButton} color="secondary" onClick={accountLoginStore.routeToCreateWallet}>
+      <Button
+        className={classes.createAccountButton}
+        color="secondary"
+        onClick={() => {
+          console.log('Calling routeToCreateWallet');
+          accountLoginStore.routeToCreateWallet();
+        }}
+      >
         Create New Wallet
       </Button>
     </div>

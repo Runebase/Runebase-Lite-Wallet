@@ -49,7 +49,7 @@ export default class SessionStore {
     });
     chrome.runtime.sendMessage({ type: MESSAGE_TYPE.GET_WALLET_INFO }, (response: any) => this.info = response);
     chrome.runtime.sendMessage({ type: MESSAGE_TYPE.GET_RUNEBASE_USD }, (response: any) => this.runebaseUSD = response);
-  }
+  };
 
   @action
   private handleMessage = (request: any) => {
@@ -69,5 +69,5 @@ export default class SessionStore {
       default:
         break;
     }
-  }
+  };
 }

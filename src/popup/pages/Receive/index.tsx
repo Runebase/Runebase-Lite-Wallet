@@ -14,7 +14,7 @@ interface IProps {
 
 @inject('store')
 @observer
-class Receive extends Component<WithStyles & IProps, {}> {
+class Receive extends Component<WithStyles & IProps, NonNullable<unknown>> {
   public render() {
     const { classes } = this.props;
     const { loggedInAccountName, info, runebaseBalanceUSD, networkBalAnnotation } = this.props.store.sessionStore;

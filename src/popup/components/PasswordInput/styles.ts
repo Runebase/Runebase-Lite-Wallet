@@ -1,6 +1,6 @@
-import { StyleRulesCallback, Theme } from '@material-ui/core';
+import { createStyles, Theme } from '@material-ui/core/styles';
 
-const styles: StyleRulesCallback = (theme: Theme) => ({
+const styles = (theme: Theme) => createStyles({
   container: {
     flex: 1,
     display: 'flex',
@@ -8,18 +8,18 @@ const styles: StyleRulesCallback = (theme: Theme) => ({
   },
   textField: {
     flex: 1,
-    padding: theme.padding.sm,
-    fontSize: theme.font.sm,
-    border: theme.border.root,
-    borderRadius: theme.border.radius,
+    padding: theme.spacing(1), // Use spacing instead of pixel value
+    fontSize: theme.typography.fontSize, // Use typography instead of sm
+    border: '2px solid black',
+    borderRadius: theme.shape.borderRadius, // Use shape property for border radius
   },
   input: {
-    fontSize: theme.font.sm,
+    fontSize: theme.typography.fontSize, // Use typography instead of sm
   },
   errorText: {
-    fontSize: theme.font.xs,
-    color: theme.color.red,
-    marginTop: theme.padding.unit,
+    fontSize: theme.typography.fontSizeSmall, // Use typography instead of xs
+    color: theme.palette.error.main, // Use palette for error text color
+    marginTop: theme.spacing(1), // Use spacing instead of pixel value
   },
 });
 

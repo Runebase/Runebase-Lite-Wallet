@@ -70,18 +70,18 @@ export default class AddTokenStore {
     this.app.routerStore.push('/account-detail');
     this.app.accountDetailStore.shouldScrollToBottom = true;
     this.setInitValues();
-  }
+  };
 
   @action
   public init = () => {
     chrome.runtime.onMessage.addListener(this.handleMessage);
-  }
+  };
 
   @action
   private setInitValues = () => {
     this.contractAddress = INIT_VALUES.contractAddress;
     this.resetTokenDetails();
-  }
+  };
 
   @action
   private resetTokenDetails = () => {
@@ -89,7 +89,7 @@ export default class AddTokenStore {
     this.symbol = INIT_VALUES.symbol;
     this.decimals = INIT_VALUES.decimals;
     this.getQRCTokenDetailsFailed = INIT_VALUES.getQRCTokenDetailsFailed;
-  }
+  };
 
   @action
   private handleMessage = (request: any) => {
@@ -107,5 +107,5 @@ export default class AddTokenStore {
       default:
         break;
     }
-  }
+  };
 }

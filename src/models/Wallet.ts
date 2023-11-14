@@ -1,5 +1,9 @@
 import { action } from 'mobx';
-import { Wallet as RunebaseWallet, Insight, WalletRPCProvider } from 'runebasejs-wallet';
+import {
+  Wallet as RunebaseWallet,
+  Insight,
+  WalletRPCProvider,
+} from 'runebasejs-wallet';
 import deepEqual from 'deep-equal';
 
 import { ISigner } from '../types';
@@ -29,6 +33,7 @@ export default class Wallet implements ISigner {
      * (This happens if the insight api is down)
      */
     let timedOut = false;
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     const timeoutPromise = new Promise((_, reject) => {
       const wait = setTimeout(() => {
         clearTimeout(wait);
@@ -49,11 +54,11 @@ export default class Wallet implements ISigner {
         return true;
       }
     } catch (e) {
-      throw(Error(e));
+      throw(Error(e as any));
     }
 
     return false;
-  }
+  };
 
   // @param amount: (unit - whole RUNEBASE)
   public send = async (to: string, amount: number, options: ISendTxOptions): Promise<Insight.ISendRawTxResult> => {
@@ -63,7 +68,7 @@ export default class Wallet implements ISigner {
 
     // convert amount units from whole RUNEBASE => SATOSHI RUNEBASE
     return await this.qjsWallet!.send(to, amount * 1e8, { feeRate: options.feeRate });
-  }
+  };
 
   public sendTransaction = async (args: any[]): Promise<any> => {
     if (!this.rpcProvider) {
@@ -73,20 +78,21 @@ export default class Wallet implements ISigner {
       throw Error('Requires first two arguments: contractAddress and data.');
     }
 
-    try {
-      return await this.rpcProvider!.rawCall(RPC_METHOD.SEND_TO_CONTRACT, args);
-    } catch (err) {
-      throw err;
-    }
-  }
+    return await this.rpcProvider!.rawCall(RPC_METHOD.SEND_TO_CONTRACT, args);
+  };
 
   public calcMaxRunebaseSend = async (networkName: string) => {
     if (!this.qjsWallet || !this.info) {
       throw Error('Cannot calculate max send amount without wallet or this.info.');
     }
-    this.maxRunebaseSend = await this.qjsWallet.sendEstimateMaxValue(this.maxRunebaseSendToAddress(networkName));
-    return this.maxRunebaseSend;
-  }
+    try {
+      this.maxRunebaseSend = await this.qjsWallet.sendEstimateMaxValue(this.maxRunebaseSendToAddress(networkName));
+      return this.maxRunebaseSend;
+    } catch (error) {
+      console.error('Error calculating max Runebase send amount:', error);
+      throw error;
+    }
+  };
 
   /**
    * We just need to pass a valid sendTo address belonging to that network for the
@@ -97,5 +103,5 @@ export default class Wallet implements ISigner {
   private maxRunebaseSendToAddress = (networkName: string) => {
     return networkName === NETWORK_NAMES.MAINNET ?
       'RasfBnAjGidRrwmbve42Uacrp3sXFFkzaj' : '5ZiLJ5LuCyhLTmwF2MYjVrc82gCFuJuocB';
-  }
+  };
 }

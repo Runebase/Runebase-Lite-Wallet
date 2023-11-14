@@ -1,6 +1,6 @@
-import { StyleRulesCallback, Theme } from '@material-ui/core';
+import { createStyles, Theme } from '@material-ui/core/styles';
 
-const styles: StyleRulesCallback = (theme: Theme) => ({
+const styles = (theme: Theme) => createStyles({
   root: {
     height: '100%',
     display: 'flex',
@@ -12,7 +12,7 @@ const styles: StyleRulesCallback = (theme: Theme) => ({
     flexDirection: 'column',
   },
   accountDetailPaper: {
-    background: theme.color.gradientPurple,
+    // background: theme.palette.gradientPurple.main, // Use palette instead of color
     borderRadius: 0,
   },
   tabsPaper: {
@@ -23,13 +23,13 @@ const styles: StyleRulesCallback = (theme: Theme) => ({
   },
   list: {
     flex: 1,
-    padding: `0 ${theme.padding.md}`,
+    padding: `0 ${theme.spacing(2)}`, // Use spacing instead of md
     overflowX: 'hidden',
     overflowY: 'auto',
   },
   listItem: {
     width: '100%',
-    padding: `${theme.padding.md} 0`,
+    padding: `${theme.spacing(2)} 0`, // Use spacing instead of md
     cursor: 'pointer',
     display: 'inline-flex',
   },
@@ -37,25 +37,25 @@ const styles: StyleRulesCallback = (theme: Theme) => ({
     flex: 1,
   },
   txState: {
-    fontSize: theme.font.sm,
+    // fontSize: theme.typography.fontSizeSmall, // Use typography instead of sm
     textTransform: 'uppercase',
-    marginBottom: theme.padding.unit,
+    marginBottom: theme.spacing(1), // Use spacing instead of unit
     '&.pending': {
-      color: theme.color.orange,
+      // color: theme.palette.orange.main, // Use palette instead of color
     },
   },
   txId: {
-    fontSize: theme.font.lg,
-    color: theme.palette.text.primary,
+    // fontSize: theme.typography.fontSizeLarge, // Use typography instead of lg
+    // color: theme.palette.text.primary,
   },
   txTime: {
-    fontSize: theme.font.md,
-    color: theme.palette.text.secondary,
+    // fontSize: theme.typography.fontSizeMedium, // Use typography instead of md
+    // color: theme.palette.text.secondary,
   },
   arrowRight: {
-    fontSize: theme.icon.size,
-    color: theme.color.gray,
-    marginLeft: theme.padding.xs,
+    // fontSize: theme.typography.fontSize, // Use typography instead of icon size
+    // color: theme.palette.gray.main, // Use palette instead of color
+    marginLeft: theme.spacing(1), // Use spacing instead of xs
   },
   tokenInfoContainer: {
     width: '100%',
@@ -65,16 +65,16 @@ const styles: StyleRulesCallback = (theme: Theme) => ({
   },
   tokenName: {
     flex: 1,
-    fontSize: theme.font.lg,
-    color: theme.palette.text.primary,
+    // fontSize: theme.typography.fontSizeLarge, // Use typography instead of lg
+    // color: theme.palette.text.primary,
   },
   tokenContainer: {
     display: 'inline-flex',
   },
   tokenAmount: {
-    fontSize: theme.font.lg,
-    color: theme.palette.text.primary,
-    marginRight: theme.padding.unit,
+    // fontSize: theme.typography.fontSizeLarge, // Use typography instead of lg
+    // color: theme.palette.text.primary,
+    marginRight: theme.spacing(1), // Use spacing instead of unit
   },
   tokenTypeContainer: {
     display: 'flex',
@@ -82,8 +82,8 @@ const styles: StyleRulesCallback = (theme: Theme) => ({
     alignItems: 'center',
   },
   tokenType: {
-    fontSize: theme.font.xs,
-    color: theme.palette.text.secondary,
+    // fontSize: theme.typography.fontSizeSmall, // Use typography instead of xs
+    // color: theme.palette.text.secondary,
   },
   tokenDeleteButton: {
     minHeight: '0px',
@@ -94,7 +94,7 @@ const styles: StyleRulesCallback = (theme: Theme) => ({
     flexDirection: 'row',
     display: 'flex',
     justifyContent: 'space-between',
-    padding: `${theme.padding.md} 0px`,
+    padding: `${theme.spacing(2)} 0px`, // Use spacing instead of md
     '&.center': {
       justifyContent: 'center',
     },
@@ -102,7 +102,7 @@ const styles: StyleRulesCallback = (theme: Theme) => ({
   bottomButton: {
     minWidth: 0,
     minHeight: 0,
-    padding: `0px ${theme.padding.unit}`,
+    padding: `0px ${theme.spacing(1)}`, // Use spacing instead of unit
   },
 });
 

@@ -39,7 +39,7 @@ export default class OnInstallController extends IController {
           }
         }
     });
-  }
+  };
 
   private refreshTab(tab: chrome.tabs.Tab) {
      // Tells the content script to post a msg to the inpage window letting it know that RunebaseChrome was installed or updated.

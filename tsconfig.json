@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
-    "target": "es2017",
-    "module": "es2015",
+    "target": "es6",
+    "module": "ESNext",
     "jsx": "react",
     "sourceMap": true,
     "outDir": "build/dist",
@@ -13,9 +13,8 @@
     "noFallthroughCasesInSwitch": true,
     "moduleResolution": "node",
     "experimentalDecorators": true,
-    "suppressImplicitAnyIndexErrors": true,
-    "allowSyntheticDefaultImports": true,
-    "typeRoots": ["node_modules/@types", "node_modules/web-ext-types"],
+    "esModuleInterop": true,
+    "typeRoots": ["node_modules/@types", "node_modules/web-ext-types"]
   },
   "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.d.ts"]
 }

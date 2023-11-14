@@ -14,7 +14,7 @@ export class RunebaseChromeRPCProvider {
         payload: { id, method, args },
       });
     });
-  }
+  };
 
   /**
    * @param response.error {string}
@@ -37,11 +37,11 @@ export class RunebaseChromeRPCProvider {
     }
 
     request.resolve(response.result);
-  }
+  };
 
   private trackRequest = (resolve: any, reject: any): string => {
     const id = generateRequestId();
     this.requests[id] = { resolve, reject };
     return id;
-  }
+  };
 }

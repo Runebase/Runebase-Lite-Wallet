@@ -29,7 +29,7 @@ export default class SessionController extends IController {
   public clearAllIntervals = () => {
     this.main.account.stopPolling();
     this.clearAllIntervalsExceptAccount();
-  }
+  };
 
   /*
   * Closes the current session and resets all the necessary session values.
@@ -38,13 +38,13 @@ export default class SessionController extends IController {
     this.main.account.resetAccount();
     this.main.token.resetTokenList();
     this.main.inpageAccount.sendInpageAccountAllPorts(RUNEBASECHROME_ACCOUNT_CHANGE.LOGOUT);
-  }
+  };
 
   private clearAllIntervalsExceptAccount = () => {
     this.main.token.stopPolling();
     this.main.external.stopPolling();
     this.main.transaction.stopPolling();
-  }
+  };
 
   /*
   * Actions taken when the popup is opened.
@@ -52,7 +52,7 @@ export default class SessionController extends IController {
   private onPopupOpened = () => {
     // If port is reconnected (user reopened the popup), clear sessionTimeout
     clearTimeout(this.sessionTimeout);
-  }
+  };
 
   /*
   * Actions taken when the popup is closed..
@@ -66,8 +66,9 @@ export default class SessionController extends IController {
       this.main.crypto.resetPasswordHash();
       console.log('Session cleared');
     },  this.sessionLogoutInterval);
-  }
+  };
 
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   private handleMessage = (request: any, _: chrome.runtime.MessageSender, sendResponse: (response: any) => void) => {
     try {
       switch (request.type) {
@@ -92,7 +93,7 @@ export default class SessionController extends IController {
       }
     } catch (err) {
       console.error(err);
-      this.main.displayErrorOnPopup(err);
+      this.main.displayErrorOnPopup(err as any);
     }
-  }
+  };
 }

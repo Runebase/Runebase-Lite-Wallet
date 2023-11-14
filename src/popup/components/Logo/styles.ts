@@ -1,6 +1,7 @@
-import { StyleRulesCallback, Theme } from '@material-ui/core';
+import { createStyles, Theme } from '@material-ui/core/styles';
+import { FontWeightProperty } from 'csstype';
 
-const styles: StyleRulesCallback = (theme: Theme) => ({
+const styles = (theme: Theme) => createStyles({
   logoContainer: {
     flex: 1,
     display: 'flex',
@@ -13,13 +14,13 @@ const styles: StyleRulesCallback = (theme: Theme) => ({
     height: 112,
   },
   logoText: {
-    fontSize: 32,
-    fontWeight: theme.fontWeight.bold,
+    fontSize: theme.typography.h4.fontSize, // Use typography instead of hardcoding font size
+    fontWeight: theme.typography.fontWeightBold as FontWeightProperty, // Use typography for font weight
     color: theme.palette.primary.main,
     alignSelf: 'center',
   },
   version: {
-    fontSize: theme.font.sm,
+    fontSize: theme.typography.fontSize, // Use typography instead of sm
     color: theme.palette.text.secondary,
   },
 });

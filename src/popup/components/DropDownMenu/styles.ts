@@ -1,12 +1,12 @@
-import { StyleRulesCallback, Theme } from '@material-ui/core';
+import { createStyles, Theme } from '@material-ui/core/styles';
 
-const styles: StyleRulesCallback = (theme: Theme) => ({
+const styles = (theme: Theme) => createStyles({
   menuButton: {
     height: 24,
     minWidth: 0,
     minHeight: 0,
-    padding: `0 ${theme.padding.sm}`,
-    color: theme.palette.text.primary,
+    padding: `0 ${theme.spacing(1)}`, // Use spacing instead of padding
+    // color: theme.palette.text.primary,
     textTransform: 'none',
   },
 });

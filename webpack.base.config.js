@@ -1,36 +1,19 @@
+const webpack = require('webpack');
 const path = require('path');
-const ExtractTextPlugin = require('extract-text-webpack-plugin');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
-const autoprefixer = require('autoprefixer');
+const ESLintPlugin = require('eslint-webpack-plugin');
 
-const styleLoaders = {
-  fallback: {
-    loader: require.resolve('style-loader'),
-  },
-  use: [
-    {
-      loader: require.resolve('css-loader'),
-      options: {
-        importLoaders: 1,
-        minimize: true,
-      },
+const styleLoaders = [
+  MiniCssExtractPlugin.loader,
+  {
+    loader: require.resolve('css-loader'),
+    options: {
+      importLoaders: 1,
     },
-    {
-      loader: require.resolve('postcss-loader'),
-      options: {
-        // Necessary for external CSS imports to work
-        // https://github.com/facebookincubator/create-react-app/issues/2677
-        ident: 'postcss',
-        plugins: () => [
-          require('postcss-flexbugs-fixes'),
-          autoprefixer({
-            flexbox: 'no-2009',
-          }),
-        ],
-      },
-    },'sass-loader'
-  ],
-}
+  },
+  'sass-loader',
+];
 
 module.exports = {
   entry: {
@@ -43,83 +26,119 @@ module.exports = {
   output: {
     path: path.join(__dirname, 'dist'),
     filename: '[name].js',
-    // @see https://developer.chrome.com/extensions/manifest/web_accessible_resources
-    publicPath : 'chrome-extension://__MSG_@@extension_id__/',
+    publicPath: 'chrome-extension://__MSG_@@extension_id__/',
   },
   resolve: {
-    extensions: [
-      '.ts',
-      '.tsx',
-      '.js',
-      '.jsx',
-      '.json',
-    ],
+    alias: {
+      'scryptsy/browser': 'scryptsy',
+    },
+    extensions: ['.ts', '.tsx', '.js', '.jsx', '.json'],
+    fallback: {
+      "http": require.resolve("stream-http"),
+      "https": require.resolve("https-browserify"),
+      "zlib": require.resolve("browserify-zlib"),
+      "url": require.resolve("url/"),
+      "crypto": require.resolve("crypto-browserify"),
+      "stream": require.resolve("stream-browserify"),
+      "assert": require.resolve("assert/"),
+      'util': require.resolve('util/'),
+      "buffer": require.resolve("buffer/"),
+    },
   },
   module: {
     rules: [
       {
-        parser: {
-          amd: false,
-        }
+        test: /\.(ts|tsx|js)$/,
+        enforce: 'pre',
+        exclude: /node_modules/,
+        use: [
+          // Remove eslint-loader configuration
+        ],
       },
       {
-        test: /\.(ts|tsx)$/,
-        loaders: require.resolve('tslint-loader'),
-        enforce: 'pre',
-        include: path.resolve(__dirname, './src'),
+        test: /\.js$/,
+        include: [
+          path.resolve(__dirname, 'node_modules/rweb3'),
+          path.resolve(__dirname, 'node_modules/@ethereumjs/util'),
+          path.resolve(__dirname, 'node_modules/micro-ftch'),
+          path.resolve(__dirname, 'node_modules/@noble'),
+          // Add other paths to problematic modules here
+        ],
+        use: [
+          {
+            loader: require.resolve('babel-loader'),
+            options: {
+              presets: [
+                [
+                  '@babel/preset-env',
+                  {
+                    targets: {
+                      chrome: '58',
+                    },
+                  },
+                ],
+              ],
+              plugins: [
+                '@babel/plugin-proposal-optional-chaining',
+                '@babel/plugin-syntax-optional-chaining',
+                '@babel/plugin-proposal-nullish-coalescing-operator',
+              ],
+              sourceType: 'unambiguous',
+            },
+          },
+        ],
       },
       {
         oneOf: [
           {
             test: [/\.bmp$/, /\.gif$/, /\.jpe?g$/, /\.png$/],
-            loader: require.resolve('url-loader'),
-            options: {
-              limit: 10000,
-              name: 'static/[name].[hash:8].[ext]',
+            type: 'asset/resource',
+            generator: {
+              filename: 'static/[name].[hash:8][ext]',
             },
           },
           {
             test: /\.(ts|tsx)$/,
             include: path.resolve(__dirname, './src'),
-            loader: require.resolve('ts-loader')
+            loader: require.resolve('ts-loader'),
           },
           {
             exclude: /node_modules/,
             test: /\.s?css$/,
-            loader: ExtractTextPlugin.extract(
-              // use css-modules
-              Object.assign({}, styleLoaders, {
-                use: (() => {
-                  const copiedUse = styleLoaders.use.slice()
-                  // change css-loader options
-                  const cssLoader = copiedUse[0]
-                  copiedUse[0] = Object.assign({}, cssLoader, {
-                    options: Object.assign({}, cssLoader.options, {
-                      modules: true,
-                    })
-                  })
-                  return copiedUse
-                })()}
-              )
-            ),
+            use: styleLoaders,
           },
           {
-            loader: require.resolve('file-loader'),
+            type: 'asset/resource',
             exclude: [/\.js$/, /\.html$/, /\.json$/],
-            options: {
-              name: 'static/[name].[hash:8].[ext]',
+            generator: {
+              filename: 'static/[name].[hash:8][ext]',
             },
           },
         ],
-      }
-    ]
+      },
+    ],
   },
+  // optimization: {
+  //   minimize: true,
+  //   minimizer: [
+  //     // new CssMinimizerPlugin(),
+  //   ],
+  // },
   plugins: [
-    new ExtractTextPlugin({
+    new webpack.ProvidePlugin({
+      process: 'process/browser',
+    }),
+    new MiniCssExtractPlugin({
       filename: '[name].css',
     }),
-    new CopyWebpackPlugin([
-      { from: 'static' },
-    ]),
+    new ESLintPlugin({
+      overrideConfigFile: path.resolve(__dirname, '.eslintrc.js'),
+      fix: true,
+    }),
+    new CopyWebpackPlugin({
+      patterns: [
+        { from: 'static', to: './' },
+      ],
+    }),
   ],
-}
+};

@@ -1,4 +1,4 @@
-import React, { Fragment } from 'react';
+import React, { Fragment, FC } from 'react';
 import { inject, observer } from 'mobx-react';
 
 import { Typography, Menu, MenuItem, IconButton, withStyles } from '@material-ui/core';
@@ -20,7 +20,7 @@ interface IProps {
   title: string;
 }
 
-const NavBar: React.SFC<IProps> = inject('store')(observer((props: IProps) => {
+const NavBar: FC<IProps> = inject('store')(observer((props: IProps) => {
   const {
     classes,
     hasBackButton,
@@ -51,13 +51,13 @@ const NavBar: React.SFC<IProps> = inject('store')(observer((props: IProps) => {
   );
 }));
 
-const BackButton: React.SFC<IProps> = ({ classes, isDarkTheme, store: { routerStore } }: any) => (
+const BackButton: FC<IProps> = ({ classes, isDarkTheme, store: { routerStore } }: any) => (
   <IconButton onClick={() => routerStore.goBack()} className={classes.backIconButton}>
     <ArrowBack className={cx(classes.backButton, isDarkTheme ? 'white' : '')} />
   </IconButton>
 );
 
-const SettingsButton: React.SFC<IProps> =
+const SettingsButton: FC<IProps> =
   observer(({ classes, store: { navBarStore }, isDarkTheme }: any) => (
   <Fragment>
     <IconButton

@@ -24,7 +24,7 @@ export default class RunebaseChromeController {
   public session: SessionController;
   public onInstall: OnInstallController;
 
-  private initialized: object = {};
+  private initialized: Record<string, boolean> = {};
 
   constructor() {
     this.crypto = new CryptoController(this);
@@ -45,7 +45,7 @@ export default class RunebaseChromeController {
   */
   public registerController = (name: string) => {
     this.initialized[name] = false;
-  }
+  };
 
   /*
   * Routes to the login page after all controllers are initialized.
@@ -57,9 +57,9 @@ export default class RunebaseChromeController {
     if (every(this.initialized)) {
       chrome.runtime.sendMessage({ type: MESSAGE_TYPE.ROUTE_LOGIN });
     }
-  }
+  };
 
   public displayErrorOnPopup = (err: Error)  => {
     chrome.runtime.sendMessage({ type: MESSAGE_TYPE.UNEXPECTED_ERROR, error: err.message });
-  }
+  };
 }

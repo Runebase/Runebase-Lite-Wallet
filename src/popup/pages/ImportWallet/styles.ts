@@ -1,6 +1,7 @@
-import { StyleRulesCallback, Theme } from '@material-ui/core';
+import { createStyles, Theme } from '@material-ui/core/styles';
+// import { FontWeightProperty } from 'csstype';
 
-const styles: StyleRulesCallback = (theme: Theme) => ({
+const styles = (theme: Theme) => createStyles({
   root: {
     height: '100%',
     display: 'flex',
@@ -10,13 +11,13 @@ const styles: StyleRulesCallback = (theme: Theme) => ({
     flex: 1,
     display: 'flex',
     flexDirection: 'column',
-    margin: theme.padding.md,
+    margin: theme.spacing(2), // Use spacing instead of padding
   },
   headerText: {
-    fontSize: 20,
-    fontWeight: theme.fontWeight.bold,
-    color: theme.palette.text.primary,
-    marginBottom: theme.padding.sm,
+    // fontSize: theme.typography.h6.fontSize, // Use typography instead of hard-coded value
+    // fontWeight: theme.typography.fontWeightBold as FontWeightProperty, // Use typography instead of fontWeight
+    // color: theme.palette.text.primary,
+    marginBottom: theme.spacing(1), // Use spacing instead of padding
   },
   inputContainer: {
     flex: 1,
@@ -25,41 +26,41 @@ const styles: StyleRulesCallback = (theme: Theme) => ({
     flex: 1,
     display: 'flex',
     flexDirection: 'column',
-    marginBottom: theme.padding.md,
+    marginBottom: theme.spacing(2), // Use spacing instead of padding
   },
   fieldHeading: {
-    marginBottom: theme.padding.unit,
-    fontSize: theme.font.sm,
-    fontWeight: 'bold',
+    marginBottom: theme.spacing(1), // Use spacing instead of unit
+    // fontSize: theme.typography.fontSize, // Use typography instead of font
+    // fontWeight: theme.typography.fontWeightBold as FontWeightProperty, // Use typography instead of fontWeight
   },
   fieldContentContainer: {
-    padding: theme.padding.sm,
-    border: theme.border.root,
-    borderRadius: theme.border.radius,
+    padding: theme.spacing(1), // Use spacing instead of padding
+    border: '1px solid black',
+    // borderRadius: theme.shape.borderRadius, // Use shape instead of border
   },
   typeSelect: {
     width: '100%',
   },
   menuItemTypography: {
-    fontSize: theme.font.md,
+    // fontSize: theme.typography.fontSizeMedium, // Use typography instead of font
   },
   mnemonicPrKeyTextField: {
     flex: 1,
-    border: theme.border.root,
-    borderRadius: theme.border.radius,
+    border: '1px solid black',
+    // borderRadius: theme.shape.borderRadius, // Use shape instead of border
   },
   mnemonicPrKeyFieldInput: {
-    padding: theme.padding.sm,
-    fontSize: theme.font.md,
-    lineHeight: theme.lineHeight.md,
+    padding: theme.spacing(1), // Use spacing instead of padding
+    // fontSize: theme.typography.fontSize, // Use typography instead of font
+    // lineHeight: theme.typography.lineHeight, // Use typography instead of lineHeight
   },
   borderTextFieldContainer: {
-    marginTop: theme.padding.md,
+    marginTop: theme.spacing(2), // Use spacing instead of padding
   },
   importButton: {
-    height: theme.button.lg.height,
-    marginBottom: theme.padding.sm,
-    borderRadius: theme.button.lg.radius,
+    height: theme.spacing(8), // Adjust to your desired value using spacing
+    marginBottom: theme.spacing(1), // Use spacing instead of padding
+    // borderRadius: theme.shape.borderRadius, // Use shape instead of border
     display: 'flex',
   },
   cancelButton: {
@@ -67,9 +68,9 @@ const styles: StyleRulesCallback = (theme: Theme) => ({
     padding: 0,
   },
   errorText: {
-    fontSize: theme.font.xs,
-    color: theme.color.red,
-    marginTop: theme.padding.unit,
+    // fontSize: theme.typography.fontSizeExtraSmall, // Use typography instead of font
+    // color: theme.palette.error.main, // Use error color from the palette
+    marginTop: theme.spacing(1), // Use spacing instead of unit
   },
 });
 

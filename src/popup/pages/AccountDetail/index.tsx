@@ -1,4 +1,4 @@
-import React, { Component, SFC } from 'react';
+import React, { Component, FC } from 'react';
 import { Paper, Tabs, Tab, List, ListItem, Typography, Button, withStyles, WithStyles } from '@material-ui/core';
 import { KeyboardArrowRight } from '@material-ui/icons';
 import { inject, observer } from 'mobx-react';
@@ -55,7 +55,7 @@ class AccountDetail extends Component<WithStyles & IProps, {}> {
           </Paper>
           <Paper className={classes.tabsPaper} elevation={1}>
             <Tabs
-              fullWidth
+              // fullWidth // Disabled because error
               indicatorColor="primary"
               textColor="primary"
               value={activeTabIdx}
@@ -75,7 +75,7 @@ class AccountDetail extends Component<WithStyles & IProps, {}> {
   }
 }
 
-const TransactionList: SFC<any> = observer(({ classes, store: { accountDetailStore } }: any) => (
+const TransactionList: FC<any> = observer(({ classes, store: { accountDetailStore } }: any) => (
   <div>
     {accountDetailStore.transactions.map(({ id, pending, confirmations, timestamp, amount }: Transaction) => (
       <ListItem divider key={id} className={classes.listItem} onClick={() => accountDetailStore.onTransactionClick(id)}>
@@ -110,7 +110,7 @@ const TransactionList: SFC<any> = observer(({ classes, store: { accountDetailSto
   </div>
 ));
 
-const TokenList: SFC<any> = observer(({ classes,
+const TokenList: FC<any> = observer(({ classes,
   store: { accountDetailStore, accountDetailStore: { tokens } } }: any) => (
   <div>
     {tokens && tokens.map(({ name, symbol, balance, address }: QRCToken) => (
@@ -155,7 +155,7 @@ const TokenList: SFC<any> = observer(({ classes,
   </div>
 ));
 
-const AmountInfo: SFC<any> = ({ classes, amount, token }: any) => (
+const AmountInfo: FC<any> = ({ classes, amount, token }: any) => (
   <div>
     <div className={classes.tokenContainer}>
       <Typography className={classes.tokenAmount}>{isUndefined(amount) ? '...' : amount}</Typography>

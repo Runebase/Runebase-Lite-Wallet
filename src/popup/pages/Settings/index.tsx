@@ -15,7 +15,7 @@ interface IProps {
 
 @inject('store')
 @observer
-class Settings extends Component<WithStyles & IProps, {}> {
+class Settings extends Component<WithStyles & IProps, NonNullable<unknown>> {
   public render() {
     const { classes } = this.props;
 
@@ -32,7 +32,8 @@ class Settings extends Component<WithStyles & IProps, {}> {
   }
 }
 
-const SliField: React.SFC<any> = observer(({ classes, store: { settingsStore } }: any) => (
+// eslint-disable-next-line @typescript-eslint/naming-convention
+const SliField: React.FC<any> = observer(({ classes, store: { settingsStore } }: any) => (
   <div className={classes.fieldContainer}>
     <Heading name="Session Logout Interval" />
     <div className={classes.fieldContentContainer}>
@@ -53,6 +54,7 @@ const SliField: React.SFC<any> = observer(({ classes, store: { settingsStore } }
   </div>
 ));
 
+// eslint-disable-next-line @typescript-eslint/naming-convention
 const Heading = withStyles(styles, { withTheme: true })(({ classes, name }: any) => (
   <Typography className={classes.fieldHeading}>{name}</Typography>
 ));

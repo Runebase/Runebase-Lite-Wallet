@@ -41,7 +41,7 @@ export default class CryptoController extends IController {
 
   public resetPasswordHash = () => {
     this.passwordHash = INIT_VALUES.passwordHash;
-  }
+  };
 
   /*
   * Generates the one-time created appSalt (if necessary) used to encrypt the user password.
@@ -59,7 +59,7 @@ export default class CryptoController extends IController {
     } catch (err) {
       throw Error('Error generating appSalt');
     }
-  }
+  };
 
   /*
   * Derives the password hash with the password input.
@@ -85,6 +85,7 @@ export default class CryptoController extends IController {
       });
 
       sww.onmessage = (e) => {
+        console.log(e);
         if (e.data.err) {
           throw Error('scrypt failed to calculate derivedKey');
         }
@@ -92,5 +93,5 @@ export default class CryptoController extends IController {
         this.main.account.finishLogin();
       };
     }
-  }
+  };
 }

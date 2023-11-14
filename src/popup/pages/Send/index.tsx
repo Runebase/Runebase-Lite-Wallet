@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 import React, { Component } from 'react';
 import { Typography, Select, MenuItem, TextField, Button, withStyles, WithStyles } from '@material-ui/core';
 import { ArrowDropDown } from '@material-ui/icons';
@@ -17,7 +18,7 @@ interface IProps {
 
 @inject('store')
 @observer
-class Send extends Component<WithStyles & IProps, {}> {
+class Send extends Component<WithStyles & IProps, NonNullable<unknown>> {
   public componentDidMount() {
     this.props.store.sendStore.init();
   }
@@ -60,7 +61,7 @@ class Send extends Component<WithStyles & IProps, {}> {
         this.props.store.sendStore.routeToSendConfirm();
       }
     });
-  }
+  };
 }
 
 const Heading = withStyles(styles, { withTheme: true })(({ classes, name }: any) => (
@@ -138,7 +139,9 @@ const AmountField = observer(({ classes, store: { sendStore }, onEnterPress }: a
       <Button
         color="primary"
         className={classes.fieldButton}
-        onClick={() => sendStore.amount = sendStore.maxAmount}
+        onClick={() => {
+          sendStore.amount = sendStore.maxAmount;
+        }}
       >
         Max
       </Button>
@@ -163,8 +166,10 @@ const AmountField = observer(({ classes, store: { sendStore }, onEnterPress }: a
           ),
           disableUnderline: true,
         }}
-        onChange={(event) => event.target.value === '' ? sendStore.amount = ''
-          : sendStore.amount = Number(event.target.value)}
+        onChange={(event) => {
+          const newValue = event.target.value;
+          newValue === '' ? sendStore.amount = '' : sendStore.amount = Number(newValue);
+        }}
         onKeyPress={onEnterPress}
       />
     </div>

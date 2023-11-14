@@ -33,5 +33,5 @@ export default class SettingsStore {
       type: MESSAGE_TYPE.SAVE_SESSION_LOGOUT_INTERVAL,
       value: this.sessionLogoutInterval,
     });
-  }
+  };
 }

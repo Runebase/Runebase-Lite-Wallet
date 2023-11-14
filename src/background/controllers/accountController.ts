@@ -1,6 +1,7 @@
 import { isEmpty, find, cloneDeep } from 'lodash';
 import { Wallet as RunebaseWallet } from 'runebasejs-wallet';
 import assert from 'assert';
+import { Buffer } from 'buffer'; // Add this line to import Buffer
 
 import RunebaseChromeController from '.';
 import IController from './iController';
@@ -8,6 +9,8 @@ import { MESSAGE_TYPE, STORAGE, NETWORK_NAMES, RUNEBASECHROME_ACCOUNT_CHANGE } f
 import Account from '../../models/Account';
 import Wallet from '../../models/Wallet';
 import { TRANSACTION_SPEED } from '../../constants';
+
+globalThis.Buffer = Buffer;
 
 const INIT_VALUES = {
   mainnetAccounts: [],
@@ -71,14 +74,14 @@ export default class AccountController extends IController {
   */
   public isWalletNameTaken = (name: string): boolean => {
     return !!find(this.accounts, { name });
-  }
+  };
 
   /*
   * Resets the account vars back to initial state.
   */
   public resetAccount = () => {
     this.loggedInAccount = INIT_VALUES.loggedInAccount;
-  }
+  };
 
   /*
   * Initial login with the master password and routing to the correct account login page.
@@ -86,10 +89,11 @@ export default class AccountController extends IController {
   public login = async (password: string) => {
     this.main.crypto.generateAppSaltIfNecessary();
     this.main.crypto.derivePasswordHash(password);
-  }
+  };
 
   public finishLogin = async () => {
     if (!this.hasAccounts) {
+      console.log('finished login');
       // New user. No created wallets yet. No need to validate.
       this.routeToAccountPage();
       return;
@@ -102,7 +106,7 @@ export default class AccountController extends IController {
     }
 
     chrome.runtime.sendMessage({ type: MESSAGE_TYPE.LOGIN_FAILURE });
-  }
+  };
 
   /*
   * Creates an account, stores it, and logs in.
@@ -110,6 +114,9 @@ export default class AccountController extends IController {
   * @param mnemonic The mnemonic to derive the wallet from.
   */
   public addAccountAndLogin = async (accountName: string, privateKeyHash: string, wallet: RunebaseWallet) => {
+    console.log(accountName);
+    console.log(privateKeyHash);
+    console.log(wallet);
     this.loggedInAccount = new Account(accountName, privateKeyHash);
     this.loggedInAccount.wallet = new Wallet(wallet);
 
@@ -133,7 +140,7 @@ export default class AccountController extends IController {
     }, () => console.log(this.main.network.networkName, 'Account added', prunedAcct));
 
     await this.onAccountLoggedIn();
-  }
+  };
 
   /*
   * Imports a new wallet from mnemonic.
@@ -145,7 +152,9 @@ export default class AccountController extends IController {
     assert(mnemonic, 'invalid mnemonic');
 
     const network = this.main.network.network;
-    const wallet = network.fromMnemonic(mnemonic);
+    console.log('importMnemonic');
+    const wallet = await network.fromMnemonic(mnemonic);
+    console.log(wallet);
     const privateKeyHash = this.getPrivateKeyHash(wallet);
 
     // Validate that we don't already have the wallet in our accountList
@@ -156,7 +165,7 @@ export default class AccountController extends IController {
     }
 
     await this.addAccountAndLogin(accountName, privateKeyHash, wallet);
-  }
+  };
 
   /*
   * Imports a new wallet from private key.
@@ -169,7 +178,7 @@ export default class AccountController extends IController {
 
     // recover wallet and privateKeyHash
     const network = this.main.network.network;
-    const wallet = network.fromWIF(privateKey);
+    const wallet = await network.fromWIF(privateKey);
     const privateKeyHash = this.getPrivateKeyHash(wallet);
 
     // validate that we don't already have the wallet in our accountList accountList
@@ -179,8 +188,10 @@ export default class AccountController extends IController {
       return;
     }
 
+    console.log('importPrivateKey');
+
     await this.addAccountAndLogin(accountName, privateKeyHash, wallet);
-  }
+  };
 
   /*
   * Saves the generated mnemonic to a file and creates a new account.
@@ -204,7 +215,7 @@ export default class AccountController extends IController {
     element.click();
 
     this.importMnemonic(accountName, mnemonic);
-  }
+  };
 
   /*
   * Finds the account based on the name and logs in.
@@ -215,19 +226,23 @@ export default class AccountController extends IController {
     this.loggedInAccount = cloneDeep(account);
 
     if (!this.loggedInAccount) {
+      console.error('Logged in account is undefined');
       throw Error('Account should not be undefined');
     }
 
     try {
+      console.log('Attempting to recover wallet from private key hash');
       const wallet = this.recoverFromPrivateKeyHash(this.loggedInAccount.privateKeyHash);
       this.loggedInAccount.wallet = new Wallet(wallet);
 
+      console.log('Login successful. Performing actions after login...');
       await this.onAccountLoggedIn();
     } catch (err) {
+      console.error('Error during login:', err);
       this.resetAccount();
       throw err;
     }
-  }
+  };
 
   /*
   * Logs out of the current account and routes back to the account login.
@@ -236,7 +251,7 @@ export default class AccountController extends IController {
     this.main.session.clearAllIntervals();
     this.main.session.clearSession();
     this.routeToAccountPage();
-  }
+  };
 
   /*
   * Routes to the CreateWallet or AccountLogin page after unlocking with the password.
@@ -249,7 +264,7 @@ export default class AccountController extends IController {
       // Accounts found, route to Account Login page
       chrome.runtime.sendMessage({ type: MESSAGE_TYPE.LOGIN_SUCCESS_WITH_ACCOUNTS });
     }
-  }
+  };
 
   /*
   * Actions after adding a new account or logging into an existing account.
@@ -277,7 +292,7 @@ export default class AccountController extends IController {
       this.main.inpageAccount.sendInpageAccountAllPorts(RUNEBASECHROME_ACCOUNT_CHANGE.LOGIN);
     }
     chrome.runtime.sendMessage({ type: MESSAGE_TYPE.ACCOUNT_LOGIN_SUCCESS });
-  }
+  };
 
   /*
   * Stops polling for the periodic info updates.
@@ -287,7 +302,7 @@ export default class AccountController extends IController {
       clearInterval(this.getInfoInterval);
       this.getInfoInterval = undefined;
     }
-  }
+  };
 
   /*
   * Recovers the wallet instance from an encrypted private key.
@@ -324,21 +339,26 @@ export default class AccountController extends IController {
     } else if (!isEmpty(this.regtestAccounts)) {
       account = this.regtestAccounts[0];
     } else {
+      console.error('No accounts found when trying to validate password');
       throw Error('Trying to validate password without existing account');
     }
 
     try {
+      console.log('Attempting to recover wallet from private key hash');
       this.recoverFromPrivateKeyHash(account.privateKeyHash);
+      console.log('Password validation successful');
       return true;
     } catch (err) {
+      console.error('Error validating password:', err);
       /*
       * If the user provides an invalid password, privateKeyHash will be invalid,
-      * and recoverFromPrivateKeyHash will throw an error. In this case it is not
+      * and recoverFromPrivateKeyHash will throw an error. In this case, it is not
       * an unexpected error for us, so we don't do anything with the error.
       */
     }
+    console.log('Password validation failed');
     return false;
-  }
+  };
 
   /*
   * Checks if a wallet is already in the mainnet or testnet accounts list.
@@ -347,7 +367,7 @@ export default class AccountController extends IController {
   */
   private walletAlreadyExists = async (privateKeyHash: string): Promise<boolean> => {
     return !!find(this.accounts, { privateKeyHash });
-  }
+  };
 
   /*
   * Fetches the wallet info from the current wallet instance.
@@ -368,7 +388,7 @@ export default class AccountController extends IController {
 
       this.updateAndSendMaxRunebaseAmountToPopup();
     }
-  }
+  };
 
   /*
   * Starts polling for periodic info updates.
@@ -379,7 +399,7 @@ export default class AccountController extends IController {
         this.getWalletInfo();
       }, AccountController.GET_INFO_INTERVAL_MS);
     }
-  }
+  };
 
   /*
   * Executes a sendtoaddress.
@@ -413,7 +433,7 @@ export default class AccountController extends IController {
       chrome.runtime.sendMessage({ type: MESSAGE_TYPE.SEND_TOKENS_FAILURE, error: err });
       throw (err);
     }
-  }
+  };
 
   /**
    * We update the maxRunebase amount under 2 scnearios
@@ -434,62 +454,78 @@ export default class AccountController extends IController {
       chrome.runtime.sendMessage({ type: MESSAGE_TYPE.GET_MAX_RUNEBASE_SEND_RETURN,
         maxRunebaseAmount: this.loggedInAccount!.wallet!.maxRunebaseSend });
     });
-  }
+  };
 
   private handleMessage = async (
     request: any,
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     _: chrome.runtime.MessageSender,
     sendResponse: (response: any) => void,
   ) => {
     try {
       switch (request.type) {
         case MESSAGE_TYPE.LOGIN:
+          console.log(`Logging in with password: ${request.password}`);
           this.login(request.password);
           break;
         case MESSAGE_TYPE.IMPORT_MNEMONIC:
+          console.log(`Importing mnemonic: ${request.accountName}, ${request.mnemonicPrivateKey}`);
           await this.importMnemonic(request.accountName, request.mnemonicPrivateKey);
           break;
         case MESSAGE_TYPE.IMPORT_PRIVATE_KEY:
+          console.log(`Importing private key: ${request.accountName}, ${request.mnemonicPrivateKey}`);
           await this.importPrivateKey(request.accountName, request.mnemonicPrivateKey);
           break;
         case MESSAGE_TYPE.SAVE_TO_FILE:
+          console.log(`Saving to file: ${request.accountName}, ${request.mnemonicPrivateKey}`);
           this.saveToFile(request.accountName, request.mnemonicPrivateKey);
           break;
         case MESSAGE_TYPE.ACCOUNT_LOGIN:
+          console.log(`Logging into account: ${request.selectedWalletName}`);
           await this.loginAccount(request.selectedWalletName);
           break;
         case MESSAGE_TYPE.SEND_TOKENS:
+          console.log(`Sending tokens: ${request.receiverAddress}, Amount: ${request.amount}, Speed: ${request.transactionSpeed}`);
           this.sendTokens(request.receiverAddress, request.amount, request.transactionSpeed);
           break;
         case MESSAGE_TYPE.LOGOUT:
+          console.log('Logging out');
           this.logoutAccount();
           break;
         case MESSAGE_TYPE.HAS_ACCOUNTS:
+          console.log('Checking if accounts exist');
           sendResponse(this.hasAccounts);
           break;
         case MESSAGE_TYPE.GET_ACCOUNTS:
+          console.log('Getting accounts');
           sendResponse(this.accounts);
           break;
         case MESSAGE_TYPE.GET_LOGGED_IN_ACCOUNT:
+          console.log('Getting logged-in account');
           sendResponse(this.loggedInAccount && this.loggedInAccount.wallet && this.loggedInAccount.wallet.info
             ? { name: this.loggedInAccount.name, address: this.loggedInAccount!.wallet!.info!.addrStr }
             : undefined);
           break;
         case MESSAGE_TYPE.GET_LOGGED_IN_ACCOUNT_NAME:
+          console.log('Getting logged-in account name');
           sendResponse(this.loggedInAccount ? this.loggedInAccount.name : undefined);
           break;
         case MESSAGE_TYPE.GET_WALLET_INFO:
+          console.log('Getting wallet info');
           sendResponse(this.loggedInAccount && this.loggedInAccount.wallet
             ? this.loggedInAccount.wallet.info : undefined);
           break;
         case MESSAGE_TYPE.GET_RUNEBASE_USD:
+          console.log('Getting RUNEBASE to USD conversion');
           sendResponse(this.loggedInAccount && this.loggedInAccount.wallet
             ? this.loggedInAccount.wallet.runebaseUSD : undefined);
           break;
         case MESSAGE_TYPE.VALIDATE_WALLET_NAME:
+          console.log(`Validating wallet name: ${request.name}`);
           sendResponse(this.isWalletNameTaken(request.name));
           break;
         case MESSAGE_TYPE.GET_MAX_RUNEBASE_SEND:
+          console.log('Getting max RUNEBASE send amount');
           this.updateAndSendMaxRunebaseAmountToPopup();
           break;
         default:
@@ -497,7 +533,7 @@ export default class AccountController extends IController {
       }
     } catch (err) {
       console.error(err);
-      this.main.displayErrorOnPopup(err);
+      this.main.displayErrorOnPopup(err as any);
     }
-  }
+  };
 }

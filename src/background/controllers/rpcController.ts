@@ -48,12 +48,12 @@ export default class RPCController extends IController {
       ];
       result = await this.main.account.loggedInAccount!.wallet!.sendTransaction(newArgs) as Insight.ISendRawTxResult;
     } catch (err) {
-      error = err.message;
       console.error(error);
+      error = (err as Error).message;
     }
 
     return { id, result, error };
-  }
+  };
 
   /*
   * Executes a callcontract request.
@@ -74,12 +74,12 @@ export default class RPCController extends IController {
 
       result = await rpcProvider.rawCall(RPC_METHOD.CALL_CONTRACT, args) as Insight.IContractCall;
     } catch (err) {
-      error = err.message;
+      error = (err as Error).message;
       console.error(error);
     }
 
     return { id, result, error };
-  }
+  };
 
   /*
   * Gets the current logged in RPC provider.
@@ -88,7 +88,7 @@ export default class RPCController extends IController {
   private rpcProvider = (): WalletRPCProvider | undefined => {
     const acct = this.main.account.loggedInAccount;
     return acct && acct.wallet && acct.wallet.rpcProvider;
-  }
+  };
 
   /**
    * Sends the RPC response or error to the active tab that requested.
@@ -101,7 +101,7 @@ export default class RPCController extends IController {
     chrome.tabs.query({ active: true, currentWindow: true }, ([{ id: tabID }]) => {
       chrome.tabs.sendMessage(tabID!, { type: MESSAGE_TYPE.EXTERNAL_RPC_CALL_RETURN, id, result, error });
     });
-  }
+  };
 
   /*
   * Handles a rawCall requested externally and sends the response back to the active tab.
@@ -120,11 +120,11 @@ export default class RPCController extends IController {
 
       result = await rpcProvider.rawCall(method, args);
     } catch (e) {
-      error = e.message;
+      error = (e as Error).message;
     }
 
     this.sendRpcResponseToActiveTab(id, result, error);
-  }
+  };
 
   /*
   * Handles a sendToContract requested externally and sends the response back to the active tab.
@@ -138,7 +138,7 @@ export default class RPCController extends IController {
 
     const { result, error } = await this.sendToContract(id, args);
     this.sendRpcResponseToActiveTab(id, result, error);
-  }
+  };
 
   /*
   * Handles a callContract requested externally and sends the response back to the active tab.
@@ -152,8 +152,9 @@ export default class RPCController extends IController {
 
     const { result, error } = await this.callContract(id, args);
     this.sendRpcResponseToActiveTab(id, result, error);
-  }
+  };
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/naming-convention
   private handleMessage = (request: any, _: chrome.runtime.MessageSender) => {
     try {
       switch (request.type) {
@@ -171,7 +172,7 @@ export default class RPCController extends IController {
       }
     } catch (err) {
       console.error(err);
-      this.main.displayErrorOnPopup(err);
+      this.main.displayErrorOnPopup(err as any);
     }
-  }
+  };
 }

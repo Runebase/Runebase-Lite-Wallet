@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component, ChangeEvent } from 'react';
 import PropTypes from 'prop-types';
 import { Typography, Button, withStyles, WithStyles, Divider } from '@material-ui/core';
 import { inject, observer } from 'mobx-react';
@@ -14,11 +14,24 @@ interface IProps {
   store: AppStore;
 }
 
+interface IState {}
+
 @inject('store')
 @observer
-class CreateWallet extends Component<WithStyles & IProps, {}> {
+class CreateWallet extends Component<WithStyles & IProps, IState> {
   public static propTypes = {
-    classes: PropTypes.object.isRequired,
+    classes: PropTypes.shape({
+      root: PropTypes.string.isRequired,
+      contentContainer: PropTypes.string.isRequired,
+      fieldContainer: PropTypes.string.isRequired,
+      walletNameField: PropTypes.string.isRequired,
+      loginButton: PropTypes.string.isRequired,
+      selectionDividerContainer: PropTypes.string.isRequired,
+      selectionDivider: PropTypes.string.isRequired,
+      selectionDividerText: PropTypes.string.isRequired,
+      importButton: PropTypes.string.isRequired,
+      // Add other classes as needed
+    }).isRequired,
   };
 
   public componentWillUnmount() {
@@ -35,7 +48,7 @@ class CreateWallet extends Component<WithStyles & IProps, {}> {
           <Logo />
           <div className={classes.fieldContainer}>
             <BorderTextField
-              classNames={classes.walletNameField}
+              className={classes.walletNameField}
               placeholder="Wallet name"
               error={createWalletStore.walletNameTaken}
               errorText={createWalletStore.walletNameError}
@@ -72,18 +85,18 @@ class CreateWallet extends Component<WithStyles & IProps, {}> {
     );
   }
 
-  private onWalletNameChange = (event: any) => {
+  private onWalletNameChange = (event: ChangeEvent<HTMLInputElement>) => {
     const { createWalletStore, saveMnemonicStore } = this.props.store;
     createWalletStore.walletName = event.target.value;
     saveMnemonicStore.walletName = event.target.value;
-  }
+  };
 
   private handleEnterPress = () => {
     const { createWalletStore } = this.props.store;
-    if (!!createWalletStore.walletName) {
+    if (createWalletStore.walletName) {
       createWalletStore.routeToSaveMnemonic();
     }
-  }
+  };
 }
 
 export default withStyles(styles)(CreateWallet);

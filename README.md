@@ -1,12 +1,10 @@
-[![Build Status](https://travis-ci.org/bodhiproject/runebasechrome.svg?branch=master)](https://travis-ci.org/bodhiproject/runebasechrome)
-
 ## Get RunebaseChrome
 Chome Web Store: https://chrome.google.com/webstore/detail/runebasechrome/hdmjdgjbehedbnjmljikggbmmbnbmlnd
 
 ## Web Dapp Usage
 
 Your dapp can use RunebaseChrome to get information about a user's account status (whether they are logged into RunebaseChrome, their account address, and balance). RunebaseChrome also enables your dapp to listen to a window event for any changes to the user's account status.
-Your dapp can also use runebasechrome to make callcontract and sendtocontract calls to the blockchain. 
+Your dapp can also use runebasechrome to make callcontract and sendtocontract calls to the blockchain.
 
 ### Connecting RunebaseChrome
 To use any of the above functionality, your dapp will first need to initiate a long-lived connection between RunebaseChrome's content script and background script.
@@ -20,11 +18,11 @@ This will populate the `window.runebasechrome` object in your webpage. The `wind
 {
   rpcProvider: RunebaseChromeRPCProvider,
   account: {
-    loggedIn: true, 
-    name: "2", 
-    network: "TestNet", 
-    address: "qJHp6dUSmDShpEEMmwxqHPo7sFSdydSkPM", 
-    balance: 49.10998413 
+    loggedIn: true,
+    name: "2",
+    network: "TestNet",
+    address: "qJHp6dUSmDShpEEMmwxqHPo7sFSdydSkPM",
+    balance: 49.10998413
   }
 }
 ```
@@ -32,7 +30,7 @@ This will populate the `window.runebasechrome` object in your webpage. The `wind
 ### Refreshing your page when RunebaseChrome is installed or updated
 You will probably want to refresh your dapp webpage when RunebaseChrome is installed or updated. This allows your dapp to rerun
 `window.postMessage({ message: { type: 'CONNECT_RUNEBASECHROME' }}, '*')`
-which would have previously failed to do anything while RunebaseChrome was not yet installed. 
+which would have previously failed to do anything while RunebaseChrome was not yet installed.
 When RunebaseChrome is installed or updated it will send all existing tabs an event message. To have that event message refresh your dapp, add the following event listener.
 
 ```
@@ -41,7 +39,7 @@ function handleRunebaseChromeInstalledOrUpdated(event) {
       // Refresh the page
       window.location.reload()
   }
-}  
+}
 window.addEventListener('message', handleRunebaseChromeInstalledOrUpdated, false);
 ```
 
@@ -94,7 +92,7 @@ function handleMessage(message) {
     // result: object
     // error: string
     const { result, error } = message.data.message.payload;
-    
+
     if (error) {
       if (error === 'Not logged in. Please log in to RunebaseChrome first.') {
         // Show an alert dialog that the user needs to login first
@@ -112,7 +110,7 @@ window.addEventListener('message', handleMessage, false);
 ```
 
 ### Using Rweb3
-You may also use our Rweb3 convenience library to make `sendtocontract` or `callcontract` calls. See the instructions in the Github repo here: https://github.com/bodhiproject/rweb3.js
+You may also use our Rweb3 convenience library to make `sendtocontract` or `callcontract` calls. See the instructions in the Github repo here: https://github.com/runebase/rweb3.js
 
 ### Using RegTest
 You can connect RunebaseChrome to regtest. You will need to set the following in your runebasecore-node.json
@@ -126,12 +124,12 @@ You can connect RunebaseChrome to regtest. You will need to set the following in
 "runebase-insight-api": {
   "routePrefix": "insight-api",
   ...
-}  
+}
 ```
 
-## Running Dev Version
+## Running Dev Version (NodeJs v20)
 ### Chrome
-1. `yarn start` in the project folder to build the dev version and wait for it to be built
+1. `npm run start` in the project folder to build the dev version and wait for it to be built
 2. Open Chrome and load URL: `chrome://extensions`
 3. Turn `Developer mode` on in the top right
 4. At the top, click `Load Unpacked Extension`
