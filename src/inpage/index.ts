@@ -4,12 +4,15 @@ import { RunebaseChromeRPCProvider } from './RunebaseChromeRPCProvider';
 import { showSignTxWindow } from './window';
 import { isMessageNotValid } from '../utils';
 import { IInpageAccountWrapper } from '../types';
+import { Utils } from './Utils';
 
 const runebasechromeProvider: RunebaseChromeRPCProvider = new RunebaseChromeRPCProvider();
+const initUtils: Utils = new Utils();
 
 let runebasechrome: any = {
   rpcProvider: runebasechromeProvider,
   account: null,
+  utils: initUtils,
 };
 let signTxUrl: string;
 
@@ -44,6 +47,10 @@ function handleInpageMessage(event: MessageEvent) {
   let accountWrapper: IInpageAccountWrapper;
 
   switch (message.type) {
+    case API_TYPE.SIGN_POD_RESPONSE:
+      console.log(`SIGN_POD_RESPONSE INPAGE: ${message.payload.result}`);
+      return message.payload.result;
+      // break;
     case API_TYPE.SIGN_TX_URL_RESOLVED:
       signTxUrl = message.payload.url;
       break;
@@ -65,6 +72,7 @@ function handleInpageMessage(event: MessageEvent) {
       handlePortDisconnected();
       break;
     default:
+      console.log(message);
       throw Error(`Inpage processing invalid type: ${message}`);
   }
 }

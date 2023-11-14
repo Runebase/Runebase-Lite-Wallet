@@ -26,6 +26,24 @@ export interface IRPCCallPendingRequest {
   resolve: (result?: any) => void;
   reject: (reason?: any) => void;
 }
+export interface PodSignRequest {
+  id: string;
+  superStakerAddress: string;
+}
+export interface PodSignPendingRequest {
+  resolve: (result?: any) => void;
+  reject: (reason?: any) => void;
+}
+export interface PodSignResponse {
+  id: string;
+  result?: PodSignResult;
+  error?: string;
+}
+export interface PodSignResult {
+  superStakerAddress: string;
+  delegatorAddress: string;
+  podMessage: string;
+}
 
 export interface IRPCCallRequest {
   id: string;

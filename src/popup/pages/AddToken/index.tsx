@@ -52,7 +52,7 @@ class AddToken extends Component<WithStyles & IProps, {}> {
         this.props.store.addTokenStore.addToken();
       }
     });
-  }
+  };
 }
 
 const Heading = withStyles(styles, { withTheme: true })(({ classes, name }: any) => (

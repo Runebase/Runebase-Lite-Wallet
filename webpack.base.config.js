@@ -43,6 +43,7 @@ module.exports = {
       "assert": require.resolve("assert/"),
       'util': require.resolve('util/'),
       "buffer": require.resolve("buffer/"),
+      "events": require.resolve('events/'),
     },
   },
   module: {
