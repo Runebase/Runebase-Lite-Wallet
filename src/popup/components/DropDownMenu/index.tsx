@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
-import { Menu, MenuItem, Button, withStyles, WithStyles } from '@material-ui/core';
-import { ArrowDropDown } from '@material-ui/icons';
+import { Menu, MenuItem, Button } from '@mui/material';
+import { WithStyles } from '@mui/styles';
+import withStyles from '@mui/styles/withStyles';
+import { ArrowDropDown } from '@mui/icons-material';
 
 import styles from './styles';
 
@@ -15,7 +17,7 @@ interface IState {
   anchorEl: any;
 }
 
-class DropDownMenu extends Component<WithStyles & IProps, IState> {
+class DropDownMenu extends Component<WithStyles<typeof styles> & IProps, IState> {
 
   public state: IState = {
     anchorEl: undefined,
@@ -56,7 +58,7 @@ class DropDownMenu extends Component<WithStyles & IProps, IState> {
       this.props.onSelect(i);
     }
     this.setState({ anchorEl: null });
-  }
+  };
 }
 
 export default withStyles(styles)(DropDownMenu);

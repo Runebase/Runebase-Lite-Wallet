@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import { inject, observer } from 'mobx-react';
-import { Typography, Select, MenuItem, withStyles, WithStyles  } from '@material-ui/core';
+import { Typography, Select, MenuItem } from '@mui/material';
+import { WithStyles } from '@mui/styles';
+import withStyles from '@mui/styles/withStyles';
 import { map } from 'lodash';
 
 import styles from './styles';
@@ -15,7 +17,7 @@ interface IProps {
 
 @inject('store')
 @observer
-class Settings extends Component<WithStyles & IProps, NonNullable<unknown>> {
+class Settings extends Component<WithStyles<typeof styles> & IProps, NonNullable<unknown>> {
   public render() {
     const { classes } = this.props;
 

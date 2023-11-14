@@ -1,6 +1,8 @@
 import React, { Component, ChangeEvent } from 'react';
 import PropTypes from 'prop-types';
-import { Typography, Button, withStyles, WithStyles, Divider } from '@material-ui/core';
+import { Typography, Button, Divider } from '@mui/material';
+import { WithStyles } from '@mui/styles';
+import withStyles from '@mui/styles/withStyles';
 import { inject, observer } from 'mobx-react';
 
 import styles from './styles';
@@ -18,7 +20,7 @@ interface IState {}
 
 @inject('store')
 @observer
-class CreateWallet extends Component<WithStyles & IProps, IState> {
+class CreateWallet extends Component<WithStyles<typeof styles> & IProps, IState> {
   public static propTypes = {
     classes: PropTypes.shape({
       root: PropTypes.string.isRequired,

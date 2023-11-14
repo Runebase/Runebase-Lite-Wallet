@@ -1,4 +1,6 @@
-import { createStyles, Theme } from '@material-ui/core/styles';
+import { Theme } from '@mui/material/styles';
+
+import createStyles from '@mui/styles/createStyles';
 
 const styles = (theme: Theme) => createStyles({
   root: {
@@ -32,7 +34,7 @@ const styles = (theme: Theme) => createStyles({
   },
   text: {
     fontSize: theme.font && theme.font.md ? theme.font.md : 'inherit',
-    color: theme.palette.text.primary,
+    //color: theme.palette.text.primary,
     marginBottom: theme.spacing(1), // Use spacing instead of pixel value
   },
   anim9: {

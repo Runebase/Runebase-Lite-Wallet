@@ -1,10 +1,7 @@
 import React, { Component } from 'react';
-import {
-  Typography,
-  Button,
-  withStyles,
-  WithStyles,
-} from '@material-ui/core';
+import { Typography, Button } from '@mui/material';
+import { WithStyles } from '@mui/styles';
+import withStyles from '@mui/styles/withStyles';
 import { inject, observer } from 'mobx-react';
 import cx from 'classnames';
 

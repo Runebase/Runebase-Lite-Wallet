@@ -1,6 +1,6 @@
 
 import { injectAllScripts } from './inject';
-import { IExtensionAPIMessage, IRPCCallRequest, IRPCCallResponse, ICurrentAccount } from '../types';
+import { IExtensionAPIMessage, IRPCCallRequest, IRPCCallResponse, ICurrentAccount, PodSignResponse, PodSignRequest } from '../types';
 import { TARGET_NAME, API_TYPE, MESSAGE_TYPE, RPC_METHOD, PORT_NAME } from '../constants';
 import { isMessageNotValid } from '../utils';
 import { postWindowMessage } from '../utils/messenger';
@@ -105,6 +105,26 @@ function handleRPCRequest(message: IRPCCallRequest) {
   });
 }
 
+function handleSignPodRequest(message: PodSignRequest) {
+  const { superStakerAddress, id } = message;
+
+  // Check for logged in account first
+  chrome.runtime.sendMessage({ type: MESSAGE_TYPE.GET_LOGGED_IN_ACCOUNT }, (account: ICurrentAccount) => {
+    if (!account) {
+      // Not logged in, send error response to Inpage
+      postWindowMessage<PodSignResponse>(TARGET_NAME.INPAGE, {
+        type: API_TYPE.SIGN_POD_RESPONSE,
+        payload: {
+          id,
+          error: 'Not logged in. Please log in to RunebaseChrome first.',
+        },
+      });
+      return;
+    }
+    chrome.runtime.sendMessage({ type: MESSAGE_TYPE.SIGN_POD, id, superStakerAddress });
+  });
+}
+
 // Forwards the request to the bg script
 function forwardInpageAccountRequest() {
   port.postMessage({ type: MESSAGE_TYPE.GET_INPAGE_RUNEBASECHROME_ACCOUNT_VALUES });
@@ -118,6 +138,9 @@ function handleInPageMessage(event: MessageEvent) {
 
   const message: IExtensionAPIMessage<any> = event.data.message;
   switch (message.type) {
+    case API_TYPE.SIGN_POD_REQUEST:
+      handleSignPodRequest(message.payload);
+      break;
     case API_TYPE.RPC_REQUEST:
       handleRPCRequest(message.payload);
       break;
@@ -135,6 +158,12 @@ function handleBackgroundScriptMessage(message: any) {
     case MESSAGE_TYPE.EXTERNAL_RPC_CALL_RETURN:
       postWindowMessage<IRPCCallResponse>(TARGET_NAME.INPAGE, {
         type: API_TYPE.RPC_RESPONSE,
+        payload: message,
+      });
+      break;
+    case MESSAGE_TYPE.SIGN_POD_RETURN:
+      postWindowMessage<IRPCCallResponse>(TARGET_NAME.INPAGE, {
+        type: API_TYPE.SIGN_POD_RESPONSE,
         payload: message,
       });
       break;

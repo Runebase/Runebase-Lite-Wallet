@@ -11,6 +11,7 @@ import TransactionController from './transactionController';
 import SessionController from './sessionController';
 import OnInstallController from './onInstallController';
 import { MESSAGE_TYPE } from '../../constants';
+import UtilsController from './utilsController';
 
 export default class RunebaseChromeController {
   public crypto: CryptoController;
@@ -23,6 +24,7 @@ export default class RunebaseChromeController {
   public transaction: TransactionController;
   public session: SessionController;
   public onInstall: OnInstallController;
+  public utils: UtilsController;
 
   private initialized: Record<string, boolean> = {};
 
@@ -37,6 +39,7 @@ export default class RunebaseChromeController {
     this.transaction = new TransactionController(this);
     this.session = new SessionController(this);
     this.onInstall = new OnInstallController(this);
+    this.utils = new UtilsController(this);
   }
 
   /*

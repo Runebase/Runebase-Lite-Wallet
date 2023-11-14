@@ -1,7 +1,8 @@
-import { createStyles, Theme } from '@material-ui/core/styles';
-import { FontWeightProperty } from 'csstype';
+import createStyles from '@mui/styles/createStyles';
+//import { FontWeightProperty } from 'csstype';
 
-const styles = (theme: Theme) => createStyles({
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const styles = () => createStyles({
   logoContainer: {
     flex: 1,
     display: 'flex',
@@ -14,14 +15,14 @@ const styles = (theme: Theme) => createStyles({
     height: 112,
   },
   logoText: {
-    fontSize: theme.typography.h4.fontSize, // Use typography instead of hardcoding font size
-    fontWeight: theme.typography.fontWeightBold as FontWeightProperty, // Use typography for font weight
-    color: theme.palette.primary.main,
+    //fontSize: theme.typography.h4.fontSize, // Use typography instead of hardcoding font size
+    //fontWeight: theme.typography.fontWeightBold as FontWeightProperty, // Use typography for font weight
+    //color: theme.palette.primary.main,
     alignSelf: 'center',
   },
   version: {
-    fontSize: theme.typography.fontSize, // Use typography instead of sm
-    color: theme.palette.text.secondary,
+    //fontSize: theme.typography.fontSize, // Use typography instead of sm
+    //color: theme.palette.text.secondary,
   },
 });
 

@@ -1,5 +1,6 @@
 import React from 'react';
-import { Typography, withStyles } from '@material-ui/core';
+import { Typography } from '@mui/material';
+import withStyles from '@mui/styles/withStyles';
 import cx from 'classnames';
 
 import styles from './styles';

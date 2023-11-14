@@ -1,5 +1,6 @@
-import { createStyles, Theme } from '@material-ui/core/styles';
-import { FontWeightProperty } from 'csstype';
+import { Theme } from '@mui/material/styles';
+import createStyles from '@mui/styles/createStyles';
+//import { FontWeightProperty } from 'csstype';
 
 
 const styles = (theme: Theme) => createStyles({
@@ -17,9 +18,9 @@ const styles = (theme: Theme) => createStyles({
     height: theme.spacing(4), // Use spacing instead of pixel value
   },
   backButton: {
-    fontSize: theme.typography.fontSize, // Use typography instead of md
+    //fontSize: theme.typography.fontSize, // Use typography instead of md
     '&.white': {
-      color: theme.palette.secondary.main,
+      //color: theme.palette.secondary.main,
     },
   },
   settingsIconButton: {
@@ -29,7 +30,7 @@ const styles = (theme: Theme) => createStyles({
   settingsButton: {
     fontSize: theme.typography.fontSizeLarge, // Use typography instead of 18
     '&.white': {
-      color: theme.palette.secondary.main,
+     // color: theme.palette.secondary.main,
     },
   },
   locationContainer: {
@@ -39,10 +40,10 @@ const styles = (theme: Theme) => createStyles({
     flex: 1,
   },
   locationText: {
-    fontSize: theme.typography.fontSize, // Use typography instead of md
-    fontWeight: theme.typography.fontWeightBold as FontWeightProperty, // Use typography for font weight
+    //fontSize: theme.typography.fontSize, // Use typography instead of md
+    //fontWeight: theme.typography.fontWeightBold as FontWeightProperty, // Use typography for font weight
     '&.white': {
-      color: theme.palette.secondary.main,
+      //color: theme.palette.secondary.main,
     },
   },
 });

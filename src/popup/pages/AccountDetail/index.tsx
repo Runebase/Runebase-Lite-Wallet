@@ -1,6 +1,8 @@
 import React, { Component, FC } from 'react';
-import { Paper, Tabs, Tab, List, ListItem, Typography, Button, withStyles, WithStyles } from '@material-ui/core';
-import { KeyboardArrowRight } from '@material-ui/icons';
+import { Paper, Tabs, Tab, List, ListItem, Typography, Button } from '@mui/material';
+import { WithStyles } from '@mui/styles';
+import withStyles from '@mui/styles/withStyles';
+import { KeyboardArrowRight } from '@mui/icons-material';
 import { inject, observer } from 'mobx-react';
 import cx from 'classnames';
 import { isUndefined } from 'lodash';
@@ -20,7 +22,7 @@ interface IProps {
 
 @inject('store')
 @observer
-class AccountDetail extends Component<WithStyles & IProps, {}> {
+class AccountDetail extends Component<WithStyles<typeof styles> & IProps, {}> {
 
   private messagesEnd?: HTMLElement | null;
 

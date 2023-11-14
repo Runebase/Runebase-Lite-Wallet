@@ -1,7 +1,12 @@
 import React, { Component } from 'react';
 import { inject, observer } from 'mobx-react';
 import { Router, Route, Switch } from 'react-router-dom';
-import { Button, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions } from '@material-ui/core';
+import Dialog from '@mui/material/Dialog';
+import Button from '@mui/material/Button';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogActions from '@mui/material/DialogActions';
 import { createBrowserHistory } from 'history';
 
 import Loading from './components/Loading';
@@ -41,7 +46,7 @@ export default class MainContainer extends Component<IProps, NonNullable<unknown
 
     return (
       <div style={{ width: '100%', height: '100%' }}>
-        <Router history={history || createBrowserHistory()}>
+         <Router history={history || createBrowserHistory()}>
           <Switch>
             <Route exact path="/loading" component={Loading} />
             <Route exact path="/login" component={Login} />
@@ -66,10 +71,8 @@ export default class MainContainer extends Component<IProps, NonNullable<unknown
 
 const UnexpectedErrorDialog: React.FC<any> = inject('store')(observer(({ store: { mainContainerStore } }) => (
   <Dialog
-    disableBackdropClick
     open={!!mainContainerStore.unexpectedError}
-    onClose={() => mainContainerStore.unexpectedError = undefined}
-  >
+    onClose={() => mainContainerStore.unexpectedError = undefined}>
     <DialogTitle>Unexpected Error</DialogTitle>
     <DialogContent>
       <DialogContentText>{ mainContainerStore.unexpectedError }</DialogContentText>
