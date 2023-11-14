@@ -1,8 +1,11 @@
 import { observable, action } from 'mobx';
 import { generateMnemonic } from 'bip39';
+import { Buffer } from 'buffer';
 
 import AppStore from './AppStore';
 import { MESSAGE_TYPE } from '../../constants';
+
+globalThis.Buffer = Buffer;
 
 const INIT_VALUES = {
   mnemonic: '',
@@ -21,13 +24,19 @@ export default class SaveMnemonicStore {
 
   @action
   public generateMnemonic = () => {
+    console.log('Generating mnemonic');
     this.mnemonic = generateMnemonic();
+    console.log('Generated mnemonic:', this.mnemonic);
   };
 
   @action
-  public reset = () => Object.assign(this, INIT_VALUES);
+  public reset = () => {
+    console.log('Resetting save mnemonic store');
+    Object.assign(this, INIT_VALUES);
+  };
 
   public createWallet = (saveFile: boolean) => {
+    console.log('Creating wallet');
     this.app.routerStore.push('/loading');
     chrome.runtime.sendMessage({
       type: saveFile ? MESSAGE_TYPE.SAVE_TO_FILE : MESSAGE_TYPE.IMPORT_MNEMONIC,

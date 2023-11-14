@@ -5,7 +5,7 @@ import cx from 'classnames';
 import styles from './styles';
 import { handleEnterPress } from '../../../utils';
 
-const BorderTextField: React.SFC<any> = ({
+const BorderTextField: React.FC<any> = ({
   classes,
   classNames,
   placeholder,

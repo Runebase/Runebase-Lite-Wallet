@@ -1,13 +1,14 @@
-import { StyleRulesCallback, Theme } from '@material-ui/core';
+import { createStyles, Theme } from '@material-ui/core/styles';
+import { FontWeightProperty } from 'csstype';
 
-const styles: StyleRulesCallback = (theme: Theme) => ({
+const styles = (theme: Theme) => createStyles({
   root: {
     height: '100%',
     display: 'flex',
     flexDirection: 'column',
   },
   contentContainer: {
-    margin: theme.padding.md,
+    margin: theme.spacing(2), // Use spacing instead of padding
     display: 'flex',
     flexDirection: 'column',
     flex: 1,
@@ -16,20 +17,20 @@ const styles: StyleRulesCallback = (theme: Theme) => ({
     flex: 1,
   },
   addressFieldsContainer: {
-    marginBottom: theme.padding.custom(8),
+    marginBottom: theme.spacing(8), // Use spacing instead of custom
   },
   fieldContainer: {
     width: '100%',
-    borderBottom: theme.border.root,
+    borderBottom: '1px solid black',
     '&.row': {
       display: 'flex',
       flexDirection: 'row',
     },
     '&.marginSmall': {
-      marginBottom: theme.padding.md,
+      marginBottom: theme.spacing(2), // Use spacing instead of md
     },
     '&.marginBig': {
-      marginBottom: theme.padding.custom(8),
+      marginBottom: theme.spacing(8), // Use spacing instead of custom
     },
   },
   labelContainer: {
@@ -38,20 +39,20 @@ const styles: StyleRulesCallback = (theme: Theme) => ({
   },
   fieldLabel: {
     color: theme.palette.text.primary,
-    fontSize: theme.font.sm,
-    fontWeight: theme.fontWeight.bold,
+    fontSize: theme.typography.fontSizeSmall, // Use typography instead of sm
+    fontWeight: theme.typography.fontWeightBold as FontWeightProperty, // Use typography instead of fontWeight
     '&.address': {
-      lineHeight: theme.lineHeight.sm,
-      marginBottom: theme.padding.md,
+      lineHeight: theme.typography.lineHeightSmall, // Use typography instead of lineHeight
+      marginBottom: theme.spacing(2), // Use spacing instead of md
     },
     '&.cost': {
-      lineHeight: theme.lineHeight.md,
+      lineHeight: theme.typography.lineHeightMedium, // Use typography instead of lineHeight
     },
   },
   addressValue: {
-    fontSize: theme.font.sm,
+    fontSize: theme.typography.fontSizeSmall, // Use typography instead of sm
     color: theme.palette.text.primary,
-    lineHeight: theme.lineHeight.lg,
+    lineHeight: theme.typography.lineHeightLarge, // Use typography instead of lineHeight
   },
   amountContainer: {
     flex: 1,
@@ -60,30 +61,30 @@ const styles: StyleRulesCallback = (theme: Theme) => ({
     alignItems: 'center',
   },
   fieldValue: {
-    fontSize: theme.font.lg,
+    fontSize: theme.typography.fontSizeLarge, // Use typography instead of lg
     color: theme.palette.text.primary,
-    lineHeight: theme.lineHeight.lg,
+    lineHeight: theme.typography.lineHeightLarge, // Use typography instead of lineHeight
   },
   unitContainer: {
     display: 'flex',
     alignItems: 'center',
   },
   fieldUnit: {
-    fontSize: theme.font.sm,
+    fontSize: theme.typography.fontSizeSmall, // Use typography instead of sm
     textTransform: 'uppercase',
     color: theme.palette.text.secondary,
-    marginLeft: theme.padding.unit,
+    marginLeft: theme.spacing(1), // Use spacing instead of unit
   },
   errorMessage: {
-    fontSize: theme.font.sm,
-    fontWeight: theme.fontWeight.bold,
-    color: theme.color.red,
+    fontSize: theme.typography.fontSizeSmall, // Use typography instead of sm
+    fontWeight: theme.typography.fontWeightBold as FontWeightProperty, // Use typography instead of fontWeight
+    color: theme.palette.error.main, // Use error color from the palette
     alignSelf: 'center',
-    marginBottom: theme.padding.unit,
+    marginBottom: theme.spacing(1), // Use spacing instead of unit
   },
   sendButton: {
-    height: theme.button.lg.height,
-    borderRadius: theme.button.lg.radius,
+    height: theme.spacing(8), // Adjust to your desired value using spacing
+    borderRadius: theme.shape.borderRadius, // Use shape instead of border
   },
 });
 

@@ -1,11 +1,10 @@
 import React, { Component } from 'react';
 import { inject, observer } from 'mobx-react';
 import { withStyles, WithStyles } from '@material-ui/core';
-
-import styles from './styles';
 import NavBar from '../../components/NavBar';
 import MainAccount from './MainAccount';
 import AppStore from '../../stores/AppStore';
+import styles from './styles';
 
 interface IProps {
   classes: Record<string, string>;
@@ -14,7 +13,7 @@ interface IProps {
 
 @inject('store')
 @observer
-class Home extends Component<WithStyles & IProps, {}> {
+class Home extends Component<WithStyles<typeof styles> & IProps, {}> {
   public render() {
     const { classes } = this.props;
 

@@ -1,6 +1,7 @@
-import { StyleRulesCallback, Theme } from '@material-ui/core';
+import { createStyles, Theme } from '@material-ui/core/styles';
+// import { FontWeightProperty } from 'csstype';
 
-const styles: StyleRulesCallback = (theme: Theme) => ({
+const styles = (theme: Theme) => createStyles({
   root: {
     height: '100%',
     display: 'flex',
@@ -10,7 +11,7 @@ const styles: StyleRulesCallback = (theme: Theme) => ({
     flex: 1,
     display: 'flex',
     flexDirection: 'column',
-    margin: theme.padding.md,
+    margin: theme.spacing(2), // Use spacing instead of padding
   },
   topContainer: {
     flex: 1,
@@ -18,29 +19,30 @@ const styles: StyleRulesCallback = (theme: Theme) => ({
     flexDirection: 'column',
   },
   walletCreatedHeader: {
-    fontSize: 20,
-    fontWeight: theme.fontWeight.bold,
-    marginBottom: theme.padding.sm,
+    // fontSize: theme.typography.h6.fontSize, // Use typography instead of hard-coded value
+    // fontWeight: theme.typography.fontWeightBold as FontWeightProperty, // Use typography instead of fontWeight
+    marginBottom: theme.spacing(1), // Use spacing instead of padding
   },
   mnemonicText: {
-    padding: theme.padding.md,
-    marginBottom: theme.padding.md,
-    fontSize: theme.font.lg,
+    padding: theme.spacing(2), // Use spacing instead of padding
+    marginBottom: theme.spacing(2), // Use spacing instead of padding
+    // fontSize: theme.typography.fontSizeLarge, // Use typography instead of font
     fontFamily: 'Roboto Mono, monospace',
-    color: theme.palette.text.primary,
-    border: theme.border.root,
-    borderRadius: theme.border.radius,
+    // color: theme.palette.text.primary,
+    border: '1px solid black',
+    // borderRadius: theme.shape.borderRadius, // Use shape instead of border
   },
   warningText: {
-    fontSize: theme.font.sm,
-    lineHeight: theme.lineHeight.md,
-    color: theme.palette.text.secondary,
+    // fontSize: theme.typography.fontSizeSmall, // Use typography instead of font
+    // lineHeight: theme.typography.lineHeightMedium, // Use typography instead of lineHeight
+    // color: theme.palette.text.secondary,
   },
   actionButton: {
-    height: theme.button.lg.height,
-    borderRadius: theme.button.lg.radius,
+    height: theme.spacing(8), // Adjust to your desired value using spacing
+    // borderRadius: theme.shape.borderRadius, // Use shape instead of border
+    marginBottom: theme.spacing(1), // Use spacing instead of padding
     '&.marginBottom': {
-      marginBottom: theme.padding.sm,
+      marginBottom: theme.spacing(1), // Use spacing instead of padding
     },
   },
 });

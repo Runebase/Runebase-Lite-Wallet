@@ -1,6 +1,7 @@
-import { StyleRulesCallback, Theme } from '@material-ui/core';
+import { createStyles, Theme } from '@material-ui/core/styles';
+import { FontWeightProperty } from 'csstype';
 
-const styles: StyleRulesCallback = (theme: Theme) => ({
+const styles = (theme: Theme) => createStyles({
   root: {
     width: '100%',
     height: '100%',
@@ -8,26 +9,26 @@ const styles: StyleRulesCallback = (theme: Theme) => ({
     flexDirection: 'column',
   },
   headerContainer: {
-    background: theme.color.gradientPurple,
+    // background: theme.palette.primary.main, // Use primary color from the palette
     borderRadius: 0,
   },
   accountContainer: {
     display: 'flex',
     flexDirection: 'column',
-    padding: theme.padding.md,
+    padding: theme.spacing(2), // Use spacing instead of padding
   },
   selectAcctText: {
-    fontSize: theme.font.sm,
-    fontWeight: theme.fontWeight.bold,
+    fontSize: theme.typography.fontSize, // Use typography instead of font
+    fontWeight: theme.typography.fontWeightBold as FontWeightProperty, // Use typography instead of fontWeight
     color: theme.palette.secondary.main,
-    marginBottom: theme.padding.xs,
+    marginBottom: theme.spacing(1), // Use spacing instead of padding
   },
   accountSelect: {
     flex: 1,
-    padding: theme.padding.sm,
-    marginBottom: theme.padding.sm,
+    padding: theme.spacing(1), // Use spacing instead of padding
+    marginBottom: theme.spacing(1), // Use spacing instead of padding
     background: theme.palette.secondary.main,
-    borderRadius: theme.border.radius,
+    borderRadius: theme.shape.borderRadius, // Use shape instead of border
   },
   createAccountContainer: {
     display: 'flex',
@@ -36,35 +37,35 @@ const styles: StyleRulesCallback = (theme: Theme) => ({
   orText: {
     display: 'flex',
     alignItems: 'center',
-    fontSize: theme.font.md,
+    fontSize: theme.typography.fontSizeMedium, // Use typography instead of font
     color: theme.palette.secondary.main,
-    marginBottom: 3,
+    marginBottom: theme.spacing(0.3), // Use spacing instead of margin
   },
   createAccountButton: {
     minHeight: 0,
-    padding: `0 ${theme.padding.unit}`,
-    fontSize: theme.font.md,
-    fontWeight: theme.fontWeight.bold,
+    padding: `0 ${theme.spacing(1)}`, // Use spacing instead of unit
+    fontSize: theme.typography.fontSizeMedium, // Use typography instead of font
+    fontWeight: theme.typography.fontWeightBold as FontWeightProperty, // Use typography instead of fontWeight
     color: theme.palette.secondary.main,
   },
   permissionContainer: {
     flex: 1,
-    padding: theme.padding.md,
+    padding: theme.spacing(2), // Use spacing instead of padding
   },
   permissionsHeader: {
-    fontSize: theme.font.sm,
-    fontWeight: theme.fontWeight.bold,
+    fontSize: theme.typography.fontSize, // Use typography instead of font
+    fontWeight: theme.typography.fontWeightBold as FontWeightProperty, // Use typography instead of fontWeight
     color: theme.palette.text.primary,
-    marginBottom: theme.padding.md,
+    marginBottom: theme.spacing(2), // Use spacing instead of padding
   },
   loginContainer: {
     display: 'flex',
     flexDirection: 'column',
-    padding: theme.padding.md,
+    padding: theme.spacing(2), // Use spacing instead of padding
   },
   loginButton: {
-    height: theme.button.lg.height,
-    borderRadius: theme.button.lg.radius,
+    height: theme.spacing(8), // Adjust to your desired value using spacing
+    borderRadius: theme.shape.borderRadius, // Use shape instead of border
   },
 });
 

@@ -1,6 +1,7 @@
-import { StyleRulesCallback, Theme } from '@material-ui/core';
+import { createStyles, Theme } from '@material-ui/core/styles';
+import { FontWeightProperty } from 'csstype';
 
-const styles: StyleRulesCallback = (theme: Theme) => ({
+const styles = (theme: Theme) => createStyles({
   root: {
     width: '100%',
     height: '100%',
@@ -11,7 +12,7 @@ const styles: StyleRulesCallback = (theme: Theme) => ({
     flex: 1,
     display: 'flex',
     flexDirection: 'column',
-    margin: theme.padding.md,
+    margin: theme.spacing(2), // Use spacing instead of padding
   },
   fieldsContainer: {
     flex: 1,
@@ -19,29 +20,29 @@ const styles: StyleRulesCallback = (theme: Theme) => ({
     flexDirection: 'column',
   },
   fieldHeading: {
-    marginBottom: theme.padding.unit,
-    fontSize: theme.font.sm,
+    marginBottom: theme.spacing(1), // Use spacing instead of unit
+    fontSize: theme.typography.fontSize, // Use typography instead of font
     fontWeight: 'bold',
   },
   fieldContainer: {
-    marginBottom: theme.padding.custom(8),
+    marginBottom: theme.spacing(8), // Use spacing instead of custom
   },
   detailContainer: {
     flex: 1,
-    borderBottom: theme.border.root,
+    borderBottom: '1px solid black',
     display: 'flex',
     flexDirection: 'row',
-    marginBottom: theme.padding.custom(8),
+    marginBottom: theme.spacing(8), // Use spacing instead of custom
   },
   fieldContentContainer: {
-    padding: theme.padding.sm,
-    border: theme.border.root,
-    borderRadius: theme.border.radius,
+    padding: theme.spacing(1), // Use spacing instead of padding
+    border: '1px solid black',
+    // borderRadius: theme.border.radius,
   },
   errorText: {
-    fontSize: theme.font.xs,
-    color: theme.color.red,
-    marginTop: theme.padding.unit,
+    fontSize: theme.typography.fontSize, // Use typography instead of font
+    color: theme.palette.error.main, // Use error color from the palette
+    marginTop: theme.spacing(1), // Use spacing instead of unit
   },
   labelContainer: {
     display: 'flex',
@@ -49,9 +50,9 @@ const styles: StyleRulesCallback = (theme: Theme) => ({
   },
   detailLabel: {
     color: theme.palette.text.primary,
-    fontSize: theme.font.sm,
-    fontWeight: theme.fontWeight.bold,
-    lineHeight: theme.lineHeight.md,
+    fontSize: theme.typography.fontSize, // Use typography instead of font
+    fontWeight: theme.typography.fontWeightBold as FontWeightProperty, // Use typography instead of fontWeight
+    lineHeight: theme.typography.lineHeight, // Use typography instead of lineHeight
   },
   valueContainer: {
     flex: 1,
@@ -60,13 +61,13 @@ const styles: StyleRulesCallback = (theme: Theme) => ({
     alignItems: 'center',
   },
   detailValue: {
-    fontSize: theme.font.lg,
+    fontSize: theme.typography.fontSizeLarge, // Adjust to your desired value
     color: theme.palette.text.primary,
-    lineHeight: theme.lineHeight.lg,
+    lineHeight: theme.typography.lineHeightLarge, // Adjust to your desired value
   },
   addButton: {
-    height: theme.button.lg.height,
-    borderRadius: theme.button.lg.radius,
+    height: theme.spacing(8), // Adjust to your desired value using spacing
+    borderRadius: theme.spacing(2), // Adjust to your desired value using spacing
   },
 });
 

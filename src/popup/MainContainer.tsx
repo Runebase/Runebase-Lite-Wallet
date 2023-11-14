@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 import { inject, observer } from 'mobx-react';
 import { Router, Route, Switch } from 'react-router-dom';
-import { SynchronizedHistory } from 'mobx-react-router';
 import { Button, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions } from '@material-ui/core';
+import { createBrowserHistory } from 'history';
 
 import Loading from './components/Loading';
 import Login from './pages/Login';
@@ -21,7 +21,7 @@ import AppStore from './stores/AppStore';
 import { MESSAGE_TYPE } from '../constants';
 
 interface IProps {
-  history: SynchronizedHistory;
+  history: any; // Replace with the appropriate type for your history
   store?: AppStore;
 }
 
@@ -41,17 +41,17 @@ export default class MainContainer extends Component<IProps, NonNullable<unknown
 
     return (
       <div style={{ width: '100%', height: '100%' }}>
-        <Router history={history}>
+        <Router history={history || createBrowserHistory()}>
           <Switch>
             <Route exact path="/loading" component={Loading} />
             <Route exact path="/login" component={Login} />
+            <Route exact path="/account-login" component={AccountLogin} />
+            <Route exact path="/home" component={Home} />
             <Route exact path="/create-wallet" component={CreateWallet} />
+            <Route exact path="/account-detail" component={AccountDetail} />
             <Route exact path="/save-mnemonic" component={SaveMnemonic} />
             <Route exact path="/import-wallet" component={ImportWallet} />
-            <Route exact path="/account-login" component={AccountLogin} />
             <Route exact path="/settings" component={Settings} />
-            <Route exact path="/home" component={Home} />
-            <Route exact path="/account-detail" component={AccountDetail} />
             <Route exact path="/send" component={Send} />
             <Route exact path="/send-confirm" component={SendConfirm} />
             <Route exact path="/receive" component={Receive} />
@@ -64,7 +64,7 @@ export default class MainContainer extends Component<IProps, NonNullable<unknown
   }
 }
 
-const UnexpectedErrorDialog: React.SFC<any> = inject('store')(observer(({ store: { mainContainerStore } }) => (
+const UnexpectedErrorDialog: React.FC<any> = inject('store')(observer(({ store: { mainContainerStore } }) => (
   <Dialog
     disableBackdropClick
     open={!!mainContainerStore.unexpectedError}

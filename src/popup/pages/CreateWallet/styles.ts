@@ -1,6 +1,7 @@
-import { StyleRulesCallback, Theme } from '@material-ui/core';
+import { createStyles, Theme } from '@material-ui/core/styles';
+// import { FontWeightProperty } from 'csstype';
 
-const styles: StyleRulesCallback = (theme: Theme) => ({
+const styles = (theme: Theme) => createStyles({
   root: {
     height: '100%',
     display: 'flex',
@@ -10,7 +11,7 @@ const styles: StyleRulesCallback = (theme: Theme) => ({
     height: '100%',
     display: 'flex',
     flexDirection: 'column',
-    margin: theme.padding.xl,
+    margin: theme.spacing(6),
   },
   fieldContainer: {
     width: '100%',
@@ -18,12 +19,12 @@ const styles: StyleRulesCallback = (theme: Theme) => ({
     flexDirection: 'column',
   },
   walletNameField: {
-    marginBottom: theme.padding.md,
+    marginBottom: theme.spacing(2),
   },
   loginButton: {
-    height: theme.button.lg.height,
-    marginBottom: theme.padding.lg,
-    borderRadius: theme.button.lg.radius,
+    height: theme.spacing(8),
+    marginBottom: theme.spacing(4),
+    borderRadius: theme.spacing(2),
     display: 'flex',
   },
   selectionDividerContainer: {
@@ -31,16 +32,16 @@ const styles: StyleRulesCallback = (theme: Theme) => ({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: theme.padding.lg,
+    marginBottom: theme.spacing(4),
   },
   selectionDivider: {
     flex: 1,
   },
   selectionDividerText: {
-    fontSize: theme.font.sm,
-    fontWeight: theme.fontWeight.bold,
-    color: theme.palette.text.secondary,
-    margin: `0px ${theme.padding.md}`,
+    // fontSize: theme.typography.fontSize,
+    // fontWeight: theme.typography.fontWeightBold as FontWeightProperty,
+    // color: theme.palette.text.secondary,
+    margin: `0px ${theme.spacing(2)}`,
   },
   importButton: {
     minHeight: 0,

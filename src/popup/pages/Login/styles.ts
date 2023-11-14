@@ -1,27 +1,27 @@
-import { StyleRulesCallback, Theme } from '@material-ui/core';
+import { createStyles, Theme } from '@material-ui/core/styles';
 
-const styles: StyleRulesCallback = (theme: Theme) => ({
+const styles = (theme: Theme) => createStyles({
   root: {
     height: '100%',
     display: 'flex',
     flexDirection: 'column',
-    margin: theme.padding.md,
+    margin: theme.spacing(2), // Use spacing instead of padding
   },
   fieldContainer: {
     display: 'flex',
     flexDirection: 'column',
   },
   passwordField: {
-    marginBottom: theme.padding.md,
+    marginBottom: theme.spacing(2), // Use spacing instead of padding
   },
   masterPwNote: {
-    fontSize: theme.font.sm,
+    // fontSize: theme.typography.fontSize, // Use typography instead of font
     color: theme.palette.text.secondary,
-    marginBottom: theme.padding.md,
+    marginBottom: theme.spacing(2), // Use spacing instead of padding
   },
   loginButton: {
-    height: theme.button.lg.height,
-    borderRadius: theme.button.lg.radius,
+    height: theme.spacing(8), // Adjust to your desired value using spacing
+    borderRadius: theme.spacing(2), // Adjust to your desired value using spacing
   },
 });
 

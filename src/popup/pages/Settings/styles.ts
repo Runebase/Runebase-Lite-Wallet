@@ -1,6 +1,7 @@
-import { StyleRulesCallback, Theme } from '@material-ui/core';
+import { createStyles, Theme } from '@material-ui/core/styles';
+import { FontWeightProperty } from 'csstype';
 
-const styles: StyleRulesCallback = (theme: Theme) => ({
+const styles = (theme: Theme) => createStyles({
   root: {
     width: '100%',
     height: '100%',
@@ -11,7 +12,7 @@ const styles: StyleRulesCallback = (theme: Theme) => ({
     flex: 1,
     display: 'flex',
     flexDirection: 'column',
-    margin: theme.padding.md,
+    margin: theme.spacing(2), // Use spacing instead of padding
   },
   fieldsContainer: {
     flex: 1,
@@ -19,24 +20,24 @@ const styles: StyleRulesCallback = (theme: Theme) => ({
     flexDirection: 'column',
   },
   fieldHeading: {
-    marginBottom: theme.padding.unit,
-    fontSize: theme.font.sm,
-    fontWeight: 'bold',
+    marginBottom: theme.spacing(1), // Use spacing instead of unit
+    fontSize: theme.typography.fontSizeSmall, // Use typography instead of font
+    fontWeight: theme.typography.fontWeightBold as FontWeightProperty, // Use typography instead of fontWeight
   },
   fieldContainer: {
-    marginBottom: theme.padding.md,
+    marginBottom: theme.spacing(2), // Use spacing instead of md
   },
   fieldContentContainer: {
-    padding: theme.padding.sm,
-    border: theme.border.root,
-    borderRadius: theme.border.radius,
+    padding: theme.spacing(1), // Use spacing instead of sm
+    border: '1px solid black',
+    borderRadius: theme.shape.borderRadius, // Use shape instead of border
   },
   select: {
     width: '100%',
   },
   selectTypography: {
-    fontSize: theme.font.md,
-    fontWeight: 'bold',
+    fontSize: theme.typography.fontSizeMedium, // Use typography instead of md
+    fontWeight: theme.typography.fontWeightBold as FontWeightProperty, // Use typography instead of fontWeight
   },
 });
 

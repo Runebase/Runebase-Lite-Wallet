@@ -23,7 +23,10 @@ export default class AccountLoginStore {
     // Set the default selected account on the login page.
     reaction(
       () => this.app.sessionStore.networkIndex,
-      () => this.getAccounts(),
+      () => {
+        console.log('Network index changed:', this.app.sessionStore.networkIndex);
+        this.getAccounts();
+      },
     );
   }
 
@@ -35,12 +38,15 @@ export default class AccountLoginStore {
    */
   @action
   public getAccounts = (validateNetwork: boolean = false) => {
+    console.log('Getting accounts');
     chrome.runtime.sendMessage({ type: MESSAGE_TYPE.GET_ACCOUNTS }, (response: any) => {
       if (!isEmpty(response)) {
+        console.log('Received accounts:', response);
         this.accounts = response;
         this.setSelectedWallet();
       } else {
         if (validateNetwork) {
+          console.log('No accounts received. Validating network.');
           this.validateNetwork();
         }
       }
@@ -59,6 +65,7 @@ export default class AccountLoginStore {
    * changing the network to that of the selectedWallet.
    */
   public validateNetwork = () => {
+    console.log('Validating network');
     if (this.app.sessionStore.networkIndex !== this.selectedWalletNetworkIndex) {
       this.app.navBarStore.changeNetwork(this.selectedWalletNetworkIndex);
     }
@@ -66,6 +73,7 @@ export default class AccountLoginStore {
 
   @action
   public setSelectedWallet = () => {
+    console.log('Setting selected wallet');
     if (!isEmpty(this.accounts)) {
       this.selectedWalletName = this.accounts[0].name;
       this.selectedWalletNetworkIndex = this.app.sessionStore.networkIndex;
@@ -74,6 +82,7 @@ export default class AccountLoginStore {
 
   @action
   public loginAccount = () => {
+    console.log('Logging in account:', this.selectedWalletName);
     this.app.routerStore.push('/loading');
     chrome.runtime.sendMessage({
       type: MESSAGE_TYPE.ACCOUNT_LOGIN,
@@ -83,9 +92,13 @@ export default class AccountLoginStore {
 
   @action
   public routeToCreateWallet = () => {
+    console.log('Routing to create wallet');
     this.app.routerStore.push('/create-wallet');
   };
 
   @action
-  public reset = () => Object.assign(this, INIT_VALUES);
+  public reset = () => {
+    console.log('Resetting account login store');
+    Object.assign(this, INIT_VALUES);
+  };
 }

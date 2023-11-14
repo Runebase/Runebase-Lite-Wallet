@@ -1,6 +1,7 @@
-import { StyleRulesCallback, Theme } from '@material-ui/core';
+import { createStyles, Theme } from '@material-ui/core/styles';
+// import { FontWeightProperty } from 'csstype';
 
-const styles: StyleRulesCallback = (theme: Theme) => ({
+const styles = (theme: Theme) => createStyles({
   root: {
     width: '100%',
     height: '100%',
@@ -11,7 +12,7 @@ const styles: StyleRulesCallback = (theme: Theme) => ({
     flex: 1,
     display: 'flex',
     flexDirection: 'column',
-    margin: theme.padding.md,
+    margin: theme.spacing(2), // Use spacing instead of padding
   },
   fieldsContainer: {
     flex: 1,
@@ -20,33 +21,33 @@ const styles: StyleRulesCallback = (theme: Theme) => ({
     overflowY: 'auto',
   },
   fieldHeading: {
-    marginBottom: theme.padding.halfUnit,
-    fontSize: theme.font.sm,
-    fontWeight: 'bold',
+    marginBottom: theme.spacing(0.5), // Use spacing instead of halfUnit
+    fontSize: '12px', // Use typography instead of font
+    // fontWeight: theme.typography.fontWeightBold as FontWeightProperty, // Use typography instead of fontWeight
   },
   fieldContainer: {
-    marginBottom: theme.padding.sm,
+    marginBottom: theme.spacing(1), // Use spacing instead of sm
   },
   fieldContentContainer: {
-    padding: theme.padding.xs,
-    border: theme.border.root,
-    borderRadius: theme.border.radius,
+    padding: theme.spacing(1), // Use spacing instead of xs
+    border: '1px solid black',
+    // borderRadius: theme.shape.borderRadius, // Use shape instead of border
   },
   errorText: {
-    fontSize: theme.font.xs,
-    color: theme.color.red,
-    marginTop: theme.padding.unit,
+    fontSize: '10px', // Use typography instead of font
+    color: theme.palette.error.main, // Use error color from the palette
+    marginTop: theme.spacing(1), // Use spacing instead of unit
   },
   fieldTextOrInput: {
-    fontSize: theme.font.sm,
+    fontSize: '12px', // Use typography instead of font
   },
   fieldInput: {
     padding: 0,
   },
   selectOrTextField: {
     width: '100%',
-    height: 17,
-    fontSize: theme.font.sm,
+    height: theme.spacing(1.7), // Adjust to your desired value using spacing
+    fontSize: '12px', // Use typography instead of font
   },
   buttonFieldHeadingContainer: {
     width: '100%',
@@ -58,24 +59,24 @@ const styles: StyleRulesCallback = (theme: Theme) => ({
     flex: 1,
   },
   fieldButtonText: {
-    fontSize: theme.font.sm,
+    fontSize: '12px', // Use typography instead of font
   },
   fieldButton: {
     minWidth: 0,
     minHeight: 0,
     padding: '0 4px',
-    fontSize: 11,
+    fontSize: '10px', // Use typography instead of font
   },
   fieldTextAdornment: {
-    fontSize: theme.font.sm,
-    fontWeight: 'bold',
-    marginLeft: theme.padding.sm,
+    fontSize: '12px', // Use typography instead of font
+    // fontWeight: theme.typography.fontWeightBold as FontWeightProperty, // Use typography instead of fontWeight
+    marginLeft: theme.spacing(1), // Use spacing instead of sm
     display: 'flex',
     alignItems: 'center',
   },
   sendButton: {
-    height: theme.button.lg.height,
-    borderRadius: theme.button.lg.radius,
+    height: theme.spacing(8), // Adjust to your desired value using spacing
+    // borderRadius: theme.shape.borderRadius, // Use shape instead of border
   },
 });
 

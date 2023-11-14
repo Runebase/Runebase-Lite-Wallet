@@ -76,7 +76,7 @@ class Login extends Component<WithStyles & IProps, {}> {
   }
 }
 
-const ErrorDialog: React.SFC<any> = observer(({ store: { loginStore }}: any) => (
+const ErrorDialog: React.FC<any> = observer(({ store: { loginStore }}: any) => (
   <Dialog
     disableBackdropClick
     open={!!loginStore.invalidPassword}

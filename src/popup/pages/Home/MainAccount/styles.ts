@@ -1,12 +1,12 @@
-import { StyleRulesCallback, Theme } from '@material-ui/core';
+import { createStyles, Theme } from '@material-ui/core/styles';
 
-const styles: StyleRulesCallback = (theme: Theme) => ({
+const styles = (theme: Theme) => createStyles({
   card: {
     cursor: 'pointer',
-    borderRadius: theme.border.radius,
+    borderRadius: theme.shape.borderRadius, // Use shape instead of border
   },
   cardContent: {
-    background: theme.color.gradientPurple,
+    background: theme.palette.primary.main, // Use primary color from the palette
   },
 });
 

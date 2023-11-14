@@ -1,7 +1,6 @@
 /* eslint-disable no-unused-vars */
-import createMuiTheme from '@material-ui/core/styles/createMuiTheme';
+import { createMuiTheme, Theme } from '@material-ui/core/styles';
 import {
-  FontWeightProperty,
   ColorProperty,
   FontFamilyProperty,
   BorderColorProperty,
@@ -13,6 +12,7 @@ import {
   LineHeightProperty,
   PaddingProperty,
   MarginProperty,
+  FontWeightProperty
 } from 'csstype';
 
 const px = (value: number): string => value.toString().concat('px');
@@ -77,117 +77,60 @@ const buttonRadiusLg: BorderRadiusProperty<string> = px(24);
 const buttonHeightSm: HeightProperty<string> = px(32);
 const buttonHeightLg: HeightProperty<string> = px(48);
 
-declare module '@material-ui/core/styles/createMuiTheme' {
-  // tslint:disable-next-line:interface-name
-  interface Theme {
-    color: {
-      gray: ColorProperty;
-      orange: ColorProperty;
-      red: ColorProperty;
-      gradientPurple: ColorProperty;
+interface CustomTheme {
+  color: {
+    gray: string;
+    orange: string;
+    red: string;
+    gradientPurple: string;
+  };
+  padding: {
+    halfUnit: string;
+    unit: string;
+    xs: string;
+    sm: string;
+    md: string;
+    lg: string;
+    xl: string;
+    custom: (multiplier: number) => string;
+  };
+  font: {
+    xs: string;
+    sm: string;
+    md: string;
+    lg: string;
+    xl: string;
+  };
+  fontWeight: {
+    bold: string;
+  };
+  lineHeight: {
+    xs: string;
+    sm: string;
+    md: string;
+    lg: string;
+    xl: string;
+  };
+  border: {
+    root: string;
+    radius: string;
+  };
+  icon: {
+    size: string;
+  };
+  button: {
+    sm: {
+      height: string;
+      radius: string;
     };
-    padding: {
-      halfUnit: PaddingProperty<string> | MarginProperty<string>;
-      unit: PaddingProperty<string> | MarginProperty<string>;
-      xs: PaddingProperty<string> | MarginProperty<string>;
-      sm: PaddingProperty<string> | MarginProperty<string>;
-      md: PaddingProperty<string> | MarginProperty<string>;
-      lg: PaddingProperty<string> | MarginProperty<string>;
-      xl: PaddingProperty<string> | MarginProperty<string>;
-      custom(multiplier: number): PaddingProperty<string> | MarginProperty<string>;
+    lg: {
+      height: string;
+      radius: string;
     };
-    font: {
-      xs: FontSizeProperty<string>;
-      sm: FontSizeProperty<string>;
-      md: FontSizeProperty<string>;
-      lg: FontSizeProperty<string>;
-      xl: FontSizeProperty<string>;
-    };
-    fontWeight: {
-      bold: FontWeightProperty;
-    };
-    lineHeight: {
-      xs: LineHeightProperty<string>;
-      sm: LineHeightProperty<string>;
-      md: LineHeightProperty<string>;
-      lg: LineHeightProperty<string>;
-      xl: LineHeightProperty<string>;
-    };
-    border: {
-      root: BorderProperty<string>;
-      radius: BorderRadiusProperty<string>;
-    };
-    icon: {
-      size: WidthProperty<string> | HeightProperty<string>;
-    };
-    button: {
-      sm: {
-        height: HeightProperty<string>;
-        radius: BorderRadiusProperty<string>;
-      };
-      lg: {
-        height: HeightProperty<string>;
-        radius: BorderRadiusProperty<string>;
-      };
-    };
-  }
-  // allow configuration using `createMuiTheme`
-  // tslint:disable-next-line:interface-name
-  interface ThemeOptions {
-    color?: {
-      gray?: ColorProperty;
-      orange?: ColorProperty;
-      red?: ColorProperty;
-      gradientPurple?: ColorProperty;
-    };
-    padding?: {
-      halfUnit?: PaddingProperty<string> | MarginProperty<string>;
-      unit?: PaddingProperty<string> | MarginProperty<string>;
-      xs?: PaddingProperty<string> | MarginProperty<string>;
-      sm?: PaddingProperty<string> | MarginProperty<string>;
-      md?: PaddingProperty<string> | MarginProperty<string>;
-      lg?: PaddingProperty<string> | MarginProperty<string>;
-      xl?: PaddingProperty<string> | MarginProperty<string>;
-      custom?(multiplier: number): PaddingProperty<string> | MarginProperty<string>;
-    };
-    font?: {
-      xs?: FontSizeProperty<string>;
-      sm?: FontSizeProperty<string>;
-      md?: FontSizeProperty<string>;
-      lg?: FontSizeProperty<string>;
-      xl?: FontSizeProperty<string>;
-    };
-    fontWeight?: {
-      bold?: FontWeightProperty;
-    };
-    lineHeight?: {
-      xs?: LineHeightProperty<string>;
-      sm?: LineHeightProperty<string>;
-      md?: LineHeightProperty<string>;
-      lg?: LineHeightProperty<string>;
-      xl?: LineHeightProperty<string>;
-    };
-    border?: {
-      root?: BorderProperty<string>;
-      radius?: BorderRadiusProperty<string>;
-    };
-    icon?: {
-      size?: WidthProperty<string> | HeightProperty<string>;
-    };
-    button?: {
-      sm?: {
-        height?: HeightProperty<string>;
-        radius?: BorderRadiusProperty<string>;
-      };
-      lg?: {
-        height?: HeightProperty<string>;
-        radius?: BorderRadiusProperty<string>;
-      };
-    };
-  }
+  };
 }
 
-export default createMuiTheme({
+const theme = createMuiTheme({
   /* Material color overrides */
   palette: {
     primary: {
@@ -254,7 +197,7 @@ export default createMuiTheme({
         fontWeight: fontWeightBold,
       },
     },
-  },
+  } as Theme['overrides'],
 
   /* User-defined variables */
   color: {
@@ -307,4 +250,6 @@ export default createMuiTheme({
       radius: buttonRadiusLg,
     },
   },
-});
+} as Theme & CustomTheme); // Merge the Material-UI ThemeOptions with your CustomTheme
+
+export default theme;

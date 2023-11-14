@@ -29,25 +29,39 @@ export default class CreateWalletStore {
 
     reaction(
       () => this.walletName,
-      () => chrome.runtime.sendMessage({
-        type: MESSAGE_TYPE.VALIDATE_WALLET_NAME,
-        name: this.walletName,
-      }, (response: any) => this.walletNameTaken = response),
+      (newWalletName) => {
+        console.log(`Wallet name changed: ${newWalletName}`);
+
+        // Send a message to background script to validate wallet name
+        chrome.runtime.sendMessage(
+          {
+            type: MESSAGE_TYPE.VALIDATE_WALLET_NAME,
+            name: newWalletName,
+          },
+          (response: any) => {
+            this.walletNameTaken = response;
+            console.log(`Wallet name taken: ${response}`);
+          }
+        );
+      }
     );
   }
 
   @action
-  public reset = () => Object.assign(this, INIT_VALUES);
+  public reset = () => {
+    console.log('Resetting CreateWalletStore');
+    Object.assign(this, INIT_VALUES);
+  };
 
   @action
   public routeToSaveMnemonic = () => {
-    console.log('routeToSaveMnemonic');
+    console.log('Routing to SaveMnemonic');
     this.app.routerStore.push('/save-mnemonic');
   };
 
   @action
   public routeToImportWallet = () => {
-    console.log('routeToImportWallet');
+    console.log('Routing to ImportWallet');
     this.app.routerStore.push('/import-wallet');
   };
 }

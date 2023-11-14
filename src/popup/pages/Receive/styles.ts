@@ -1,6 +1,7 @@
-import { StyleRulesCallback, Theme } from '@material-ui/core';
+import { createStyles, Theme } from '@material-ui/core/styles';
+import { FontWeightProperty } from 'csstype';
 
-const styles: StyleRulesCallback = (theme: Theme) => ({
+const styles = (theme: Theme) => createStyles({
   root: {
     width: '100%',
     height: '100%',
@@ -11,18 +12,18 @@ const styles: StyleRulesCallback = (theme: Theme) => ({
     flex: 1,
     display: 'flex',
     flexDirection: 'column',
-    margin: theme.padding.md,
+    margin: theme.spacing(2), // Use spacing instead of padding
   },
   accountName: {
     color: theme.palette.text.primary,
-    fontSize: theme.font.lg,
-    fontWeight: 'bold',
-    marginBottom: theme.padding.unit,
+    fontSize: theme.typography.fontSizeLarge, // Use typography instead of font
+    fontWeight: theme.typography.fontWeightBold as FontWeightProperty, // Use typography instead of fontWeight
+    marginBottom: theme.spacing(1), // Use spacing instead of unit
   },
   accountAddress: {
     color: theme.palette.text.primary,
-    fontSize: theme.font.sm,
-    marginBottom: theme.padding.md,
+    fontSize: theme.typography.fontSize, // Use typography instead of font
+    marginBottom: theme.spacing(2), // Use spacing instead of padding
   },
   amountContainer: {
     width: '100%',
@@ -30,21 +31,21 @@ const styles: StyleRulesCallback = (theme: Theme) => ({
     display: 'inline-flex',
   },
   tokenAmount: {
-    fontSize: 32,
-    fontWeight: 'bold',
+    fontSize: theme.spacing(4), // Adjust to your desired value using spacing
+    fontWeight: theme.typography.fontWeightBold as FontWeightProperty, // Use typography instead of fontWeight
     color: theme.palette.text.primary,
-    marginRight: theme.padding.xs,
+    marginRight: theme.spacing(1), // Use spacing instead of xs
   },
   token: {
-    fontSize: theme.font.sm,
+    fontSize: theme.typography.fontSize, // Use typography instead of font
     color: theme.palette.text.primary,
     alignSelf: 'flex-end',
-    marginBottom: 6,
+    marginBottom: theme.spacing(1), // Adjust to your desired value using spacing
   },
   currencyValue: {
-    fontSize: theme.font.sm,
+    fontSize: theme.typography.fontSize, // Use typography instead of font
     color: theme.palette.text.primary,
-    marginBottom: 32,
+    marginBottom: theme.spacing(4), // Adjust to your desired value using spacing
   },
   qrCodeContainer: {
     display: 'flex',
