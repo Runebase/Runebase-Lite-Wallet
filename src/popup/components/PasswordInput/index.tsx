@@ -1,11 +1,11 @@
-import React from 'react';
+import React, { FC } from 'react';
 import { TextField, Typography, withStyles } from '@material-ui/core';
 import cx from 'classnames';
 
 import styles from './styles';
 import { handleEnterPress } from '../../../utils';
 
-const PasswordTextField: React.SFC<any> = ({
+const PasswordTextField: FC<any> = ({
   classes,
   classNames,
   autoFocus,

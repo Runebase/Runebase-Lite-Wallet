@@ -1,5 +1,18 @@
-import React, { Component } from 'react';
-import { Typography, TextField, Button, withStyles, WithStyles, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, Select, MenuItem } from '@material-ui/core';
+import React, { Component, FC } from 'react';
+import {
+  Typography,
+  TextField,
+  Button,
+  withStyles,
+  WithStyles,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+  Select,
+  MenuItem
+} from '@material-ui/core';
 import { inject, observer } from 'mobx-react';
 
 import styles from './styles';
@@ -115,7 +128,7 @@ const TypeField = observer(({ classes, store: { importStore } }: any) => (
   </div>
 ));
 
-const ErrorDialog: React.SFC<any> = observer(({ store: { importStore }}: any) => (
+const ErrorDialog: FC<any> = observer(({ store: { importStore }}: any) => (
   <Dialog
     disableBackdropClick
     open={importStore.importMnemonicPrKeyFailed}
