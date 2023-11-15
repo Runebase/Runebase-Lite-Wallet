@@ -1,4 +1,4 @@
-import { observable, computed, action, reaction } from 'mobx';
+import { observable, computed, action, reaction, makeObservable } from 'mobx';
 import { findIndex } from 'lodash';
 
 import AppStore from './AppStore';
@@ -42,6 +42,7 @@ export default class AddTokenStore {
   private app: AppStore;
 
   constructor(app: AppStore) {
+    makeObservable(this);
     this.app = app;
     this.setInitValues();
 

@@ -1,4 +1,4 @@
-import { observable, action, reaction } from 'mobx';
+import { observable, action, reaction, makeObservable } from 'mobx';
 import { isEmpty } from 'lodash';
 
 import AppStore from './AppStore';
@@ -17,6 +17,7 @@ export default class AccountLoginStore {
   private selectedWalletNetworkIndex: number;
 
   constructor(app: AppStore) {
+    makeObservable(this);
     this.app = app;
     this.selectedWalletNetworkIndex = this.app.sessionStore.networkIndex;
 

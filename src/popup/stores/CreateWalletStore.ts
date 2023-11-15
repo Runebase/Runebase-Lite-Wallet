@@ -1,4 +1,4 @@
-import { observable, action, computed, reaction } from 'mobx';
+import { observable, action, computed, reaction, makeObservable } from 'mobx';
 import { isEmpty } from 'lodash';
 
 import AppStore from './AppStore';
@@ -25,6 +25,7 @@ export default class CreateWalletStore {
   private app: AppStore;
 
   constructor(app: AppStore) {
+    makeObservable(this);
     this.app = app;
 
     reaction(

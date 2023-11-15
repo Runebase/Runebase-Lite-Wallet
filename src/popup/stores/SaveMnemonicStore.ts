@@ -1,4 +1,4 @@
-import { observable, action } from 'mobx';
+import { observable, action, makeObservable } from 'mobx';
 import { generateMnemonic } from 'bip39';
 import { Buffer } from 'buffer';
 
@@ -19,6 +19,7 @@ export default class SaveMnemonicStore {
   private app: AppStore;
 
   constructor(app: AppStore) {
+    makeObservable(this);
     this.app = app;
   }
 

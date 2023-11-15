@@ -1,4 +1,4 @@
-import { observable, action, computed } from 'mobx';
+import { observable, action, computed, makeObservable } from 'mobx';
 import { Insight } from 'runebasejs-wallet';
 import { isUndefined } from 'lodash';
 
@@ -33,6 +33,7 @@ export default class SessionStore {
   private runebaseUSD?: number = INIT_VALUES.runebaseUSD;
 
   constructor() {
+    makeObservable(this);
     chrome.runtime.onMessage.addListener(this.handleMessage);
     chrome.runtime.sendMessage({ type: MESSAGE_TYPE.GET_NETWORKS }, (response: any) => this.networks = response);
     chrome.runtime.sendMessage({ type: MESSAGE_TYPE.GET_NETWORK_INDEX }, (response: any) => {

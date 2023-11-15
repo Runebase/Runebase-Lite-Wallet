@@ -1,4 +1,4 @@
-import { observable, computed, action } from 'mobx';
+import { observable, computed, action, makeObservable } from 'mobx';
 import { find } from 'lodash';
 
 import AppStore from './AppStore';
@@ -76,6 +76,7 @@ export default class SendStore {
   private app: AppStore;
 
   constructor(app: AppStore) {
+    makeObservable(this);
     this.app = app;
   }
 

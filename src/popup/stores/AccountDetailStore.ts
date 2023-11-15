@@ -1,4 +1,4 @@
-import { observable, action, reaction } from 'mobx';
+import { observable, action, reaction, makeObservable } from 'mobx';
 
 import AppStore from './AppStore';
 import { MESSAGE_TYPE } from '../../constants';
@@ -25,6 +25,7 @@ export default class AccountDetailStore {
   private app: AppStore;
 
   constructor(app: AppStore) {
+    makeObservable(this);
     this.app = app;
     reaction(
       () => this.activeTabIdx,
