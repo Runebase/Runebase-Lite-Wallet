@@ -1,4 +1,4 @@
-import { action, observable } from 'mobx';
+import { action, observable, makeObservable } from 'mobx';
 
 import AppStore from './AppStore';
 import { MESSAGE_TYPE } from '../../constants';
@@ -9,6 +9,7 @@ export default class MainContainerStore {
   private app: AppStore;
 
   constructor(app: AppStore) {
+    makeObservable(this);
     this.app = app;
   }
 

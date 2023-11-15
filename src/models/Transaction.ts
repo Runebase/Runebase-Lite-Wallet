@@ -1,4 +1,4 @@
-import { observable, computed } from 'mobx';
+import { observable, computed, makeObservable } from 'mobx';
 
 export default class Transaction {
   @observable public id?: string;
@@ -10,6 +10,7 @@ export default class Transaction {
   }
 
   constructor(attributes = {}) {
+    makeObservable(this);
     Object.assign(this, attributes);
   }
 }

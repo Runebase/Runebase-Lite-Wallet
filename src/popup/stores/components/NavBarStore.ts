@@ -1,4 +1,4 @@
-import { observable, action } from 'mobx';
+import { observable, action, makeObservable } from 'mobx';
 
 import { MESSAGE_TYPE } from '../../../constants';
 import AppStore from '../AppStore';
@@ -13,6 +13,7 @@ export default class NavBarStore {
   private app: AppStore;
 
   constructor(app: AppStore) {
+    makeObservable(this);
     this.app = app;
   }
 

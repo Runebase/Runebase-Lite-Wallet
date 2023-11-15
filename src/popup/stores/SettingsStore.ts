@@ -1,4 +1,4 @@
-import { observable } from 'mobx';
+import { observable, makeObservable } from 'mobx';
 
 import { INTERVAL_NAMES, MESSAGE_TYPE } from '../../constants';
 import { SessionLogoutInterval } from '../../models/SessionLogoutInterval';
@@ -13,6 +13,7 @@ export default class SettingsStore {
   public sliArray: SessionLogoutInterval[];
 
   constructor() {
+    makeObservable(this);
     chrome.runtime.sendMessage({ type: MESSAGE_TYPE.GET_SESSION_LOGOUT_INTERVAL }, (response: any) => {
       this.sessionLogoutInterval = response;
     });

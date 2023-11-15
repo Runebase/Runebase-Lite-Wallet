@@ -1,4 +1,4 @@
-import { observable, action } from 'mobx';
+import { observable, action, makeObservable } from 'mobx';
 import { findIndex } from 'lodash';
 
 import Permission from './Permission';
@@ -8,6 +8,7 @@ export default class SubAccount {
   @observable public permissions: Permission[] = [];
 
   constructor(name: string, permissions: Permission[]) {
+    makeObservable(this);
     this.name = name;
     this.permissions = permissions;
   }

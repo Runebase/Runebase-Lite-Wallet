@@ -1,4 +1,4 @@
-import { observable, computed, action } from 'mobx';
+import { observable, computed, action, makeObservable } from 'mobx';
 import { isEmpty } from 'lodash';
 
 import AppStore from './AppStore';
@@ -27,6 +27,7 @@ export default class LoginStore {
   private app: AppStore;
 
   constructor(app: AppStore) {
+    makeObservable(this);
     this.app = app;
     chrome.runtime.sendMessage({ type: MESSAGE_TYPE.HAS_ACCOUNTS }, (response: any) => this.hasAccounts = response);
     chrome.runtime.sendMessage({ type: MESSAGE_TYPE.RESTORE_SESSION }, (response: any) => {

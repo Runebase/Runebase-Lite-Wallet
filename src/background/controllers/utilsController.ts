@@ -64,28 +64,33 @@ export default class UtilsController extends IController {
       if (!acct || !acct.wallet || !acct.wallet.qjsWallet || !acct.wallet.qjsWallet.keyPair) {
         throw Error('Invalid account or key pair.');
       }
-
       const keyPair = acct.wallet.qjsWallet.keyPair;
       const hexAddress = runebase.address.fromBase58Check(superStakerAddress).hash.toString('hex');
-      const messageToSign = `\x19Runebase Signed Message:\n${hexAddress}`;
 
       // Verify that keyPair.network.messagePrefix is set correctly for Runebase
       const hash = sha256d(
         Buffer.concat([
           Buffer.from(keyPair.network.messagePrefix, 'utf8'),
-          Buffer.from(String(messageToSign.length)),
-          Buffer.from(messageToSign, 'utf8')
+          Buffer.from([hexAddress.length]),
+          Buffer.from(hexAddress, 'utf8')
         ])
       );
 
-      const { signature, recid } = secp256k1.ecdsaSign(hash, keyPair.d.toBuffer());
+      const { signature, recid } = secp256k1.ecdsaSign(
+        hash,
+        keyPair.d.toBuffer()
+        );
       const signed = Buffer.concat([
         Buffer.from([recid + (keyPair.compressed ? 31 : 27)]),
         signature
       ]);
       const podMessage = `0x${signed.toString('hex')}`;
 
-      // Check against a constant or dynamically calculated value based on the expected length
+      const pubKey = secp256k1.publicKeyCreate(keyPair.d.toBuffer());
+      const verified = secp256k1.ecdsaVerify(signature, hash, pubKey);
+      if (!verified) {
+        throw Error('Unable to verify signature');
+      }
       if (podMessage.length !== 132) {
         throw Error('Incorrect POD length');
       }

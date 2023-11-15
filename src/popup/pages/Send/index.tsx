@@ -6,6 +6,7 @@ import withStyles from '@mui/styles/withStyles';
 import { ArrowDropDown } from '@mui/icons-material';
 import { inject, observer } from 'mobx-react';
 import { map } from 'lodash';
+import SendIcon from '@mui/icons-material/Send';
 
 import styles from './styles';
 import NavBar from '../../components/NavBar';
@@ -140,7 +141,7 @@ const AmountField = observer(({ classes, store: { sendStore }, onEnterPress }: a
       <Typography className={classes.fieldButtonText}>{sendStore.maxAmount}</Typography>
       <Button
         color="primary"
-        className={classes.fieldButton}
+        variant="contained"
         onClick={() => {
           sendStore.amount = sendStore.maxAmount;
         }}
@@ -293,12 +294,17 @@ const GasPriceField = observer(({ classes, store: { sendStore }, onEnterPress }:
 
 const SendButton = observer(({ classes, store: { sendStore } }: any) => (
   <Button
+    sx={{
+      mt: 1,
+    }}
     className={classes.sendButton}
     fullWidth
     variant="contained"
     color="primary"
+    size="large"
     disabled={sendStore.buttonDisabled}
     onClick={sendStore.routeToSendConfirm}
+    endIcon={<SendIcon />}
   >
     Send
   </Button>

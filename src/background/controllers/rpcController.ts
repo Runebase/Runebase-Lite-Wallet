@@ -35,7 +35,6 @@ export default class RPCController extends IController {
       if (args.length < 2) {
         throw Error('Requires first two arguments: contractAddress and data.');
       }
-
       // Set default values for amount, gasLimit, and gasPrice if needed
       const { DEFAULT_AMOUNT, DEFAULT_GAS_LIMIT, DEFAULT_GAS_PRICE } = Config.TRANSACTION;
       const [address, data, amount, gasLimit, gasPrice] = args;
@@ -44,7 +43,7 @@ export default class RPCController extends IController {
         data,
         amount || DEFAULT_AMOUNT,
         gasLimit || DEFAULT_GAS_LIMIT,
-        gasPrice * 1e-8 || DEFAULT_GAS_PRICE,
+        gasPrice || DEFAULT_GAS_PRICE,
       ];
       result = await this.main.account.loggedInAccount!.wallet!.sendTransaction(newArgs) as Insight.ISendRawTxResult;
     } catch (err) {

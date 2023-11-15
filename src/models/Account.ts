@@ -1,4 +1,4 @@
-import { observable, action } from 'mobx';
+import { observable, action, makeObservable } from 'mobx';
 
 import SubAccount from './SubAccount';
 import Wallet from './Wallet';
@@ -10,6 +10,7 @@ export default class Account {
   public wallet?: Wallet;
 
   constructor(name: string, privateKeyHash: string, subAccounts: SubAccount[] = []) {
+    makeObservable(this);
     this.name = name;
     this.privateKeyHash = privateKeyHash;
     this.subAccounts = subAccounts;

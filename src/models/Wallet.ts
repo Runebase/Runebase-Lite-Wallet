@@ -1,4 +1,4 @@
-import { action } from 'mobx';
+import { action, makeObservable } from 'mobx';
 import {
   Wallet as RunebaseWallet,
   Insight,
@@ -18,6 +18,7 @@ export default class Wallet implements ISigner {
   public maxRunebaseSend?: number;
 
   constructor(qjsWallet: RunebaseWallet) {
+    makeObservable(this);
     this.qjsWallet = qjsWallet;
     this.rpcProvider = new WalletRPCProvider(this.qjsWallet);
   }
