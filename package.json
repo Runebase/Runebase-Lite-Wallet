@@ -63,6 +63,7 @@
     "@mui/icons-material": "^5.14.18",
     "@mui/material": "^5.14.18",
     "@mui/styles": "^5.14.18",
+    "@mui/system": "^5.14.18",
     "@types/bip39": "^3.0.0",
     "@types/deep-equal": "^1.0.1",
     "@types/har-format": "^1.2.15",

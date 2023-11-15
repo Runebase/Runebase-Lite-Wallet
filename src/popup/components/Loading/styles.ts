@@ -1,8 +1,6 @@
-import { Theme } from '@mui/material/styles';
+import { makeStyles } from '@mui/styles';
 
-import createStyles from '@mui/styles/createStyles';
-
-const styles = (theme: Theme) => createStyles({
+const useStyles = makeStyles((theme) => ({
   root: {
     width: '100%',
     height: '100%',
@@ -34,8 +32,7 @@ const styles = (theme: Theme) => createStyles({
   },
   text: {
     fontSize: theme.font && theme.font.md ? theme.font.md : 'inherit',
-    //color: theme.palette.text.primary,
-    marginBottom: theme.spacing(1), // Use spacing instead of pixel value
+    marginBottom: theme.spacing(1),
   },
   anim9: {
     width: '160px',
@@ -46,6 +43,6 @@ const styles = (theme: Theme) => createStyles({
   '@keyframes anim9': {
     to: { backgroundPosition: '160px' },
   },
-});
+}));
 
-export default styles;
+export default useStyles;
