@@ -18,8 +18,6 @@ const AccountInfo: React.FC<IProps> = ({ hasRightArrow, store }) => {
   const [networkBalAnnotation, setNetworkBalAnnotation] = useState<string | null>(null);
 
   useEffect(() => {
-    // Assuming there is some logic to set the state values from the store.
-    // Replace the following lines with the actual logic from your class component.
     setLoggedInAccountName(store?.sessionStore.loggedInAccountName || null);
     setInfo(store?.sessionStore.info || null);
     setRunebaseBalanceUSD(store?.sessionStore.runebaseBalanceUSD);
