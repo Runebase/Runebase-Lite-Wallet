@@ -39,7 +39,6 @@ const PasswordTextField: FC<PasswordTextFieldProps> = ({
         helperText={helperText}
         error={error}
         InputProps={{
-          disableUnderline: true,
           classes: { input: classes.input },
         }}
         onChange={onChange}

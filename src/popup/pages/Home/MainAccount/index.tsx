@@ -17,6 +17,7 @@ const MainAccount: React.FC<IProps> = inject('store')(
 
       switch (id) {
         case 'mainCard': {
+          console.log('Clicked on mainCard. Navigating to /account-detail');
           store!.routerStore.push('/account-detail');
           break;
         }
@@ -29,6 +30,7 @@ const MainAccount: React.FC<IProps> = inject('store')(
     const { loggedInAccountName, info } = store!.sessionStore;
 
     if (!loggedInAccountName || !info) {
+      console.log('No logged-in account or info available. Rendering null.');
       return null;
     }
 

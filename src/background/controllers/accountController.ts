@@ -261,6 +261,7 @@ export default class AccountController extends IController {
       // Accounts not found, route to Create Wallet page
       chrome.runtime.sendMessage({ type: MESSAGE_TYPE.LOGIN_SUCCESS_NO_ACCOUNTS });
     } else {
+      console.log('LOGIN_SUCCESS_WITH_ACCOUNTS');
       // Accounts found, route to Account Login page
       chrome.runtime.sendMessage({ type: MESSAGE_TYPE.LOGIN_SUCCESS_WITH_ACCOUNTS });
     }
@@ -494,10 +495,12 @@ export default class AccountController extends IController {
           break;
         case MESSAGE_TYPE.HAS_ACCOUNTS:
           console.log('Checking if accounts exist');
+          console.log(this.accounts);
           sendResponse(this.hasAccounts);
           break;
         case MESSAGE_TYPE.GET_ACCOUNTS:
           console.log('Getting accounts');
+          console.log(this.accounts);
           sendResponse(this.accounts);
           break;
         case MESSAGE_TYPE.GET_LOGGED_IN_ACCOUNT:

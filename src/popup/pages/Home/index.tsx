@@ -8,8 +8,9 @@ interface IProps {
 }
 
 const Home: React.FC<IProps> = () => {
-    const classes = useStyles();
-    return (
+  const classes = useStyles();
+
+  return (
     <div className={classes.root}>
       <NavBar hasSettingsButton hasNetworkSelector title="Home" />
       <div className={classes.content}>

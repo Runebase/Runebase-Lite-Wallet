@@ -13,10 +13,11 @@ interface IProps {
 
 const AccountLogin: React.FC<IProps> = inject('store')(
   observer(({ store }) => {
+    const { accountLoginStore } = store;
     const classes = useStyles();
     useEffect(() => {
-      store.accountLoginStore.getAccounts(true);
-    }, [store.accountLoginStore]);
+      accountLoginStore.getAccounts(true);
+    }, [accountLoginStore]);
 
     return (
       <div className={classes.root}>
@@ -40,7 +41,10 @@ const AccountSection: React.FC<{ classes: Record<string, string>; store: AppStor
       className={classes.accountSelect}
       name="accounts"
       value={store.accountLoginStore.selectedWalletName}
-      onChange={(e) => (store.accountLoginStore.selectedWalletName = e.target.value)}
+      onChange={(e) => {
+        console.log('Selected account:', e.target.value);
+        store.accountLoginStore.selectedWalletName = e.target.value;
+      }}
     >
       {store.accountLoginStore.accounts.map((acct: Account, index: number) => (
         <MenuItem key={index} value={acct.name}>
@@ -77,7 +81,10 @@ const LoginSection: React.FC<{ classes: Record<string, string>; store: AppStore 
       fullWidth
       variant="contained"
       color="primary"
-      onClick={store.accountLoginStore.loginAccount}
+      onClick={() => {
+        console.log('Attempting to login...');
+        store.accountLoginStore.loginAccount();
+      }}
     >
       Login
     </Button>

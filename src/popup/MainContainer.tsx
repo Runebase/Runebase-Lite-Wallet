@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { observer } from 'mobx-react';
+import { observer, inject } from 'mobx-react';
 import { Router, Route, Switch } from 'react-router-dom';
 import Dialog from '@mui/material/Dialog';
 import Button from '@mui/material/Button';
@@ -31,14 +31,12 @@ interface IProps {
   store: AppStore;
 }
 
-const MainContainer: React.FC<IProps> = observer(({ history, store }) => {
+const MainContainer: React.FC<IProps> = inject('store')(observer(({ history, store }) => {
   useEffect(() => {
-    store?.mainContainerStore.init();
-
     return () => {
       chrome.runtime.sendMessage({ type: MESSAGE_TYPE.LOGOUT });
     };
-  }, [store]);
+  }, []);
 
   return (
     <div style={{ width: '100%', height: '100%' }}>
@@ -62,7 +60,8 @@ const MainContainer: React.FC<IProps> = observer(({ history, store }) => {
       <UnexpectedErrorDialog mainContainerStore={store.mainContainerStore} />
     </div>
   );
-});
+}));
+
 interface UnexpectedErrorDialogProps {
   mainContainerStore: MainContainerStore; // Replace with the appropriate type for your store
 }

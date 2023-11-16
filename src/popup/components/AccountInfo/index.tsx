@@ -18,6 +18,8 @@ const AccountInfo: React.FC<IProps> = ({ hasRightArrow, store }) => {
   const [networkBalAnnotation, setNetworkBalAnnotation] = useState<string | null>(null);
 
   useEffect(() => {
+    console.log('useEffect - store:', store);
+
     setLoggedInAccountName(store?.sessionStore.loggedInAccountName || null);
     setInfo(store?.sessionStore.info || null);
     setRunebaseBalanceUSD(store?.sessionStore.runebaseBalanceUSD);
@@ -26,6 +28,8 @@ const AccountInfo: React.FC<IProps> = ({ hasRightArrow, store }) => {
 
   const handleClick = (id: string, event: React.MouseEvent<HTMLElement>) => {
     event.stopPropagation();
+
+    console.log('Button Clicked:', id);
 
     const locations: Record<string, string> = {
       mainCard: '/account-detail',
@@ -43,6 +47,8 @@ const AccountInfo: React.FC<IProps> = ({ hasRightArrow, store }) => {
   if (!loggedInAccountName || !info) {
     return null;
   }
+
+  console.log('Rendering AccountInfo:', loggedInAccountName, info);
 
   return (
     <div className={classes.root}>
@@ -81,3 +87,4 @@ const AccountInfo: React.FC<IProps> = ({ hasRightArrow, store }) => {
 };
 
 export default inject('store')(observer(AccountInfo));
+

@@ -22,12 +22,10 @@ interface IProps {
 const Login: React.FC<IProps> = inject('store')(
   observer(({ store }) => {
     const classes = useStyles();
-    useEffect(() => {
-      store.loginStore.init();
-    }, [store.loginStore]);
-
     const { loginStore } = store;
     const { hasAccounts, matchError, error } = loginStore;
+    useEffect(() => { loginStore.init(); }, [loginStore]);
+    useEffect(() => { }, [hasAccounts]);
 
     return (
       <div className={classes.root}>
@@ -62,7 +60,9 @@ const Login: React.FC<IProps> = inject('store')(
           variant="contained"
           color="primary"
           disabled={error}
-          onClick={loginStore.login}
+          onClick={() => {
+            loginStore.login();
+          }}
         >
           Login
         </Button>
@@ -72,18 +72,20 @@ const Login: React.FC<IProps> = inject('store')(
   })
 );
 
-const ErrorDialog: React.FC<{ store: { loginStore: any } }> = observer(({ store }) => (
-  <Dialog open={!!store.loginStore.invalidPassword} onClose={() => (store.loginStore.invalidPassword = undefined)}>
-    <DialogTitle>Invalid Password</DialogTitle>
-    <DialogContent>
-      <DialogContentText>You have entered an invalid password. Please try again.</DialogContentText>
-    </DialogContent>
-    <DialogActions>
-      <Button onClick={() => (store.loginStore.invalidPassword = undefined)} color="primary">
-        Close
-      </Button>
-    </DialogActions>
-  </Dialog>
-));
+const ErrorDialog: React.FC<{ store: { loginStore: any } }> = observer(({ store }) => {
+  return (
+    <Dialog open={!!store.loginStore.invalidPassword} onClose={() => (store.loginStore.invalidPassword = undefined)}>
+      <DialogTitle>Invalid Password</DialogTitle>
+      <DialogContent>
+        <DialogContentText>You have entered an invalid password. Please try again.</DialogContentText>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={() => (store.loginStore.invalidPassword = undefined)} color="primary">
+          Close
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+});
 
 export default Login;
