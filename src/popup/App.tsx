@@ -26,7 +26,7 @@ const App: React.FC<IProps> = observer(() => (
   <MobxProvider store={store}>
     <StyledEngineProvider injectFirst>
       <ThemeProvider theme={theme}>
-        <MainContainer history={history} />
+        <MainContainer history={history} store={store} />
       </ThemeProvider>
     </StyledEngineProvider>
   </MobxProvider>
