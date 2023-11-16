@@ -1,8 +1,6 @@
-import { Theme } from '@mui/material/styles';
+import { makeStyles } from '@mui/styles';
 
-import createStyles from '@mui/styles/createStyles';
-
-const styles = (theme: Theme) => createStyles({
+const useStyles = makeStyles((theme) => ({
   container: {
     flex: 1,
     display: 'flex',
@@ -10,19 +8,15 @@ const styles = (theme: Theme) => createStyles({
   },
   textField: {
     flex: 1,
-    padding: theme.spacing(1), // Use spacing instead of pixel value
-    //fontSize: theme.typography.fontSize, // Use typography instead of sm
+    padding: theme.spacing(1),
     border: '2px solid black',
-    borderRadius: theme.shape.borderRadius, // Use shape property for border radius
+    borderRadius: theme.shape.borderRadius,
   },
-  input: {
-    //fontSize: theme.typography.fontSize, // Use typography instead of sm
-  },
+  input: {},
   errorText: {
-    fontSize: theme.typography.fontSizeSmall, // Use typography instead of xs
-    //color: theme.palette.error.main, // Use palette for error text color
-    marginTop: theme.spacing(1), // Use spacing instead of pixel value
+    fontSize: theme.typography.fontSizeSmall,
+    marginTop: theme.spacing(1),
   },
-});
+}));
 
-export default styles;
+export default useStyles;
