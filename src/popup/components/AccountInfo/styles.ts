@@ -1,8 +1,6 @@
-import { Theme } from '@mui/material/styles';
-import createStyles from '@mui/styles/createStyles';
-// import { FontWeightProperty } from 'csstype';
+import { makeStyles } from '@mui/styles';
 
-const styles = (theme: Theme) => createStyles({
+const useStyles = makeStyles((theme) => ({
   root: {
     padding: theme.spacing(2), // Use spacing instead of padding
   },
@@ -54,6 +52,6 @@ const styles = (theme: Theme) => createStyles({
     marginRight: theme.spacing(1), // Use spacing instead of padding
     //fontSize: theme.typography.body1.fontSize, // Adjust the font size based on your design
   },
-});
+}));
 
-export default styles;
+export default useStyles;
