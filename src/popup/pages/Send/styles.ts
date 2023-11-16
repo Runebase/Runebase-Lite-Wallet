@@ -1,7 +1,6 @@
-import { Theme } from '@mui/material/styles';
-import createStyles from '@mui/styles/createStyles';
+import { makeStyles } from '@mui/styles';
 
-const styles = (theme: Theme) => createStyles({
+const useStyles = makeStyles((theme) => ({
    root: {
     width: '100%',
     height: '100%',
@@ -22,6 +21,6 @@ const styles = (theme: Theme) => createStyles({
    selectOrTextField: {
      width: '100%',
   },
-});
+}));
 
-export default styles;
+export default useStyles;

@@ -1,36 +1,41 @@
-/* eslint-disable @typescript-eslint/naming-convention */
-import React, { Component } from 'react';
+import React, { useEffect } from 'react';
 import { Typography, Select, MenuItem, TextField, Button } from '@mui/material';
-import { WithStyles } from '@mui/styles';
-import withStyles from '@mui/styles/withStyles';
-import { ArrowDropDown } from '@mui/icons-material';
-import { inject, observer } from 'mobx-react';
+import { ArrowDropDown, Send as SendIcon } from '@mui/icons-material';
+import { observer, inject } from 'mobx-react';
 import { map } from 'lodash';
-import SendIcon from '@mui/icons-material/Send';
-
-import styles from './styles';
-import NavBar from '../../components/NavBar';
-import AppStore from '../../stores/AppStore';
 import { handleEnterPress } from '../../../utils';
 import QRCToken from '../../../models/QRCToken';
+
+import useStyles from './styles';
+import NavBar from '../../components/NavBar';
+import AppStore from '../../stores/AppStore';
 
 interface IProps {
   classes: Record<string, string>;
   store: AppStore;
 }
 
-@inject('store')
-@observer
-class Send extends Component<WithStyles<typeof styles> & IProps, NonNullable<unknown>> {
-  public componentDidMount() {
-    this.props.store.sendStore.init();
-  }
+const Send: React.FC<IProps> = inject('store')(
+  observer(({ store }) => {
+    const { sendStore, sessionStore } = store;
+    if (!sendStore) return;
+    const classes = useStyles();
 
-  public render() {
-    const { classes } = this.props;
-    const { loggedInAccountName } = this.props.store.sessionStore;
+    useEffect(() => {
+      if (sendStore) {
+        sendStore.init();
+      }
+    }, [sendStore]);
 
-    if (!loggedInAccountName) {
+    const onEnterPress = (event: React.KeyboardEvent) => {
+      handleEnterPress(event, () => {
+        if (!sendStore.buttonDisabled) {
+          sendStore.routeToSendConfirm();
+        }
+      });
+    };
+
+    if (!sessionStore || !sessionStore.loggedInAccountName) {
       return null;
     }
 
@@ -38,42 +43,36 @@ class Send extends Component<WithStyles<typeof styles> & IProps, NonNullable<unk
       <div className={classes.root}>
         <NavBar hasBackButton title="Send" />
         <div className={classes.contentContainer}>
-          <div className={classes.fieldsContainer}>
-            <FromField {...this.props} />
-            <ToField onEnterPress={this.onEnterPress} {...this.props} />
-            <TokenField {...this.props} />
-            <AmountField onEnterPress={this.onEnterPress} {...this.props} />
-            {this.props.store.sendStore.token && this.props.store.sendStore.token.symbol === 'RUNES' ? (
-                <TransactionSpeedField {...this.props} />
+          <div
+            // className={classes.fieldsContainer}
+          >
+            <FromField sendStore={sendStore} sessionStore={sessionStore} classes={classes} />
+            <ToField onEnterPress={onEnterPress} sendStore={sendStore} classes={classes} />
+            <TokenField sendStore={sendStore} classes={classes} />
+            <AmountField onEnterPress={onEnterPress} sendStore={sendStore} classes={classes} />
+            {sendStore.token && sendStore.token.symbol === 'RUNES' ? (
+              <TransactionSpeedField sendStore={sendStore} classes={classes} />
             ) : (
               <div>
-                <GasLimitField onEnterPress={this.onEnterPress} {...this.props} />
-                <GasPriceField onEnterPress={this.onEnterPress} {...this.props} />
+                <GasLimitField onEnterPress={onEnterPress} sendStore={sendStore} classes={classes} />
+                <GasPriceField onEnterPress={onEnterPress} sendStore={sendStore} classes={classes} />
               </div>
             )}
           </div>
-          <SendButton {...this.props} />
+          <SendButton sendStore={sendStore} classes={classes} />
         </div>
       </div>
     );
-  }
+  })
+);
 
-  private onEnterPress = (event: any) => {
-    handleEnterPress(event, () => {
-      if (!this.props.store.sendStore.buttonDisabled) {
-        this.props.store.sendStore.routeToSendConfirm();
-      }
-    });
-  };
-}
-
-const Heading = withStyles(styles, { withTheme: true })(({ classes, name }: any) => (
+const Heading: React.FC<{ classes: Record<string, string>; name: string }> = ({ classes, name }) => (
   <Typography className={classes.fieldHeading}>{name}</Typography>
-));
+);
 
-const FromField = observer(({ classes, store: { sendStore, sessionStore } }: any) => (
+const FromField = observer(({ classes, sendStore, sessionStore }: any) => (
   <div className={classes.fieldContainer}>
-    <Heading name="From" />
+    <Heading name="From" classes={classes} />
     <div className={classes.fieldContentContainer}>
       <Select
         className={classes.selectOrTextField}
@@ -90,16 +89,16 @@ const FromField = observer(({ classes, store: { sendStore, sessionStore } }: any
   </div>
 ));
 
-const ToField = observer(({ classes, store: { sendStore, sessionStore }, onEnterPress }: any) => (
+const ToField = observer(({ classes, sendStore, sessionStore, onEnterPress }: any) => (
   <div className={classes.fieldContainer}>
-    <Heading name="To" />
+    <Heading name="To" classes={classes} />
     <div className={classes.fieldContentContainer}>
       <TextField
         className={classes.selectOrTextField}
         fullWidth
         type="text"
         multiline={false}
-        placeholder={sessionStore.info.addrStr}
+        placeholder={sessionStore?.info?.addrStr || ''}
         value={sendStore.receiverAddress || ''}
         InputProps={{ className: classes.fieldTextOrInput, endAdornment: <ArrowDropDown />, disableUnderline: true }}
         onChange={(event) => sendStore.receiverAddress = event.target.value}
@@ -112,9 +111,9 @@ const ToField = observer(({ classes, store: { sendStore, sessionStore }, onEnter
   </div>
 ));
 
-const TokenField = observer(({ classes, store: { sendStore } }: any) => (
+const TokenField = observer(({ classes, sendStore }: any) => (
   <div className={classes.fieldContainer}>
-    <Heading name="Token" />
+    <Heading name="Token" classes={classes} />
     <div className={classes.fieldContentContainer}>
       <Select
         className={classes.selectOrTextField}
@@ -132,11 +131,11 @@ const TokenField = observer(({ classes, store: { sendStore } }: any) => (
   </div>
 ));
 
-const AmountField = observer(({ classes, store: { sendStore }, onEnterPress }: any) => (
+const AmountField = observer(({ classes, sendStore, onEnterPress }: any) => (
   <div className={classes.fieldContainer}>
     <div className={classes.buttonFieldHeadingContainer}>
       <div className={classes.buttonFieldHeadingTextContainer}>
-        <Heading name="Amount" />
+        <Heading name="Amount" classes={classes} />
       </div>
       <Typography className={classes.fieldButtonText}>{sendStore.maxAmount}</Typography>
       <Button
@@ -182,9 +181,9 @@ const AmountField = observer(({ classes, store: { sendStore }, onEnterPress }: a
   </div>
 ));
 
-const TransactionSpeedField = observer(({ classes, store: { sendStore } }: any) => (
+const TransactionSpeedField = observer(({ classes, sendStore }: any) => (
   <div className={classes.fieldContainer}>
-    <Heading name="Transaction Speed" />
+    <Heading name="Transaction Speed" classes={classes} />
     <div className={classes.fieldContentContainer}>
       <Select
         className={classes.selectOrTextField}
@@ -202,11 +201,11 @@ const TransactionSpeedField = observer(({ classes, store: { sendStore } }: any) 
   </div>
 ));
 
-const GasLimitField = observer(({ classes, store: { sendStore }, onEnterPress }: any) => (
+const GasLimitField = observer(({ classes, sendStore, onEnterPress }: any) => (
   <div className={classes.fieldContainer}>
     <div className={classes.buttonFieldHeadingContainer}>
       <div className={classes.buttonFieldHeadingTextContainer}>
-        <Heading name="Gas Limit" />
+        <Heading name="Gas Limit" classes={classes} />
       </div>
       <Typography className={classes.fieldButtonText}>{sendStore.gasLimitRecommendedAmount}</Typography>
       <Button
@@ -247,11 +246,11 @@ const GasLimitField = observer(({ classes, store: { sendStore }, onEnterPress }:
   </div>
 ));
 
-const GasPriceField = observer(({ classes, store: { sendStore }, onEnterPress }: any) => (
+const GasPriceField = observer(({ classes, sendStore, onEnterPress }: any) => (
   <div className={classes.fieldContainer}>
     <div className={classes.buttonFieldHeadingContainer}>
       <div className={classes.buttonFieldHeadingTextContainer}>
-        <Heading name="Gas Price" />
+        <Heading name="Gas Price" classes={classes} />
       </div>
       <Typography className={classes.fieldButtonText}>{sendStore.gasPriceRecommendedAmount}</Typography>
       <Button
@@ -292,7 +291,7 @@ const GasPriceField = observer(({ classes, store: { sendStore }, onEnterPress }:
   </div>
 ));
 
-const SendButton = observer(({ classes, store: { sendStore } }: any) => (
+const SendButton = observer(({ classes, sendStore }: any) => (
   <Button
     sx={{
       mt: 1,
@@ -310,4 +309,4 @@ const SendButton = observer(({ classes, store: { sendStore } }: any) => (
   </Button>
 ));
 
-export default withStyles(styles)(Send);
+export default Send;
