@@ -1,4 +1,4 @@
-import React, { Component, Fragment } from 'react';
+import React, { useEffect, Fragment } from 'react';
 import {
   Typography,
   Button,
@@ -8,28 +8,25 @@ import {
   DialogContentText,
   DialogActions,
 } from '@mui/material';
-import { WithStyles } from '@mui/styles';
-import withStyles from '@mui/styles/withStyles';
-import { inject, observer } from 'mobx-react';
-
-import styles from './styles';
+import { observer, inject } from 'mobx-react';
 import PasswordInput from '../../components/PasswordInput';
 import Logo from '../../components/Logo';
 import AppStore from '../../stores/AppStore';
+import useStyles from './styles';
+
 interface IProps {
   classes: Record<string, string>;
   store: AppStore;
 }
 
-@inject('store')
-@observer
-class Login extends Component<WithStyles<typeof styles> & IProps, {}> {
-  public componentDidMount() {
-    this.props.store.loginStore.init();
-  }
+const Login: React.FC<IProps> = inject('store')(
+  observer(({ store }) => {
+    const classes = useStyles();
+    useEffect(() => {
+      store.loginStore.init();
+    }, [store.loginStore]);
 
-  public render() {
-    const { classes, store: { loginStore } } = this.props;
+    const { loginStore } = store;
     const { hasAccounts, matchError, error } = loginStore;
 
     return (
@@ -40,7 +37,7 @@ class Login extends Component<WithStyles<typeof styles> & IProps, {}> {
             classNames={classes.passwordField}
             autoFocus={true}
             placeholder="Password"
-            onChange={(e: any) => loginStore.password = e.target.value}
+            onChange={(e: any) => (loginStore.password = e.target.value)}
             onEnterPress={loginStore.login}
           />
           {!hasAccounts && (
@@ -50,7 +47,7 @@ class Login extends Component<WithStyles<typeof styles> & IProps, {}> {
                 placeholder="Confirm password"
                 error={!!matchError}
                 errorText={matchError}
-                onChange={(e: any) => loginStore.confirmPassword = e.target.value}
+                onChange={(e: any) => (loginStore.confirmPassword = e.target.value)}
                 onEnterPress={loginStore.login}
               />
               <Typography className={classes.masterPwNote}>
@@ -69,24 +66,24 @@ class Login extends Component<WithStyles<typeof styles> & IProps, {}> {
         >
           Login
         </Button>
-        <ErrorDialog {...this.props} />
+        <ErrorDialog {...{ store }} />
       </div>
     );
-  }
-}
+  })
+);
 
-const ErrorDialog: React.FC<any> = observer(({ store: { loginStore }}: any) => (
-  <Dialog
-    open={!!loginStore.invalidPassword}
-    onClose={() => loginStore.invalidPassword = undefined}>
+const ErrorDialog: React.FC<{ store: { loginStore: any } }> = observer(({ store }) => (
+  <Dialog open={!!store.loginStore.invalidPassword} onClose={() => (store.loginStore.invalidPassword = undefined)}>
     <DialogTitle>Invalid Password</DialogTitle>
     <DialogContent>
       <DialogContentText>You have entered an invalid password. Please try again.</DialogContentText>
     </DialogContent>
     <DialogActions>
-      <Button onClick={() => loginStore.invalidPassword = undefined} color="primary">Close</Button>
+      <Button onClick={() => (store.loginStore.invalidPassword = undefined)} color="primary">
+        Close
+      </Button>
     </DialogActions>
   </Dialog>
 ));
 
-export default withStyles(styles)(Login);
+export default Login;

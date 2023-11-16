@@ -1,57 +1,52 @@
-import React, { Component } from 'react';
+import React, { useEffect } from 'react';
 import { Paper, Select, MenuItem, Typography, Button } from '@mui/material';
-import { WithStyles } from '@mui/styles';
-import withStyles from '@mui/styles/withStyles';
-import { inject, observer } from 'mobx-react';
-
-import styles from './styles';
+import { observer, inject } from 'mobx-react';
 import NavBar from '../../components/NavBar';
 import AppStore from '../../stores/AppStore';
 import Account from '../../../models/Account';
+import useStyles from './styles';
 
 interface IProps {
   classes: Record<string, string>;
   store: AppStore;
 }
 
-@inject('store')
-@observer
-class AccountLogin extends Component<WithStyles<typeof styles> & IProps, {}> {
-
-  public componentDidMount() {
-    this.props.store.accountLoginStore.getAccounts(true);
-  }
-
-  public render() {
-    const { classes } = this.props;
-    console.log('AccountLogin render');
+const AccountLogin: React.FC<IProps> = inject('store')(
+  observer(({ store }) => {
+    const classes = useStyles();
+    useEffect(() => {
+      store.accountLoginStore.getAccounts(true);
+    }, [store.accountLoginStore]);
 
     return (
       <div className={classes.root}>
         <Paper className={classes.headerContainer}>
           <NavBar hasNetworkSelector isDarkTheme title="Account Login" />
-          <AccountSection {...this.props} />
+          <AccountSection {...{ classes, store }} />
         </Paper>
-        <PermissionSection {...this.props} />
-        <LoginSection {...this.props} />
+        <PermissionSection {...{ classes }} />
+        <LoginSection {...{ classes, store }} />
       </div>
     );
-  }
-}
+  })
+);
 
-const AccountSection = observer(({ classes, store: { accountLoginStore } }: any) => (
+const AccountSection: React.FC<{ classes: Record<string, string>; store: AppStore }> = observer(
+  ({ classes, store }) => (
   <div className={classes.accountContainer}>
     <Typography className={classes.selectAcctText}>Select account</Typography>
     <Select
       disableUnderline
       className={classes.accountSelect}
       name="accounts"
-      value={accountLoginStore.selectedWalletName}
-      onChange={(e) => accountLoginStore.selectedWalletName = e.target.value}
+      value={store.accountLoginStore.selectedWalletName}
+      onChange={(e) => (store.accountLoginStore.selectedWalletName = e.target.value)}
     >
-      {accountLoginStore.accounts.map((acct: Account, index: number) =>
-        <MenuItem key={index} value={acct.name}>{acct.name}</MenuItem>)
-      }
+      {store.accountLoginStore.accounts.map((acct: Account, index: number) => (
+        <MenuItem key={index} value={acct.name}>
+          {acct.name}
+        </MenuItem>
+      ))}
     </Select>
     <div className={classes.createAccountContainer}>
       <Typography className={classes.orText}>or</Typography>
@@ -60,7 +55,7 @@ const AccountSection = observer(({ classes, store: { accountLoginStore } }: any)
         color="secondary"
         onClick={() => {
           console.log('Calling routeToCreateWallet');
-          accountLoginStore.routeToCreateWallet();
+          store.accountLoginStore.routeToCreateWallet();
         }}
       >
         Create New Wallet
@@ -69,24 +64,24 @@ const AccountSection = observer(({ classes, store: { accountLoginStore } }: any)
   </div>
 ));
 
-const PermissionSection = ({ classes }: any) => (
+const PermissionSection: React.FC<{ classes: Record<string, string> }> = ({ classes }) => (
   <div className={classes.permissionContainer}>
     {/* <Typography className={classes.permissionsHeader}>Permissions</Typography> */}
   </div>
 );
 
-const LoginSection = observer(({ classes, store: { accountLoginStore } }: any) => (
+const LoginSection: React.FC<{ classes: Record<string, string>; store: AppStore }> = observer(({ classes, store }) => (
   <div className={classes.loginContainer}>
     <Button
       className={classes.loginButton}
       fullWidth
       variant="contained"
       color="primary"
-      onClick={accountLoginStore.loginAccount}
+      onClick={store.accountLoginStore.loginAccount}
     >
       Login
     </Button>
   </div>
 ));
 
-export default withStyles(styles)(AccountLogin);
+export default AccountLogin;

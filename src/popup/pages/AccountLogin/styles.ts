@@ -1,8 +1,6 @@
-import { Theme } from '@mui/material/styles';
-import createStyles from '@mui/styles/createStyles';
-//import { FontWeightProperty } from 'csstype';
+import { makeStyles } from '@mui/styles';
 
-const styles = (theme: Theme) => createStyles({
+const useStyles = makeStyles((theme) => ({
   root: {
     width: '100%',
     height: '100%',
@@ -68,6 +66,6 @@ const styles = (theme: Theme) => createStyles({
     height: theme.spacing(8), // Adjust to your desired value using spacing
     borderRadius: theme.shape.borderRadius, // Use shape instead of border
   },
-});
+}));
 
-export default styles;
+export default useStyles;
