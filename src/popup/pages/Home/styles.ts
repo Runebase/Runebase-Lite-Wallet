@@ -1,9 +1,6 @@
-import { Theme } from '@mui/material';
+import { makeStyles } from '@mui/styles';
 
-import createStyles from '@mui/styles/createStyles';
-
-const styles = (theme: Theme) =>
-  createStyles({
+const useStyles = makeStyles((theme) => ({
     root: {
       width: '100%',
       height: '100%',
@@ -16,6 +13,6 @@ const styles = (theme: Theme) =>
       flexDirection: 'column',
       margin: theme.spacing(2),
     },
-  });
+}));
 
-export default styles;
+  export default useStyles;
