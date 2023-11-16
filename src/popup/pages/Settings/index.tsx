@@ -1,11 +1,9 @@
-import React, { Component } from 'react';
-import { inject, observer } from 'mobx-react';
+import React from 'react';
+import { observer, inject } from 'mobx-react';
 import { Typography, Select, MenuItem } from '@mui/material';
-import { WithStyles } from '@mui/styles';
-import withStyles from '@mui/styles/withStyles';
 import { map } from 'lodash';
 
-import styles from './styles';
+import useStyles from './styles';
 import NavBar from '../../components/NavBar';
 import AppStore from '../../stores/AppStore';
 import { SessionLogoutInterval } from '../../../models/SessionLogoutInterval';
@@ -15,50 +13,60 @@ interface IProps {
   store: AppStore;
 }
 
-@inject('store')
-@observer
-class Settings extends Component<WithStyles<typeof styles> & IProps, NonNullable<unknown>> {
-  public render() {
-    const { classes } = this.props;
+const Settings: React.FC<IProps> = inject('store')(
+  observer(({ store }) => {
+    const classes = useStyles();
 
-    return(
+    return (
       <div className={classes.root}>
         <NavBar hasBackButton title="Settings" />
         <div className={classes.contentContainer}>
           <div className={classes.fieldsContainer}>
-            <SliField {...this.props} />
+            <SliField classes={classes} store={store} />
           </div>
         </div>
       </div>
     );
-  }
+  })
+);
+
+interface SliFieldProps {
+  classes: Record<string, string>;
+  store: { settingsStore: { sessionLogoutInterval: number;
+    changeSessionLogoutInterval: (value: number) => void; sliArray: SessionLogoutInterval[] } };
 }
 
-// eslint-disable-next-line @typescript-eslint/naming-convention
-const SliField: React.FC<any> = observer(({ classes, store: { settingsStore } }: any) => (
+const SliField: React.FC<SliFieldProps> = observer(({ classes, store }) => (
   <div className={classes.fieldContainer}>
-    <Heading name="Session Logout Interval" />
+    <Heading name="Session Logout Interval" classes={classes} />
     <div className={classes.fieldContentContainer}>
       <Select
         className={classes.select}
         inputProps={{ name: 'sessionLogoutInterval', id: 'sessionLogoutInterval'}}
         disableUnderline
-        value={settingsStore.sessionLogoutInterval}
-        onChange={(event) => settingsStore.changeSessionLogoutInterval(event.target.value)}
+        value={store.settingsStore.sessionLogoutInterval}
+        onChange={(event) => store.settingsStore.changeSessionLogoutInterval(Number(event.target.value))}
       >
-      {map(settingsStore.sliArray, (sli: SessionLogoutInterval) =>
-        <MenuItem key={sli.interval} value={sli.interval}>
-          <Typography className={classes.selectTypography}>{sli.name}</Typography>
-        </MenuItem>,
-      )}
+        {map(store.settingsStore.sliArray, (sli: SessionLogoutInterval) => (
+          <MenuItem key={sli.interval} value={sli.interval}>
+            <Typography className={classes.selectTypography}>{sli.name}</Typography>
+          </MenuItem>
+        ))}
       </Select>
     </div>
   </div>
 ));
 
-// eslint-disable-next-line @typescript-eslint/naming-convention
-const Heading = withStyles(styles, { withTheme: true })(({ classes, name }: any) => (
-  <Typography className={classes.fieldHeading}>{name}</Typography>
-));
+interface HeadingProps {
+  classes: Record<string, string>;
+  name: string;
+}
 
-export default withStyles(styles)(Settings);
+const Heading: React.FC<HeadingProps> = ({ name }) => {
+  const classes = useStyles();
+  return (
+    <Typography className={classes.fieldHeading}>{name}</Typography>
+  );
+};
+
+export default Settings;
