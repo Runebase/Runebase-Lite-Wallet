@@ -30,7 +30,7 @@ const styles = (theme: Theme) => createStyles({
   settingsButton: {
     fontSize: theme.typography.fontSizeLarge, // Use typography instead of 18
     '&.white': {
-     // color: theme.palette.secondary.main,
+      // color: theme.palette.secondary.main,
     },
   },
   locationContainer: {

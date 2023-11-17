@@ -1,8 +1,6 @@
-import { Theme } from '@mui/material/styles';
-import createStyles from '@mui/styles/createStyles';
-//import { FontWeightProperty } from 'csstype';
+import { makeStyles } from '@mui/styles';
 
-const styles = (theme: Theme) => createStyles({
+const useStyles = makeStyles((theme) => ({
   root: {
     width: '100%',
     height: '100%',
@@ -18,7 +16,7 @@ const styles = (theme: Theme) => createStyles({
   accountName: {
     //color: theme.palette.text.primary,
     //fontSize: theme.typography.fontSizeLarge, // Use typography instead of font
-   // fontWeight: theme.typography.fontWeightBold as FontWeightProperty, // Use typography instead of fontWeight
+    // fontWeight: theme.typography.fontWeightBold as FontWeightProperty, // Use typography instead of fontWeight
     marginBottom: theme.spacing(1), // Use spacing instead of unit
   },
   accountAddress: {
@@ -52,6 +50,6 @@ const styles = (theme: Theme) => createStyles({
     display: 'flex',
     justifyContent: 'center',
   },
-});
+}));
 
-export default styles;
+export default useStyles;

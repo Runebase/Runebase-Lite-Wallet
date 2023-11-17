@@ -19,24 +19,24 @@ export default class NavBarStore {
 
   @action
   public reset = () => {
-    Object.assign(this, INIT_VALUES);
-  };
+      Object.assign(this, INIT_VALUES);
+    };
 
   @action
   public changeNetwork = (index: number) => {
-    chrome.runtime.sendMessage({ type: MESSAGE_TYPE.CHANGE_NETWORK, networkIndex: index });
-  };
+      chrome.runtime.sendMessage({ type: MESSAGE_TYPE.CHANGE_NETWORK, networkIndex: index });
+    };
 
   @action
   public routeToSettings = () => {
-    this.reset();
-    this.app.routerStore.push('/settings');
-  };
+      this.reset();
+      this.app.routerStore.push('/settings');
+    };
 
   @action
   public logout = () => {
-    this.reset();
-    this.app.routerStore.push('/loading');
-    chrome.runtime.sendMessage({ type: MESSAGE_TYPE.LOGOUT });
-  };
+      this.reset();
+      this.app.routerStore.push('/loading');
+      chrome.runtime.sendMessage({ type: MESSAGE_TYPE.LOGOUT });
+    };
 }

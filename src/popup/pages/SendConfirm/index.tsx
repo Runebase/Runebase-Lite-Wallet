@@ -1,11 +1,9 @@
-import React, { Component } from 'react';
-import { inject, observer } from 'mobx-react';
+import React from 'react';
+import { observer, inject } from 'mobx-react';
 import { Typography, Button } from '@mui/material';
-import { WithStyles } from '@mui/styles';
-import withStyles from '@mui/styles/withStyles';
 import cx from 'classnames';
 
-import styles from './styles';
+import useStyles from './styles';
 import { SEND_STATE } from '../../../constants';
 import NavBar from '../../components/NavBar';
 import AppStore from '../../stores/AppStore';
@@ -15,15 +13,23 @@ interface IProps {
   store: AppStore;
 }
 
-@inject('store')
-@observer
-class SendConfirm extends Component<WithStyles<typeof styles> & IProps, NonNullable<unknown>> {
-
-  public render() {
-    const { classes, store: { sendStore } } = this.props;
-    const { senderAddress, receiverAddress, amount, token, transactionSpeed, gasLimit,
-    gasPrice, maxTxFee, sendState, errorMessage } = sendStore;
+const SendConfirm: React.FC<IProps> = inject('store')(
+  observer(({ store }) => {
+    const classes = useStyles();
     const { SENDING, SENT } = SEND_STATE;
+    const { sendStore } = store;
+    const {
+      senderAddress,
+      receiverAddress,
+      amount,
+      token,
+      transactionSpeed,
+      gasLimit,
+      gasPrice,
+      maxTxFee,
+      sendState,
+      errorMessage
+    } = sendStore;
 
     return (
       <div className={classes.root}>
@@ -31,17 +37,17 @@ class SendConfirm extends Component<WithStyles<typeof styles> & IProps, NonNulla
         <div className={classes.contentContainer}>
           <div className={classes.inputContainer}>
             <div className={classes.addressFieldsContainer}>
-              <AddressField fieldName={'From'} address={senderAddress} {...this.props} />
-              <AddressField fieldName={'To'} address={receiverAddress} {...this.props} />
+              <AddressField fieldName={'From'} address={senderAddress} classes={classes} />
+              <AddressField fieldName={'To'} address={receiverAddress} classes={classes} />
             </div>
-            <CostField fieldName={'Amount'} amount={amount} unit={token!.symbol} {...this.props} />
-            {this.props.store.sendStore.token && this.props.store.sendStore.token.symbol === 'RUNES' ? (
-              <CostField fieldName={'Transaction Speed'} amount={transactionSpeed} unit={''} {...this.props} />
+            <CostField fieldName={'Amount'} amount={amount} unit={token!.symbol} classes={classes} />
+            {store.sendStore.token && store.sendStore.token.symbol === 'RUNES' ? (
+              <CostField fieldName={'Transaction Speed'} amount={transactionSpeed} unit={''} classes={classes} />
             ) : (
               <div>
-                <CostField fieldName={'Gas Limit'} amount={gasLimit} unit={'GAS'} {...this.props} />
-                <CostField fieldName={'Gas Price'} amount={gasPrice} unit={'SATOSHI/GAS'} {...this.props} />
-                <CostField fieldName={'Max Transaction Fee'} amount={maxTxFee} unit={'RUNES'} {...this.props} />
+                <CostField fieldName={'Gas Limit'} amount={gasLimit} unit={'GAS'} classes={classes} />
+                <CostField fieldName={'Gas Price'} amount={gasPrice} unit={'SATOSHI/GAS'} classes={classes} />
+                <CostField fieldName={'Max Transaction Fee'} amount={maxTxFee} unit={'RUNES'} classes={classes} />
               </div>
             )}
           </div>
@@ -59,17 +65,30 @@ class SendConfirm extends Component<WithStyles<typeof styles> & IProps, NonNulla
         </div>
       </div>
     );
-  }
+  })
+);
+
+interface AddressFieldProps {
+  classes: Record<string, string>;
+  fieldName: string;
+  address?: string;
 }
 
-const AddressField = ({ classes, fieldName, address }: any) => (
+const AddressField: React.FC<AddressFieldProps> = ({ classes, fieldName, address }) => (
   <div className={cx(classes.fieldContainer, 'marginSmall')}>
     <Typography className={cx(classes.fieldLabel, 'address')}>{fieldName}</Typography>
     <Typography className={classes.addressValue}>{address}</Typography>
   </div>
 );
 
-const CostField = ({ classes, fieldName, amount, unit }: any) => (
+interface CostFieldProps {
+  classes: Record<string, string>;
+  fieldName: string;
+  amount: string | number | undefined;
+  unit: string;
+}
+
+const CostField: React.FC<CostFieldProps> = ({ classes, fieldName, amount, unit }) => (
   <div className={cx(classes.fieldContainer, 'row', 'marginBig')}>
     <div className={classes.labelContainer}>
       <Typography className={cx(classes.fieldLabel, 'cost')}>{fieldName}</Typography>
@@ -83,4 +102,4 @@ const CostField = ({ classes, fieldName, amount, unit }: any) => (
   </div>
 );
 
-export default withStyles(styles)(SendConfirm);
+export default SendConfirm;

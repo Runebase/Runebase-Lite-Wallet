@@ -3,7 +3,6 @@ import { Typography } from '@mui/material';
 import cx from 'classnames';
 import useStyles from './styles';
 
-
 const Loading = () => {
   const classes = useStyles();
 

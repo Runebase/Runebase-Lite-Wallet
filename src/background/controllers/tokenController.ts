@@ -210,7 +210,7 @@ export default class TokenController extends IController {
   * @param gasPrice (unit - satoshi/gas)
   */
   private sendQRCToken = async (receiverAddress: string, amount: number, token: QRCToken,
-                                gasLimit: number, gasPrice: number ) => {
+    gasLimit: number, gasPrice: number ) => {
     // bn.js does not handle decimals well (Ex: BN(1.2) => 1 not 1.2) so we use BigNumber
     const bnAmount = new BigNumber(amount).times(new BigNumber(10 ** token.decimals));
     const data = rweb3.encoder.constructData(rrc223TokenABI, 'transfer', [receiverAddress, bnAmount]);
@@ -258,23 +258,23 @@ export default class TokenController extends IController {
   private handleMessage = (request: any, _: chrome.runtime.MessageSender, sendResponse: (response: any) => void) => {
     try {
       switch (request.type) {
-        case MESSAGE_TYPE.GET_QRC_TOKEN_LIST:
-          sendResponse(this.tokens);
-          break;
-        case MESSAGE_TYPE.SEND_QRC_TOKENS:
-          this.sendQRCToken(request.receiverAddress, request.amount, request.token, request.gasLimit, request.gasPrice);
-          break;
-        case MESSAGE_TYPE.ADD_TOKEN:
-          this.addToken(request.contractAddress, request.name, request.symbol, request.decimals);
-          break;
-        case MESSAGE_TYPE.GET_QRC_TOKEN_DETAILS:
-          this.getQRCTokenDetails(request.contractAddress);
-          break;
-        case MESSAGE_TYPE.REMOVE_TOKEN:
-          this.removeToken(request.contractAddress);
-          break;
-        default:
-          break;
+      case MESSAGE_TYPE.GET_QRC_TOKEN_LIST:
+        sendResponse(this.tokens);
+        break;
+      case MESSAGE_TYPE.SEND_QRC_TOKENS:
+        this.sendQRCToken(request.receiverAddress, request.amount, request.token, request.gasLimit, request.gasPrice);
+        break;
+      case MESSAGE_TYPE.ADD_TOKEN:
+        this.addToken(request.contractAddress, request.name, request.symbol, request.decimals);
+        break;
+      case MESSAGE_TYPE.GET_QRC_TOKEN_DETAILS:
+        this.getQRCTokenDetails(request.contractAddress);
+        break;
+      case MESSAGE_TYPE.REMOVE_TOKEN:
+        this.removeToken(request.contractAddress);
+        break;
+      default:
+        break;
       }
     } catch (err) {
       console.error(err);

@@ -63,38 +63,38 @@ export default class ImportStore {
 
   @action
   public changeImportType = (type: string) => {
-    console.log('Import type changed:', type);
-    this.importType = type;
-  };
+      console.log('Import type changed:', type);
+      this.importType = type;
+    };
 
   @action
   public reset = () => {
-    console.log('Resetting import store');
-    const tempImportType = this.importType;
-    Object.assign(this, INIT_VALUES);
-    this.importType = tempImportType;
-  };
+      console.log('Resetting import store');
+      const tempImportType = this.importType;
+      Object.assign(this, INIT_VALUES);
+      this.importType = tempImportType;
+    };
 
   @action
   public importMnemonicOrPrKey = () => {
-    if (!this.mnemonicPrKeyPageError) {
-      console.log('Importing mnemonic or private key');
-      this.app.routerStore.push('/loading');
-      const msgType =
+      if (!this.mnemonicPrKeyPageError) {
+        console.log('Importing mnemonic or private key');
+        this.app.routerStore.push('/loading');
+        const msgType =
         this.importType === IMPORT_TYPE.MNEMONIC
           ? MESSAGE_TYPE.IMPORT_MNEMONIC
           : MESSAGE_TYPE.IMPORT_PRIVATE_KEY;
-      chrome.runtime.sendMessage({
-        type: msgType,
-        accountName: this.accountName,
-        mnemonicPrivateKey: this.mnemonicPrivateKey,
-      });
-    }
-  };
+        chrome.runtime.sendMessage({
+          type: msgType,
+          accountName: this.accountName,
+          mnemonicPrivateKey: this.mnemonicPrivateKey,
+        });
+      }
+    };
 
   @action
   public cancelImport = () => {
-    console.log('Cancelling import');
-    this.app.routerStore.goBack();
-  };
+      console.log('Cancelling import');
+      this.app.routerStore.goBack();
+    };
 }

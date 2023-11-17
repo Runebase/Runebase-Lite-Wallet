@@ -1,24 +1,35 @@
-import React, { Component } from 'react';
-import { inject, observer } from 'mobx-react';
+import React, { useState, useEffect } from 'react';
+import { observer, inject } from 'mobx-react';
 import { Typography, Button } from '@mui/material';
-import { WithStyles } from '@mui/styles';
-import withStyles from '@mui/styles/withStyles';
 import { KeyboardArrowRight } from '@mui/icons-material';
-
-import styles from './styles';
 import AppStore from '../../stores/AppStore';
+import useStyles from './styles';
 
 interface IProps {
-  classes: Record<string, string>;
   store?: AppStore;
   hasRightArrow?: boolean;
 }
 
-@inject('store')
-@observer
-class AccountInfo extends Component<WithStyles<typeof styles> & IProps, {}> {
-  public handleClick = (id: string, event: React.MouseEvent<HTMLElement>) => {
+const AccountInfo: React.FC<IProps> = ({ hasRightArrow, store }) => {
+  const classes = useStyles();
+  const [loggedInAccountName, setLoggedInAccountName] = useState<string | null>(null);
+  const [info, setInfo] = useState<any | null>(null);
+  const [runebaseBalanceUSD, setRunebaseBalanceUSD] = useState<string | undefined>(undefined);
+  const [networkBalAnnotation, setNetworkBalAnnotation] = useState<string | null>(null);
+
+  useEffect(() => {
+    console.log('useEffect - store:', store);
+
+    setLoggedInAccountName(store?.sessionStore.loggedInAccountName || null);
+    setInfo(store?.sessionStore.info || null);
+    setRunebaseBalanceUSD(store?.sessionStore.runebaseBalanceUSD);
+    setNetworkBalAnnotation(store?.sessionStore.networkBalAnnotation || null);
+  }, [store]);
+
+  const handleClick = (id: string, event: React.MouseEvent<HTMLElement>) => {
     event.stopPropagation();
+
+    console.log('Button Clicked:', id);
 
     const locations: Record<string, string> = {
       mainCard: '/account-detail',
@@ -29,53 +40,51 @@ class AccountInfo extends Component<WithStyles<typeof styles> & IProps, {}> {
     const location = locations[id];
 
     if (location) {
-      this.props.store!.routerStore.push(location);
+      store?.routerStore.push(location);
     }
   };
 
-  public render() {
-    const { classes, hasRightArrow } = this.props;
-    const { loggedInAccountName, info, runebaseBalanceUSD, networkBalAnnotation } = this.props.store!.sessionStore;
-
-    if (!loggedInAccountName || !info) {
-      return null;
-    }
-
-    return (
-      <div className={classes.root}>
-        <Typography className={classes.acctName}>{loggedInAccountName}</Typography>
-        <Typography className={classes.address}>{info.addrStr}</Typography>
-        <div className={classes.amountContainer}>
-          <Typography className={classes.tokenAmount}>{info.balance}</Typography>
-          <Typography className={classes.token}>RUNES</Typography>
-          {hasRightArrow && <KeyboardArrowRight className={classes.rightArrow} />}
-        </div>
-        <Typography className={classes.balanceUSD}>{`${runebaseBalanceUSD} ${networkBalAnnotation}`}</Typography>
-        <div className={classes.actionButtonsContainer}>
-          <Button
-            id="sendButton"
-            color="secondary"
-            variant="contained"
-            size="small"
-            className={classes.actionButton}
-            onClick={(e) => this.handleClick('sendButton', e)}
-          >
-            Send
-          </Button>
-          <Button
-            id="receiveButton"
-            color="secondary"
-            variant="contained"
-            size="small"
-            className={classes.actionButton}
-            onClick={(e) => this.handleClick('receiveButton', e)}
-          >
-            Receive
-          </Button>
-        </div>
-      </div>
-    );
+  if (!loggedInAccountName || !info) {
+    return null;
   }
-}
 
-export default withStyles(styles)(AccountInfo);
+  console.log('Rendering AccountInfo:', loggedInAccountName, info);
+
+  return (
+    <div className={classes.root}>
+      <Typography className={classes.acctName}>{loggedInAccountName}</Typography>
+      <Typography className={classes.address}>{info.addrStr}</Typography>
+      <div className={classes.amountContainer}>
+        <Typography className={classes.tokenAmount}>{info.balance}</Typography>
+        <Typography className={classes.token}>RUNES</Typography>
+        {hasRightArrow && <KeyboardArrowRight className={classes.rightArrow} />}
+      </div>
+      <Typography className={classes.balanceUSD}>{`${runebaseBalanceUSD} ${networkBalAnnotation}`}</Typography>
+      <div className={classes.actionButtonsContainer}>
+        <Button
+          id="sendButton"
+          color="secondary"
+          variant="contained"
+          size="small"
+          className={classes.actionButton}
+          onClick={(e) => handleClick('sendButton', e)}
+        >
+          Send
+        </Button>
+        <Button
+          id="receiveButton"
+          color="secondary"
+          variant="contained"
+          size="small"
+          className={classes.actionButton}
+          onClick={(e) => handleClick('receiveButton', e)}
+        >
+          Receive
+        </Button>
+      </div>
+    </div>
+  );
+};
+
+export default inject('store')(observer(AccountInfo));
+

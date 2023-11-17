@@ -13,6 +13,7 @@ module.exports = {
     'sort-keys': 'off',
     'import/order': 'off',
     'no-console': 'off',
+    "indent": ["error", 2],
     quotes: ['error', 'single', { avoidEscape: true, allowTemplateLiterals: false }],
     // '@typescript-eslint/naming-convention': [
     //   'error',

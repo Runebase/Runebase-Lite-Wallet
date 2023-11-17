@@ -1,64 +1,64 @@
-import React, { Component } from 'react';
+import React, { useState } from 'react';
 import { Menu, MenuItem, Button } from '@mui/material';
-import { WithStyles } from '@mui/styles';
-import withStyles from '@mui/styles/withStyles';
 import { ArrowDropDown } from '@mui/icons-material';
-
-import styles from './styles';
+import useStyles from './styles';
 
 interface IProps {
-  classes: Record<string, string>;
   onSelect?: (idx: number) => any;
   selections: string[];
   selectedIndex: number;
 }
 
-interface IState {
-  anchorEl: any;
-}
+const DropDownMenu: React.FC<IProps> = ({
+  selections,
+  selectedIndex,
+  onSelect,
+}) => {
+  const classes = useStyles();
+  const [anchorEl, setAnchorEl] = useState<any>(null);
 
-class DropDownMenu extends Component<WithStyles<typeof styles> & IProps, IState> {
-
-  public state: IState = {
-    anchorEl: undefined,
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(event.currentTarget);
   };
 
-  public render() {
-    const { classes, selections, selectedIndex } = this.props;
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
 
-    return (
-      <div>
-        <Button
-          aria-haspopup="true"
-          color="secondary"
-          variant="contained"
-          size="small"
-          className={classes.menuButton}
-          onClick={(e) => this.setState({ anchorEl: e.currentTarget }) }
-        >
-          {selections[selectedIndex]}
-          <ArrowDropDown />
-        </Button>
-        <Menu
-          id="simple-menu"
-          anchorEl={ this.state.anchorEl }
-          open={Boolean(this.state.anchorEl)}
-          onClose={() => this.setState({ anchorEl: null }) }
-        >
-          {selections.map((item, i) => (
-            <MenuItem key={i} onClick={() => this.onMenuItemClick(i)}> {item} </MenuItem>
-          ))}
-        </Menu >
-      </div>
-    );
-  }
-
-  private onMenuItemClick = (i: number) => {
-    if (this.props.onSelect) {
-      this.props.onSelect(i);
+  const handleMenuItemClick = (index: number) => {
+    if (onSelect) {
+      onSelect(index);
     }
-    this.setState({ anchorEl: null });
+    handleClose();
   };
-}
 
-export default withStyles(styles)(DropDownMenu);
+  return (
+    <div>
+      <Button
+        aria-haspopup="true"
+        color="secondary"
+        variant="contained"
+        size="small"
+        className={classes.menuButton}
+        onClick={handleClick}
+      >
+        {selections[selectedIndex]}
+        <ArrowDropDown />
+      </Button>
+      <Menu
+        id="simple-menu"
+        anchorEl={anchorEl}
+        open={Boolean(anchorEl)}
+        onClose={handleClose}
+      >
+        {selections.map((item, index) => (
+          <MenuItem key={index} onClick={() => handleMenuItemClick(index)}>
+            {item}
+          </MenuItem>
+        ))}
+      </Menu>
+    </div>
+  );
+};
+
+export default DropDownMenu;

@@ -1,5 +1,5 @@
-import React, { Component } from 'react';
-import { inject, observer } from 'mobx-react';
+import React, { useEffect } from 'react';
+import { observer, inject } from 'mobx-react';
 import { Router, Route, Switch } from 'react-router-dom';
 import Dialog from '@mui/material/Dialog';
 import Button from '@mui/material/Button';
@@ -24,61 +24,63 @@ import SendConfirm from './pages/SendConfirm';
 import AddToken from './pages/AddToken';
 import AppStore from './stores/AppStore';
 import { MESSAGE_TYPE } from '../constants';
+import MainContainerStore from './stores/MainContainerStore';
 
 interface IProps {
   history: any; // Replace with the appropriate type for your history
-  store?: AppStore;
+  store: AppStore;
 }
 
-@inject('store')
-@observer
-export default class MainContainer extends Component<IProps, NonNullable<unknown>> {
-  public componentDidMount() {
-    this.props.store!.mainContainerStore.init();
-  }
+const MainContainer: React.FC<IProps> = inject('store')(observer(({ history, store }) => {
+  useEffect(() => {
+    return () => {
+      chrome.runtime.sendMessage({ type: MESSAGE_TYPE.LOGOUT });
+    };
+  }, []);
 
-  public componentWillUnmount() {
-    chrome.runtime.sendMessage({ type: MESSAGE_TYPE.LOGOUT });
-  }
+  return (
+    <div style={{ width: '100%', height: '100%' }}>
+      <Router history={history || createBrowserHistory()}>
+        <Switch>
+          <Route exact path="/loading" component={Loading} />
+          <Route exact path="/login" component={Login} />
+          <Route exact path="/account-login" component={AccountLogin} />
+          <Route exact path="/home" component={Home} />
+          <Route exact path="/create-wallet" component={CreateWallet} />
+          <Route exact path="/account-detail" component={AccountDetail} />
+          <Route exact path="/save-mnemonic" component={SaveMnemonic} />
+          <Route exact path="/import-wallet" component={ImportWallet} />
+          <Route exact path="/settings" component={Settings} />
+          <Route exact path="/send" component={Send} />
+          <Route exact path="/send-confirm" component={SendConfirm} />
+          <Route exact path="/receive" component={Receive} />
+          <Route exact path="/add-token" component={AddToken} />
+        </Switch>
+      </Router>
+      <UnexpectedErrorDialog mainContainerStore={store.mainContainerStore} />
+    </div>
+  );
+}));
 
-  public render() {
-    const { history }: any = this.props;
-
-    return (
-      <div style={{ width: '100%', height: '100%' }}>
-         <Router history={history || createBrowserHistory()}>
-          <Switch>
-            <Route exact path="/loading" component={Loading} />
-            <Route exact path="/login" component={Login} />
-            <Route exact path="/account-login" component={AccountLogin} />
-            <Route exact path="/home" component={Home} />
-            <Route exact path="/create-wallet" component={CreateWallet} />
-            <Route exact path="/account-detail" component={AccountDetail} />
-            <Route exact path="/save-mnemonic" component={SaveMnemonic} />
-            <Route exact path="/import-wallet" component={ImportWallet} />
-            <Route exact path="/settings" component={Settings} />
-            <Route exact path="/send" component={Send} />
-            <Route exact path="/send-confirm" component={SendConfirm} />
-            <Route exact path="/receive" component={Receive} />
-            <Route exact path="/add-token" component={AddToken} />
-          </Switch>
-        </Router>
-        <UnexpectedErrorDialog />
-      </div>
-    );
-  }
+interface UnexpectedErrorDialogProps {
+  mainContainerStore: MainContainerStore; // Replace with the appropriate type for your store
 }
 
-const UnexpectedErrorDialog: React.FC<any> = inject('store')(observer(({ store: { mainContainerStore } }) => (
+const UnexpectedErrorDialog: React.FC<UnexpectedErrorDialogProps> = observer(({ mainContainerStore }) => (
   <Dialog
     open={!!mainContainerStore.unexpectedError}
-    onClose={() => mainContainerStore.unexpectedError = undefined}>
+    onClose={() => mainContainerStore.unexpectedError = undefined}
+  >
     <DialogTitle>Unexpected Error</DialogTitle>
     <DialogContent>
-      <DialogContentText>{ mainContainerStore.unexpectedError }</DialogContentText>
+      <DialogContentText>{mainContainerStore.unexpectedError}</DialogContentText>
     </DialogContent>
     <DialogActions>
-      <Button onClick={() => mainContainerStore.unexpectedError = undefined} color="primary">Close</Button>
+      <Button onClick={() => mainContainerStore.unexpectedError = undefined} color="primary">
+        Close
+      </Button>
     </DialogActions>
   </Dialog>
-)));
+));
+
+export default MainContainer;

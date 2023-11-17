@@ -51,20 +51,20 @@ export default class AccountController extends IController {
     const { MAINNET_ACCOUNTS, TESTNET_ACCOUNTS, REGTEST_ACCOUNTS } = STORAGE;
     chrome.storage.local.get([MAINNET_ACCOUNTS, TESTNET_ACCOUNTS, REGTEST_ACCOUNTS],
       ({ mainnetAccounts, testnetAccounts, regtestAccounts }: any) => {
-      if (!isEmpty(mainnetAccounts)) {
-        this.mainnetAccounts = mainnetAccounts;
-      }
+        if (!isEmpty(mainnetAccounts)) {
+          this.mainnetAccounts = mainnetAccounts;
+        }
 
-      if (!isEmpty(testnetAccounts)) {
-        this.testnetAccounts = testnetAccounts;
-      }
+        if (!isEmpty(testnetAccounts)) {
+          this.testnetAccounts = testnetAccounts;
+        }
 
-      if (!isEmpty(regtestAccounts)) {
-        this.regtestAccounts = regtestAccounts;
-      }
+        if (!isEmpty(regtestAccounts)) {
+          this.regtestAccounts = regtestAccounts;
+        }
 
-      this.initFinished();
-    });
+        this.initFinished();
+      });
   }
 
   /*
@@ -86,9 +86,12 @@ export default class AccountController extends IController {
   /*
   * Initial login with the master password and routing to the correct account login page.
   */
-  public login = async (password: string) => {
+  public login = async (
+    password: string,
+    algorithm: string,
+  ) => {
     this.main.crypto.generateAppSaltIfNecessary();
-    this.main.crypto.derivePasswordHash(password);
+    this.main.crypto.derivePasswordHash(password, algorithm);
   };
 
   public finishLogin = async () => {
@@ -113,10 +116,11 @@ export default class AccountController extends IController {
   * @param accountName The account name for the new wallet account.
   * @param mnemonic The mnemonic to derive the wallet from.
   */
-  public addAccountAndLogin = async (accountName: string, privateKeyHash: string, wallet: RunebaseWallet) => {
-    console.log(accountName);
-    console.log(privateKeyHash);
-    console.log(wallet);
+  public addAccountAndLogin = async (
+    accountName: string,
+    privateKeyHash: string,
+    wallet: RunebaseWallet
+  ) => {
     this.loggedInAccount = new Account(accountName, privateKeyHash);
     this.loggedInAccount.wallet = new Wallet(wallet);
 
@@ -152,9 +156,7 @@ export default class AccountController extends IController {
     assert(mnemonic, 'invalid mnemonic');
 
     const network = this.main.network.network;
-    console.log('importMnemonic');
     const wallet = await network.fromMnemonic(mnemonic);
-    console.log(wallet);
     const privateKeyHash = this.getPrivateKeyHash(wallet);
 
     // Validate that we don't already have the wallet in our accountList
@@ -172,7 +174,10 @@ export default class AccountController extends IController {
   * @param accountName The account name for the new wallet account.
   * @param privateKey The private key to derive the wallet from.
   */
-  public importPrivateKey = async (accountName: string, privateKey: string) => {
+  public importPrivateKey = async (
+    accountName: string,
+    privateKey: string
+  ) => {
     // Non-empty privateKey is already validated in the popup ui
     assert(privateKey, 'invalid privateKey');
 
@@ -261,6 +266,7 @@ export default class AccountController extends IController {
       // Accounts not found, route to Create Wallet page
       chrome.runtime.sendMessage({ type: MESSAGE_TYPE.LOGIN_SUCCESS_NO_ACCOUNTS });
     } else {
+      console.log('LOGIN_SUCCESS_WITH_ACCOUNTS');
       // Accounts found, route to Account Login page
       chrome.runtime.sendMessage({ type: MESSAGE_TYPE.LOGIN_SUCCESS_WITH_ACCOUNTS });
     }
@@ -464,72 +470,74 @@ export default class AccountController extends IController {
   ) => {
     try {
       switch (request.type) {
-        case MESSAGE_TYPE.LOGIN:
-          console.log(`Logging in with password: ${request.password}`);
-          this.login(request.password);
-          break;
-        case MESSAGE_TYPE.IMPORT_MNEMONIC:
-          console.log(`Importing mnemonic: ${request.accountName}, ${request.mnemonicPrivateKey}`);
-          await this.importMnemonic(request.accountName, request.mnemonicPrivateKey);
-          break;
-        case MESSAGE_TYPE.IMPORT_PRIVATE_KEY:
-          console.log(`Importing private key: ${request.accountName}, ${request.mnemonicPrivateKey}`);
-          await this.importPrivateKey(request.accountName, request.mnemonicPrivateKey);
-          break;
-        case MESSAGE_TYPE.SAVE_TO_FILE:
-          console.log(`Saving to file: ${request.accountName}, ${request.mnemonicPrivateKey}`);
-          this.saveToFile(request.accountName, request.mnemonicPrivateKey);
-          break;
-        case MESSAGE_TYPE.ACCOUNT_LOGIN:
-          console.log(`Logging into account: ${request.selectedWalletName}`);
-          await this.loginAccount(request.selectedWalletName);
-          break;
-        case MESSAGE_TYPE.SEND_TOKENS:
-          console.log(`Sending tokens: ${request.receiverAddress}, Amount: ${request.amount}, Speed: ${request.transactionSpeed}`);
-          this.sendTokens(request.receiverAddress, request.amount, request.transactionSpeed);
-          break;
-        case MESSAGE_TYPE.LOGOUT:
-          console.log('Logging out');
-          this.logoutAccount();
-          break;
-        case MESSAGE_TYPE.HAS_ACCOUNTS:
-          console.log('Checking if accounts exist');
-          sendResponse(this.hasAccounts);
-          break;
-        case MESSAGE_TYPE.GET_ACCOUNTS:
-          console.log('Getting accounts');
-          sendResponse(this.accounts);
-          break;
-        case MESSAGE_TYPE.GET_LOGGED_IN_ACCOUNT:
-          console.log('Getting logged-in account');
-          sendResponse(this.loggedInAccount && this.loggedInAccount.wallet && this.loggedInAccount.wallet.info
-            ? { name: this.loggedInAccount.name, address: this.loggedInAccount!.wallet!.info!.addrStr }
-            : undefined);
-          break;
-        case MESSAGE_TYPE.GET_LOGGED_IN_ACCOUNT_NAME:
-          console.log('Getting logged-in account name');
-          sendResponse(this.loggedInAccount ? this.loggedInAccount.name : undefined);
-          break;
-        case MESSAGE_TYPE.GET_WALLET_INFO:
-          console.log('Getting wallet info');
-          sendResponse(this.loggedInAccount && this.loggedInAccount.wallet
-            ? this.loggedInAccount.wallet.info : undefined);
-          break;
-        case MESSAGE_TYPE.GET_RUNEBASE_USD:
-          console.log('Getting RUNEBASE to USD conversion');
-          sendResponse(this.loggedInAccount && this.loggedInAccount.wallet
-            ? this.loggedInAccount.wallet.runebaseUSD : undefined);
-          break;
-        case MESSAGE_TYPE.VALIDATE_WALLET_NAME:
-          console.log(`Validating wallet name: ${request.name}`);
-          sendResponse(this.isWalletNameTaken(request.name));
-          break;
-        case MESSAGE_TYPE.GET_MAX_RUNEBASE_SEND:
-          console.log('Getting max RUNEBASE send amount');
-          this.updateAndSendMaxRunebaseAmountToPopup();
-          break;
-        default:
-          break;
+      case MESSAGE_TYPE.LOGIN:
+        console.log(`Logging in with password: ${request.password}`);
+        this.login(request.password, request.algorithm);
+        break;
+      case MESSAGE_TYPE.IMPORT_MNEMONIC:
+        console.log(`Importing mnemonic: ${request.accountName}, ${request.mnemonicPrivateKey}`);
+        await this.importMnemonic(request.accountName, request.mnemonicPrivateKey);
+        break;
+      case MESSAGE_TYPE.IMPORT_PRIVATE_KEY:
+        console.log(`Importing private key: ${request.accountName}, ${request.mnemonicPrivateKey}`);
+        await this.importPrivateKey(request.accountName, request.mnemonicPrivateKey);
+        break;
+      case MESSAGE_TYPE.SAVE_TO_FILE:
+        console.log(`Saving to file: ${request.accountName}, ${request.mnemonicPrivateKey}`);
+        this.saveToFile(request.accountName, request.mnemonicPrivateKey);
+        break;
+      case MESSAGE_TYPE.ACCOUNT_LOGIN:
+        console.log(`Logging into account: ${request.selectedWalletName}`);
+        await this.loginAccount(request.selectedWalletName);
+        break;
+      case MESSAGE_TYPE.SEND_TOKENS:
+        console.log(`Sending tokens: ${request.receiverAddress}, Amount: ${request.amount}, Speed: ${request.transactionSpeed}`);
+        this.sendTokens(request.receiverAddress, request.amount, request.transactionSpeed);
+        break;
+      case MESSAGE_TYPE.LOGOUT:
+        console.log('Logging out');
+        this.logoutAccount();
+        break;
+      case MESSAGE_TYPE.HAS_ACCOUNTS:
+        console.log('Checking if accounts exist');
+        console.log(this.accounts);
+        sendResponse(this.hasAccounts);
+        break;
+      case MESSAGE_TYPE.GET_ACCOUNTS:
+        console.log('Getting accounts');
+        console.log(this.accounts);
+        sendResponse(this.accounts);
+        break;
+      case MESSAGE_TYPE.GET_LOGGED_IN_ACCOUNT:
+        console.log('Getting logged-in account');
+        sendResponse(this.loggedInAccount && this.loggedInAccount.wallet && this.loggedInAccount.wallet.info
+          ? { name: this.loggedInAccount.name, address: this.loggedInAccount!.wallet!.info!.addrStr }
+          : undefined);
+        break;
+      case MESSAGE_TYPE.GET_LOGGED_IN_ACCOUNT_NAME:
+        console.log('Getting logged-in account name');
+        sendResponse(this.loggedInAccount ? this.loggedInAccount.name : undefined);
+        break;
+      case MESSAGE_TYPE.GET_WALLET_INFO:
+        console.log('Getting wallet info');
+        sendResponse(this.loggedInAccount && this.loggedInAccount.wallet
+          ? this.loggedInAccount.wallet.info : undefined);
+        break;
+      case MESSAGE_TYPE.GET_RUNEBASE_USD:
+        console.log('Getting RUNEBASE to USD conversion');
+        sendResponse(this.loggedInAccount && this.loggedInAccount.wallet
+          ? this.loggedInAccount.wallet.runebaseUSD : undefined);
+        break;
+      case MESSAGE_TYPE.VALIDATE_WALLET_NAME:
+        console.log(`Validating wallet name: ${request.name}`);
+        sendResponse(this.isWalletNameTaken(request.name));
+        break;
+      case MESSAGE_TYPE.GET_MAX_RUNEBASE_SEND:
+        console.log('Getting max RUNEBASE send amount');
+        this.updateAndSendMaxRunebaseAmountToPopup();
+        break;
+      default:
+        break;
       }
     } catch (err) {
       console.error(err);

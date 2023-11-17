@@ -1,4 +1,4 @@
-import React, { Component, Fragment } from 'react';
+import React, { useEffect, Fragment } from 'react';
 import {
   Typography,
   Button,
@@ -7,52 +7,83 @@ import {
   DialogContent,
   DialogContentText,
   DialogActions,
+  InputLabel,
+  MenuItem,
+  FormControl,
+  Box,
 } from '@mui/material';
-import { WithStyles } from '@mui/styles';
-import withStyles from '@mui/styles/withStyles';
-import { inject, observer } from 'mobx-react';
-
-import styles from './styles';
+import Select, { SelectChangeEvent } from '@mui/material/Select';
+import { observer, inject } from 'mobx-react';
 import PasswordInput from '../../components/PasswordInput';
 import Logo from '../../components/Logo';
 import AppStore from '../../stores/AppStore';
+import useStyles from './styles';
+
 interface IProps {
   classes: Record<string, string>;
   store: AppStore;
 }
 
-@inject('store')
-@observer
-class Login extends Component<WithStyles<typeof styles> & IProps, {}> {
-  public componentDidMount() {
-    this.props.store.loginStore.init();
-  }
-
-  public render() {
-    const { classes, store: { loginStore } } = this.props;
+const Login: React.FC<IProps> = inject('store')(
+  observer(({ store }) => {
+    const classes = useStyles();
+    const { loginStore } = store;
     const { hasAccounts, matchError, error } = loginStore;
+    useEffect(() => { loginStore.init(); }, [loginStore]);
+    useEffect(() => { }, [hasAccounts]);
 
     return (
       <div className={classes.root}>
         <Logo />
         <div className={classes.fieldContainer}>
-          <PasswordInput
-            classNames={classes.passwordField}
-            autoFocus={true}
-            placeholder="Password"
-            onChange={(e: any) => loginStore.password = e.target.value}
-            onEnterPress={loginStore.login}
-          />
+          <Box
+            sx={{
+              mb: 1,
+            }}
+          >
+            <PasswordInput
+              // classNames={classes.passwordField}
+              autoFocus={true}
+              placeholder="Password"
+              onChange={(e: any) => (loginStore.password = e.target.value)}
+              onEnterPress={loginStore.login}
+            />
+          </Box>
           {!hasAccounts && (
             <Fragment>
-              <PasswordInput
-                classNames={classes.passwordField}
-                placeholder="Confirm password"
-                error={!!matchError}
-                errorText={matchError}
-                onChange={(e: any) => loginStore.confirmPassword = e.target.value}
-                onEnterPress={loginStore.login}
-              />
+              <Box
+                sx={{
+                  mb: 1,
+                }}
+              >
+                <PasswordInput
+                // classNames={classes.passwordField}
+                  placeholder="Confirm password"
+                  error={!!matchError}
+                  errorText={matchError}
+                  onChange={(e: any) => (loginStore.confirmPassword = e.target.value)}
+                  onEnterPress={loginStore.login}
+                />
+              </Box>
+              <Box
+                sx={{
+                  mb: 1,
+                }}
+              >
+                <FormControl fullWidth>
+                  <InputLabel id="security-algo-select-label">Security Algorithm</InputLabel>
+                  <Select
+                    labelId="security-algo-select-label"
+                    id="security-algo-select"
+                    value={loginStore.algorithm}
+                    label="Security Algorithm"
+                    onChange={(e: SelectChangeEvent) => (loginStore.algorithm = e.target.value)}
+                  >
+                    <MenuItem value={'PBKDF2'}>PBKDF2 (Fast, less secure)</MenuItem>
+                    <MenuItem value={'Scrypt'}>Scrypt (Slow, more secure)</MenuItem>
+                  </Select>
+                </FormControl>
+              </Box>
               <Typography className={classes.masterPwNote}>
                 This will serve as your master password and will be saved when you create or import your first wallet.
               </Typography>
@@ -60,33 +91,40 @@ class Login extends Component<WithStyles<typeof styles> & IProps, {}> {
           )}
         </div>
         <Button
+          sx={{
+            mt: 1,
+          }}
           className={classes.loginButton}
           fullWidth
           variant="contained"
           color="primary"
           disabled={error}
-          onClick={loginStore.login}
+          onClick={() => {
+            loginStore.login();
+          }}
         >
           Login
         </Button>
-        <ErrorDialog {...this.props} />
+        <ErrorDialog {...{ store }} />
       </div>
     );
-  }
-}
+  })
+);
 
-const ErrorDialog: React.FC<any> = observer(({ store: { loginStore }}: any) => (
-  <Dialog
-    open={!!loginStore.invalidPassword}
-    onClose={() => loginStore.invalidPassword = undefined}>
-    <DialogTitle>Invalid Password</DialogTitle>
-    <DialogContent>
-      <DialogContentText>You have entered an invalid password. Please try again.</DialogContentText>
-    </DialogContent>
-    <DialogActions>
-      <Button onClick={() => loginStore.invalidPassword = undefined} color="primary">Close</Button>
-    </DialogActions>
-  </Dialog>
-));
+const ErrorDialog: React.FC<{ store: { loginStore: any } }> = observer(({ store }) => {
+  return (
+    <Dialog open={!!store.loginStore.invalidPassword} onClose={() => (store.loginStore.invalidPassword = undefined)}>
+      <DialogTitle>Invalid Password</DialogTitle>
+      <DialogContent>
+        <DialogContentText>You have entered an invalid password. Please try again.</DialogContentText>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={() => (store.loginStore.invalidPassword = undefined)} color="primary">
+          Close
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+});
 
-export default withStyles(styles)(Login);
+export default Login;

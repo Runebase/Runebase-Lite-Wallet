@@ -1,8 +1,6 @@
-import { Theme } from '@mui/material/styles';
-import createStyles from '@mui/styles/createStyles';
-// import { FontWeightProperty } from 'csstype';
+import { makeStyles } from '@mui/styles';
 
-const styles = (theme: Theme) => createStyles({
+const useStyles = makeStyles((theme) => ({
   root: {
     height: '100%',
     display: 'flex',
@@ -46,6 +44,6 @@ const styles = (theme: Theme) => createStyles({
       marginBottom: theme.spacing(1), // Use spacing instead of padding
     },
   },
-});
+}));
 
-export default styles;
+export default useStyles;

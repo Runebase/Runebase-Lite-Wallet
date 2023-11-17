@@ -1,21 +1,18 @@
-import { Theme } from '@mui/material';
+import { makeStyles } from '@mui/styles';
 
-import createStyles from '@mui/styles/createStyles';
+const useStyles = makeStyles((theme) => ({
+  root: {
+    width: '100%',
+    height: '100%',
+    display: 'flex',
+    flexDirection: 'column',
+  },
+  content: {
+    flex: 1,
+    display: 'flex',
+    flexDirection: 'column',
+    margin: theme.spacing(2),
+  },
+}));
 
-const styles = (theme: Theme) =>
-  createStyles({
-    root: {
-      width: '100%',
-      height: '100%',
-      display: 'flex',
-      flexDirection: 'column',
-    },
-    content: {
-      flex: 1,
-      display: 'flex',
-      flexDirection: 'column',
-      margin: theme.spacing(2),
-    },
-  });
-
-export default styles;
+export default useStyles;

@@ -1,8 +1,6 @@
-import { Theme } from '@mui/material/styles';
+import { makeStyles } from '@mui/styles';
 
-import createStyles from '@mui/styles/createStyles';
-
-const styles = (theme: Theme) => createStyles({
+const useStyles = makeStyles((theme) => ({
   menuButton: {
     height: 24,
     minWidth: 0,
@@ -11,6 +9,6 @@ const styles = (theme: Theme) => createStyles({
     // color: theme.palette.text.primary,
     textTransform: 'none',
   },
-});
+}));
 
-export default styles;
+export default useStyles;

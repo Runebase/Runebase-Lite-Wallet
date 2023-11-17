@@ -1,16 +1,17 @@
 import React, { FC } from 'react';
 import { Typography } from '@mui/material';
+import useStyles from './styles';
 
-import withStyles from '@mui/styles/withStyles';
+const Logo: FC = () => {
+  const classes = useStyles();
 
-import styles from './styles';
+  return (
+    <div className={classes.logoContainer}>
+      <img className={classes.logo} src={chrome.runtime.getURL('images/logo.png')} alt={'Logo'} />
+      <Typography className={classes.logoText}>RunebaseChrome</Typography>
+      <Typography className={classes.version}>version {chrome.runtime.getManifest().version}</Typography>
+    </div>
+  );
+};
 
-const Logo: FC<any> = ({ classes }: any) => (
-  <div className={classes.logoContainer}>
-    <img className={classes.logo} src={chrome.runtime.getURL('images/logo.png')} alt={'Logo'} />
-    <Typography className={classes.logoText}>RunebaseChrome</Typography>
-    <Typography className={classes.version}>version {chrome.runtime.getManifest().version}</Typography>
-  </div>
-);
-
-export default withStyles(styles)(Logo);
+export default Logo;

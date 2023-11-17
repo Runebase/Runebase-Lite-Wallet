@@ -1,8 +1,6 @@
-import { Theme } from '@mui/material/styles';
+import { makeStyles } from '@mui/styles';
 
-import createStyles from '@mui/styles/createStyles';
-
-const styles = (theme: Theme) => createStyles({
+const useStyles = makeStyles((theme) => ({
   root: {
     height: '100%',
     display: 'flex',
@@ -106,6 +104,6 @@ const styles = (theme: Theme) => createStyles({
     minHeight: 0,
     padding: `0px ${theme.spacing(1)}`, // Use spacing instead of unit
   },
-});
+}));
 
-export default styles;
+export default useStyles;

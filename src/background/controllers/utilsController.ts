@@ -79,7 +79,7 @@ export default class UtilsController extends IController {
       const { signature, recid } = secp256k1.ecdsaSign(
         hash,
         keyPair.d.toBuffer()
-        );
+      );
       const signed = Buffer.concat([
         Buffer.from([recid + (keyPair.compressed ? 31 : 27)]),
         signature
@@ -145,14 +145,14 @@ export default class UtilsController extends IController {
   private handleMessage = (request: any, _: chrome.runtime.MessageSender) => {
     try {
       switch (request.type) {
-        case MESSAGE_TYPE.SIGN_POD:
-          this.signPodMessage(request.id, request.superStakerAddress);
-          break;
-        case API_TYPE.SIGN_POD_REQUEST:
-          this.handleSignPodRequest(request);
-          break;  // Add this break statement
-        default:
-          break;
+      case MESSAGE_TYPE.SIGN_POD:
+        this.signPodMessage(request.id, request.superStakerAddress);
+        break;
+      case API_TYPE.SIGN_POD_REQUEST:
+        this.handleSignPodRequest(request);
+        break;  // Add this break statement
+      default:
+        break;
       }
     } catch (err) {
       console.error(err);

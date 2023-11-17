@@ -47,32 +47,32 @@ function handleInpageMessage(event: MessageEvent) {
   let accountWrapper: IInpageAccountWrapper;
 
   switch (message.type) {
-    case API_TYPE.SIGN_POD_RESPONSE:
-      console.log(`SIGN_POD_RESPONSE INPAGE: ${message.payload.result}`);
-      return message.payload.result;
-      // break;
-    case API_TYPE.SIGN_TX_URL_RESOLVED:
-      signTxUrl = message.payload.url;
-      break;
-    case API_TYPE.RPC_SEND_TO_CONTRACT:
-      handleSendToContractRequest(message.payload);
-      break;
-    case API_TYPE.RPC_RESPONSE:
-      return runebasechromeProvider.handleRpcCallResponse(message.payload);
-    case API_TYPE.SEND_INPAGE_RUNEBASECHROME_ACCOUNT_VALUES:
-      accountWrapper = message.payload;
-      runebasechrome.account = accountWrapper.account;
-      if (accountWrapper.error) {
-        throw accountWrapper.error;
-      } else {
-        console.log('window.runebasechrome.account has been updated,\n Reason:', accountWrapper.statusChangeReason);
-      }
-      break;
-    case API_TYPE.PORT_DISCONNECTED:
-      handlePortDisconnected();
-      break;
-    default:
-      console.log(message);
-      throw Error(`Inpage processing invalid type: ${message}`);
+  case API_TYPE.SIGN_POD_RESPONSE:
+    console.log(`SIGN_POD_RESPONSE INPAGE: ${message.payload.result}`);
+    return message.payload.result;
+    // break;
+  case API_TYPE.SIGN_TX_URL_RESOLVED:
+    signTxUrl = message.payload.url;
+    break;
+  case API_TYPE.RPC_SEND_TO_CONTRACT:
+    handleSendToContractRequest(message.payload);
+    break;
+  case API_TYPE.RPC_RESPONSE:
+    return runebasechromeProvider.handleRpcCallResponse(message.payload);
+  case API_TYPE.SEND_INPAGE_RUNEBASECHROME_ACCOUNT_VALUES:
+    accountWrapper = message.payload;
+    runebasechrome.account = accountWrapper.account;
+    if (accountWrapper.error) {
+      throw accountWrapper.error;
+    } else {
+      console.log('window.runebasechrome.account has been updated,\n Reason:', accountWrapper.statusChangeReason);
+    }
+    break;
+  case API_TYPE.PORT_DISCONNECTED:
+    handlePortDisconnected();
+    break;
+  default:
+    console.log(message);
+    throw Error(`Inpage processing invalid type: ${message}`);
   }
 }

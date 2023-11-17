@@ -49,18 +49,27 @@ export default class AddTokenStore {
     reaction(
       () => this.contractAddress,
       () => {
+        console.log('Contract address changed:', this.contractAddress);
         this.resetTokenDetails();
         // If valid contract address, send rpc call to fetch other contract details
         if (this.contractAddress && !this.contractAddressFieldError) {
-          chrome.runtime.sendMessage(
-            { type: MESSAGE_TYPE.GET_QRC_TOKEN_DETAILS,
-              contractAddress: this.contractAddress});
+          console.log('Fetching RRC token details for:', this.contractAddress);
+          chrome.runtime.sendMessage({
+            type: MESSAGE_TYPE.GET_QRC_TOKEN_DETAILS,
+            contractAddress: this.contractAddress
+          });
         }
       },
     );
   }
 
   public addToken = () => {
+    console.log('Adding token:', {
+      contractAddress: this.contractAddress,
+      name: this.name,
+      symbol: this.symbol,
+      decimals: this.decimals,
+    });
     chrome.runtime.sendMessage({
       type: MESSAGE_TYPE.ADD_TOKEN,
       contractAddress: this.contractAddress,
@@ -75,38 +84,45 @@ export default class AddTokenStore {
 
   @action
   public init = () => {
-    chrome.runtime.onMessage.addListener(this.handleMessage);
-  };
+      chrome.runtime.onMessage.addListener(this.handleMessage);
+    };
 
   @action
   private setInitValues = () => {
-    this.contractAddress = INIT_VALUES.contractAddress;
-    this.resetTokenDetails();
-  };
+      this.contractAddress = INIT_VALUES.contractAddress;
+      this.resetTokenDetails();
+    };
+
+  @action
+  public setContractAddress = (value: string) => {
+      this.contractAddress = value;
+    };
 
   @action
   private resetTokenDetails = () => {
-    this.name = INIT_VALUES.name;
-    this.symbol = INIT_VALUES.symbol;
-    this.decimals = INIT_VALUES.decimals;
-    this.getQRCTokenDetailsFailed = INIT_VALUES.getQRCTokenDetailsFailed;
-  };
+      this.name = INIT_VALUES.name;
+      this.symbol = INIT_VALUES.symbol;
+      this.decimals = INIT_VALUES.decimals;
+      this.getQRCTokenDetailsFailed = INIT_VALUES.getQRCTokenDetailsFailed;
+    };
 
   @action
   private handleMessage = (request: any) => {
-    switch (request.type) {
+      switch (request.type) {
       case MESSAGE_TYPE.QRC_TOKEN_DETAILS_RETURN:
         if (request.isValid) {
           const { name, symbol, decimals } = request.token;
+          console.log('Received RRC token details:', { name, symbol, decimals });
           this.name = name;
           this.symbol = symbol;
           this.decimals = decimals;
         } else {
+          console.log('RRC token details request failed');
           this.getQRCTokenDetailsFailed = true;
         }
         break;
       default:
         break;
-    }
-  };
+      }
+    };
 }

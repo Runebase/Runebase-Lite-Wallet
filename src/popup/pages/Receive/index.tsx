@@ -1,11 +1,9 @@
-import React, { Component } from 'react';
-import { inject, observer } from 'mobx-react';
+import React from 'react';
+import { observer, inject } from 'mobx-react';
 import { Typography } from '@mui/material';
-import { WithStyles } from '@mui/styles';
-import withStyles from '@mui/styles/withStyles';
 import QRCode from 'qrcode.react';
 
-import styles from './styles';
+import useStyles from './styles';
 import NavBar from '../../components/NavBar';
 import AppStore from '../../stores/AppStore';
 
@@ -14,18 +12,15 @@ interface IProps {
   store: AppStore;
 }
 
-@inject('store')
-@observer
-class Receive extends Component<WithStyles<typeof styles> & IProps, NonNullable<unknown>> {
-  public render() {
-    const { classes } = this.props;
-    const { loggedInAccountName, info, runebaseBalanceUSD, networkBalAnnotation } = this.props.store.sessionStore;
-
+const Receive: React.FC<IProps> = inject('store')(
+  observer(({ store }) => {
+    const classes = useStyles();
+    const { loggedInAccountName, info, runebaseBalanceUSD, networkBalAnnotation } = store.sessionStore;
     if (!loggedInAccountName || !info) {
       return null;
     }
 
-    return info && (
+    return (
       <div className={classes.root}>
         <NavBar hasBackButton title="Receive" />
         <div className={classes.contentContainer}>
@@ -42,7 +37,7 @@ class Receive extends Component<WithStyles<typeof styles> & IProps, NonNullable<
         </div>
       </div>
     );
-  }
-}
+  })
+);
 
-export default withStyles(styles)(Receive);
+export default Receive;

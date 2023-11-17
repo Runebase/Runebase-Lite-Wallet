@@ -99,6 +99,7 @@ export enum STORAGE {
   LOGGED_IN_ACCOUNT = 'loggedInAccount',
   NETWORK_INDEX = 'networkIndex',
   ACCOUNT_TOKEN_LIST = 'accountTokenList',
+  SECURITY_ALGORITHM = 'securityAlgorithm'
 }
 
 export enum IMPORT_TYPE {
