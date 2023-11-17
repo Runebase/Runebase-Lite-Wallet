@@ -14,7 +14,7 @@ const INIT_VALUES = {
 
 export default class SaveMnemonicStore {
   @observable public mnemonic: string = INIT_VALUES.mnemonic;
-  public walletName: string = INIT_VALUES.walletName;
+  @observable public walletName: string = INIT_VALUES.walletName;
 
   private app: AppStore;
 
@@ -25,9 +25,13 @@ export default class SaveMnemonicStore {
 
   @action
   public generateMnemonic = () => {
-    console.log('Generating mnemonic');
     this.mnemonic = generateMnemonic();
     console.log('Generated mnemonic:', this.mnemonic);
+  };
+
+  @action
+  public updateWalletName = (newWalletName: string) => {
+    this.walletName = newWalletName;
   };
 
   @action

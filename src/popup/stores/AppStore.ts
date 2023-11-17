@@ -1,5 +1,4 @@
 import { RouterStore } from 'mobx-react-router';
-
 import NavBarStore from './components/NavBarStore';
 import SessionStore from './SessionStore';
 import LoginStore from './LoginStore';
