@@ -1,69 +1,75 @@
-import React, { Component } from 'react';
+import React, { useEffect } from 'react';
 import { Typography, TextField, Button } from '@mui/material';
-import { WithStyles } from '@mui/styles';
-import withStyles from '@mui/styles/withStyles';
 import { inject, observer } from 'mobx-react';
 import cx from 'classnames';
-
-import styles from './styles';
 import NavBar from '../../components/NavBar';
 import AppStore from '../../stores/AppStore';
 import { handleEnterPress } from '../../../utils';
+import useStyles from './styles';
 
 interface IProps {
   classes: Record<string, string>;
   store: AppStore;
 }
 
-@inject('store')
-@observer
-class AddToken extends Component<WithStyles<typeof styles> & IProps, {}> {
-  public componentDidMount() {
-    this.props.store.addTokenStore.init();
-  }
+const AddToken: React.FC<IProps> = ({ store }) => {
+  const classes = useStyles();
+  const { addTokenStore } = store;
+  useEffect(() => { store.addTokenStore.init(); }, [addTokenStore]);
+  useEffect(() => { }, [addTokenStore.contractAddress]);
 
-  public render() {
-    const { classes, store: { addTokenStore } } = this.props;
-
-    return (
-      <div className={classes.root}>
-        <NavBar hasBackButton title="Add Token" />
-        <div className={classes.contentContainer}>
-          <div className={classes.fieldsContainer}>
-            <ContractAddressField onEnterPress={this.onEnterPress} {...this.props} />
-            {addTokenStore.name && (
-            <div>
-              <DetailField fieldName={'Token Name'} value={addTokenStore.name} classes={classes} />
-              <DetailField fieldName={'Token Symbol'} value={addTokenStore.symbol} {...this.props} />
-              <DetailField fieldName={'Decimals'} value={addTokenStore.decimals} {...this.props} />
-            </div>
-            )}
-          </div>
-          {!!addTokenStore.tokenAlreadyInListError && (
-            <Typography className={classes.errorText}>{addTokenStore.tokenAlreadyInListError}</Typography>
-          )}
-          <AddButton {...this.props} />
-        </div>
-      </div>
-    );
-  }
-
-  private onEnterPress = (event: any) => {
+  const onEnterPress = (event: any) => {
     handleEnterPress(event, () => {
-      if (!this.props.store.addTokenStore.buttonDisabled) {
-        this.props.store.addTokenStore.addToken();
+      if (!store.addTokenStore.buttonDisabled) {
+        store.addTokenStore.addToken();
       }
     });
   };
-}
 
-const Heading = withStyles(styles, { withTheme: true })(({ classes, name }: any) => (
+  return (
+    <div className={classes.root}>
+      <NavBar hasBackButton title="Add Token" />
+      <div className={classes.contentContainer}>
+        <div className={classes.fieldsContainer}>
+          <ContractAddressField onEnterPress={onEnterPress} {...{ classes, store }} />
+          {store.addTokenStore.name && (
+            <div>
+              <DetailField fieldName={'Token Name'} value={store.addTokenStore.name} {...{ classes }} />
+              <DetailField fieldName={'Token Symbol'} value={store.addTokenStore.symbol} {...{ classes }} />
+              <DetailField fieldName={'Decimals'} value={store.addTokenStore.decimals} {...{ classes }} />
+            </div>
+          )}
+        </div>
+        {!!store.addTokenStore.tokenAlreadyInListError && (
+          <Typography className={classes.errorText}>{store.addTokenStore.tokenAlreadyInListError}</Typography>
+        )}
+        <AddButton {...{ classes, store }} />
+      </div>
+    </div>
+  );
+};
+
+const Heading: React.FC<{
+  classes: Record<string, string>;
+  name: string
+}> = ({
+  classes,
+  name
+}) => (
   <Typography className={classes.fieldHeading}>{name}</Typography>
-));
+);
 
-const ContractAddressField = observer(({ classes, store: { addTokenStore }, onEnterPress }: any) => (
+const ContractAddressField: React.FC<{
+  classes: Record<string, string>;
+  store: { addTokenStore: any };
+  onEnterPress: (event: any) => void
+}> = ({
+  classes,
+  store: { addTokenStore },
+  onEnterPress,
+}) => (
   <div className={classes.fieldContainer}>
-    <Heading name="Contract Address" />
+    <Heading name="Contract Address" classes={classes} />
     <div className={classes.fieldContentContainer}>
       <TextField
         fullWidth
@@ -71,7 +77,7 @@ const ContractAddressField = observer(({ classes, store: { addTokenStore }, onEn
         multiline={false}
         value={addTokenStore.contractAddress || ''}
         InputProps={{ disableUnderline: true }}
-        onChange={(event) => addTokenStore.contractAddress = event.target.value}
+        onChange={(event) => addTokenStore.setContractAddress(event.target.value)}
         onKeyPress={onEnterPress}
       />
     </div>
@@ -79,9 +85,18 @@ const ContractAddressField = observer(({ classes, store: { addTokenStore }, onEn
       <Typography className={classes.errorText}>{addTokenStore.contractAddressFieldError}</Typography>
     )}
   </div>
-));
+);
 
-const DetailField = ({ classes, fieldName, value }: any) => (
+
+const DetailField: React.FC<{
+  classes: Record<string, string>;
+  fieldName: string;
+  value: string | number | undefined
+}> = ({
+  classes,
+  fieldName,
+  value
+}) => (
   <div className={cx(classes.detailContainer)}>
     <div className={classes.labelContainer}>
       <Typography className={cx(classes.detailLabel)}>{fieldName}</Typography>
@@ -92,17 +107,25 @@ const DetailField = ({ classes, fieldName, value }: any) => (
   </div>
 );
 
-const AddButton = observer(({ classes, store: { addTokenStore } }: any) => (
+const AddButton: React.FC<{
+  classes: Record<string, string>;
+  store: {
+    addTokenStore: any
+  }
+}> = ({
+  classes,
+  store
+}) => (
   <Button
     className={classes.addButton}
     fullWidth
     variant="contained"
     color="primary"
-    disabled={addTokenStore.buttonDisabled}
-    onClick={addTokenStore.addToken}
+    disabled={store.addTokenStore.buttonDisabled}
+    onClick={store.addTokenStore.addToken}
   >
     Add
   </Button>
-));
+);
 
-export default withStyles(styles)(AddToken);
+export default inject('store')(observer(AddToken));
