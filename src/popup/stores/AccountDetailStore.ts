@@ -35,9 +35,9 @@ export default class AccountDetailStore {
 
   @action
   public init = () => {
-    chrome.runtime.onMessage.addListener(this.handleMessage);
-    this.activeTabIdx === 0 ? this.onTransactionTabSelected() : this.onTokenTabSelected();
-  };
+      chrome.runtime.onMessage.addListener(this.handleMessage);
+      this.activeTabIdx === 0 ? this.onTransactionTabSelected() : this.onTokenTabSelected();
+    };
 
   public deinit = () => {
     chrome.runtime.onMessage.removeListener(this.handleMessage);
@@ -78,7 +78,7 @@ export default class AccountDetailStore {
 
   @action
   private handleMessage = (request: any) => {
-    switch (request.type) {
+      switch (request.type) {
       case MESSAGE_TYPE.GET_TXS_RETURN:
         this.transactions = request.transactions;
         this.hasMore = request.hasMore;
@@ -88,6 +88,6 @@ export default class AccountDetailStore {
         break;
       default:
         break;
-    }
-  };
+      }
+    };
 }

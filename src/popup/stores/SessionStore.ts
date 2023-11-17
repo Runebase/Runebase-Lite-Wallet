@@ -53,31 +53,31 @@ export default class SessionStore {
 
   @action
   public init = () => {
-    console.log('Initializing SessionStore'); // Add this log statement
-    console.log('Sending message to get logged-in account name'); // Add this log statement
-    chrome.runtime.sendMessage({ type: MESSAGE_TYPE.GET_LOGGED_IN_ACCOUNT_NAME }, (response: any) => {
-      console.log('Received logged-in account name:', response); // Add this log statement
-      this.loggedInAccountName = response;
-    });
+      console.log('Initializing SessionStore'); // Add this log statement
+      console.log('Sending message to get logged-in account name'); // Add this log statement
+      chrome.runtime.sendMessage({ type: MESSAGE_TYPE.GET_LOGGED_IN_ACCOUNT_NAME }, (response: any) => {
+        console.log('Received logged-in account name:', response); // Add this log statement
+        this.loggedInAccountName = response;
+      });
 
-    console.log('Sending message to get wallet info'); // Add this log statement
-    chrome.runtime.sendMessage({ type: MESSAGE_TYPE.GET_WALLET_INFO }, (response: any) => {
-      console.log('Received wallet info:', response); // Add this log statement
-      this.info = response;
-    });
+      console.log('Sending message to get wallet info'); // Add this log statement
+      chrome.runtime.sendMessage({ type: MESSAGE_TYPE.GET_WALLET_INFO }, (response: any) => {
+        console.log('Received wallet info:', response); // Add this log statement
+        this.info = response;
+      });
 
-    console.log('Sending message to get RUNEBASE USD'); // Add this log statement
-    chrome.runtime.sendMessage({ type: MESSAGE_TYPE.GET_RUNEBASE_USD }, (response: any) => {
-      console.log('Received RUNEBASE USD:', response); // Add this log statement
-      this.runebaseUSD = response;
-    });
-  };
+      console.log('Sending message to get RUNEBASE USD'); // Add this log statement
+      chrome.runtime.sendMessage({ type: MESSAGE_TYPE.GET_RUNEBASE_USD }, (response: any) => {
+        console.log('Received RUNEBASE USD:', response); // Add this log statement
+        this.runebaseUSD = response;
+      });
+    };
 
   @action
   private handleMessage = (request: any) => {
-    console.log('Session Store Received message:', request); // Add this log statement
+      console.log('Session Store Received message:', request); // Add this log statement
 
-    switch (request.type) {
+      switch (request.type) {
       case MESSAGE_TYPE.CHANGE_NETWORK_SUCCESS:
         console.log('Changing network success. New network index:', request.networkIndex); // Add this log statement
         this.networkIndex = request.networkIndex;
@@ -96,6 +96,6 @@ export default class SessionStore {
         break;
       default:
         break;
-    }
-  };
+      }
+    };
 }

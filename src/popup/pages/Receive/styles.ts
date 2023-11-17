@@ -16,7 +16,7 @@ const useStyles = makeStyles((theme) => ({
   accountName: {
     //color: theme.palette.text.primary,
     //fontSize: theme.typography.fontSizeLarge, // Use typography instead of font
-   // fontWeight: theme.typography.fontWeightBold as FontWeightProperty, // Use typography instead of fontWeight
+    // fontWeight: theme.typography.fontWeightBold as FontWeightProperty, // Use typography instead of fontWeight
     marginBottom: theme.spacing(1), // Use spacing instead of unit
   },
   accountAddress: {

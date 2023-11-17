@@ -25,20 +25,20 @@ export default class SaveMnemonicStore {
 
   @action
   public generateMnemonic = () => {
-    this.mnemonic = generateMnemonic();
-    console.log('Generated mnemonic:', this.mnemonic);
-  };
+      this.mnemonic = generateMnemonic();
+      console.log('Generated mnemonic:', this.mnemonic);
+    };
 
   @action
   public updateWalletName = (newWalletName: string) => {
-    this.walletName = newWalletName;
-  };
+      this.walletName = newWalletName;
+    };
 
   @action
   public reset = () => {
-    console.log('Resetting save mnemonic store');
-    Object.assign(this, INIT_VALUES);
-  };
+      console.log('Resetting save mnemonic store');
+      Object.assign(this, INIT_VALUES);
+    };
 
   public createWallet = (saveFile: boolean) => {
     console.log('Creating wallet');

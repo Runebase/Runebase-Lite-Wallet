@@ -84,31 +84,31 @@ export default class AddTokenStore {
 
   @action
   public init = () => {
-    chrome.runtime.onMessage.addListener(this.handleMessage);
-  };
+      chrome.runtime.onMessage.addListener(this.handleMessage);
+    };
 
   @action
   private setInitValues = () => {
-    this.contractAddress = INIT_VALUES.contractAddress;
-    this.resetTokenDetails();
-  };
+      this.contractAddress = INIT_VALUES.contractAddress;
+      this.resetTokenDetails();
+    };
 
   @action
   public setContractAddress = (value: string) => {
-    this.contractAddress = value;
-  };
+      this.contractAddress = value;
+    };
 
   @action
   private resetTokenDetails = () => {
-    this.name = INIT_VALUES.name;
-    this.symbol = INIT_VALUES.symbol;
-    this.decimals = INIT_VALUES.decimals;
-    this.getQRCTokenDetailsFailed = INIT_VALUES.getQRCTokenDetailsFailed;
-  };
+      this.name = INIT_VALUES.name;
+      this.symbol = INIT_VALUES.symbol;
+      this.decimals = INIT_VALUES.decimals;
+      this.getQRCTokenDetailsFailed = INIT_VALUES.getQRCTokenDetailsFailed;
+    };
 
   @action
   private handleMessage = (request: any) => {
-    switch (request.type) {
+      switch (request.type) {
       case MESSAGE_TYPE.QRC_TOKEN_DETAILS_RETURN:
         if (request.isValid) {
           const { name, symbol, decimals } = request.token;
@@ -123,6 +123,6 @@ export default class AddTokenStore {
         break;
       default:
         break;
-    }
-  };
+      }
+    };
 }

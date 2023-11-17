@@ -25,41 +25,41 @@ export default class Wallet implements ISigner {
 
   @action
   public updateInfo = async () => {
-    if (!this.qjsWallet) {
-      console.error('Cannot updateInfo without qjsWallet instance.');
-    }
+      if (!this.qjsWallet) {
+        console.error('Cannot updateInfo without qjsWallet instance.');
+      }
 
-    /**
+      /**
      * We add a timeout promise to handle if qjsWallet hangs when executing getInfo.
      * (This happens if the insight api is down)
      */
-    let timedOut = false;
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    const timeoutPromise = new Promise((_, reject) => {
-      const wait = setTimeout(() => {
-        clearTimeout(wait);
-        timedOut = true;
-        reject(Error('wallet.getInfo failed, insight api may be down'));
-      }, 30000);
-    });
+      let timedOut = false;
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      const timeoutPromise = new Promise((_, reject) => {
+        const wait = setTimeout(() => {
+          clearTimeout(wait);
+          timedOut = true;
+          reject(Error('wallet.getInfo failed, insight api may be down'));
+        }, 30000);
+      });
 
-    const getInfoPromise = this.qjsWallet!.getInfo();
-    const promises = [timeoutPromise, getInfoPromise];
-    let newInfo: any;
-    try {
-      newInfo = await Promise.race(promises);
+      const getInfoPromise = this.qjsWallet!.getInfo();
+      const promises = [timeoutPromise, getInfoPromise];
+      let newInfo: any;
+      try {
+        newInfo = await Promise.race(promises);
 
-      // if they are not equal, then the balance has changed
-      if (!timedOut && !deepEqual(this.info, newInfo)) {
-        this.info = newInfo;
-        return true;
+        // if they are not equal, then the balance has changed
+        if (!timedOut && !deepEqual(this.info, newInfo)) {
+          this.info = newInfo;
+          return true;
+        }
+      } catch (e) {
+        throw(Error(e as any));
       }
-    } catch (e) {
-      throw(Error(e as any));
-    }
 
-    return false;
-  };
+      return false;
+    };
 
   // @param amount: (unit - whole RUNEBASE)
   public send = async (to: string, amount: number, options: ISendTxOptions): Promise<Insight.ISendRawTxResult> => {

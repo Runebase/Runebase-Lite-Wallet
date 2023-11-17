@@ -85,22 +85,22 @@ function handleRPCRequest(message: IRPCCallRequest) {
     }
 
     switch (method) {
-      case RPC_METHOD.SEND_TO_CONTRACT:
-        // Inpage shows sign tx popup
-        postWindowMessage<IRPCCallRequest>(TARGET_NAME.INPAGE, {
-          type: API_TYPE.RPC_SEND_TO_CONTRACT,
-          payload: {
-            ...message,
-            account,
-          },
-        });
-        break;
-      case RPC_METHOD.CALL_CONTRACT:
-        // Background executes callcontract
-        chrome.runtime.sendMessage({ type: MESSAGE_TYPE.EXTERNAL_CALL_CONTRACT, id, args });
-        break;
-      default:
-        throw Error('Unhandled RPC method.');
+    case RPC_METHOD.SEND_TO_CONTRACT:
+      // Inpage shows sign tx popup
+      postWindowMessage<IRPCCallRequest>(TARGET_NAME.INPAGE, {
+        type: API_TYPE.RPC_SEND_TO_CONTRACT,
+        payload: {
+          ...message,
+          account,
+        },
+      });
+      break;
+    case RPC_METHOD.CALL_CONTRACT:
+      // Background executes callcontract
+      chrome.runtime.sendMessage({ type: MESSAGE_TYPE.EXTERNAL_CALL_CONTRACT, id, args });
+      break;
+    default:
+      throw Error('Unhandled RPC method.');
     }
   });
 }
@@ -138,36 +138,36 @@ function handleInPageMessage(event: MessageEvent) {
 
   const message: IExtensionAPIMessage<any> = event.data.message;
   switch (message.type) {
-    case API_TYPE.SIGN_POD_REQUEST:
-      handleSignPodRequest(message.payload);
-      break;
-    case API_TYPE.RPC_REQUEST:
-      handleRPCRequest(message.payload);
-      break;
-    case API_TYPE.GET_INPAGE_RUNEBASECHROME_ACCOUNT_VALUES:
-      forwardInpageAccountRequest();
-      break;
-    default:
-      throw Error(`Contentscript processing invalid type: ${message}`);
+  case API_TYPE.SIGN_POD_REQUEST:
+    handleSignPodRequest(message.payload);
+    break;
+  case API_TYPE.RPC_REQUEST:
+    handleRPCRequest(message.payload);
+    break;
+  case API_TYPE.GET_INPAGE_RUNEBASECHROME_ACCOUNT_VALUES:
+    forwardInpageAccountRequest();
+    break;
+  default:
+    throw Error(`Contentscript processing invalid type: ${message}`);
   }
 }
 
 // Handle messages sent from bg script -> content script(here) -> inpage
 function handleBackgroundScriptMessage(message: any) {
   switch (message.type) {
-    case MESSAGE_TYPE.EXTERNAL_RPC_CALL_RETURN:
-      postWindowMessage<IRPCCallResponse>(TARGET_NAME.INPAGE, {
-        type: API_TYPE.RPC_RESPONSE,
-        payload: message,
-      });
-      break;
-    case MESSAGE_TYPE.SIGN_POD_RETURN:
-      postWindowMessage<IRPCCallResponse>(TARGET_NAME.INPAGE, {
-        type: API_TYPE.SIGN_POD_RESPONSE,
-        payload: message,
-      });
-      break;
-    default:
-      break;
+  case MESSAGE_TYPE.EXTERNAL_RPC_CALL_RETURN:
+    postWindowMessage<IRPCCallResponse>(TARGET_NAME.INPAGE, {
+      type: API_TYPE.RPC_RESPONSE,
+      payload: message,
+    });
+    break;
+  case MESSAGE_TYPE.SIGN_POD_RETURN:
+    postWindowMessage<IRPCCallResponse>(TARGET_NAME.INPAGE, {
+      type: API_TYPE.SIGN_POD_RESPONSE,
+      payload: message,
+    });
+    break;
+  default:
+    break;
   }
 }

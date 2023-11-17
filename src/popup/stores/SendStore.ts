@@ -82,76 +82,76 @@ export default class SendStore {
 
   @action
   public init = () => {
-    chrome.runtime.onMessage.addListener(this.handleMessage);
-    chrome.runtime.sendMessage({ type: MESSAGE_TYPE.GET_QRC_TOKEN_LIST }, (response: any) => {
-      console.log('Received token list:', response);
-      this.tokens = response;
-      this.tokens.unshift(new QRCToken('Runebase Token', 'RUNES', 8, ''));
-      this.tokens[0].balance = this.app.sessionStore.info ? this.app.sessionStore.info.balance : undefined;
-      this.token = this.tokens[0];
-    });
-    this.senderAddress = this.app.sessionStore.info ? this.app.sessionStore.info.addrStr : undefined;
-    chrome.runtime.sendMessage({
-      type: MESSAGE_TYPE.GET_MAX_RUNEBASE_SEND,
-    });
-  };
+      chrome.runtime.onMessage.addListener(this.handleMessage);
+      chrome.runtime.sendMessage({ type: MESSAGE_TYPE.GET_QRC_TOKEN_LIST }, (response: any) => {
+        console.log('Received token list:', response);
+        this.tokens = response;
+        this.tokens.unshift(new QRCToken('Runebase Token', 'RUNES', 8, ''));
+        this.tokens[0].balance = this.app.sessionStore.info ? this.app.sessionStore.info.balance : undefined;
+        this.token = this.tokens[0];
+      });
+      this.senderAddress = this.app.sessionStore.info ? this.app.sessionStore.info.addrStr : undefined;
+      chrome.runtime.sendMessage({
+        type: MESSAGE_TYPE.GET_MAX_RUNEBASE_SEND,
+      });
+    };
 
   @action
   public changeToken = (tokenSymbol: string) => {
-    const token = find(this.tokens, { symbol: tokenSymbol });
-    if (token) {
-      console.log('Changing token to:', token);
-      this.token = token;
-    }
-  };
+      const token = find(this.tokens, { symbol: tokenSymbol });
+      if (token) {
+        console.log('Changing token to:', token);
+        this.token = token;
+      }
+    };
 
   @action
   public routeToSendConfirm = () => {
-    this.app.routerStore.push('/send-confirm');
-  };
+      this.app.routerStore.push('/send-confirm');
+    };
 
   @action
   public send = () => {
-    if (!this.token) {
-      return;
-    }
+      if (!this.token) {
+        return;
+      }
 
-    this.sendState = SEND_STATE.SENDING;
-    if (this.token.symbol === 'RUNES') {
-      console.log('Sending RUNES:', {
-        receiverAddress: this.receiverAddress,
-        amount: Number(this.amount),
-        transactionSpeed: this.transactionSpeed,
-      });
-      chrome.runtime.sendMessage({
-        type: MESSAGE_TYPE.SEND_TOKENS,
-        receiverAddress: this.receiverAddress,
-        amount: Number(this.amount),
-        transactionSpeed: this.transactionSpeed,
-      });
-    } else {
-      console.log('Sending RRC tokens:', {
-        receiverAddress: this.receiverAddress,
-        amount: Number(this.amount),
-        token: this.token,
-        gasLimit: Number(this.gasLimit),
-        gasPrice: Number(this.gasPrice),
-      });
-      chrome.runtime.sendMessage({
-        type: MESSAGE_TYPE.SEND_QRC_TOKENS,
-        receiverAddress: this.receiverAddress,
-        amount: Number(this.amount),
-        token: this.token,
-        gasLimit: Number(this.gasLimit),
-        gasPrice: Number(this.gasPrice),
-      });
-    }
-  };
+      this.sendState = SEND_STATE.SENDING;
+      if (this.token.symbol === 'RUNES') {
+        console.log('Sending RUNES:', {
+          receiverAddress: this.receiverAddress,
+          amount: Number(this.amount),
+          transactionSpeed: this.transactionSpeed,
+        });
+        chrome.runtime.sendMessage({
+          type: MESSAGE_TYPE.SEND_TOKENS,
+          receiverAddress: this.receiverAddress,
+          amount: Number(this.amount),
+          transactionSpeed: this.transactionSpeed,
+        });
+      } else {
+        console.log('Sending RRC tokens:', {
+          receiverAddress: this.receiverAddress,
+          amount: Number(this.amount),
+          token: this.token,
+          gasLimit: Number(this.gasLimit),
+          gasPrice: Number(this.gasPrice),
+        });
+        chrome.runtime.sendMessage({
+          type: MESSAGE_TYPE.SEND_QRC_TOKENS,
+          receiverAddress: this.receiverAddress,
+          amount: Number(this.amount),
+          token: this.token,
+          gasLimit: Number(this.gasLimit),
+          gasPrice: Number(this.gasPrice),
+        });
+      }
+    };
 
   @action
   private handleMessage = (request: any) => {
-    let runebaseToken;
-    switch (request.type) {
+      let runebaseToken;
+      switch (request.type) {
       case MESSAGE_TYPE.SEND_TOKENS_SUCCESS:
         console.log('Send tokens success:', request);
         this.app.routerStore.push('/home'); // so pressing back won't go back to sendConfirm page
@@ -169,6 +169,6 @@ export default class SendStore {
         break;
       default:
         break;
-    }
-  };
+      }
+    };
 }

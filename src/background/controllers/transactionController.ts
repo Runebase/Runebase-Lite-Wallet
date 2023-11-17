@@ -136,17 +136,17 @@ export default class TransactionController extends IController {
   private handleMessage = (request: any) => {
     try {
       switch (request.type) {
-        case MESSAGE_TYPE.START_TX_POLLING:
-          this.startPolling();
-          break;
-        case MESSAGE_TYPE.STOP_TX_POLLING:
-          this.stopPolling();
-          break;
-        case MESSAGE_TYPE.GET_MORE_TXS:
-          this.fetchMore();
-          break;
-        default:
-          break;
+      case MESSAGE_TYPE.START_TX_POLLING:
+        this.startPolling();
+        break;
+      case MESSAGE_TYPE.STOP_TX_POLLING:
+        this.stopPolling();
+        break;
+      case MESSAGE_TYPE.GET_MORE_TXS:
+        this.fetchMore();
+        break;
+      default:
+        break;
       }
     } catch (err) {
       console.error(err);

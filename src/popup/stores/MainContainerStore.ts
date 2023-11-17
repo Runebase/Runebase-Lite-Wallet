@@ -16,10 +16,10 @@ export default class MainContainerStore {
 
   @action
   private handleMessage = (request: any) => {
-    console.log('MainContainer Store Received message:', request);
+      console.log('MainContainer Store Received message:', request);
 
-    const { loginStore, importStore, routerStore }: any = this.app;
-    switch (request.type) {
+      const { loginStore, importStore, routerStore }: any = this.app;
+      switch (request.type) {
       case MESSAGE_TYPE.ROUTE_LOGIN:
         console.log('Routing to login page');
         routerStore.push('/login');
@@ -63,6 +63,6 @@ export default class MainContainerStore {
 
       default:
         break;
-    }
-  };
+      }
+    };
 }

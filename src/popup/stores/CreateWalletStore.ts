@@ -57,36 +57,36 @@ export default class CreateWalletStore {
 
   @action
   public reset = () => {
-    console.log('Resetting CreateWalletStore');
-    Object.assign(this, INIT_VALUES);
-  };
+      console.log('Resetting CreateWalletStore');
+      Object.assign(this, INIT_VALUES);
+    };
 
   @action
   public routeToSaveMnemonic = () => {
-    console.log('Routing to SaveMnemonic');
-    this.app.routerStore.push('/save-mnemonic');
-  };
+      console.log('Routing to SaveMnemonic');
+      this.app.routerStore.push('/save-mnemonic');
+    };
 
   @action
   public routeToImportWallet = () => {
-    console.log('Routing to ImportWallet');
-    this.app.routerStore.push('/import-wallet');
-  };
+      console.log('Routing to ImportWallet');
+      this.app.routerStore.push('/import-wallet');
+    };
 
   @action
   public updateWalletName = (newWalletName: string) => {
-    this.walletName = newWalletName;
-  };
+      this.walletName = newWalletName;
+    };
 
   @action
   public setWalletNameTaken = (isTaken: boolean) => {
-    this.walletNameTaken = isTaken;
-  };
+      this.walletNameTaken = isTaken;
+    };
 
   @action
   public handleEnterPress = () => {
-    if (this.walletName) {
-      this.routeToSaveMnemonic();
-    }
-  };
+      if (this.walletName) {
+        this.routeToSaveMnemonic();
+      }
+    };
 }
