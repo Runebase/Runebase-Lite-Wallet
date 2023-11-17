@@ -7,7 +7,12 @@ import {
   DialogContent,
   DialogContentText,
   DialogActions,
+  InputLabel,
+  MenuItem,
+  FormControl,
+  Box,
 } from '@mui/material';
+import Select, { SelectChangeEvent } from '@mui/material/Select';
 import { observer, inject } from 'mobx-react';
 import PasswordInput from '../../components/PasswordInput';
 import Logo from '../../components/Logo';
@@ -31,23 +36,54 @@ const Login: React.FC<IProps> = inject('store')(
       <div className={classes.root}>
         <Logo />
         <div className={classes.fieldContainer}>
-          <PasswordInput
-            classNames={classes.passwordField}
-            autoFocus={true}
-            placeholder="Password"
-            onChange={(e: any) => (loginStore.password = e.target.value)}
-            onEnterPress={loginStore.login}
-          />
+          <Box
+            sx={{
+              mb: 1,
+            }}
+          >
+            <PasswordInput
+              // classNames={classes.passwordField}
+              autoFocus={true}
+              placeholder="Password"
+              onChange={(e: any) => (loginStore.password = e.target.value)}
+              onEnterPress={loginStore.login}
+            />
+          </Box>
           {!hasAccounts && (
             <Fragment>
-              <PasswordInput
-                classNames={classes.passwordField}
-                placeholder="Confirm password"
-                error={!!matchError}
-                errorText={matchError}
-                onChange={(e: any) => (loginStore.confirmPassword = e.target.value)}
-                onEnterPress={loginStore.login}
-              />
+              <Box
+                sx={{
+                  mb: 1,
+                }}
+              >
+                <PasswordInput
+                // classNames={classes.passwordField}
+                  placeholder="Confirm password"
+                  error={!!matchError}
+                  errorText={matchError}
+                  onChange={(e: any) => (loginStore.confirmPassword = e.target.value)}
+                  onEnterPress={loginStore.login}
+                />
+              </Box>
+              <Box
+                sx={{
+                  mb: 1,
+                }}
+              >
+                <FormControl fullWidth>
+                  <InputLabel id="security-algo-select-label">Security Algorithm</InputLabel>
+                  <Select
+                    labelId="security-algo-select-label"
+                    id="security-algo-select"
+                    value={loginStore.algorithm}
+                    label="Security Algorithm"
+                    onChange={(e: SelectChangeEvent) => (loginStore.algorithm = e.target.value)}
+                  >
+                    <MenuItem value={'PBKDF2'}>PBKDF2 (Fast, less secure)</MenuItem>
+                    <MenuItem value={'Scrypt'}>Scrypt (Slow, more secure)</MenuItem>
+                  </Select>
+                </FormControl>
+              </Box>
               <Typography className={classes.masterPwNote}>
                 This will serve as your master password and will be saved when you create or import your first wallet.
               </Typography>
@@ -55,6 +91,9 @@ const Login: React.FC<IProps> = inject('store')(
           )}
         </div>
         <Button
+          sx={{
+            mt: 1,
+          }}
           className={classes.loginButton}
           fullWidth
           variant="contained"

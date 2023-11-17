@@ -31,7 +31,7 @@ const PasswordTextField: FC<PasswordTextFieldProps> = ({
   return (
     <div className={cx(classes.container, classNames)}>
       <TextField
-        className={classes.textField}
+        // className={classes.textField}
         required
         autoFocus={autoFocus}
         type="password"
@@ -39,7 +39,7 @@ const PasswordTextField: FC<PasswordTextFieldProps> = ({
         helperText={helperText}
         error={error}
         InputProps={{
-          classes: { input: classes.input },
+          // classes: { input: classes.input },
         }}
         onChange={onChange}
         onKeyPress={(e) => handleEnterPress(e, onEnterPress)}

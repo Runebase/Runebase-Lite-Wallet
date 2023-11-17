@@ -6,13 +6,6 @@ const useStyles = makeStyles((theme) => ({
     display: 'flex',
     flexDirection: 'column',
   },
-  textField: {
-    flex: 1,
-    padding: theme.spacing(1),
-    border: '2px solid black',
-    borderRadius: theme.shape.borderRadius,
-  },
-  input: {},
   errorText: {
     fontSize: theme.typography.fontSizeSmall,
     marginTop: theme.spacing(1),
