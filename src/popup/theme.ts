@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import { createTheme, Theme } from '@mui/material/styles';
+import { createTheme } from '@mui/material/styles';
 
 const px = (value: number): string => value.toString().concat('px');
 
@@ -130,7 +130,7 @@ const theme = createTheme({
         fontWeight: fontWeightBold,
       },
     },
-  } as Theme['overrides'],
+  },
 
   /* User-defined variables */
   color: {

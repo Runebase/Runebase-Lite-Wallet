@@ -15,7 +15,7 @@ interface IProps {
 const Receive: React.FC<IProps> = inject('store')(
   observer(({ store }) => {
     const classes = useStyles();
-    const { loggedInAccountName, info, runebaseBalanceUSD, networkBalAnnotation } = store.sessionStore;
+    const { loggedInAccountName, info, runebaseBalanceUSD } = store.sessionStore;
     if (!loggedInAccountName || !info) {
       return null;
     }
@@ -30,7 +30,7 @@ const Receive: React.FC<IProps> = inject('store')(
             <Typography className={classes.tokenAmount}>{info.balance}</Typography>
             <Typography className={classes.token}>RUNES</Typography>
           </div>
-          <Typography className={classes.currencyValue}>{`${runebaseBalanceUSD} ${networkBalAnnotation}`}</Typography>
+          <Typography className={classes.currencyValue}>{`~${runebaseBalanceUSD}`}</Typography>
           <div className={classes.qrCodeContainer}>
             <QRCode value={info!.addrStr} />
           </div>

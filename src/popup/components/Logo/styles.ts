@@ -1,6 +1,6 @@
 import { makeStyles } from '@mui/styles';
 
-const useStyles = makeStyles(() => ({
+const useStyles = makeStyles((theme) => ({
   logoContainer: {
     flex: 1,
     display: 'flex',
@@ -13,9 +13,15 @@ const useStyles = makeStyles(() => ({
     height: 112,
   },
   logoText: {
+    fontSize: 24,
+    fontWeight: theme.typography.fontWeightBold,
+    color: theme.palette.primary.light,
     alignSelf: 'center',
   },
-  version: {},
+  version: {
+    fontSize: theme.typography.caption.fontSize,
+    color: theme.palette.text.secondary,
+  },
 }));
 
 export default useStyles;

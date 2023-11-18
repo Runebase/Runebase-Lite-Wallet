@@ -34,39 +34,39 @@ const AccountLogin: React.FC<IProps> = inject('store')(
 
 const AccountSection: React.FC<{ classes: Record<string, string>; store: AppStore }> = observer(
   ({ classes, store }) => (
-  <div className={classes.accountContainer}>
-    <Typography className={classes.selectAcctText}>Select account</Typography>
-    <Select
-      disableUnderline
-      className={classes.accountSelect}
-      name="accounts"
-      value={store.accountLoginStore.selectedWalletName}
-      onChange={(e) => {
-        console.log('Selected account:', e.target.value);
-        store.accountLoginStore.selectedWalletName = e.target.value;
-      }}
-    >
-      {store.accountLoginStore.accounts.map((acct: Account, index: number) => (
-        <MenuItem key={index} value={acct.name}>
-          {acct.name}
-        </MenuItem>
-      ))}
-    </Select>
-    <div className={classes.createAccountContainer}>
-      <Typography className={classes.orText}>or</Typography>
-      <Button
-        className={classes.createAccountButton}
-        color="secondary"
-        onClick={() => {
-          console.log('Calling routeToCreateWallet');
-          store.accountLoginStore.routeToCreateWallet();
+    <div className={classes.accountContainer}>
+      <Typography className={classes.selectAcctText}>Select account</Typography>
+      <Select
+        disableUnderline
+        className={classes.accountSelect}
+        name="accounts"
+        value={store.accountLoginStore.selectedWalletName}
+        onChange={(e) => {
+          console.log('Selected account:', e.target.value);
+          store.accountLoginStore.selectedWalletName = e.target.value;
         }}
       >
+        {store.accountLoginStore.accounts.map((acct: Account, index: number) => (
+          <MenuItem key={index} value={acct.name}>
+            {acct.name}
+          </MenuItem>
+        ))}
+      </Select>
+      <div className={classes.createAccountContainer}>
+        <Typography className={classes.orText}>or</Typography>
+        <Button
+          className={classes.createAccountButton}
+          color="secondary"
+          onClick={() => {
+            console.log('Calling routeToCreateWallet');
+            store.accountLoginStore.routeToCreateWallet();
+          }}
+        >
         Create New Wallet
-      </Button>
+        </Button>
+      </div>
     </div>
-  </div>
-));
+  ));
 
 const PermissionSection: React.FC<{ classes: Record<string, string> }> = ({ classes }) => (
   <div className={classes.permissionContainer}>

@@ -26,9 +26,6 @@ export default class SessionStore {
   @computed public get isMainNet() {
     return this.networkName === NETWORK_NAMES.MAINNET;
   }
-  @computed public get networkBalAnnotation() {
-    return this.isMainNet ? '' : `(${this.networkName}, no value)`;
-  }
 
   private runebaseUSD?: number = INIT_VALUES.runebaseUSD;
 

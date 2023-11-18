@@ -4,6 +4,8 @@ import { Typography, Button } from '@mui/material';
 import { KeyboardArrowRight } from '@mui/icons-material';
 import AppStore from '../../stores/AppStore';
 import useStyles from './styles';
+import SendIcon from '@mui/icons-material/Send';
+import CallReceivedIcon from '@mui/icons-material/CallReceived';
 
 interface IProps {
   store?: AppStore;
@@ -15,7 +17,7 @@ const AccountInfo: React.FC<IProps> = ({ hasRightArrow, store }) => {
   const [loggedInAccountName, setLoggedInAccountName] = useState<string | null>(null);
   const [info, setInfo] = useState<any | null>(null);
   const [runebaseBalanceUSD, setRunebaseBalanceUSD] = useState<string | undefined>(undefined);
-  const [networkBalAnnotation, setNetworkBalAnnotation] = useState<string | null>(null);
+  // const [networkBalAnnotation, setNetworkBalAnnotation] = useState<string | null>(null);
 
   useEffect(() => {
     console.log('useEffect - store:', store);
@@ -23,7 +25,7 @@ const AccountInfo: React.FC<IProps> = ({ hasRightArrow, store }) => {
     setLoggedInAccountName(store?.sessionStore.loggedInAccountName || null);
     setInfo(store?.sessionStore.info || null);
     setRunebaseBalanceUSD(store?.sessionStore.runebaseBalanceUSD);
-    setNetworkBalAnnotation(store?.sessionStore.networkBalAnnotation || null);
+    // setNetworkBalAnnotation(store?.sessionStore.networkBalAnnotation || null);
   }, [store]);
 
   const handleClick = (id: string, event: React.MouseEvent<HTMLElement>) => {
@@ -59,27 +61,29 @@ const AccountInfo: React.FC<IProps> = ({ hasRightArrow, store }) => {
         <Typography className={classes.token}>RUNES</Typography>
         {hasRightArrow && <KeyboardArrowRight className={classes.rightArrow} />}
       </div>
-      <Typography className={classes.balanceUSD}>{`${runebaseBalanceUSD} ${networkBalAnnotation}`}</Typography>
+      <Typography className={classes.balanceUSD}>{`~${runebaseBalanceUSD}`}</Typography>
       <div className={classes.actionButtonsContainer}>
         <Button
-          id="sendButton"
-          color="secondary"
-          variant="contained"
-          size="small"
-          className={classes.actionButton}
-          onClick={(e) => handleClick('sendButton', e)}
-        >
-          Send
-        </Button>
-        <Button
           id="receiveButton"
-          color="secondary"
+          color="primary"
           variant="contained"
           size="small"
+          startIcon={<CallReceivedIcon />}
           className={classes.actionButton}
           onClick={(e) => handleClick('receiveButton', e)}
         >
           Receive
+        </Button>
+        <Button
+          id="sendButton"
+          color="primary"
+          variant="contained"
+          size="small"
+          startIcon={<SendIcon />}
+          className={classes.actionButton}
+          onClick={(e) => handleClick('sendButton', e)}
+        >
+          Send
         </Button>
       </div>
     </div>

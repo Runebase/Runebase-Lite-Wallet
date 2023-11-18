@@ -16,14 +16,14 @@ const MainAccount: React.FC<IProps> = inject('store')(
       event.stopPropagation();
 
       switch (id) {
-        case 'mainCard': {
-          console.log('Clicked on mainCard. Navigating to /account-detail');
+      case 'mainCard': {
+        console.log('Clicked on mainCard. Navigating to /account-detail');
           store!.routerStore.push('/account-detail');
           break;
-        }
-        default: {
-          break;
-        }
+      }
+      default: {
+        break;
+      }
       }
     };
 
