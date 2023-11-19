@@ -41,7 +41,7 @@ export default class AccountController extends IController {
   private mainnetAccounts: Account[] = INIT_VALUES.mainnetAccounts;
   private testnetAccounts: Account[] = INIT_VALUES.testnetAccounts;
   private regtestAccounts: Account[] = INIT_VALUES.regtestAccounts;
-  private getInfoInterval?: number = INIT_VALUES.getInfoInterval;
+  private getInfoInterval?: any = INIT_VALUES.getInfoInterval;
 
   constructor(main: RunebaseChromeController) {
     super('account', main);
@@ -401,7 +401,7 @@ export default class AccountController extends IController {
   */
   private startPolling = async () => {
     if (!this.getInfoInterval) {
-      this.getInfoInterval = window.setInterval(() => {
+      this.getInfoInterval = setInterval(() => {
         this.getWalletInfo();
       }, AccountController.GET_INFO_INTERVAL_MS);
     }

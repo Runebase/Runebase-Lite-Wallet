@@ -12,7 +12,7 @@ const INIT_VALUES = {
 export default class ExternalController extends IController {
   private static GET_PRICE_INTERVAL_MS: number = 60000;
 
-  private getPriceInterval?: number = INIT_VALUES.getPriceInterval;
+  private getPriceInterval?: any = INIT_VALUES.getPriceInterval;
   private runebasePriceUSD: number = INIT_VALUES.runebasePriceUSD;
 
   constructor(main: RunebaseChromeController) {
@@ -30,7 +30,7 @@ export default class ExternalController extends IController {
   public startPolling = async () => {
     await this.getRunebasePrice();
     if (!this.getPriceInterval) {
-      this.getPriceInterval = window.setInterval(() => {
+      this.getPriceInterval = setInterval(() => {
         this.getRunebasePrice();
       }, ExternalController.GET_PRICE_INTERVAL_MS);
     }

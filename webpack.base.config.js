@@ -54,40 +54,6 @@ module.exports = {
         enforce: 'pre',
         exclude: /node_modules/,
         use: [
-          // Remove eslint-loader configuration
-        ],
-      },
-      {
-        test: /\.js$/,
-        include: [
-          path.resolve(__dirname, 'node_modules/rweb3'),
-          path.resolve(__dirname, 'node_modules/@ethereumjs/util'),
-          path.resolve(__dirname, 'node_modules/micro-ftch'),
-          path.resolve(__dirname, 'node_modules/@noble'),
-          // Add other paths to problematic modules here
-        ],
-        use: [
-          {
-            loader: require.resolve('babel-loader'),
-            options: {
-              presets: [
-                [
-                  '@babel/preset-env',
-                  {
-                    targets: {
-                      chrome: '58',
-                    },
-                  },
-                ],
-              ],
-              plugins: [
-                '@babel/plugin-proposal-optional-chaining',
-                '@babel/plugin-syntax-optional-chaining',
-                '@babel/plugin-proposal-nullish-coalescing-operator',
-              ],
-              sourceType: 'unambiguous',
-            },
-          },
         ],
       },
       {
@@ -100,9 +66,21 @@ module.exports = {
             },
           },
           {
-            test: /\.(ts|tsx)$/,
-            include: path.resolve(__dirname, './src'),
-            loader: require.resolve('ts-loader'),
+            test: /\.(ts|tsx|js)$/,
+            include: [
+              path.resolve(__dirname, 'node_modules/rweb3'),
+              path.resolve(__dirname, 'node_modules/@ethereumjs/util'),
+              path.resolve(__dirname, 'node_modules/micro-ftch'),
+              path.resolve(__dirname, 'node_modules/@noble'),
+              path.resolve(__dirname, './src'),
+              // path.resolve(__dirname, 'node_modules/runebasejs-wallet'),
+              // Add other paths to problematic modules here
+            ],
+            use: [
+              {
+                loader: require.resolve('babel-loader'),
+              },
+            ],
           },
           {
             exclude: /node_modules/,
@@ -127,15 +105,16 @@ module.exports = {
   //   ],
   // },
   plugins: [
+    new ESLintPlugin({
+      overrideConfigFile: path.resolve(__dirname, '.eslintrc.js'),
+      fix: true,
+      files: 'src/**/*.ts', // Adjust the glob pattern as needed
+    }),
     new webpack.ProvidePlugin({
       process: 'process/browser',
     }),
     new MiniCssExtractPlugin({
       filename: '[name].css',
-    }),
-    new ESLintPlugin({
-      overrideConfigFile: path.resolve(__dirname, '.eslintrc.js'),
-      fix: true,
     }),
     new CopyWebpackPlugin({
       patterns: [
@@ -143,5 +122,4 @@ module.exports = {
       ],
     }),
   ],
-  devtool: 'source-map',
 };

@@ -26,7 +26,7 @@ export default class TokenController extends IController {
 
   public tokens?: QRCToken[] = INIT_VALUES.tokens;
 
-  private getBalancesInterval?: number = INIT_VALUES.getBalancesInterval;
+  private getBalancesInterval?: any = INIT_VALUES.getBalancesInterval;
 
   constructor(main: RunebaseChromeController) {
     super('token', main);
@@ -66,7 +66,7 @@ export default class TokenController extends IController {
   public startPolling = async () => {
     await this.getBalances();
     if (!this.getBalancesInterval) {
-      this.getBalancesInterval = window.setInterval(() => {
+      this.getBalancesInterval = setInterval(() => {
         this.getBalances();
       }, TokenController.GET_BALANCES_INTERVAL_MS);
     }
