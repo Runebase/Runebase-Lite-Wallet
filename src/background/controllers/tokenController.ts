@@ -201,30 +201,38 @@ export default class TokenController extends IController {
     chrome.runtime.sendMessage(msg);
   };
 
-  /*
-  * Send QRC tokens.
-  * @param receiverAddress The receiver of the send.
-  * @param amount The amount to send in decimal format. (unit - whole token)
-  * @param token The QRC token being sent.
-  * @param gasLimit (unit - gas)
-  * @param gasPrice (unit - satoshi/gas)
-  */
-  private sendQRCToken = async (receiverAddress: string, amount: number, token: QRCToken,
-    gasLimit: number, gasPrice: number ) => {
-    // bn.js does not handle decimals well (Ex: BN(1.2) => 1 not 1.2) so we use BigNumber
-    const bnAmount = new BigNumber(amount).times(new BigNumber(10 ** token.decimals));
-    const data = rweb3.encoder.constructData(rrc223TokenABI, 'transfer', [receiverAddress, bnAmount]);
-    const args = [token.address, data, null, gasLimit, gasPrice];
-    const { error } = await this.main.rpc.sendToContract(generateRequestId(), args);
+  private sendQRCToken = async (
+    receiverAddress: string,
+    amount: number,
+    token: QRCToken,
+    gasLimit: number,
+    gasPrice: number
+  ) => {
+    try {
+      // bn.js does not handle decimals well (Ex: BN(1.2) => 1 not 1.2) so we use BigNumber
+      const bnAmount = new BigNumber(amount).times(new BigNumber(10 ** token.decimals));
+      const data = rweb3.encoder.constructData(rrc223TokenABI, 'transfer', [receiverAddress, bnAmount]);
+      const args = [token.address, data, null, gasLimit, gasPrice];
 
-    if (error) {
-      console.error(error);
-      chrome.runtime.sendMessage({ type: MESSAGE_TYPE.SEND_TOKENS_FAILURE, error });
-      return;
+      console.log('Sending QRCToken with the following arguments:', args);
+
+      const requestId = generateRequestId();
+      const { error } = await this.main.rpc.sendToContract(requestId, args);
+
+      if (error) {
+        console.error('Error sending QRCToken:', error);
+        chrome.runtime.sendMessage({ type: MESSAGE_TYPE.SEND_TOKENS_FAILURE, error });
+        return;
+      }
+
+      console.log('QRCToken sent successfully!');
+      chrome.runtime.sendMessage({ type: MESSAGE_TYPE.SEND_TOKENS_SUCCESS });
+    } catch (e) {
+      console.error('An unexpected error occurred:', e);
+      chrome.runtime.sendMessage({ type: MESSAGE_TYPE.SEND_TOKENS_FAILURE, error: e.message });
     }
-
-    chrome.runtime.sendMessage({ type: MESSAGE_TYPE.SEND_TOKENS_SUCCESS });
   };
+
 
   private addToken = async (contractAddress: string, name: string, symbol: string, decimals: number) => {
     const newToken = new QRCToken(name, symbol, decimals, contractAddress);

@@ -135,7 +135,7 @@ export default class SendStore {
           amount: Number(this.amount),
           token: this.token,
           gasLimit: Number(this.gasLimit),
-          gasPrice: Number(this.gasPrice),
+          gasPrice: Number(this.gasPrice * 1e-8),
         });
         chrome.runtime.sendMessage({
           type: MESSAGE_TYPE.SEND_QRC_TOKENS,
@@ -143,7 +143,7 @@ export default class SendStore {
           amount: Number(this.amount),
           token: this.token,
           gasLimit: Number(this.gasLimit),
-          gasPrice: Number(this.gasPrice),
+          gasPrice: Number(this.gasPrice * 1e-8),
         });
       }
     };
