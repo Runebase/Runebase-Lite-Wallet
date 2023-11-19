@@ -27,8 +27,10 @@ interface IProps {
 
 const AccountDetail: React.FC<IProps> = ({ store }) => {
   const classes = useStyles();
-  const { accountDetailStore } = store;
+  const { accountDetailStore, sessionStore, loginStore } = store;
+  const { loggedInAccountName, info } = sessionStore;
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => { }, [loggedInAccountName, info, sessionStore, store, loginStore]);
 
   useEffect(() => {
     accountDetailStore.init();
@@ -55,7 +57,12 @@ const AccountDetail: React.FC<IProps> = ({ store }) => {
     <div className={classes.root}>
       <div className={classes.contentContainer}>
         <Paper className={classes.accountDetailPaper} elevation={2}>
-          <NavBar hasBackButton isDarkTheme title="Account Detail" />
+          <NavBar
+            hasSettingsButton
+            title="Account Detail"
+            // hasNetworkSelector
+          />
+          {/* <NavBar hasBackButton isDarkTheme title="Account Detail" /> */}
           <AccountInfo />
         </Paper>
         <Paper className={classes.tabsPaper} elevation={1}>

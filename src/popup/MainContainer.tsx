@@ -16,7 +16,6 @@ import SaveMnemonic from './pages/SaveMnemonic';
 import ImportWallet from './pages/ImportWallet';
 import AccountLogin from './pages/AccountLogin';
 import Settings from './pages/Settings';
-import Home from './pages/Home';
 import AccountDetail from './pages/AccountDetail';
 import Send from './pages/Send';
 import Receive from './pages/Receive';
@@ -45,7 +44,6 @@ const MainContainer: React.FC<IProps> = inject('store')(observer(({ history, sto
           <Route exact path="/loading" component={Loading} />
           <Route exact path="/login" component={Login} />
           <Route exact path="/account-login" component={AccountLogin} />
-          <Route exact path="/home" component={Home} />
           <Route exact path="/create-wallet" component={CreateWallet} />
           <Route exact path="/account-detail" component={AccountDetail} />
           <Route exact path="/save-mnemonic" component={SaveMnemonic} />

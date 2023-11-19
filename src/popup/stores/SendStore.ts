@@ -154,7 +154,7 @@ export default class SendStore {
       switch (request.type) {
       case MESSAGE_TYPE.SEND_TOKENS_SUCCESS:
         console.log('Send tokens success:', request);
-        this.app.routerStore.push('/home'); // so pressing back won't go back to sendConfirm page
+        // this.app.routerStore.push('/home'); // so pressing back won't go back to sendConfirm page
         this.app.routerStore.push('/account-detail');
         this.sendState = SEND_STATE.INITIAL;
         break;

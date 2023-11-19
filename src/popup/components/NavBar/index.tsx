@@ -63,26 +63,26 @@ const BackButton: FC<IProps> = ({ classes, isDarkTheme, store: { routerStore } }
 
 const SettingsButton: FC<IProps> =
   observer(({ classes, store: { navBarStore }, isDarkTheme }: any) => (
-  <Fragment>
-    <IconButton
-      aria-owns={navBarStore.settingsMenuAnchor ? 'settingsMenu' : undefined}
-      aria-haspopup="true"
-      color="primary"
-      onClick={(e) => navBarStore.settingsMenuAnchor = e.currentTarget}
-      className={classes.settingsIconButton}
-      size="large">
-      <Settings className={cx(classes.settingsButton, isDarkTheme ? 'white' : '')} />
-    </IconButton>
-    <Menu
-      id="settingsMenu"
-      anchorEl={navBarStore.settingsMenuAnchor}
-      open={Boolean(navBarStore.settingsMenuAnchor)}
-      onClose={() => navBarStore.settingsMenuAnchor = undefined}
-    >
-      <MenuItem onClick={navBarStore.routeToSettings}>Settings</MenuItem>
-      <MenuItem onClick={navBarStore.logout}>Logout</MenuItem>
-    </Menu>
-  </Fragment>
-));
+    <Fragment>
+      <IconButton
+        aria-owns={navBarStore.settingsMenuAnchor ? 'settingsMenu' : undefined}
+        aria-haspopup="true"
+        color="primary"
+        onClick={(e) => navBarStore.settingsMenuAnchor = e.currentTarget}
+        className={classes.settingsIconButton}
+        size="large">
+        <Settings className={cx(classes.settingsButton, isDarkTheme ? 'white' : '')} />
+      </IconButton>
+      <Menu
+        id="settingsMenu"
+        anchorEl={navBarStore.settingsMenuAnchor}
+        open={Boolean(navBarStore.settingsMenuAnchor)}
+        onClose={() => navBarStore.settingsMenuAnchor = undefined}
+      >
+        <MenuItem onClick={navBarStore.routeToSettings}>Settings</MenuItem>
+        <MenuItem onClick={navBarStore.logout}>Logout</MenuItem>
+      </Menu>
+    </Fragment>
+  ));
 
 export default withStyles(styles)(NavBar);

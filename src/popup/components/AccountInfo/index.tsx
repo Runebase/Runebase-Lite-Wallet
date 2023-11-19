@@ -21,12 +21,16 @@ const AccountInfo: React.FC<IProps> = ({ hasRightArrow, store }) => {
 
   useEffect(() => {
     console.log('useEffect - store:', store);
-
     setLoggedInAccountName(store?.sessionStore.loggedInAccountName || null);
     setInfo(store?.sessionStore.info || null);
     setRunebaseBalanceUSD(store?.sessionStore.runebaseBalanceUSD);
     // setNetworkBalAnnotation(store?.sessionStore.networkBalAnnotation || null);
-  }, [store]);
+  }, [
+    store,
+    store?.sessionStore.loggedInAccountName,
+    store?.sessionStore.runebaseBalanceUSD,
+    store?.sessionStore.info,
+  ]);
 
   const handleClick = (id: string, event: React.MouseEvent<HTMLElement>) => {
     event.stopPropagation();
