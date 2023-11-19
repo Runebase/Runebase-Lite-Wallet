@@ -43,7 +43,6 @@ const SliField: React.FC<SliFieldProps> = observer(({ classes, store }) => (
       <Select
         className={classes.select}
         inputProps={{ name: 'sessionLogoutInterval', id: 'sessionLogoutInterval'}}
-        disableUnderline
         value={store.settingsStore.sessionLogoutInterval}
         onChange={(event) => store.settingsStore.changeSessionLogoutInterval(Number(event.target.value))}
       >

@@ -76,7 +76,6 @@ const ContractAddressField: React.FC<{
         type="text"
         multiline={false}
         value={addTokenStore.contractAddress || ''}
-        InputProps={{ disableUnderline: true }}
         onChange={(event) => addTokenStore.setContractAddress(event.target.value)}
         onKeyPress={onEnterPress}
       />

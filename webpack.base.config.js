@@ -32,6 +32,7 @@ module.exports = {
     alias: {
       'scryptsy/browser': 'scryptsy',
       'clsx': require.resolve('clsx'),
+      'bignumber.js': require.resolve('bignumber.js'),
     },
     extensions: ['.ts', '.tsx', '.js', '.jsx', '.json'],
     fallback: {
@@ -49,13 +50,16 @@ module.exports = {
   },
   module: {
     rules: [
-      {
-        test: /\.(ts|tsx|js)$/,
-        enforce: 'pre',
-        exclude: /node_modules/,
-        use: [
-        ],
-      },
+      // {
+      //   test: /\.(ts|tsx|js)$/,
+      //   enforce: 'pre',
+      //   exclude: /node_modules/,
+      //   use: [
+      //     {
+      //       loader: require.resolve('babel-loader'),
+      //     },
+      //   ],
+      // },
       {
         oneOf: [
           {

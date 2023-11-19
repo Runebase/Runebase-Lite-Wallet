@@ -1,3 +1,4 @@
+// constants.ts
 export enum TARGET_NAME {
   INPAGE = 'runebasechrome-inpage',
   CONTENTSCRIPT = 'runebasechrome-contentscript',
@@ -86,6 +87,7 @@ export enum MESSAGE_TYPE {
 
   SIGN_POD = 'SIGN_POD',
   SIGN_POD_RETURN = 'SIGN_POD_RETURN',
+  SAVE_SEED_TO_FILE_RETURN = 'SAVE_SEED_TO_FILE_RETURN',
 }
 
 export enum RESPONSE_TYPE {

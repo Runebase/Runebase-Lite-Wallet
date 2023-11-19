@@ -1,4 +1,4 @@
-
+// contentscript/index.ts
 import { injectAllScripts } from './inject';
 import { IExtensionAPIMessage, IRPCCallRequest, IRPCCallResponse, ICurrentAccount, PodSignResponse, PodSignRequest } from '../types';
 import { TARGET_NAME, API_TYPE, MESSAGE_TYPE, RPC_METHOD, PORT_NAME } from '../constants';
@@ -164,6 +164,8 @@ function handleInPageMessage(event: MessageEvent) {
 
 // Handle messages sent from bg script -> content script(here) -> inpage
 function handleBackgroundScriptMessage(message: any) {
+  console.log('MESSAGE RECEIVED FROM BACKGROUND SCRIPT');
+  console.log(message);
   switch (message.type) {
   case MESSAGE_TYPE.EXTERNAL_RPC_CALL_RETURN:
     postWindowMessage<IRPCCallResponse>(TARGET_NAME.INPAGE, {
@@ -174,6 +176,14 @@ function handleBackgroundScriptMessage(message: any) {
   case MESSAGE_TYPE.SIGN_POD_RETURN:
     postWindowMessage<IRPCCallResponse>(TARGET_NAME.INPAGE, {
       type: API_TYPE.SIGN_POD_RESPONSE,
+      payload: message,
+    });
+    break;
+  case MESSAGE_TYPE.SAVE_SEED_TO_FILE_RETURN:
+    console.log('SAVE_SEED_TO_FILE_RETURN');
+    console.log(message);
+    postWindowMessage<IRPCCallResponse>(TARGET_NAME.INPAGE, {
+      type: API_TYPE.SAVE_SEED_TO_FILE_RESPONSE,
       payload: message,
     });
     break;

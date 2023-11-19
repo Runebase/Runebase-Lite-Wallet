@@ -1,3 +1,4 @@
+// Login.tsx
 import React, { useEffect, Fragment } from 'react';
 import {
   Typography,
@@ -29,8 +30,18 @@ const Login: React.FC<IProps> = inject('store')(
     const classes = useStyles();
     const { loginStore } = store;
     const { hasAccounts, matchError, error } = loginStore;
-    useEffect(() => { loginStore.init(); }, [loginStore]);
-    useEffect(() => { }, [hasAccounts]);
+
+    useEffect(() => {
+      loginStore.init();
+    }, [loginStore]);
+
+    const handlePasswordChange = (e: any) => {
+      loginStore.password = e.target.value;
+    };
+
+    const handleConfirmPasswordChange = (e: any) => {
+      loginStore.confirmPassword = e.target.value;
+    };
 
     return (
       <div className={classes.root}>
@@ -42,10 +53,9 @@ const Login: React.FC<IProps> = inject('store')(
             }}
           >
             <PasswordInput
-              // classNames={classes.passwordField}
               autoFocus={true}
               placeholder="Password"
-              onChange={(e: any) => (loginStore.password = e.target.value)}
+              onChange={handlePasswordChange}
               onEnterPress={loginStore.login}
             />
           </Box>
@@ -57,11 +67,10 @@ const Login: React.FC<IProps> = inject('store')(
                 }}
               >
                 <PasswordInput
-                // classNames={classes.passwordField}
                   placeholder="Confirm password"
                   error={!!matchError}
                   errorText={matchError}
-                  onChange={(e: any) => (loginStore.confirmPassword = e.target.value)}
+                  onChange={handleConfirmPasswordChange}
                   onEnterPress={loginStore.login}
                 />
               </Box>

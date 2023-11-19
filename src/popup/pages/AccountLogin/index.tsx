@@ -37,7 +37,6 @@ const AccountSection: React.FC<{ classes: Record<string, string>; store: AppStor
     <div className={classes.accountContainer}>
       <Typography className={classes.selectAcctText}>Select account</Typography>
       <Select
-        disableUnderline
         className={classes.accountSelect}
         name="accounts"
         value={store.accountLoginStore.selectedWalletName}

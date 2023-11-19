@@ -14,16 +14,6 @@ export default class RPCController extends IController {
     this.initFinished();
   }
 
-  /*
-  * Executes a sendtocontract on the blockchain.
-  * @param contractAddress The contract address of the contract.
-  * @param abi The ABI of the contract.
-  * @param methodName The method to call that is in the ABI.
-  * @param args The arguments that are needed when calling the method.
-  *   @argParam gasLimit (unit - gas)
-  *   @argParam gasPrice (unit - satoshi/gas)
-  * @return The result of the callcontract.
-  */
   public sendToContract = async (id: string, args: any[]): Promise<IRPCCallResponse> => {
     let result: any;
     let error: string | undefined;
@@ -38,6 +28,9 @@ export default class RPCController extends IController {
       // Set default values for amount, gasLimit, and gasPrice if needed
       const { DEFAULT_AMOUNT, DEFAULT_GAS_LIMIT, DEFAULT_GAS_PRICE } = Config.TRANSACTION;
       const [address, data, amount, gasLimit, gasPrice] = args;
+
+      console.log('Sending to contract. Args:', args);
+
       const newArgs = [
         address,
         data,
@@ -45,20 +38,20 @@ export default class RPCController extends IController {
         gasLimit || DEFAULT_GAS_LIMIT,
         gasPrice || DEFAULT_GAS_PRICE,
       ];
+
+      console.log('Sending transaction. New Args:', newArgs);
+
       result = await this.main.account.loggedInAccount!.wallet!.sendTransaction(newArgs) as Insight.ISendRawTxResult;
+
+      console.log('Transaction result:', result);
     } catch (err) {
-      console.error(error);
+      console.error(err);
       error = (err as Error).message;
     }
 
     return { id, result, error };
   };
 
-  /*
-  * Executes a callcontract request.
-  * @param id Request ID.
-  * @param args Request arguments. [contractAddress, data, amount?, gasLimit?, gasPrice?]
-  */
   public callContract = async (id: string, args: any[]): Promise<IRPCCallResponse> => {
     let result: any;
     let error: string | undefined;
@@ -71,7 +64,11 @@ export default class RPCController extends IController {
         throw Error('Requires first two arguments: contractAddress and data.');
       }
 
+      console.log('Calling contract. Args:', args);
+
       result = await rpcProvider.rawCall(RPC_METHOD.CALL_CONTRACT, args) as Insight.IContractCall;
+
+      console.log('Contract call result:', result);
     } catch (err) {
       error = (err as Error).message;
       console.error(error);
@@ -102,11 +99,6 @@ export default class RPCController extends IController {
     });
   };
 
-  /*
-  * Handles a rawCall requested externally and sends the response back to the active tab.
-  * @param id Request ID.
-  * @param args Request arguments. [contractAddress, data, amount?, gasLimit?, gasPrice?]
-  */
   private externalRawCall = async (id: string, method: string, args: any[]) => {
     let result: any;
     let error: string | undefined;
@@ -117,9 +109,15 @@ export default class RPCController extends IController {
         throw Error('Cannot call RPC without provider.');
       }
 
+      console.log('External raw call. Method:', method, 'Args:', args);
+
       result = await rpcProvider.rawCall(method, args);
+
+      console.log('External raw call result:', result);
     } catch (e) {
+      console.log(e);
       error = (e as Error).message;
+      console.error(error);
     }
 
     this.sendRpcResponseToActiveTab(id, result, error);

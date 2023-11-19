@@ -1,5 +1,3 @@
-import axios from 'axios';
-
 import RunebaseChromeController from '.';
 import IController from './iController';
 import { MESSAGE_TYPE } from '../../constants';
@@ -51,16 +49,20 @@ export default class ExternalController extends IController {
   */
   private getRunebasePrice = async () => {
     try {
-      // const jsonObj = await axios.get('https://api.coinmarketcap.com/v2/ticker/xxxx/');
-      const jsonObj = await axios.get('https://api.coinpaprika.com/v1/ticker/runes-runebase');
-      // this.runebasePriceUSD = jsonObj.data.data.quotes.USD.price;
-      this.runebasePriceUSD = jsonObj.data.price_usd;
+      // Replace Axios with Fetch API
+      const response = await fetch('https://api.coinpaprika.com/v1/ticker/runes-runebase');
+      const jsonObj = await response.json();
 
-      if (this.main.account.loggedInAccount
-        && this.main.account.loggedInAccount.wallet
-        && this.main.account.loggedInAccount.wallet.info
+      this.runebasePriceUSD = jsonObj.price_usd;
+
+      if (
+        this.main.account.loggedInAccount &&
+        this.main.account.loggedInAccount.wallet &&
+        this.main.account.loggedInAccount.wallet.info
       ) {
-        const runebaseUSD = this.calculateRunebaseToUSD(this.main.account.loggedInAccount.wallet.info.balance);
+        const runebaseUSD = this.calculateRunebaseToUSD(
+          this.main.account.loggedInAccount.wallet.info.balance
+        );
         this.main.account.loggedInAccount.wallet.runebaseUSD = runebaseUSD;
 
         chrome.runtime.sendMessage({

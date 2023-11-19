@@ -1,4 +1,5 @@
-import { observable, computed, action, makeObservable } from 'mobx';
+// LoginStore.ts
+import { observable, computed, action, makeObservable, runInAction } from 'mobx';
 import { isEmpty } from 'lodash';
 
 import AppStore from './AppStore';
@@ -35,7 +36,9 @@ export default class LoginStore {
     // Check if there are accounts
     chrome.runtime.sendMessage({ type: MESSAGE_TYPE.HAS_ACCOUNTS }, action((response: any) => {
       console.log('Received hasAccounts response:', response);
-      this.hasAccounts = response;
+      runInAction(() => {
+        this.hasAccounts = response;
+      });
     }));
 
     // Attempt to restore session
@@ -43,22 +46,27 @@ export default class LoginStore {
       console.log('Received restore session response:', response);
 
       if (response === RESPONSE_TYPE.RESTORING_SESSION) {
-        this.app.routerStore.push('/loading');
+        runInAction(() => {
+          this.app.routerStore.push('/loading');
+        });
       }
     }));
   }
 
-  @action
-  public init = () => {
-      console.log('LoginStore init method called');
+  @action  public init = () => {
+    console.log('LoginStore init method called');
+    runInAction(() => {
       this.password = INIT_VALUES.password;
       this.confirmPassword = INIT_VALUES.confirmPassword;
-    };
+    });
+  };
 
-  public login = () => {
+  @action  public login = () => {
     if (this.error === false) {
       console.log('Attempting login...');
-      this.app.routerStore.push('/loading');
+      runInAction(() => {
+        this.app.routerStore.push('/loading');
+      });
       chrome.runtime.sendMessage({ type: MESSAGE_TYPE.LOGIN, password: this.password, algorithm: this.algorithm });
     }
   };
