@@ -80,7 +80,7 @@ const SettingsButton: FC<IProps> =
         onClose={() => navBarStore.settingsMenuAnchor = undefined}
       >
         <MenuItem onClick={navBarStore.routeToSettings}>Settings</MenuItem>
-        <MenuItem onClick={navBarStore.logout}>Logout</MenuItem>
+        <MenuItem onClick={navBarStore.logout}>Change Account</MenuItem>
       </Menu>
     </Fragment>
   ));
