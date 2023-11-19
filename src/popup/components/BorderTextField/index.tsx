@@ -22,7 +22,6 @@ const BorderTextField: React.FC<any> = ({
       type="text"
       placeholder={placeholder}
       InputProps={{
-        disableUnderline: true,
         classes: { input: classes.textFieldInput },
       }}
       onChange={onChange}

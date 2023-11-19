@@ -9,7 +9,7 @@ const Logo: FC = () => {
     <div className={classes.logoContainer}>
       <img className={classes.logo} src={chrome.runtime.getURL('images/logo.png')} alt={'Logo'} />
       <Typography className={classes.logoText}>RunebaseChrome</Typography>
-      <Typography className={classes.version}>version {chrome.runtime.getManifest().version}</Typography>
+      <Typography className={classes.version}>v{chrome.runtime.getManifest().version}</Typography>
     </div>
   );
 };

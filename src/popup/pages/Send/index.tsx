@@ -77,7 +77,6 @@ const FromField = observer(({ classes, sendStore, sessionStore }: any) => (
       <Select
         className={classes.selectOrTextField}
         inputProps={{ name: 'from', id: 'from'}}
-        disableUnderline
         value={sessionStore.info.addrStr}
         onChange={(event) => sendStore.senderAddress = event.target.value}
       >
@@ -100,7 +99,7 @@ const ToField = observer(({ classes, sendStore, sessionStore, onEnterPress }: an
         multiline={false}
         placeholder={sessionStore?.info?.addrStr || ''}
         value={sendStore.receiverAddress || ''}
-        InputProps={{ className: classes.fieldTextOrInput, endAdornment: <ArrowDropDown />, disableUnderline: true }}
+        InputProps={{ className: classes.fieldTextOrInput, endAdornment: <ArrowDropDown /> }}
         onChange={(event) => sendStore.receiverAddress = event.target.value}
         onKeyPress={onEnterPress}
       />
@@ -117,7 +116,6 @@ const TokenField = observer(({ classes, sendStore }: any) => (
     <div className={classes.fieldContentContainer}>
       <Select
         className={classes.selectOrTextField}
-        disableUnderline
         value={sendStore.token ? sendStore.token.symbol : ''}
         onChange={(event) => sendStore.changeToken(event.target.value)}
       >
@@ -166,7 +164,6 @@ const AmountField = observer(({ classes, sendStore, onEnterPress }: any) => (
               {sendStore.token && sendStore.token.symbol}
             </Typography>
           ),
-          disableUnderline: true,
         }}
         onChange={(event) => {
           const newValue = event.target.value;
@@ -187,7 +184,6 @@ const TransactionSpeedField = observer(({ classes, sendStore }: any) => (
     <div className={classes.fieldContentContainer}>
       <Select
         className={classes.selectOrTextField}
-        disableUnderline
         value={sendStore.transactionSpeed}
         onChange={(event) => sendStore.transactionSpeed = event.target.value}
       >
@@ -234,7 +230,6 @@ const GasLimitField = observer(({ classes, sendStore, onEnterPress }: any) => (
               GAS
             </Typography>
           ),
-          disableUnderline: true,
         }}
         onChange={(event) => sendStore.gasLimit = event.target.value}
         onKeyPress={onEnterPress}
@@ -279,7 +274,6 @@ const GasPriceField = observer(({ classes, sendStore, onEnterPress }: any) => (
               SATOSHI/GAS
             </Typography>
           ),
-          disableUnderline: true,
         }}
         onChange={(event) => sendStore.gasPrice = event.target.value}
         onKeyPress={onEnterPress}

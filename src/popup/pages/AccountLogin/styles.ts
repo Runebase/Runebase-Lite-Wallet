@@ -17,16 +17,16 @@ const useStyles = makeStyles((theme) => ({
     padding: theme.spacing(2), // Use spacing instead of padding
   },
   selectAcctText: {
-    //fontSize: theme.typography.fontSize, // Use typography instead of font
-    //fontWeight: theme.typography.fontWeightBold as FontWeightProperty, // Use typography instead of fontWeight
-    //color: theme.palette.secondary.main,
+    fontSize: theme.typography.fontSize, // Use typography instead of font
+    fontWeight: theme.typography.fontWeightBold, // Use typography instead of fontWeight
+    color: theme.palette.secondary.main,
     marginBottom: theme.spacing(1), // Use spacing instead of padding
   },
   accountSelect: {
     flex: 1,
     padding: theme.spacing(1), // Use spacing instead of padding
     marginBottom: theme.spacing(1), // Use spacing instead of padding
-    //background: theme.palette.secondary.main,
+    // background: theme.palette.secondary.main,
     borderRadius: theme.shape.borderRadius, // Use shape instead of border
   },
   createAccountContainer: {
@@ -37,24 +37,24 @@ const useStyles = makeStyles((theme) => ({
     display: 'flex',
     alignItems: 'center',
     fontSize: theme.typography.fontSizeMedium, // Use typography instead of font
-    //color: theme.palette.secondary.main,
+    color: theme.palette.secondary.main,
     marginBottom: theme.spacing(0.3), // Use spacing instead of margin
   },
   createAccountButton: {
     minHeight: 0,
     padding: `0 ${theme.spacing(1)}`, // Use spacing instead of unit
     fontSize: theme.typography.fontSizeMedium, // Use typography instead of font
-    //fontWeight: theme.typography.fontWeightBold as FontWeightProperty, // Use typography instead of fontWeight
-    //color: theme.palette.secondary.main,
+    fontWeight: theme.typography.fontWeightBold, // Use typography instead of fontWeight
+    color: theme.palette.secondary.main,
   },
   permissionContainer: {
     flex: 1,
     padding: theme.spacing(2), // Use spacing instead of padding
   },
   permissionsHeader: {
-    //fontSize: theme.typography.fontSize, // Use typography instead of font
-    //fontWeight: theme.typography.fontWeightBold as FontWeightProperty, // Use typography instead of fontWeight
-    //color: theme.palette.text.primary,
+    fontSize: theme.typography.fontSize, // Use typography instead of font
+    fontWeight: theme.typography.fontWeightBold, // Use typography instead of fontWeight
+    color: theme.palette.text.primary,
     marginBottom: theme.spacing(2), // Use spacing instead of padding
   },
   loginContainer: {

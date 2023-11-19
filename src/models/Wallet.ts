@@ -52,10 +52,12 @@ export default class Wallet implements ISigner {
         // if they are not equal, then the balance has changed
         if (!timedOut && !deepEqual(this.info, newInfo)) {
           this.info = newInfo;
+          console.log('Wallet info updated:', this.info); // Added logging
           return true;
         }
       } catch (e) {
-        throw(Error(e as any));
+        console.error('Error updating wallet info:', e); // Added logging
+        throw Error(e as any);
       }
 
       return false;
@@ -68,6 +70,7 @@ export default class Wallet implements ISigner {
     }
 
     // convert amount units from whole RUNEBASE => SATOSHI RUNEBASE
+    console.log('Sending tokens:', to, amount, options); // Added logging
     return await this.qjsWallet!.send(to, amount * 1e8, { feeRate: options.feeRate });
   };
 
@@ -79,6 +82,7 @@ export default class Wallet implements ISigner {
       throw Error('Requires first two arguments: contractAddress and data.');
     }
 
+    console.log('Sending transaction:', args); // Added logging
     return await this.rpcProvider!.rawCall(RPC_METHOD.SEND_TO_CONTRACT, args);
   };
 
@@ -87,10 +91,12 @@ export default class Wallet implements ISigner {
       throw Error('Cannot calculate max send amount without wallet or this.info.');
     }
     try {
+      console.log('Calculating max Runebase send amount...'); // Added logging
       this.maxRunebaseSend = await this.qjsWallet.sendEstimateMaxValue(this.maxRunebaseSendToAddress(networkName));
+      console.log('Max Runebase send amount calculated:', this.maxRunebaseSend); // Added logging
       return this.maxRunebaseSend;
     } catch (error) {
-      console.error('Error calculating max Runebase send amount:', error);
+      console.error('Error calculating max Runebase send amount:', error); // Added logging
       throw error;
     }
   };

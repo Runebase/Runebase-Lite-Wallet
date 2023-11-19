@@ -3,7 +3,7 @@ import IController from './iController';
 import { MESSAGE_TYPE, RESPONSE_TYPE, RUNEBASECHROME_ACCOUNT_CHANGE } from '../../constants';
 
 export default class SessionController extends IController {
-  public sessionTimeout?: number = undefined;
+  public sessionTimeout?: any = undefined;
 
   private sessionLogoutInterval: number = 600000; // in ms
 
@@ -61,7 +61,7 @@ export default class SessionController extends IController {
     this.clearAllIntervalsExceptAccount();
 
     // Logout from bgp after interval
-    this.sessionTimeout = window.setTimeout(() => {
+    this.sessionTimeout = setTimeout(() => {
       this.clearSession();
       this.main.crypto.resetPasswordHash();
       console.log('Session cleared');

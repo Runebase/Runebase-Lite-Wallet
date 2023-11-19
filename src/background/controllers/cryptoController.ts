@@ -62,7 +62,7 @@ export default class CryptoController extends IController {
   public generateAppSaltIfNecessary = () => {
     try {
       if (!this.appSalt) {
-        const appSalt: Uint8Array = window.crypto.getRandomValues(new Uint8Array(16)) as Uint8Array;
+        const appSalt: Uint8Array = crypto.getRandomValues(new Uint8Array(16)) as Uint8Array;
         this.appSalt = appSalt;
         chrome.storage.local.set(
           { [STORAGE.APP_SALT]: Array.from(appSalt).join(',') },

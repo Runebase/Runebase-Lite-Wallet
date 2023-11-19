@@ -51,7 +51,6 @@ const ImportWallet: React.FC<IProps> = ({ store }) => {
               placeholder={`Enter your ${importStore.importType} here to import your wallet.`}
               onChange={(e) => (importStore.mnemonicPrivateKey = e.target.value)}
               InputProps={{
-                disableUnderline: true,
                 classes: { input: classes.mnemonicPrKeyFieldInput },
               }}
             />
@@ -104,7 +103,6 @@ const TypeField: React.FC<any> = observer(({ classes, store }) => (
     <div className={classes.fieldContentContainer}>
       <Select
         className={classes.typeSelect}
-        disableUnderline
         value={store.importStore.importType}
         onChange={(event) => store.importStore.changeImportType(event.target.value)}
       >

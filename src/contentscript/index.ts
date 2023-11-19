@@ -1,4 +1,4 @@
-
+// contentscript/index.ts
 import { injectAllScripts } from './inject';
 import { IExtensionAPIMessage, IRPCCallRequest, IRPCCallResponse, ICurrentAccount, PodSignResponse, PodSignRequest } from '../types';
 import { TARGET_NAME, API_TYPE, MESSAGE_TYPE, RPC_METHOD, PORT_NAME } from '../constants';
@@ -130,6 +130,13 @@ function forwardInpageAccountRequest() {
   port.postMessage({ type: MESSAGE_TYPE.GET_INPAGE_RUNEBASECHROME_ACCOUNT_VALUES });
 }
 
+function handleOpenWalletExtension(payload: any) {
+  console.log('Handling OPEN_WALLET_EXTENSION');
+
+  // Send a message to the background script to open the wallet extension
+  chrome.runtime.sendMessage({ type: API_TYPE.OPEN_WALLET_EXTENSION, payload });
+}
+
 // Handle messages sent from inpage -> content script(here) -> bg script
 function handleInPageMessage(event: MessageEvent) {
   if (isMessageNotValid(event, TARGET_NAME.CONTENTSCRIPT)) {
@@ -144,16 +151,21 @@ function handleInPageMessage(event: MessageEvent) {
   case API_TYPE.RPC_REQUEST:
     handleRPCRequest(message.payload);
     break;
+  case API_TYPE.OPEN_WALLET_EXTENSION:  // Add this case
+    handleOpenWalletExtension(message.payload);
+    break;
   case API_TYPE.GET_INPAGE_RUNEBASECHROME_ACCOUNT_VALUES:
     forwardInpageAccountRequest();
     break;
   default:
-    throw Error(`Contentscript processing invalid type: ${message}`);
+    throw Error(`Contentscript processing invalid type: ${JSON.stringify(message)}`);
   }
 }
 
 // Handle messages sent from bg script -> content script(here) -> inpage
 function handleBackgroundScriptMessage(message: any) {
+  console.log('MESSAGE RECEIVED FROM BACKGROUND SCRIPT');
+  console.log(message);
   switch (message.type) {
   case MESSAGE_TYPE.EXTERNAL_RPC_CALL_RETURN:
     postWindowMessage<IRPCCallResponse>(TARGET_NAME.INPAGE, {
@@ -164,6 +176,14 @@ function handleBackgroundScriptMessage(message: any) {
   case MESSAGE_TYPE.SIGN_POD_RETURN:
     postWindowMessage<IRPCCallResponse>(TARGET_NAME.INPAGE, {
       type: API_TYPE.SIGN_POD_RESPONSE,
+      payload: message,
+    });
+    break;
+  case MESSAGE_TYPE.SAVE_SEED_TO_FILE_RETURN:
+    console.log('SAVE_SEED_TO_FILE_RETURN');
+    console.log(message);
+    postWindowMessage<IRPCCallResponse>(TARGET_NAME.INPAGE, {
+      type: API_TYPE.SAVE_SEED_TO_FILE_RESPONSE,
       payload: message,
     });
     break;

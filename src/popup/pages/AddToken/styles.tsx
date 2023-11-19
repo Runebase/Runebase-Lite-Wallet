@@ -20,7 +20,7 @@ const useStyles = makeStyles((theme) => ({
   },
   fieldHeading: {
     marginBottom: theme.spacing(1), // Use spacing instead of unit
-    //fontSize: theme.typography.fontSize, // Use typography instead of font
+    fontSize: theme.typography.fontSize, // Use typography instead of font
     fontWeight: 'bold',
   },
   fieldContainer: {
@@ -36,11 +36,11 @@ const useStyles = makeStyles((theme) => ({
   fieldContentContainer: {
     padding: theme.spacing(1), // Use spacing instead of padding
     border: '1px solid black',
-    // borderRadius: theme.border.radius,
+    borderRadius: theme.shape.borderRadius,
   },
   errorText: {
-    //fontSize: theme.typography.fontSize, // Use typography instead of font
-    //color: theme.palette.error.main, // Use error color from the palette
+    fontSize: theme.typography.fontSize, // Use typography instead of font
+    color: theme.palette.error.main, // Use error color from the palette
     marginTop: theme.spacing(1), // Use spacing instead of unit
   },
   labelContainer: {
@@ -48,10 +48,10 @@ const useStyles = makeStyles((theme) => ({
     alignItems: 'center',
   },
   detailLabel: {
-    //color: theme.palette.text.primary,
-    //fontSize: theme.typography.fontSize, // Use typography instead of font
-    //fontWeight: theme.typography.fontWeightBold as FontWeightProperty, // Use typography instead of fontWeight
-    //lineHeight: theme.typography.lineHeight, // Use typography instead of lineHeight
+    color: theme.palette.text.primary,
+    fontSize: theme.typography.fontSize, // Use typography instead of font
+    fontWeight: theme.typography.fontWeightBold, // Use typography instead of fontWeight
+    lineHeight: theme.typography.lineHeight, // Use typography instead of lineHeight
   },
   valueContainer: {
     flex: 1,
@@ -61,7 +61,7 @@ const useStyles = makeStyles((theme) => ({
   },
   detailValue: {
     fontSize: theme.typography.fontSizeLarge, // Adjust to your desired value
-    //color: theme.palette.text.primary,
+    color: theme.palette.text.primary,
     lineHeight: theme.typography.lineHeightLarge, // Adjust to your desired value
   },
   addButton: {

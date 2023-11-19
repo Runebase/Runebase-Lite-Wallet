@@ -25,6 +25,13 @@ export class Utils {
     });
   };
 
+  public openWallet =() => {
+    postWindowMessage(TARGET_NAME.CONTENTSCRIPT, {
+      type: API_TYPE.OPEN_WALLET_EXTENSION,
+      payload: {},
+    });
+  };
+
 
   /**
    * @param response.error {string}

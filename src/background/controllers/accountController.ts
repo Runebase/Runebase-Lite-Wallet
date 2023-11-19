@@ -1,3 +1,4 @@
+// background/controllers/accountController.ts
 import { isEmpty, find, cloneDeep } from 'lodash';
 import { Wallet as RunebaseWallet } from 'runebasejs-wallet';
 import assert from 'assert';
@@ -41,7 +42,7 @@ export default class AccountController extends IController {
   private mainnetAccounts: Account[] = INIT_VALUES.mainnetAccounts;
   private testnetAccounts: Account[] = INIT_VALUES.testnetAccounts;
   private regtestAccounts: Account[] = INIT_VALUES.regtestAccounts;
-  private getInfoInterval?: number = INIT_VALUES.getInfoInterval;
+  private getInfoInterval?: any = INIT_VALUES.getInfoInterval;
 
   constructor(main: RunebaseChromeController) {
     super('account', main);
@@ -198,11 +199,6 @@ export default class AccountController extends IController {
     await this.addAccountAndLogin(accountName, privateKeyHash, wallet);
   };
 
-  /*
-  * Saves the generated mnemonic to a file and creates a new account.
-  * @param accountName The account name for the new wallet account.
-  * @param mnemonic The mnemonic to derive the wallet from.
-  */
   public saveToFile = (accountName: string, mnemonic: string) => {
     const timestamp = new Date().toLocaleDateString(undefined, {
       year: 'numeric',
@@ -213,11 +209,19 @@ export default class AccountController extends IController {
       second: '2-digit',
       hour12: false,
     });
-    const file = new Blob([mnemonic], {type: 'text/plain'});
-    const element = document.createElement('a');
-    element.href = URL.createObjectURL(file);
-    element.download = `runebasechrome_${accountName}_${timestamp}.bak`;
-    element.click();
+    const filename = `runebasechrome_${accountName}_${timestamp}.bak`;
+
+    // Send a message to the popup or content script to handle the file download
+    // chrome.runtime.sendMessage({
+    //   type: MESSAGE_TYPE.SAVE_SEED_TO_FILE_RETURN,
+    //   filename: filename,
+    //   content: mnemonic,
+    // });
+    chrome.runtime.sendMessage({
+      type: MESSAGE_TYPE.SAVE_SEED_TO_FILE_RETURN,
+      filename: filename,
+      content: mnemonic,
+    });
 
     this.importMnemonic(accountName, mnemonic);
   };
@@ -401,7 +405,7 @@ export default class AccountController extends IController {
   */
   private startPolling = async () => {
     if (!this.getInfoInterval) {
-      this.getInfoInterval = window.setInterval(() => {
+      this.getInfoInterval = setInterval(() => {
         this.getWalletInfo();
       }, AccountController.GET_INFO_INTERVAL_MS);
     }

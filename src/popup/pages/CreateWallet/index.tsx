@@ -87,7 +87,7 @@ CreateWallet.propTypes = {
     selectionDivider: PropTypes.string.isRequired,
     selectionDividerText: PropTypes.string.isRequired,
     importButton: PropTypes.string.isRequired,
-  }).isRequired,
+  }),
 };
 
 export default inject('store')(observer(CreateWallet));

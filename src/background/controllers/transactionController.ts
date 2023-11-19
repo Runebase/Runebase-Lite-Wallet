@@ -17,7 +17,7 @@ export default class TransactionController extends IController {
     return !!this.pagesTotal && (this.pagesTotal > this.pageNum + 1);
   }
 
-  private getTransactionsInterval?: number = undefined;
+  private getTransactionsInterval?: any = undefined;
 
   constructor(main: RunebaseChromeController) {
     super('transaction', main);
@@ -73,7 +73,7 @@ export default class TransactionController extends IController {
   private startPolling = async () => {
     this.fetchFirst();
     if (!this.getTransactionsInterval) {
-      this.getTransactionsInterval = window.setInterval(() => {
+      this.getTransactionsInterval = setInterval(() => {
         this.refreshTransactions();
       }, TransactionController.GET_TX_INTERVAL_MS);
     }

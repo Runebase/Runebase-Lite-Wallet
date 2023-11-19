@@ -31,7 +31,7 @@ const useStyles = makeStyles((theme) => ({
     alignItems: 'center',
   },
   text: {
-    fontSize: theme.font && theme.font.md ? theme.font.md : 'inherit',
+    fontSize: theme.typography.fontSize,
     marginBottom: theme.spacing(1),
   },
   anim9: {

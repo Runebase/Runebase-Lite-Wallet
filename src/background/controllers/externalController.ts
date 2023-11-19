@@ -1,5 +1,3 @@
-import axios from 'axios';
-
 import RunebaseChromeController from '.';
 import IController from './iController';
 import { MESSAGE_TYPE } from '../../constants';
@@ -12,7 +10,7 @@ const INIT_VALUES = {
 export default class ExternalController extends IController {
   private static GET_PRICE_INTERVAL_MS: number = 60000;
 
-  private getPriceInterval?: number = INIT_VALUES.getPriceInterval;
+  private getPriceInterval?: any = INIT_VALUES.getPriceInterval;
   private runebasePriceUSD: number = INIT_VALUES.runebasePriceUSD;
 
   constructor(main: RunebaseChromeController) {
@@ -30,7 +28,7 @@ export default class ExternalController extends IController {
   public startPolling = async () => {
     await this.getRunebasePrice();
     if (!this.getPriceInterval) {
-      this.getPriceInterval = window.setInterval(() => {
+      this.getPriceInterval = setInterval(() => {
         this.getRunebasePrice();
       }, ExternalController.GET_PRICE_INTERVAL_MS);
     }
@@ -51,16 +49,20 @@ export default class ExternalController extends IController {
   */
   private getRunebasePrice = async () => {
     try {
-      // const jsonObj = await axios.get('https://api.coinmarketcap.com/v2/ticker/xxxx/');
-      const jsonObj = await axios.get('https://api.coinpaprika.com/v1/ticker/runes-runebase');
-      // this.runebasePriceUSD = jsonObj.data.data.quotes.USD.price;
-      this.runebasePriceUSD = jsonObj.data.price_usd;
+      // Replace Axios with Fetch API
+      const response = await fetch('https://api.coinpaprika.com/v1/ticker/runes-runebase');
+      const jsonObj = await response.json();
 
-      if (this.main.account.loggedInAccount
-        && this.main.account.loggedInAccount.wallet
-        && this.main.account.loggedInAccount.wallet.info
+      this.runebasePriceUSD = jsonObj.price_usd;
+
+      if (
+        this.main.account.loggedInAccount &&
+        this.main.account.loggedInAccount.wallet &&
+        this.main.account.loggedInAccount.wallet.info
       ) {
-        const runebaseUSD = this.calculateRunebaseToUSD(this.main.account.loggedInAccount.wallet.info.balance);
+        const runebaseUSD = this.calculateRunebaseToUSD(
+          this.main.account.loggedInAccount.wallet.info.balance
+        );
         this.main.account.loggedInAccount.wallet.runebaseUSD = runebaseUSD;
 
         chrome.runtime.sendMessage({

@@ -4,7 +4,6 @@ import { MESSAGE_TYPE, PORT_NAME, RUNEBASECHROME_ACCOUNT_CHANGE } from '../../co
 import { InpageAccount } from '../../models/InpageAccount';
 
 export default class InpageAccountController extends IController {
-
   // All connected ports from content script
   private ports: chrome.runtime.Port[] = [];
 
@@ -23,7 +22,7 @@ export default class InpageAccountController extends IController {
   };
 
   // bg -> content script
-  public sendInpageAccount = (port: any, statusChangeReason: RUNEBASECHROME_ACCOUNT_CHANGE) => {
+  public sendInpageAccount = (port: chrome.runtime.Port, statusChangeReason: RUNEBASECHROME_ACCOUNT_CHANGE) => {
     port.postMessage({
       type: MESSAGE_TYPE.SEND_INPAGE_RUNEBASECHROME_ACCOUNT_VALUES,
       accountWrapper: this.inpageAccountWrapper(statusChangeReason),
@@ -51,15 +50,15 @@ export default class InpageAccountController extends IController {
   };
 
   // when a port connects
-  private handleLongLivedConnection = (port: any) => {
+  private handleLongLivedConnection = (port: chrome.runtime.Port) => {
     if (port.name !== PORT_NAME.CONTENTSCRIPT) {
       return;
     }
     this.ports.push(port);
 
     /*
-    * Triggers when port is disconnected from other end, such as when user closes
-    * the tab, or navigates to another page. Does not trigger when extension is uninstalled.
+    * Triggers when port is disconnected from other end, such as when the user closes
+    * the tab or navigates to another page. Does not trigger when the extension is uninstalled.
     */
     port.onDisconnect.addListener(this.handleDisconnect);
     port.onMessage.addListener((msg: any) => {
@@ -70,7 +69,7 @@ export default class InpageAccountController extends IController {
   };
 
   // remove disconnected port from ports array
-  private handleDisconnect = (port: any) => {
+  private handleDisconnect = (port: chrome.runtime.Port) => {
     const portIdx = this.ports.indexOf(port);
     if (portIdx !== -1) {
       this.ports.splice(portIdx, 1);
