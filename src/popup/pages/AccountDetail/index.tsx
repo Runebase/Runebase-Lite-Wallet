@@ -117,7 +117,7 @@ const TransactionList: React.FC<{
               {timestamp || '01-01-2018 00:00'}
             </Typography>
           </div>
-          <AmountInfo classes={classes} amount={amount} token="RUNES" />
+          <AmountInfo classes={classes} amount={amount / 1e8} token="RUNES" />
           <div>
             <KeyboardArrowRight className={classes.arrowRight} />
           </div>

@@ -1,5 +1,5 @@
-import { Insight } from 'runebasejs-wallet';
-import { map, find, partition, sumBy, includes, round } from 'lodash';
+import { RunebaseInfo } from 'runebasejs-wallet';
+import { map, round } from 'lodash';
 import moment from 'moment';
 
 import RunebaseChromeController from '.';
@@ -13,6 +13,7 @@ export default class TransactionController extends IController {
   public transactions: Transaction[] = [];
   public pageNum: number = 0;
   public pagesTotal?: number;
+  public totalTransactions?: number;
   public get hasMore(): boolean {
     return !!this.pagesTotal && (this.pagesTotal > this.pageNum + 1);
   }
@@ -30,7 +31,10 @@ export default class TransactionController extends IController {
   * Fetches the first page of transactions.
   */
   public fetchFirst = async () => {
-    this.transactions = await this.fetchTransactions(0);
+    this.transactions = await this.fetchTransactions(
+      10, // Limit
+      0, // Offset
+    );
     this.sendTransactionsMessage();
   };
 
@@ -39,7 +43,10 @@ export default class TransactionController extends IController {
   */
   public fetchMore = async () => {
     this.pageNum = this.pageNum + 1;
-    const txs = await this.fetchTransactions(this.pageNum);
+    const txs = await this.fetchTransactions(
+      10,
+      this.pageNum * 10,
+    );
     this.transactions = this.transactions.concat(txs);
     this.sendTransactionsMessage();
   };
@@ -61,7 +68,12 @@ export default class TransactionController extends IController {
   private refreshTransactions = async () => {
     let refreshedItems: Transaction[] = [];
     for (let i = 0; i <= this.pageNum; i++) {
-      refreshedItems = refreshedItems.concat(await this.fetchTransactions(i));
+      refreshedItems = refreshedItems.concat(
+        await this.fetchTransactions(
+          10, // Limit
+          i * 10 // Offset
+        )
+      );
     }
     this.transactions = refreshedItems;
     this.sendTransactionsMessage();
@@ -84,7 +96,10 @@ export default class TransactionController extends IController {
   * @param pageNum The page of transactions to fetch.
   * @return The Transactions array.
   */
-  private fetchTransactions = async (pageNum: number = 0): Promise<Transaction[]> => {
+  private fetchTransactions = async (
+    limit: number = 10,
+    offset: number = 0
+  ): Promise<Transaction[]> => {
     if (!this.main.account.loggedInAccount
       || !this.main.account.loggedInAccount.wallet
       || !this.main.account.loggedInAccount.wallet.qjsWallet
@@ -94,30 +109,36 @@ export default class TransactionController extends IController {
     }
 
     const wallet = this.main.account.loggedInAccount.wallet.qjsWallet;
-    const { pagesTotal, txs } =  await wallet.getTransactions(pageNum);
-    this.pagesTotal = pagesTotal;
+    // assert.containsAllKeys(rawTxs, ["transactions", "totalCount"])
+    const {
+      totalCount,
+      transactions
+    } =  await wallet.getTransactions(
+      limit,
+      offset,
+    );
+    // this.pagesTotal = pagesTotal;
+    this.totalTransactions = totalCount;
 
-    return map(txs, (tx: Insight.IRawTransactionInfo) => {
+    return map(transactions, (tx: RunebaseInfo.IRawTransactionInfo) => {
+      console.log('tx');
+      console.log(tx);
       const {
-        txid,
+        timestamp,
         confirmations,
-        time,
-        vin,
-        vout,
+        id,
+        amount,
       } = tx;
 
-      const sender = find(vin, {addr: wallet.address});
-      const outs = map(vout, ({ value, scriptPubKey: { addresses } }) => {
-        return { value, addresses };
-      });
-      const [mine, other] = partition(outs, ({ addresses }) => includes(addresses, wallet.address));
-      const amount = sumBy(sender ? other : mine, ({ value }) => parseFloat(value));
 
       return new Transaction({
-        id: txid,
-        timestamp: moment(new Date(time * 1000)).format('MM-DD-YYYY, HH:mm'),
+        id: id,
+        timestamp: moment(new Date(timestamp * 1000)).format('MM-DD-YYYY, HH:mm'),
         confirmations,
-        amount: round(amount, 8),
+        amount: round(
+          Number(amount),
+          8
+        ),
       });
     });
   };

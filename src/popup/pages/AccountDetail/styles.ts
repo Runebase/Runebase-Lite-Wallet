@@ -37,7 +37,7 @@ const useStyles = makeStyles((theme) => ({
     flex: 1,
   },
   txState: {
-    // fontSize: theme.typography.fontSizeSmall, // Use typography instead of sm
+    fontSize: theme.typography.caption.fontSize, // Use typography instead of sm
     textTransform: 'uppercase',
     marginBottom: theme.spacing(1), // Use spacing instead of unit
     '&.pending': {
@@ -45,15 +45,15 @@ const useStyles = makeStyles((theme) => ({
     },
   },
   txId: {
-    // fontSize: theme.typography.fontSizeLarge, // Use typography instead of lg
+    fontSize: theme.typography.body2.fontSize, // Use typography instead of lg
     // color: theme.palette.text.primary,
   },
   txTime: {
-    // fontSize: theme.typography.fontSizeMedium, // Use typography instead of md
+    fontSize: theme.typography.body2.fontSize, // Use typography instead of md
     // color: theme.palette.text.secondary,
   },
   arrowRight: {
-    // fontSize: theme.typography.fontSize, // Use typography instead of icon size
+    fontSize: theme.typography.fontSize, // Use typography instead of icon size
     // color: theme.palette.gray.main, // Use palette instead of color
     marginLeft: theme.spacing(1), // Use spacing instead of xs
   },
@@ -72,7 +72,7 @@ const useStyles = makeStyles((theme) => ({
     display: 'inline-flex',
   },
   tokenAmount: {
-    // fontSize: theme.typography.fontSizeLarge, // Use typography instead of lg
+    fontSize: theme.typography.body1.fontSize, // Use typography instead of lg
     // color: theme.palette.text.primary,
     marginRight: theme.spacing(1), // Use spacing instead of unit
   },
@@ -82,7 +82,7 @@ const useStyles = makeStyles((theme) => ({
     alignItems: 'center',
   },
   tokenType: {
-    // fontSize: theme.typography.fontSizeSmall, // Use typography instead of xs
+    fontSize: theme.typography.caption.fontSize, // Use typography instead of xs
     // color: theme.palette.text.secondary,
   },
   tokenDeleteButton: {

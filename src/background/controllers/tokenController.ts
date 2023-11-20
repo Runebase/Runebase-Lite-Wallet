@@ -1,6 +1,6 @@
 import { each, findIndex, isEmpty } from 'lodash';
 import BigNumber from 'bignumber.js';
-import { Insight } from 'runebasejs-wallet';
+import { RunebaseInfo } from 'runebasejs-wallet';
 // eslint-disable-next-line @typescript-eslint/naming-convention
 const { Rweb3 } = require('rweb3');
 
@@ -154,7 +154,7 @@ export default class TokenController extends IController {
       if (error) {
         throw Error(error);
       }
-      result = rweb3.decoder.decodeCall(result, rrc223TokenABI, methodName) as Insight.IContractCall;
+      result = rweb3.decoder.decodeCall(result, rrc223TokenABI, methodName) as RunebaseInfo.IContractCall;
       const name = result.executionResult.formattedOutput[0];
 
       // Get symbol
@@ -164,7 +164,7 @@ export default class TokenController extends IController {
       if (error) {
         throw Error(error);
       }
-      result = rweb3.decoder.decodeCall(result, rrc223TokenABI, methodName) as Insight.IContractCall;
+      result = rweb3.decoder.decodeCall(result, rrc223TokenABI, methodName) as RunebaseInfo.IContractCall;
       const symbol = result.executionResult.formattedOutput[0];
 
       // Get decimals
@@ -174,7 +174,7 @@ export default class TokenController extends IController {
       if (error) {
         throw Error(error);
       }
-      result = rweb3.decoder.decodeCall(result, rrc223TokenABI, methodName) as Insight.IContractCall;
+      result = rweb3.decoder.decodeCall(result, rrc223TokenABI, methodName) as RunebaseInfo.IContractCall;
       const decimals = result.executionResult.formattedOutput[0];
 
       if (name && symbol && decimals) {
@@ -227,7 +227,7 @@ export default class TokenController extends IController {
 
       console.log('QRCToken sent successfully!');
       chrome.runtime.sendMessage({ type: MESSAGE_TYPE.SEND_TOKENS_SUCCESS });
-    } catch (e) {
+    } catch (e: any) {
       console.error('An unexpected error occurred:', e);
       chrome.runtime.sendMessage({ type: MESSAGE_TYPE.SEND_TOKENS_FAILURE, error: e.message });
     }

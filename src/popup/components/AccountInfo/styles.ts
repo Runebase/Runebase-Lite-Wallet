@@ -24,6 +24,7 @@ const useStyles = makeStyles((theme) => ({
     fontSize: theme.typography.h6.fontSize, // Adjust the font size based on your design
     fontWeight: theme.typography.fontWeightBold, // Use typography properties
     // color: theme.palette.secondary.main,
+    marginLeft: theme.spacing(1), // Use spacing instead of padding
     marginRight: theme.spacing(1), // Use spacing instead of padding
   },
   token: {
@@ -41,7 +42,7 @@ const useStyles = makeStyles((theme) => ({
   balanceUSD: {
     fontSize: theme.typography.body1.fontSize, // Adjust the font size based on your design
     // color: theme.palette.secondary.main,
-    marginBottom: theme.spacing(1), // Use spacing instead of padding
+    // marginBottom: theme.spacing(1), // Use spacing instead of padding
   },
   actionButtonsContainer: {
     display: 'flex',
@@ -52,6 +53,9 @@ const useStyles = makeStyles((theme) => ({
     marginRight: theme.spacing(1), // Use spacing instead of padding
     fontSize: theme.typography.body1.fontSize, // Adjust the font size based on your design
   },
+  tokenContainer: {
+    marginLeft: '24px',
+  }
 }));
 
 export default useStyles;

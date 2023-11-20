@@ -27,6 +27,11 @@ const Send: React.FC<IProps> = inject('store')(
       }
     }, [sendStore]);
 
+    useEffect(() => {}, [
+      sendStore.senderAddress,
+      sendStore.buttonDisabled
+    ]);
+
     const onEnterPress = (event: React.KeyboardEvent) => {
       handleEnterPress(event, () => {
         if (!sendStore.buttonDisabled) {
@@ -77,10 +82,12 @@ const FromField = observer(({ classes, sendStore, sessionStore }: any) => (
       <Select
         className={classes.selectOrTextField}
         inputProps={{ name: 'from', id: 'from'}}
-        value={sessionStore.info.addrStr}
-        onChange={(event) => sendStore.senderAddress = event.target.value}
+        value={sessionStore.info.address}
+        onChange={(event) => {
+          sendStore.senderAddress = event.target.value;
+        }}
       >
-        <MenuItem value={sessionStore.info.addrStr}>
+        <MenuItem value={sessionStore.info.address}>
           <Typography className={classes.fieldTextOrInput}>{sessionStore.loggedInAccountName}</Typography>
         </MenuItem>
       </Select>
@@ -97,7 +104,7 @@ const ToField = observer(({ classes, sendStore, sessionStore, onEnterPress }: an
         fullWidth
         type="text"
         multiline={false}
-        placeholder={sessionStore?.info?.addrStr || ''}
+        placeholder={sessionStore?.info?.address || ''}
         value={sendStore.receiverAddress || ''}
         InputProps={{ className: classes.fieldTextOrInput, endAdornment: <ArrowDropDown /> }}
         onChange={(event) => sendStore.receiverAddress = event.target.value}

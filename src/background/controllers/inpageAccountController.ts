@@ -38,7 +38,7 @@ export default class InpageAccountController extends IController {
 
       // loggedInAccount!.wallet is always defined if loggedInAccount is defined, but info may not be if the fetch request failed
       if (this.main.account.loggedInAccount!.wallet!.info) {
-        inpageAccount.address = this.main.account.loggedInAccount!.wallet!.info!.addrStr;
+        inpageAccount.address = this.main.account.loggedInAccount!.wallet!.info!.address;
         inpageAccount.balance = this.main.account.loggedInAccount!.wallet!.info!.balance;
       } else {
         return {

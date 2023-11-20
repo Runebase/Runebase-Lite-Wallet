@@ -1,5 +1,5 @@
 import { observable, action, computed, makeObservable } from 'mobx';
-import { Insight } from 'runebasejs-wallet';
+import { RunebaseInfo } from 'runebasejs-wallet';
 import { isUndefined } from 'lodash';
 
 import { MESSAGE_TYPE, NETWORK_NAMES } from '../../constants';
@@ -16,7 +16,7 @@ export default class SessionStore {
   @observable public networkIndex: number = INIT_VALUES.networkIndex;
   @observable public networks: QryNetwork[] = [];
   @observable public loggedInAccountName?: string = INIT_VALUES.loggedInAccountName;
-  @observable public info?: Insight.IGetInfo = INIT_VALUES.info;
+  @observable public info?: RunebaseInfo.IGetInfo = INIT_VALUES.info;
 
   @computed public get runebaseBalanceUSD() {
     return isUndefined(this.runebaseUSD) ? 'Loading...' : `$${this.runebaseUSD} USD`;
@@ -110,7 +110,35 @@ export default class SessionStore {
     };
 
   @action
-  private setWalletInfo = (info: Insight.IGetInfo) => {
+  private setWalletInfo = (info: RunebaseInfo.IGetInfo) => {
+      // INFO OBJECT
+      // {
+      //   'balance': '497300000',
+      //   'totalReceived': '500000000',
+      //   'totalSent': '2700000',
+      //   'unconfirmed': '0',
+      //   'staking': '0',
+      //   'mature': '0',
+      //   'qrc20Balances': [
+      //     {
+      //       'address': '4a344d24f909e4cb4ee667371d67cdfca432d0c8',
+      //       'addressHex': '4a344d24f909e4cb4ee667371d67cdfca432d0c8',
+      //       'name': 'Dust',
+      //       'symbol': 'Dust',
+      //       'decimals': 8,
+      //       'balance': '500000000',
+      //       'unconfirmed': {
+      //         'received': '0',
+      //         'sent': '0'
+      //       }
+      //     }
+      //   ],
+      //   'qrc721Balances': [],
+      //   'ranking': 1811,
+      //   'transactionCount': 5,
+      //   'blocksMined': 0,
+      //   'address': 'RrEjaBEW1dVKR4XesrsgwiZ9U2HPq5ziK5'
+      // }
       this.info = info;
     };
 

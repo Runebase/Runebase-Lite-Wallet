@@ -3,7 +3,7 @@ const INIT_VALUES = {
   name: '',
   network: '',
   address: '',
-  balance: 0,
+  balance: '0',
 };
 
 export class InpageAccount {
@@ -11,7 +11,7 @@ export class InpageAccount {
   public name: string;
   public network: string;
   public address: string;
-  public balance: number;
+  public balance: string;
 
   constructor() {
     this.loggedIn = INIT_VALUES.loggedIn;

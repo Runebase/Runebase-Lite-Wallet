@@ -25,14 +25,14 @@ const Receive: React.FC<IProps> = inject('store')(
         <NavBar hasBackButton title="Receive" />
         <div className={classes.contentContainer}>
           <Typography className={classes.accountName}>{loggedInAccountName}</Typography>
-          <Typography className={classes.accountAddress}>{info.addrStr}</Typography>
+          <Typography className={classes.accountAddress}>{info.address}</Typography>
           <div className={classes.amountContainer}>
-            <Typography className={classes.tokenAmount}>{info.balance}</Typography>
+            <Typography className={classes.tokenAmount}>{info.balance / 1e8}</Typography>
             <Typography className={classes.token}>RUNES</Typography>
           </div>
           <Typography className={classes.currencyValue}>{`~${runebaseBalanceUSD}`}</Typography>
           <div className={classes.qrCodeContainer}>
-            <QRCode value={info!.addrStr} />
+            <QRCode value={info!.address} />
           </div>
         </div>
       </div>

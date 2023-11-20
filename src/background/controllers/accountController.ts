@@ -390,8 +390,10 @@ export default class AccountController extends IController {
 
     const infoDidUpdate = await this.loggedInAccount.wallet.updateInfo();
     if (infoDidUpdate) {
-      chrome.runtime.sendMessage({ type: MESSAGE_TYPE.GET_WALLET_INFO_RETURN, info: this.loggedInAccount.wallet.info });
-
+      chrome.runtime.sendMessage({
+        type: MESSAGE_TYPE.GET_WALLET_INFO_RETURN,
+        info: this.loggedInAccount.wallet.info
+      });
       if (sendInpageUpdate) {
         this.main.inpageAccount.sendInpageAccountAllPorts(RUNEBASECHROME_ACCOUNT_CHANGE.BALANCE_CHANGE);
       }
@@ -515,7 +517,7 @@ export default class AccountController extends IController {
       case MESSAGE_TYPE.GET_LOGGED_IN_ACCOUNT:
         console.log('Getting logged-in account');
         sendResponse(this.loggedInAccount && this.loggedInAccount.wallet && this.loggedInAccount.wallet.info
-          ? { name: this.loggedInAccount.name, address: this.loggedInAccount!.wallet!.info!.addrStr }
+          ? { name: this.loggedInAccount.name, address: this.loggedInAccount!.wallet!.info!.address }
           : undefined);
         break;
       case MESSAGE_TYPE.GET_LOGGED_IN_ACCOUNT_NAME:

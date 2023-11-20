@@ -1,5 +1,4 @@
-import { WalletRPCProvider, Insight } from 'runebasejs-wallet';
-
+import { WalletRPCProvider, RunebaseInfo } from 'runebasejs-wallet';
 import RunebaseChromeController from '.';
 import IController from './iController';
 import { MESSAGE_TYPE, RPC_METHOD } from '../../constants';
@@ -41,7 +40,8 @@ export default class RPCController extends IController {
 
       console.log('Sending transaction. New Args:', newArgs);
 
-      result = await this.main.account.loggedInAccount!.wallet!.sendTransaction(newArgs) as Insight.ISendRawTxResult;
+      // eslint-disable-next-line max-len
+      result = await this.main.account.loggedInAccount!.wallet!.sendTransaction(newArgs) as RunebaseInfo.ISendRawTxResult;
 
       console.log('Transaction result:', result);
     } catch (err) {
@@ -66,7 +66,7 @@ export default class RPCController extends IController {
 
       console.log('Calling contract. Args:', args);
 
-      result = await rpcProvider.rawCall(RPC_METHOD.CALL_CONTRACT, args) as Insight.IContractCall;
+      result = await rpcProvider.rawCall(RPC_METHOD.CALL_CONTRACT, args) as RunebaseInfo.IContractCall;
 
       console.log('Contract call result:', result);
     } catch (err) {

@@ -1,7 +1,7 @@
 import { action, makeObservable } from 'mobx';
 import {
   Wallet as RunebaseWallet,
-  Insight,
+  RunebaseInfo,
   WalletRPCProvider,
 } from 'runebasejs-wallet';
 import deepEqual from 'deep-equal';
@@ -13,7 +13,7 @@ import { RPC_METHOD, NETWORK_NAMES } from '../constants';
 export default class Wallet implements ISigner {
   public qjsWallet?: RunebaseWallet;
   public rpcProvider?: WalletRPCProvider;
-  public info?: Insight.IGetInfo;
+  public info?: RunebaseInfo.IGetInfo;
   public runebaseUSD?: number;
   public maxRunebaseSend?: number;
 
@@ -31,7 +31,7 @@ export default class Wallet implements ISigner {
 
       /**
      * We add a timeout promise to handle if qjsWallet hangs when executing getInfo.
-     * (This happens if the insight api is down)
+     * (This happens if the runebase api is down)
      */
       let timedOut = false;
       // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -39,7 +39,7 @@ export default class Wallet implements ISigner {
         const wait = setTimeout(() => {
           clearTimeout(wait);
           timedOut = true;
-          reject(Error('wallet.getInfo failed, insight api may be down'));
+          reject(Error('wallet.getInfo failed, runebase api may be down'));
         }, 30000);
       });
 
@@ -64,7 +64,7 @@ export default class Wallet implements ISigner {
     };
 
   // @param amount: (unit - whole RUNEBASE)
-  public send = async (to: string, amount: number, options: ISendTxOptions): Promise<Insight.ISendRawTxResult> => {
+  public send = async (to: string, amount: number, options: ISendTxOptions): Promise<RunebaseInfo.ISendRawTxResult> => {
     if (!this.qjsWallet) {
       throw Error('Cannot send without wallet.');
     }

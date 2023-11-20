@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { RunebaseInfo } from 'runebasejs-wallet';
 import { observer, inject } from 'mobx-react';
-import { Typography, Button } from '@mui/material';
+import { Typography, Button, Box, Divider } from '@mui/material';
 import { KeyboardArrowRight } from '@mui/icons-material';
 import AppStore from '../../stores/AppStore';
 import useStyles from './styles';
@@ -59,14 +60,43 @@ const AccountInfo: React.FC<IProps> = ({ hasRightArrow, store }) => {
   return (
     <div className={classes.root}>
       <Typography className={classes.acctName}>{loggedInAccountName}</Typography>
-      <Typography className={classes.address}>{info.addrStr}</Typography>
-      <div className={classes.amountContainer}>
-        <Typography className={classes.tokenAmount}>{info.balance}</Typography>
+      <Typography className={classes.address}>{info.address}</Typography>
+      <Divider />
+      <Box className={classes.amountContainer}>
+        <img
+          style={{
+            height: '24px',
+            width: '24px'
+          }}
+          src={chrome.runtime.getURL('images/runes.png')}
+          alt={'Runes'}
+        />
+        <Typography className={classes.tokenAmount}>{info.balance / 1e8}</Typography>
         <Typography className={classes.token}>RUNES</Typography>
         {hasRightArrow && <KeyboardArrowRight className={classes.rightArrow} />}
-      </div>
-      <Typography className={classes.balanceUSD}>{`~${runebaseBalanceUSD}`}</Typography>
-      <div className={classes.actionButtonsContainer}>
+        <Typography className={classes.balanceUSD}>{`(~${runebaseBalanceUSD})`}</Typography>
+      </Box>
+
+      {info.qrc20Balances.map((
+        token: RunebaseInfo.IRrc20Balance,
+        index: number
+      ) => (
+        <>
+          <Divider />
+          <Box key={index} className={`${classes.amountContainer} ${classes.tokenContainer}`}>
+            <Typography className={classes.tokenAmount}>{token.balance / 10 ** token.decimals}</Typography>
+            <Typography className={classes.token}>{token.symbol}</Typography>
+          </Box>
+        </>
+      ))}
+      <Divider />
+
+      <Box
+        className={classes.actionButtonsContainer}
+        sx={{
+          mt: 1,
+        }}
+      >
         <Button
           id="receiveButton"
           color="primary"
@@ -89,7 +119,7 @@ const AccountInfo: React.FC<IProps> = ({ hasRightArrow, store }) => {
         >
           Send
         </Button>
-      </div>
+      </Box>
     </div>
   );
 };

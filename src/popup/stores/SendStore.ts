@@ -58,7 +58,8 @@ export default class SendStore {
     return isValidGasPrice(this.gasPrice) ? undefined : 'Not a valid gas price';
   }
   @computed public get buttonDisabled(): boolean {
-    return !this.senderAddress || !!this.receiverFieldError || !this.token || !!this.amountFieldError;
+    const isButtonDisabled = !this.senderAddress || !!this.receiverFieldError || !this.token || !!this.amountFieldError;
+    return isButtonDisabled;
   }
   @computed public get maxAmount(): number | undefined {
     if (this.token) {
@@ -90,7 +91,7 @@ export default class SendStore {
         this.tokens[0].balance = this.app.sessionStore.info ? this.app.sessionStore.info.balance : undefined;
         this.token = this.tokens[0];
       });
-      this.senderAddress = this.app.sessionStore.info ? this.app.sessionStore.info.addrStr : undefined;
+      this.senderAddress = this.app.sessionStore.info ? this.app.sessionStore.info.address : undefined;
       chrome.runtime.sendMessage({
         type: MESSAGE_TYPE.GET_MAX_RUNEBASE_SEND,
       });
