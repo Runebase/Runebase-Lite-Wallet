@@ -7,6 +7,7 @@ import AppStore from '../../stores/AppStore';
 import useStyles from './styles';
 import SendIcon from '@mui/icons-material/Send';
 import CallReceivedIcon from '@mui/icons-material/CallReceived';
+import { TOKEN_IMAGES } from '../../../constants';
 
 interface IProps {
   store?: AppStore;
@@ -82,11 +83,27 @@ const AccountInfo: React.FC<IProps> = ({ hasRightArrow, store }) => {
         index: number
       ) => {
         const isVerifiedToken = store?.accountDetailStore.verifiedTokens.find(x => x.address === token.address);
+        const tokenLogoSrc = TOKEN_IMAGES[token.address];
         if (isVerifiedToken) {
           return (
             <>
               <Divider />
-              <Box key={index} className={`${classes.amountContainer} ${classes.tokenContainer}`}>
+              <Box
+                key={index}
+                className={`${classes.amountContainer} ${!tokenLogoSrc ? classes.tokenContainer : ''}`}
+              >
+                {
+                  tokenLogoSrc && (
+                    <img
+                      style={{
+                        height: '24px',
+                        width: '24px'
+                      }}
+                      src={chrome.runtime.getURL(tokenLogoSrc)}
+                      alt={token.symbol}
+                    />
+                  )
+                }
                 <Typography className={classes.tokenAmount}>{token.balance / 10 ** token.decimals}</Typography>
                 <Typography className={classes.token}>{token.symbol}</Typography>
               </Box>

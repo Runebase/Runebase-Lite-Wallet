@@ -144,3 +144,7 @@ export enum RUNEBASECHROME_ACCOUNT_CHANGE {
   BALANCE_CHANGE = 'RUNEBASE Account Balance Changed',
   DAPP_CONNECTION = 'Account Connected to Dapp',
 }
+
+export const TOKEN_IMAGES: Record<string, string> = {
+  '4a344d24f909e4cb4ee667371d67cdfca432d0c8': 'images/credits.png',
+};
