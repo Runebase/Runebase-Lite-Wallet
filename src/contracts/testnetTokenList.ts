@@ -1,5 +1,5 @@
-import QRCToken from '../models/QRCToken';
+import RRCToken from '../models/RRCToken';
 
-const testnetTokenList: QRCToken[] = [];
+const testnetTokenList: RRCToken[] = [];
 
 export default testnetTokenList;

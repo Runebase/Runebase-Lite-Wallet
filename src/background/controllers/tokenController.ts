@@ -1,13 +1,13 @@
 import { each, findIndex, isEmpty } from 'lodash';
 import BigNumber from 'bignumber.js';
-import { Insight } from 'runebasejs-wallet';
+import { RunebaseInfo } from 'runebasejs-wallet';
 // eslint-disable-next-line @typescript-eslint/naming-convention
 const { Rweb3 } = require('rweb3');
 
 import RunebaseChromeController from '.';
 import IController from './iController';
 import { MESSAGE_TYPE, STORAGE, NETWORK_NAMES } from '../../constants';
-import QRCToken from '../../models/QRCToken';
+import RRCToken from '../../models/RRCToken';
 import rrc223TokenABI from '../../contracts/rrc223TokenABI';
 import mainnetTokenList from '../../contracts/mainnetTokenList';
 import testnetTokenList from '../../contracts/testnetTokenList';
@@ -24,7 +24,7 @@ const rweb3 = new Rweb3('null');
 export default class TokenController extends IController {
   private static GET_BALANCES_INTERVAL_MS: number = 60000;
 
-  public tokens?: QRCToken[] = INIT_VALUES.tokens;
+  public tokens?: RRCToken[] = INIT_VALUES.tokens;
 
   private getBalancesInterval?: any = INIT_VALUES.getBalancesInterval;
 
@@ -86,21 +86,21 @@ export default class TokenController extends IController {
   * Fetch the tokens balances via RPC calls.
   */
   private getBalances = () => {
-    each(this.tokens, async (token: QRCToken) => {
-      await this.getQRCTokenBalance(token);
+    each(this.tokens, async (token: RRCToken) => {
+      await this.getRRCTokenBalance(token);
     });
   };
 
   /*
   * Makes an RPC call to the contract to get the token balance of this current wallet address.
-  * @param token The QRCToken to get the balance of.
+  * @param token The RRCToken to get the balance of.
   */
-  private getQRCTokenBalance = async (token: QRCToken) => {
+  private getRRCTokenBalance = async (token: RRCToken) => {
     if (!this.main.account.loggedInAccount
       || !this.main.account.loggedInAccount.wallet
       || !this.main.account.loggedInAccount.wallet.qjsWallet
     ) {
-      console.error('Cannot getQRCTokenBalance without wallet instance.');
+      console.error('Cannot getRRCTokenBalance without wallet instance.');
       return;
     }
 
@@ -130,20 +130,20 @@ export default class TokenController extends IController {
       this.tokens![index].balance = balance;
     }
 
-    chrome.runtime.sendMessage({ type: MESSAGE_TYPE.QRC_TOKENS_RETURN, tokens: this.tokens });
+    chrome.runtime.sendMessage({ type: MESSAGE_TYPE.RRC_TOKENS_RETURN, tokens: this.tokens });
   };
 
   /**
-   * Gets the QRC token details (name, symbol, decimals) given a contract address.
-   * @param {string} contractAddress QRC token contract address.
+   * Gets the RRC token details (name, symbol, decimals) given a contract address.
+   * @param {string} contractAddress RRC token contract address.
    */
-  private getQRCTokenDetails = async (contractAddress: string) => {
+  private getRRCTokenDetails = async (contractAddress: string) => {
     let msg;
 
     /*
     * Further contract address validation - if the addr provided does not have name,
     * symbol, and decimals fields, it will throw an error as it is not a valid
-    * qrc20TokenContractAddr
+    * rrc20TokenContractAddr
     */
     try {
       // Get name
@@ -154,7 +154,7 @@ export default class TokenController extends IController {
       if (error) {
         throw Error(error);
       }
-      result = rweb3.decoder.decodeCall(result, rrc223TokenABI, methodName) as Insight.IContractCall;
+      result = rweb3.decoder.decodeCall(result, rrc223TokenABI, methodName) as RunebaseInfo.IContractCall;
       const name = result.executionResult.formattedOutput[0];
 
       // Get symbol
@@ -164,7 +164,7 @@ export default class TokenController extends IController {
       if (error) {
         throw Error(error);
       }
-      result = rweb3.decoder.decodeCall(result, rrc223TokenABI, methodName) as Insight.IContractCall;
+      result = rweb3.decoder.decodeCall(result, rrc223TokenABI, methodName) as RunebaseInfo.IContractCall;
       const symbol = result.executionResult.formattedOutput[0];
 
       // Get decimals
@@ -174,26 +174,26 @@ export default class TokenController extends IController {
       if (error) {
         throw Error(error);
       }
-      result = rweb3.decoder.decodeCall(result, rrc223TokenABI, methodName) as Insight.IContractCall;
+      result = rweb3.decoder.decodeCall(result, rrc223TokenABI, methodName) as RunebaseInfo.IContractCall;
       const decimals = result.executionResult.formattedOutput[0];
 
       if (name && symbol && decimals) {
-        const token = new QRCToken(name, symbol, decimals, contractAddress);
+        const token = new RRCToken(name, symbol, decimals, contractAddress);
         msg = {
-          type: MESSAGE_TYPE.QRC_TOKEN_DETAILS_RETURN,
+          type: MESSAGE_TYPE.RRC_TOKEN_DETAILS_RETURN,
           isValid: true,
           token,
         };
       } else {
         msg = {
-          type: MESSAGE_TYPE.QRC_TOKEN_DETAILS_RETURN,
+          type: MESSAGE_TYPE.RRC_TOKEN_DETAILS_RETURN,
           isValid: false,
         };
       }
     } catch (err) {
       console.error(err);
       msg = {
-        type: MESSAGE_TYPE.QRC_TOKEN_DETAILS_RETURN,
+        type: MESSAGE_TYPE.RRC_TOKEN_DETAILS_RETURN,
         isValid: false,
       };
     }
@@ -201,36 +201,46 @@ export default class TokenController extends IController {
     chrome.runtime.sendMessage(msg);
   };
 
-  /*
-  * Send QRC tokens.
-  * @param receiverAddress The receiver of the send.
-  * @param amount The amount to send in decimal format. (unit - whole token)
-  * @param token The QRC token being sent.
-  * @param gasLimit (unit - gas)
-  * @param gasPrice (unit - satoshi/gas)
-  */
-  private sendQRCToken = async (receiverAddress: string, amount: number, token: QRCToken,
-    gasLimit: number, gasPrice: number ) => {
-    // bn.js does not handle decimals well (Ex: BN(1.2) => 1 not 1.2) so we use BigNumber
-    const bnAmount = new BigNumber(amount).times(new BigNumber(10 ** token.decimals));
-    const data = rweb3.encoder.constructData(rrc223TokenABI, 'transfer', [receiverAddress, bnAmount]);
-    const args = [token.address, data, null, gasLimit, gasPrice];
-    const { error } = await this.main.rpc.sendToContract(generateRequestId(), args);
+  private sendRRCToken = async (
+    receiverAddress: string,
+    amount: number,
+    token: RRCToken,
+    gasLimit: number,
+    gasPrice: number
+  ) => {
+    try {
+      console.log('token in sendRRCToken Background.js');
+      console.log(token);
+      // bn.js does not handle decimals well (Ex: BN(1.2) => 1 not 1.2) so we use BigNumber
+      const bnAmount = new BigNumber(amount).times(new BigNumber(10 ** token.decimals));
+      const data = rweb3.encoder.constructData(rrc223TokenABI, 'transfer', [receiverAddress, bnAmount]);
+      const args = [token.address, data, null, gasLimit, gasPrice];
 
-    if (error) {
-      console.error(error);
-      chrome.runtime.sendMessage({ type: MESSAGE_TYPE.SEND_TOKENS_FAILURE, error });
-      return;
+      console.log('Sending RRCToken with the following arguments:', args);
+
+      const requestId = generateRequestId();
+      const { error } = await this.main.rpc.sendToContract(requestId, args);
+
+      if (error) {
+        console.error('Error sending RRCToken:', error);
+        chrome.runtime.sendMessage({ type: MESSAGE_TYPE.SEND_TOKENS_FAILURE, error });
+        return;
+      }
+
+      console.log('RRCToken sent successfully!');
+      chrome.runtime.sendMessage({ type: MESSAGE_TYPE.SEND_TOKENS_SUCCESS });
+    } catch (e: any) {
+      console.error('An unexpected error occurred:', e);
+      chrome.runtime.sendMessage({ type: MESSAGE_TYPE.SEND_TOKENS_FAILURE, error: e.message });
     }
-
-    chrome.runtime.sendMessage({ type: MESSAGE_TYPE.SEND_TOKENS_SUCCESS });
   };
 
+
   private addToken = async (contractAddress: string, name: string, symbol: string, decimals: number) => {
-    const newToken = new QRCToken(name, symbol, decimals, contractAddress);
+    const newToken = new RRCToken(name, symbol, decimals, contractAddress);
     this.tokens!.push(newToken);
     this.setTokenListInChromeStorage();
-    await this.getQRCTokenBalance(newToken);
+    await this.getRRCTokenBalance(newToken);
   };
 
   private removeToken = (contractAddress: string) => {
@@ -244,7 +254,7 @@ export default class TokenController extends IController {
       [this.chromeStorageAccountTokenListKey()]: this.tokens,
     }, () => {
       chrome.runtime.sendMessage({
-        type: MESSAGE_TYPE.QRC_TOKENS_RETURN,
+        type: MESSAGE_TYPE.RRC_TOKENS_RETURN,
         tokens: this.tokens,
       });
     });
@@ -258,17 +268,17 @@ export default class TokenController extends IController {
   private handleMessage = (request: any, _: chrome.runtime.MessageSender, sendResponse: (response: any) => void) => {
     try {
       switch (request.type) {
-      case MESSAGE_TYPE.GET_QRC_TOKEN_LIST:
+      case MESSAGE_TYPE.GET_RRC_TOKEN_LIST:
         sendResponse(this.tokens);
         break;
-      case MESSAGE_TYPE.SEND_QRC_TOKENS:
-        this.sendQRCToken(request.receiverAddress, request.amount, request.token, request.gasLimit, request.gasPrice);
+      case MESSAGE_TYPE.SEND_RRC_TOKENS:
+        this.sendRRCToken(request.receiverAddress, request.amount, request.token, request.gasLimit, request.gasPrice);
         break;
       case MESSAGE_TYPE.ADD_TOKEN:
         this.addToken(request.contractAddress, request.name, request.symbol, request.decimals);
         break;
-      case MESSAGE_TYPE.GET_QRC_TOKEN_DETAILS:
-        this.getQRCTokenDetails(request.contractAddress);
+      case MESSAGE_TYPE.GET_RRC_TOKEN_DETAILS:
+        this.getRRCTokenDetails(request.contractAddress);
         break;
       case MESSAGE_TYPE.REMOVE_TOKEN:
         this.removeToken(request.contractAddress);

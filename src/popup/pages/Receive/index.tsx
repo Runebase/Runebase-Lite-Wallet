@@ -15,8 +15,8 @@ interface IProps {
 const Receive: React.FC<IProps> = inject('store')(
   observer(({ store }) => {
     const classes = useStyles();
-    const { loggedInAccountName, info, runebaseBalanceUSD } = store.sessionStore;
-    if (!loggedInAccountName || !info) {
+    const { loggedInAccountName, walletInfo, runebaseBalanceUSD } = store.sessionStore;
+    if (!loggedInAccountName || !walletInfo) {
       return null;
     }
 
@@ -25,14 +25,14 @@ const Receive: React.FC<IProps> = inject('store')(
         <NavBar hasBackButton title="Receive" />
         <div className={classes.contentContainer}>
           <Typography className={classes.accountName}>{loggedInAccountName}</Typography>
-          <Typography className={classes.accountAddress}>{info.addrStr}</Typography>
+          <Typography className={classes.accountAddress}>{walletInfo.address}</Typography>
           <div className={classes.amountContainer}>
-            <Typography className={classes.tokenAmount}>{info.balance}</Typography>
+            <Typography className={classes.tokenAmount}>{Number(walletInfo.balance) / 1e8}</Typography>
             <Typography className={classes.token}>RUNES</Typography>
           </div>
           <Typography className={classes.currencyValue}>{`~${runebaseBalanceUSD}`}</Typography>
           <div className={classes.qrCodeContainer}>
-            <QRCode value={info!.addrStr} />
+            <QRCode value={walletInfo!.address} />
           </div>
         </div>
       </div>

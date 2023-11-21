@@ -4,7 +4,7 @@ import { ArrowDropDown, Send as SendIcon } from '@mui/icons-material';
 import { observer, inject } from 'mobx-react';
 import { map } from 'lodash';
 import { handleEnterPress } from '../../../utils';
-import QRCToken from '../../../models/QRCToken';
+import RRCToken from '../../../models/RRCToken';
 
 import useStyles from './styles';
 import NavBar from '../../components/NavBar';
@@ -26,6 +26,11 @@ const Send: React.FC<IProps> = inject('store')(
         sendStore.init();
       }
     }, [sendStore]);
+
+    useEffect(() => {}, [
+      sendStore.senderAddress,
+      sendStore.buttonDisabled
+    ]);
 
     const onEnterPress = (event: React.KeyboardEvent) => {
       handleEnterPress(event, () => {
@@ -77,10 +82,12 @@ const FromField = observer(({ classes, sendStore, sessionStore }: any) => (
       <Select
         className={classes.selectOrTextField}
         inputProps={{ name: 'from', id: 'from'}}
-        value={sessionStore.info.addrStr}
-        onChange={(event) => sendStore.senderAddress = event.target.value}
+        value={sessionStore.walletInfo.address}
+        onChange={(event) => {
+          sendStore.senderAddress = event.target.value;
+        }}
       >
-        <MenuItem value={sessionStore.info.addrStr}>
+        <MenuItem value={sessionStore.walletInfo.address}>
           <Typography className={classes.fieldTextOrInput}>{sessionStore.loggedInAccountName}</Typography>
         </MenuItem>
       </Select>
@@ -97,7 +104,7 @@ const ToField = observer(({ classes, sendStore, sessionStore, onEnterPress }: an
         fullWidth
         type="text"
         multiline={false}
-        placeholder={sessionStore?.info?.addrStr || ''}
+        placeholder={sessionStore?.walletInfo?.address || ''}
         value={sendStore.receiverAddress || ''}
         InputProps={{ className: classes.fieldTextOrInput, endAdornment: <ArrowDropDown /> }}
         onChange={(event) => sendStore.receiverAddress = event.target.value}
@@ -119,7 +126,7 @@ const TokenField = observer(({ classes, sendStore }: any) => (
         value={sendStore.token ? sendStore.token.symbol : ''}
         onChange={(event) => sendStore.changeToken(event.target.value)}
       >
-        {map(sendStore.tokens, (token: QRCToken) => (
+        {map(sendStore.tokens, (token: RRCToken) => (
           <MenuItem key={token.symbol} value={token.symbol}>
             <Typography className={classes.fieldTextOrInput}>{token.symbol}</Typography>
           </MenuItem>

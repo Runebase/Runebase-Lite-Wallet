@@ -16,7 +16,6 @@ import SaveMnemonic from './pages/SaveMnemonic';
 import ImportWallet from './pages/ImportWallet';
 import AccountLogin from './pages/AccountLogin';
 import Settings from './pages/Settings';
-import Home from './pages/Home';
 import AccountDetail from './pages/AccountDetail';
 import Send from './pages/Send';
 import Receive from './pages/Receive';
@@ -25,6 +24,7 @@ import AddToken from './pages/AddToken';
 import AppStore from './stores/AppStore';
 import { MESSAGE_TYPE } from '../constants';
 import MainContainerStore from './stores/MainContainerStore';
+import ManageTokens from './pages/ManageTokens';
 
 interface IProps {
   history: any; // Replace with the appropriate type for your history
@@ -45,7 +45,6 @@ const MainContainer: React.FC<IProps> = inject('store')(observer(({ history, sto
           <Route exact path="/loading" component={Loading} />
           <Route exact path="/login" component={Login} />
           <Route exact path="/account-login" component={AccountLogin} />
-          <Route exact path="/home" component={Home} />
           <Route exact path="/create-wallet" component={CreateWallet} />
           <Route exact path="/account-detail" component={AccountDetail} />
           <Route exact path="/save-mnemonic" component={SaveMnemonic} />
@@ -54,6 +53,7 @@ const MainContainer: React.FC<IProps> = inject('store')(observer(({ history, sto
           <Route exact path="/send" component={Send} />
           <Route exact path="/send-confirm" component={SendConfirm} />
           <Route exact path="/receive" component={Receive} />
+          <Route exact path="/manage-tokens" component={ManageTokens} />
           <Route exact path="/add-token" component={AddToken} />
         </Switch>
       </Router>

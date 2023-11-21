@@ -4,10 +4,12 @@ import { find } from 'lodash';
 import AppStore from './AppStore';
 import { SEND_STATE, MESSAGE_TYPE, TRANSACTION_SPEED } from '../../constants';
 import { isValidAddress, isValidAmount, isValidGasLimit, isValidGasPrice } from '../../utils';
-import QRCToken from '../../models/QRCToken';
+import RRCToken from '../../models/RRCToken';
 import Config from '../../config';
+import BigNumber from 'bignumber.js';
 
 const INIT_VALUES = {
+  verifiedTokens: [],
   tokens: [],
   senderAddress: undefined,
   receiverAddress: '',
@@ -26,10 +28,11 @@ const INIT_VALUES = {
 };
 
 export default class SendStore {
-  @observable public tokens: QRCToken[] = INIT_VALUES.tokens;
+  @observable public tokens: RRCToken[] = INIT_VALUES.tokens;
+  @observable public verifiedTokens: RRCToken[] = INIT_VALUES.verifiedTokens;
   @observable public senderAddress?: string = INIT_VALUES.senderAddress;
   @observable public receiverAddress?: string = INIT_VALUES.receiverAddress;
-  @observable public token?: QRCToken = INIT_VALUES.token;
+  @observable public token?: RRCToken = INIT_VALUES.token;
   @observable public amount: number | string = INIT_VALUES.amount;
   @observable public maxRunebaseSend?: number = INIT_VALUES.maxRunebaseSend;
   public transactionSpeeds: string[] = INIT_VALUES.transactionSpeeds;
@@ -58,7 +61,8 @@ export default class SendStore {
     return isValidGasPrice(this.gasPrice) ? undefined : 'Not a valid gas price';
   }
   @computed public get buttonDisabled(): boolean {
-    return !this.senderAddress || !!this.receiverFieldError || !this.token || !!this.amountFieldError;
+    const isButtonDisabled = !this.senderAddress || !!this.receiverFieldError || !this.token || !!this.amountFieldError;
+    return isButtonDisabled;
   }
   @computed public get maxAmount(): number | undefined {
     if (this.token) {
@@ -75,35 +79,51 @@ export default class SendStore {
 
   private app: AppStore;
 
-  constructor(app: AppStore) {
+  constructor(
+    app: AppStore,
+  ) {
     makeObservable(this);
     this.app = app;
   }
 
-  @action
-  public init = () => {
-      chrome.runtime.onMessage.addListener(this.handleMessage);
-      chrome.runtime.sendMessage({ type: MESSAGE_TYPE.GET_QRC_TOKEN_LIST }, (response: any) => {
-        console.log('Received token list:', response);
-        this.tokens = response;
-        this.tokens.unshift(new QRCToken('Runebase Token', 'RUNES', 8, ''));
-        this.tokens[0].balance = this.app.sessionStore.info ? this.app.sessionStore.info.balance : undefined;
-        this.token = this.tokens[0];
+  @action  public init = () => {
+    this.tokens = [];
+    chrome.runtime.onMessage.addListener(this.handleMessage);
+    chrome.runtime.sendMessage({ type: MESSAGE_TYPE.GET_RRC_TOKEN_LIST }, (response: any) => {
+      console.log('Received token list:', response);
+      this.verifiedTokens = response;
+      this.app.sessionStore.walletInfo?.qrc20Balances.forEach((tokenInfo) => {
+        const { name, symbol, decimals, balance, address } = tokenInfo;
+        const newToken = new RRCToken(name, symbol, Number(decimals), address);
+        const isTokenVerified = this.verifiedTokens.find(x => x.address === newToken.address);
+        if (isTokenVerified) {
+          newToken.balance = new BigNumber(balance).dividedBy(`1e${decimals}`).toNumber();
+          this.tokens.push(newToken);
+        } else {
+          // TODO: Make a visible unverified token balance list
+        }
       });
-      this.senderAddress = this.app.sessionStore.info ? this.app.sessionStore.info.addrStr : undefined;
-      chrome.runtime.sendMessage({
-        type: MESSAGE_TYPE.GET_MAX_RUNEBASE_SEND,
-      });
-    };
+    });
 
-  @action
-  public changeToken = (tokenSymbol: string) => {
-      const token = find(this.tokens, { symbol: tokenSymbol });
-      if (token) {
-        console.log('Changing token to:', token);
-        this.token = token;
-      }
-    };
+    this.tokens.unshift(new RRCToken('Runebase Token', 'RUNES', 8, ''));
+    this.tokens[0].balance = this.app.sessionStore.walletInfo
+      ? Number(this.app.sessionStore.walletInfo.balance) : undefined;
+    this.token = this.tokens[0];
+    this.senderAddress = this.app.sessionStore.walletInfo
+      ? this.app.sessionStore.walletInfo.address : undefined;
+    chrome.runtime.sendMessage({
+      type: MESSAGE_TYPE.GET_MAX_RUNEBASE_SEND,
+    });
+  };
+
+  @action  public changeToken = (tokenSymbol: string) => {
+    console.log('tokenSymbol: ', tokenSymbol);
+    const token = find(this.tokens, { symbol: tokenSymbol });
+    if (token) {
+      console.log('Changing token to:', token);
+      this.token = token;
+    }
+  };
 
   @action
   public routeToSendConfirm = () => {
@@ -135,15 +155,15 @@ export default class SendStore {
           amount: Number(this.amount),
           token: this.token,
           gasLimit: Number(this.gasLimit),
-          gasPrice: Number(this.gasPrice),
+          gasPrice: Number(this.gasPrice * 1e-8),
         });
         chrome.runtime.sendMessage({
-          type: MESSAGE_TYPE.SEND_QRC_TOKENS,
+          type: MESSAGE_TYPE.SEND_RRC_TOKENS,
           receiverAddress: this.receiverAddress,
           amount: Number(this.amount),
           token: this.token,
           gasLimit: Number(this.gasLimit),
-          gasPrice: Number(this.gasPrice),
+          gasPrice: Number(this.gasPrice * 1e-8),
         });
       }
     };
@@ -154,7 +174,7 @@ export default class SendStore {
       switch (request.type) {
       case MESSAGE_TYPE.SEND_TOKENS_SUCCESS:
         console.log('Send tokens success:', request);
-        this.app.routerStore.push('/home'); // so pressing back won't go back to sendConfirm page
+        // this.app.routerStore.push('/home'); // so pressing back won't go back to sendConfirm page
         this.app.routerStore.push('/account-detail');
         this.sendState = SEND_STATE.INITIAL;
         break;

@@ -1,24 +1,23 @@
 import { RunebaseInfo } from 'runebasejs-wallet';
-import { map, round } from 'lodash';
 import moment from 'moment';
 
 import RunebaseChromeController from '.';
 import IController from './iController';
 import { MESSAGE_TYPE } from '../../constants';
-import Transaction from '../../models/Transaction';
+import TokenTransfer from '../../models/TokenTransfer';
 
-export default class TransactionController extends IController {
+export default class TokenBalanceHistoryController extends IController {
   private static GET_TX_INTERVAL_MS: number = 60000;
 
-  public transactions: Transaction[] = [];
+  public tokenTransfers: TokenTransfer[] = [];
   public pageNum: number = 0;
   public pagesTotal?: number;
-  public totalTransactions?: number;
+  public totalTokenTransfers?: number;
   public get hasMore(): boolean {
     return !!this.pagesTotal && (this.pagesTotal > this.pageNum + 1);
   }
 
-  private getTransactionsInterval?: any = undefined;
+  private getTokenTransferHistoryInterval?: any = undefined;
 
   constructor(main: RunebaseChromeController) {
     super('transaction', main);
@@ -31,11 +30,11 @@ export default class TransactionController extends IController {
   * Fetches the first page of transactions.
   */
   public fetchFirst = async () => {
-    this.transactions = await this.fetchTransactions(
+    this.tokenTransfers = await this.fetchTokenTransferHistory(
       10, // Limit
       0, // Offset
     );
-    this.sendTransactionsMessage();
+    this.sendTokenTransfersMessage();
   };
 
   /*
@@ -43,21 +42,21 @@ export default class TransactionController extends IController {
   */
   public fetchMore = async () => {
     this.pageNum = this.pageNum + 1;
-    const txs = await this.fetchTransactions(
+    const tokenTransfers = await this.fetchTokenTransferHistory(
       10,
       this.pageNum * 10,
     );
-    this.transactions = this.transactions.concat(txs);
-    this.sendTransactionsMessage();
+    this.tokenTransfers = this.tokenTransfers.concat(tokenTransfers);
+    this.sendTokenTransfersMessage();
   };
 
   /*
   * Stops polling for the periodic info updates.
   */
   public stopPolling = () => {
-    if (this.getTransactionsInterval) {
-      clearInterval(this.getTransactionsInterval);
-      this.getTransactionsInterval = undefined;
+    if (this.getTokenTransferHistoryInterval) {
+      clearInterval(this.getTokenTransferHistoryInterval);
+      this.getTokenTransferHistoryInterval = undefined;
       this.pageNum = 0;
     }
   };
@@ -66,17 +65,17 @@ export default class TransactionController extends IController {
   // transaction number 10 shifts to page2), and the bottom most transaction would disappear from the list.
   // Need to add some additional logic to keep the bottom most transaction displaying.
   private refreshTransactions = async () => {
-    let refreshedItems: Transaction[] = [];
+    let refreshedItems: TokenTransfer[] = [];
     for (let i = 0; i <= this.pageNum; i++) {
       refreshedItems = refreshedItems.concat(
-        await this.fetchTransactions(
+        await this.fetchTokenTransferHistory(
           10, // Limit
           i * 10 // Offset
         )
       );
     }
-    this.transactions = refreshedItems;
-    this.sendTransactionsMessage();
+    this.tokenTransfers = refreshedItems;
+    this.sendTokenTransfersMessage();
   };
 
   /*
@@ -84,10 +83,10 @@ export default class TransactionController extends IController {
   */
   private startPolling = async () => {
     this.fetchFirst();
-    if (!this.getTransactionsInterval) {
-      this.getTransactionsInterval = setInterval(() => {
+    if (!this.getTokenTransferHistoryInterval) {
+      this.getTokenTransferHistoryInterval = setInterval(() => {
         this.refreshTransactions();
-      }, TransactionController.GET_TX_INTERVAL_MS);
+      }, TokenBalanceHistoryController.GET_TX_INTERVAL_MS);
     }
   };
 
@@ -96,10 +95,10 @@ export default class TransactionController extends IController {
   * @param pageNum The page of transactions to fetch.
   * @return The Transactions array.
   */
-  private fetchTransactions = async (
+  private fetchTokenTransferHistory = async (
     limit: number = 10,
     offset: number = 0
-  ): Promise<Transaction[]> => {
+  ): Promise<TokenTransfer[]> => {
     if (!this.main.account.loggedInAccount
       || !this.main.account.loggedInAccount.wallet
       || !this.main.account.loggedInAccount.wallet.qjsWallet
@@ -113,32 +112,30 @@ export default class TransactionController extends IController {
     const {
       totalCount,
       transactions
-    } =  await wallet.getTransactions(
+    } =  await wallet.getTokenBalanceHistory(
+      undefined,
       limit,
       offset,
     );
     // this.pagesTotal = pagesTotal;
-    this.totalTransactions = totalCount;
+    this.totalTokenTransfers = totalCount;
 
-    return map(transactions, (tx: RunebaseInfo.IRawTransactionInfo) => {
-      console.log('tx');
-      console.log(tx);
+    return transactions.map((tokenTransfer: RunebaseInfo.ITokenBalanceHistoryInfo) => {
       const {
-        timestamp,
-        confirmations,
+        blockHash,
+        blockHeight,
         id,
-        amount,
-      } = tx;
+        timestamp,
+        tokens,
+      } = tokenTransfer;
 
-
-      return new Transaction({
+      return new TokenTransfer({
         id: id,
         timestamp: moment(new Date(timestamp * 1000)).format('MM-DD-YYYY, HH:mm'),
-        confirmations,
-        amount: round(
-          Number(amount),
-          8
-        ),
+        // confirmations: confirmations || 0, // Adjust based on your logic for confirmations
+        blockHash: blockHash,
+        blockHeight: blockHeight,
+        tokens: tokens,
       });
     });
   };
@@ -146,10 +143,10 @@ export default class TransactionController extends IController {
   /*
   * Sends the message after fetching transactions.
   */
-  private sendTransactionsMessage = () => {
+  private sendTokenTransfersMessage = () => {
     chrome.runtime.sendMessage({
-      type: MESSAGE_TYPE.GET_TXS_RETURN,
-      transactions: this.transactions,
+      type: MESSAGE_TYPE.GET_TOKEN_TRANSFER_HISTORY_RETURN,
+      tokenTransfers: this.tokenTransfers,
       hasMore: this.hasMore,
     });
   };
@@ -157,13 +154,13 @@ export default class TransactionController extends IController {
   private handleMessage = (request: any) => {
     try {
       switch (request.type) {
-      case MESSAGE_TYPE.START_TX_POLLING:
+      case MESSAGE_TYPE.START_TOKEN_BALANCE_HISTORY_POLLING:
         this.startPolling();
         break;
-      case MESSAGE_TYPE.STOP_TX_POLLING:
+      case MESSAGE_TYPE.STOP_TOKEN_BALANCE_HISTORY_POLLING:
         this.stopPolling();
         break;
-      case MESSAGE_TYPE.GET_MORE_TXS:
+      case MESSAGE_TYPE.GET_MORE_TOKEN_BALANCE_HISTORY:
         this.fetchMore();
         break;
       default:

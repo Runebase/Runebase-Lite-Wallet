@@ -57,6 +57,8 @@
         "inpage.js",
         "sign-tx.html",
         "images/logo.png",
+        "images/runes.png",
+        "images/credits.png",
         "css/modal.css"
       ],
       "matches": ["<all_urls>"]

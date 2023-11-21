@@ -51,16 +51,6 @@ module.exports = {
   },
   module: {
     rules: [
-      // {
-      //   test: /\.(ts|tsx|js)$/,
-      //   enforce: 'pre',
-      //   exclude: /node_modules/,
-      //   use: [
-      //     {
-      //       loader: require.resolve('babel-loader'),
-      //     },
-      //   ],
-      // },
       {
         oneOf: [
           {
@@ -114,6 +104,7 @@ module.exports = {
       overrideConfigFile: path.resolve(__dirname, '.eslintrc.js'),
       fix: true,
       files: 'src/**/*.ts', // Adjust the glob pattern as needed
+      useEslintrc: true,
     }),
     new webpack.ProvidePlugin({
       process: 'process/browser',

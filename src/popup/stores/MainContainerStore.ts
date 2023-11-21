@@ -38,7 +38,7 @@ export default class MainContainerStore {
 
       case MESSAGE_TYPE.ACCOUNT_LOGIN_SUCCESS:
         console.log('Account login success. Routing to home page');
-        routerStore.push('/home');
+        routerStore.push('/account-detail');
         break;
 
       case MESSAGE_TYPE.LOGIN_FAILURE:

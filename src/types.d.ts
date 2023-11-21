@@ -1,5 +1,5 @@
 // import { utils } from 'ethers';
-import { Insight } from 'runebasejs-wallet';
+import { RunebaseInfo } from 'runebasejs-wallet';
 import { ISendTxOptions } from 'runebasejs-wallet/lib/tx';
 import {
   API_TYPE,
@@ -54,7 +54,7 @@ export interface IRPCCallRequest {
 
 export interface IRPCCallResponse {
   id: string;
-  result?: Insight.IContractCall | Insight.ISendRawTxResult;
+  result?: RunebaseInfo.IContractCall | RunebaseInfo.ISendRawTxResult;
   error?: string;
 }
 
@@ -69,7 +69,7 @@ export interface ISignExternalTxRequest {
 }
 
 export interface ISigner {
-  send(to: string, amount: number, options: ISendTxOptions): Promise<Insight.ISendRawTxResult>;
+  send(to: string, amount: number, options: ISendTxOptions): Promise<RunebaseInfo.ISendRawTxResult>;
   sendTransaction(args: any[]): any;
 }
 
