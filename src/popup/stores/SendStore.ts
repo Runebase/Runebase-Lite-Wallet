@@ -92,7 +92,7 @@ export default class SendStore {
     chrome.runtime.sendMessage({ type: MESSAGE_TYPE.GET_RRC_TOKEN_LIST }, (response: any) => {
       console.log('Received token list:', response);
       this.verifiedTokens = response;
-      this.app.sessionStore.info?.qrc20Balances.forEach((tokenInfo) => {
+      this.app.sessionStore.walletInfo?.qrc20Balances.forEach((tokenInfo) => {
         const { name, symbol, decimals, balance, address } = tokenInfo;
         const newToken = new RRCToken(name, symbol, Number(decimals), address);
         const isTokenVerified = this.verifiedTokens.find(x => x.address === newToken.address);
@@ -106,9 +106,11 @@ export default class SendStore {
     });
 
     this.tokens.unshift(new RRCToken('Runebase Token', 'RUNES', 8, ''));
-    this.tokens[0].balance = this.app.sessionStore.info ? Number(this.app.sessionStore.info.balance) : undefined;
+    this.tokens[0].balance = this.app.sessionStore.walletInfo
+      ? Number(this.app.sessionStore.walletInfo.balance) : undefined;
     this.token = this.tokens[0];
-    this.senderAddress = this.app.sessionStore.info ? this.app.sessionStore.info.address : undefined;
+    this.senderAddress = this.app.sessionStore.walletInfo
+      ? this.app.sessionStore.walletInfo.address : undefined;
     chrome.runtime.sendMessage({
       type: MESSAGE_TYPE.GET_MAX_RUNEBASE_SEND,
     });

@@ -82,12 +82,12 @@ const FromField = observer(({ classes, sendStore, sessionStore }: any) => (
       <Select
         className={classes.selectOrTextField}
         inputProps={{ name: 'from', id: 'from'}}
-        value={sessionStore.info.address}
+        value={sessionStore.walletInfo.address}
         onChange={(event) => {
           sendStore.senderAddress = event.target.value;
         }}
       >
-        <MenuItem value={sessionStore.info.address}>
+        <MenuItem value={sessionStore.walletInfo.address}>
           <Typography className={classes.fieldTextOrInput}>{sessionStore.loggedInAccountName}</Typography>
         </MenuItem>
       </Select>
@@ -104,7 +104,7 @@ const ToField = observer(({ classes, sendStore, sessionStore, onEnterPress }: an
         fullWidth
         type="text"
         multiline={false}
-        placeholder={sessionStore?.info?.address || ''}
+        placeholder={sessionStore?.walletInfo?.address || ''}
         value={sendStore.receiverAddress || ''}
         InputProps={{ className: classes.fieldTextOrInput, endAdornment: <ArrowDropDown /> }}
         onChange={(event) => sendStore.receiverAddress = event.target.value}

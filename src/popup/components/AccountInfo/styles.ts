@@ -2,7 +2,8 @@ import { makeStyles } from '@mui/styles';
 
 const useStyles = makeStyles((theme) => ({
   root: {
-    padding: theme.spacing(2), // Use spacing instead of padding
+    paddingLeft: theme.spacing(2), // Use spacing instead of padding
+    paddingRight: theme.spacing(2), // Use spacing instead of padding
   },
   acctName: {
     fontSize: theme.typography.h4.fontSize, // Adjust the font size based on your design

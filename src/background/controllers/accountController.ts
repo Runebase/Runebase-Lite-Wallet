@@ -1,6 +1,6 @@
 // background/controllers/accountController.ts
 import { isEmpty, find, cloneDeep } from 'lodash';
-import { Wallet as RunebaseWallet } from 'runebasejs-wallet';
+import { Wallet as RunebaseWallet, RunebaseInfo } from 'runebasejs-wallet';
 import assert from 'assert';
 import { Buffer } from 'buffer'; // Add this line to import Buffer
 
@@ -18,12 +18,15 @@ const INIT_VALUES = {
   testnetAccounts: [],
   regtestAccounts: [],
   loggedInAccount: undefined,
-  getInfoInterval: undefined,
+  getWalletInfoInterval: undefined,
+  getBlockchainInfoInterval: undefined,
+  blockchainInfo: undefined,
 };
 
 export default class AccountController extends IController {
   private static SCRYPT_PARAMS_PRIV_KEY: any = { N: 8192, r: 8, p: 1 };
-  private static GET_INFO_INTERVAL_MS: number = 30000;
+  private static GET_WALLET_INFO_INTERVAL_MS: number = 30000;
+  private static GET_BLOCKCHAIN_INFO_INTERVAL_MS: number = 120000;
 
   public get accounts(): Account[] {
     if (this.main.network.networkName === NETWORK_NAMES.MAINNET) {
@@ -38,11 +41,13 @@ export default class AccountController extends IController {
     return !isEmpty(this.mainnetAccounts) || !isEmpty(this.testnetAccounts) || !isEmpty(this.regtestAccounts);
   }
   public loggedInAccount?: Account = INIT_VALUES.loggedInAccount;
+  public blockchainInfo?: RunebaseInfo.IGetBlockchainInfo = INIT_VALUES.blockchainInfo;
 
   private mainnetAccounts: Account[] = INIT_VALUES.mainnetAccounts;
   private testnetAccounts: Account[] = INIT_VALUES.testnetAccounts;
   private regtestAccounts: Account[] = INIT_VALUES.regtestAccounts;
-  private getInfoInterval?: any = INIT_VALUES.getInfoInterval;
+  private getWalletInfoInterval?: any = INIT_VALUES.getWalletInfoInterval;
+  private getBlockchainInfoInterval?: any = INIT_VALUES.getBlockchainInfoInterval;
 
   constructor(main: RunebaseChromeController) {
     super('account', main);
@@ -211,12 +216,6 @@ export default class AccountController extends IController {
     });
     const filename = `runebasechrome_${accountName}_${timestamp}.bak`;
 
-    // Send a message to the popup or content script to handle the file download
-    // chrome.runtime.sendMessage({
-    //   type: MESSAGE_TYPE.SAVE_SEED_TO_FILE_RETURN,
-    //   filename: filename,
-    //   content: mnemonic,
-    // });
     chrome.runtime.sendMessage({
       type: MESSAGE_TYPE.SAVE_SEED_TO_FILE_RETURN,
       filename: filename,
@@ -226,10 +225,6 @@ export default class AccountController extends IController {
     this.importMnemonic(accountName, mnemonic);
   };
 
-  /*
-  * Finds the account based on the name and logs in.
-  * @param accountName {string} The account name to search by.
-  */
   public loginAccount = async (accountName: string) => {
     const account = find(this.accounts, { name: accountName });
     this.loggedInAccount = cloneDeep(account);
@@ -253,9 +248,6 @@ export default class AccountController extends IController {
     }
   };
 
-  /*
-  * Logs out of the current account and routes back to the account login.
-  */
   public logoutAccount = () => {
     this.main.session.clearAllIntervals();
     this.main.session.clearSession();
@@ -289,6 +281,7 @@ export default class AccountController extends IController {
      */
     const sendInpageUpdate = false;
     await this.getWalletInfo(sendInpageUpdate);
+    await this.getBlockchainInfo();
     await this.startPolling();
     await this.main.token.startPolling();
     await this.main.external.startPolling();
@@ -308,9 +301,13 @@ export default class AccountController extends IController {
   * Stops polling for the periodic info updates.
   */
   public stopPolling = () => {
-    if (this.getInfoInterval) {
-      clearInterval(this.getInfoInterval);
-      this.getInfoInterval = undefined;
+    if (this.getWalletInfoInterval) {
+      clearInterval(this.getWalletInfoInterval);
+      this.getWalletInfoInterval = undefined;
+    }
+    if (this.getBlockchainInfoInterval) {
+      clearInterval(this.getBlockchainInfoInterval);
+      this.getBlockchainInfoInterval = undefined;
     }
   };
 
@@ -403,13 +400,37 @@ export default class AccountController extends IController {
   };
 
   /*
+  * Fetches the blockchain info from the current wallet instance.
+  */
+  private getBlockchainInfo = async () => {
+    if (!this.loggedInAccount || !this.loggedInAccount.wallet || !this.loggedInAccount.wallet.qjsWallet) {
+      console.error('Could not get wallet info.');
+      return;
+    }
+    const blockchainInfo = await this.loggedInAccount.wallet.getBlockchainInfo();
+    console.log('getblockchainInfo: ', blockchainInfo);
+    if (blockchainInfo) {
+      this.blockchainInfo = blockchainInfo;
+      chrome.runtime.sendMessage({
+        type: MESSAGE_TYPE.GET_BLOCKCHAIN_INFO_RETURN,
+        blockchainInfo: this.blockchainInfo
+      });
+    }
+  };
+
+  /*
   * Starts polling for periodic info updates.
   */
   private startPolling = async () => {
-    if (!this.getInfoInterval) {
-      this.getInfoInterval = setInterval(() => {
+    if (!this.getWalletInfoInterval) {
+      this.getWalletInfoInterval = setInterval(() => {
         this.getWalletInfo();
-      }, AccountController.GET_INFO_INTERVAL_MS);
+      }, AccountController.GET_WALLET_INFO_INTERVAL_MS);
+    }
+    if (!this.getBlockchainInfoInterval) {
+      this.getBlockchainInfoInterval = setInterval(() => {
+        this.getBlockchainInfo();
+      }, AccountController.GET_BLOCKCHAIN_INFO_INTERVAL_MS);
     }
   };
 
@@ -523,6 +544,10 @@ export default class AccountController extends IController {
       case MESSAGE_TYPE.GET_LOGGED_IN_ACCOUNT_NAME:
         console.log('Getting logged-in account name');
         sendResponse(this.loggedInAccount ? this.loggedInAccount.name : undefined);
+        break;
+      case MESSAGE_TYPE.GET_BLOCKCHAIN_INFO:
+        console.log('Getting blockchain info');
+        sendResponse(this.blockchainInfo ? this.blockchainInfo : undefined);
         break;
       case MESSAGE_TYPE.GET_WALLET_INFO:
         console.log('Getting wallet info');

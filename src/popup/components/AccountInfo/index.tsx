@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { RunebaseInfo } from 'runebasejs-wallet';
 import { observer, inject } from 'mobx-react';
-import { Typography, Button, Box, Divider } from '@mui/material';
+import { Typography, Button, Box, Divider, Grid } from '@mui/material';
 import { KeyboardArrowRight } from '@mui/icons-material';
 import AppStore from '../../stores/AppStore';
 import useStyles from './styles';
 import SendIcon from '@mui/icons-material/Send';
 import CallReceivedIcon from '@mui/icons-material/CallReceived';
 import { TOKEN_IMAGES } from '../../../constants';
+import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
+import StarIcon from '@mui/icons-material/Star';
 
 interface IProps {
   store?: AppStore;
@@ -24,14 +26,17 @@ const AccountInfo: React.FC<IProps> = ({ hasRightArrow, store }) => {
   useEffect(() => {
     console.log('useEffect - store:', store);
     setLoggedInAccountName(store?.sessionStore.loggedInAccountName || null);
-    setInfo(store?.sessionStore.info || null);
+    setInfo(store?.sessionStore.walletInfo || null);
     setRunebaseBalanceUSD(store?.sessionStore.runebaseBalanceUSD);
     // setNetworkBalAnnotation(store?.sessionStore.networkBalAnnotation || null);
   }, [
     store,
     store?.sessionStore.loggedInAccountName,
     store?.sessionStore.runebaseBalanceUSD,
-    store?.sessionStore.info,
+    store?.sessionStore.walletInfo,
+    store?.accountDetailStore.verifiedTokens,
+    store?.sessionStore.blockchainInfo,
+    store?.accountDetailStore.tokenBalanceHistory
   ]);
 
   const handleClick = (id: string, event: React.MouseEvent<HTMLElement>) => {
@@ -61,6 +66,18 @@ const AccountInfo: React.FC<IProps> = ({ hasRightArrow, store }) => {
   return (
     <div className={classes.root}>
       <Typography className={classes.acctName}>{loggedInAccountName}</Typography>
+      <Grid container>
+        <Grid item xs={6}>
+          <Typography
+            variant="subtitle2"
+            gutterBottom
+            style={{ display: 'flex', alignItems: 'center' }}
+          >
+            <StarIcon style={{ marginRight: '5px' }} />
+            #{info.ranking}
+          </Typography>
+        </Grid>
+      </Grid>
       <Typography className={classes.address}>{info.address}</Typography>
       <Divider />
       <Box className={classes.amountContainer}>
@@ -104,7 +121,9 @@ const AccountInfo: React.FC<IProps> = ({ hasRightArrow, store }) => {
                     />
                   )
                 }
-                <Typography className={classes.tokenAmount}>{token.balance / 10 ** token.decimals}</Typography>
+                <Typography className={classes.tokenAmount}>
+                  {Number(token.balance) / (10 ** Number(token.decimals))}
+                </Typography>
                 <Typography className={classes.token}>{token.symbol}</Typography>
               </Box>
             </>
@@ -118,6 +137,7 @@ const AccountInfo: React.FC<IProps> = ({ hasRightArrow, store }) => {
         className={classes.actionButtonsContainer}
         sx={{
           mt: 1,
+          mb: 1,
         }}
       >
         <Button
@@ -143,6 +163,18 @@ const AccountInfo: React.FC<IProps> = ({ hasRightArrow, store }) => {
           Send
         </Button>
       </Box>
+      <Grid container>
+        <Grid item xs={6}>
+          <Typography
+            variant="subtitle2"
+            gutterBottom
+            style={{ display: 'flex', alignItems: 'center' }}
+          >
+            <ReceiptLongIcon style={{ marginRight: '5px' }} />
+            {info.transactionCount}
+          </Typography>
+        </Grid>
+      </Grid>
     </div>
   );
 };

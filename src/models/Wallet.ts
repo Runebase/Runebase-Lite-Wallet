@@ -13,7 +13,7 @@ import { RPC_METHOD, NETWORK_NAMES } from '../constants';
 export default class Wallet implements ISigner {
   public qjsWallet?: RunebaseWallet;
   public rpcProvider?: WalletRPCProvider;
-  public info?: RunebaseInfo.IGetInfo;
+  public info?: RunebaseInfo.IGetAddressInfo;
   public runebaseUSD?: number;
   public maxRunebaseSend?: number;
 
@@ -30,7 +30,7 @@ export default class Wallet implements ISigner {
       }
 
       /**
-     * We add a timeout promise to handle if qjsWallet hangs when executing getInfo.
+     * We add a timeout promise to handle if qjsWallet hangs when executing getWalletInfo.
      * (This happens if the runebase api is down)
      */
       let timedOut = false;
@@ -39,12 +39,12 @@ export default class Wallet implements ISigner {
         const wait = setTimeout(() => {
           clearTimeout(wait);
           timedOut = true;
-          reject(Error('wallet.getInfo failed, runebase api may be down'));
+          reject(Error('wallet.getWalletInfo failed, runebase api may be down'));
         }, 30000);
       });
 
-      const getInfoPromise = this.qjsWallet!.getInfo();
-      const promises = [timeoutPromise, getInfoPromise];
+      const getWalletInfoPromise = this.qjsWallet!.getWalletInfo();
+      const promises = [timeoutPromise, getWalletInfoPromise];
       let newInfo: any;
       try {
         newInfo = await Promise.race(promises);
@@ -110,5 +110,19 @@ export default class Wallet implements ISigner {
   private maxRunebaseSendToAddress = (networkName: string) => {
     return networkName === NETWORK_NAMES.MAINNET ?
       'RasfBnAjGidRrwmbve42Uacrp3sXFFkzaj' : '5ZiLJ5LuCyhLTmwF2MYjVrc82gCFuJuocB';
+  };
+
+  // Inside the Wallet class
+  public getBlockchainInfo = async (): Promise<RunebaseInfo.IGetBlockchainInfo> => {
+    if (!this.qjsWallet) {
+      throw Error('Cannot get blockchain info without wallet.');
+    }
+
+    try {
+      return await this.qjsWallet.runebaseInfo.getBlockchainInfo();
+    } catch (error) {
+      console.error('Error getting blockchain info:', error);
+      throw error;
+    }
   };
 }
