@@ -77,7 +77,7 @@ export default class AddTokenStore {
       symbol: this.symbol,
       decimals: this.decimals,
     });
-    this.app.routerStore.push('/account-detail');
+    this.app.routerStore.push('/manage-tokens');
     this.app.accountDetailStore.shouldScrollToBottom = true;
     this.setInitValues();
   };

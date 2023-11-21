@@ -79,6 +79,7 @@ const SettingsButton: FC<IProps> =
         open={Boolean(navBarStore.settingsMenuAnchor)}
         onClose={() => navBarStore.settingsMenuAnchor = undefined}
       >
+        <MenuItem onClick={navBarStore.routeToManageTokens}>Manage Tokens</MenuItem>
         <MenuItem onClick={navBarStore.routeToSettings}>Settings</MenuItem>
         <MenuItem onClick={navBarStore.logout}>Change Account</MenuItem>
       </Menu>

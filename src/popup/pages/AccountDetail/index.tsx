@@ -73,7 +73,7 @@ const AccountDetail: React.FC<IProps> = ({ store }) => {
             onChange={handleTabChange}
           >
             <Tab label="Transactions" className={classes.tab} />
-            <Tab label="Tokens" className={classes.tab} />
+            <Tab label="Token Transfers" className={classes.tab} />
           </Tabs>
         </Paper>
         <List className={classes.list}>
