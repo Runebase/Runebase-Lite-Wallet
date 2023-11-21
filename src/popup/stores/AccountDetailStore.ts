@@ -3,12 +3,14 @@ import { observable, action, reaction, makeObservable } from 'mobx';
 import AppStore from './AppStore';
 import { MESSAGE_TYPE } from '../../constants';
 import Transaction from '../../models/Transaction';
-import QRCToken from '../../models/QRCToken';
+import RRCToken from '../../models/RRCToken';
+import BigNumber from 'bignumber.js';
 
 const INIT_VALUES = {
   activeTabIdx: 0,
   transactions: [],
   tokens: [],
+  verifiedTokens: [],
   hasMore: false,
   shouldScrollToBottom: false,
   editTokenMode: false,
@@ -17,7 +19,8 @@ const INIT_VALUES = {
 export default class AccountDetailStore {
   @observable public activeTabIdx: number = INIT_VALUES.activeTabIdx;
   @observable public transactions: Transaction[] = INIT_VALUES.transactions;
-  @observable public tokens: QRCToken[] = INIT_VALUES.tokens;
+  @observable public tokens: RRCToken[] = INIT_VALUES.tokens;
+  @observable public verifiedTokens: RRCToken[] = INIT_VALUES.verifiedTokens;
   @observable public hasMore: boolean = INIT_VALUES.hasMore;
   @observable public shouldScrollToBottom: boolean = INIT_VALUES.shouldScrollToBottom;
   @observable public editTokenMode: boolean = INIT_VALUES.editTokenMode;
@@ -70,9 +73,25 @@ export default class AccountDetailStore {
   };
 
   private onTokenTabSelected = () => {
-    chrome.runtime.sendMessage({ type: MESSAGE_TYPE.GET_QRC_TOKEN_LIST }, (response: any) => {
-      this.tokens = response;
+    chrome.runtime.sendMessage({ type: MESSAGE_TYPE.GET_RRC_TOKEN_LIST }, (response: any) => {
+      console.log('Received token list:', response);
+      this.verifiedTokens = response;
+      this.tokens = [];
+      this.app.sessionStore.info?.qrc20Balances.forEach((tokenInfo) => {
+        const { name, symbol, decimals, balance, address } = tokenInfo;
+        const newToken = new RRCToken(name, symbol, Number(decimals), address);
+        const isTokenVerified = this.verifiedTokens.find(x => x.address === newToken.address);
+        if (isTokenVerified) {
+          newToken.balance = new BigNumber(balance).dividedBy(`1e${decimals}`).toNumber();
+          this.tokens.push(newToken);
+        } else {
+          // TODO: Make a visible unverified token balance list
+        }
+      });
     });
+    // chrome.runtime.sendMessage({ type: MESSAGE_TYPE.GET_RRC_TOKEN_LIST }, (response: any) => {
+    //   this.tokens = response;
+    // });
     chrome.runtime.sendMessage({ type: MESSAGE_TYPE.STOP_TX_POLLING });
   };
 
@@ -83,9 +102,10 @@ export default class AccountDetailStore {
         this.transactions = request.transactions;
         this.hasMore = request.hasMore;
         break;
-      case MESSAGE_TYPE.QRC_TOKENS_RETURN:
-        this.tokens = request.tokens;
+      case MESSAGE_TYPE.RRC_TOKENS_RETURN: {
+        this.verifiedTokens = request.tokens;
         break;
+      }
       default:
         break;
       }

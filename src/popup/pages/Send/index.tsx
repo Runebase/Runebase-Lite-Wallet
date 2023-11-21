@@ -4,7 +4,7 @@ import { ArrowDropDown, Send as SendIcon } from '@mui/icons-material';
 import { observer, inject } from 'mobx-react';
 import { map } from 'lodash';
 import { handleEnterPress } from '../../../utils';
-import QRCToken from '../../../models/QRCToken';
+import RRCToken from '../../../models/RRCToken';
 
 import useStyles from './styles';
 import NavBar from '../../components/NavBar';
@@ -126,7 +126,7 @@ const TokenField = observer(({ classes, sendStore }: any) => (
         value={sendStore.token ? sendStore.token.symbol : ''}
         onChange={(event) => sendStore.changeToken(event.target.value)}
       >
-        {map(sendStore.tokens, (token: QRCToken) => (
+        {map(sendStore.tokens, (token: RRCToken) => (
           <MenuItem key={token.symbol} value={token.symbol}>
             <Typography className={classes.fieldTextOrInput}>{token.symbol}</Typography>
           </MenuItem>

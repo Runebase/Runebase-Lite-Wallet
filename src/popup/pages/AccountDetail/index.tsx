@@ -16,7 +16,7 @@ import NavBar from '../../components/NavBar';
 import Transaction from '../../../models/Transaction';
 import AccountInfo from '../../components/AccountInfo';
 import AppStore from '../../stores/AppStore';
-import QRCToken from '../../../models/QRCToken';
+import RRCToken from '../../../models/RRCToken';
 import { shortenTxid } from '../../../utils';
 import useStyles from './styles';
 
@@ -143,7 +143,7 @@ const TransactionList: React.FC<{
 const TokenList: React.FC<{ classes: Record<string, string>; store: AppStore }> = observer(({ classes, store }) => (
   <div>
     {store.accountDetailStore.tokens &&
-      store.accountDetailStore.tokens.map(({ name, symbol, balance, address }: QRCToken) => (
+      store.accountDetailStore.tokens.map(({ name, symbol, balance, address }: RRCToken) => (
         <ListItem
           divider
           key={symbol}

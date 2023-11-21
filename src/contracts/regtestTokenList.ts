@@ -1,6 +1,6 @@
-import QRCToken from '../models/QRCToken';
+import RRCToken from '../models/RRCToken';
 
-const regtestTokenList: QRCToken[] = [
+const regtestTokenList: RRCToken[] = [
 ];
 
 export default regtestTokenList;

@@ -80,15 +80,21 @@ const AccountInfo: React.FC<IProps> = ({ hasRightArrow, store }) => {
       {info.qrc20Balances.map((
         token: RunebaseInfo.IRrc20Balance,
         index: number
-      ) => (
-        <>
-          <Divider />
-          <Box key={index} className={`${classes.amountContainer} ${classes.tokenContainer}`}>
-            <Typography className={classes.tokenAmount}>{token.balance / 10 ** token.decimals}</Typography>
-            <Typography className={classes.token}>{token.symbol}</Typography>
-          </Box>
-        </>
-      ))}
+      ) => {
+        const isVerifiedToken = store?.accountDetailStore.verifiedTokens.find(x => x.address === token.address);
+        if (isVerifiedToken) {
+          return (
+            <>
+              <Divider />
+              <Box key={index} className={`${classes.amountContainer} ${classes.tokenContainer}`}>
+                <Typography className={classes.tokenAmount}>{token.balance / 10 ** token.decimals}</Typography>
+                <Typography className={classes.token}>{token.symbol}</Typography>
+              </Box>
+            </>
+          );
+        }
+        return null;
+      })}
       <Divider />
 
       <Box

@@ -10,7 +10,7 @@ const INIT_VALUES = {
   name: '',
   symbol: '',
   decimals: undefined,
-  getQRCTokenDetailsFailed: false,
+  getRRCTokenDetailsFailed: false,
 };
 
 export default class AddTokenStore {
@@ -18,11 +18,11 @@ export default class AddTokenStore {
   @observable public name?: string = INIT_VALUES.name;
   @observable public symbol?: string = INIT_VALUES.symbol;
   @observable public decimals?: number = INIT_VALUES.decimals;
-  @observable public getQRCTokenDetailsFailed?: boolean = INIT_VALUES.getQRCTokenDetailsFailed;
+  @observable public getRRCTokenDetailsFailed?: boolean = INIT_VALUES.getRRCTokenDetailsFailed;
   @computed public get contractAddressFieldError(): string | undefined {
     return (!!this.contractAddress
       && isValidContractAddressLength(this.contractAddress)
-      && !this.getQRCTokenDetailsFailed)
+      && !this.getRRCTokenDetailsFailed)
       ? undefined : 'Not a valid contract address';
   }
   @computed public get buttonDisabled(): boolean {
@@ -55,7 +55,7 @@ export default class AddTokenStore {
         if (this.contractAddress && !this.contractAddressFieldError) {
           console.log('Fetching RRC token details for:', this.contractAddress);
           chrome.runtime.sendMessage({
-            type: MESSAGE_TYPE.GET_QRC_TOKEN_DETAILS,
+            type: MESSAGE_TYPE.GET_RRC_TOKEN_DETAILS,
             contractAddress: this.contractAddress
           });
         }
@@ -103,13 +103,13 @@ export default class AddTokenStore {
       this.name = INIT_VALUES.name;
       this.symbol = INIT_VALUES.symbol;
       this.decimals = INIT_VALUES.decimals;
-      this.getQRCTokenDetailsFailed = INIT_VALUES.getQRCTokenDetailsFailed;
+      this.getRRCTokenDetailsFailed = INIT_VALUES.getRRCTokenDetailsFailed;
     };
 
   @action
   private handleMessage = (request: any) => {
       switch (request.type) {
-      case MESSAGE_TYPE.QRC_TOKEN_DETAILS_RETURN:
+      case MESSAGE_TYPE.RRC_TOKEN_DETAILS_RETURN:
         if (request.isValid) {
           const { name, symbol, decimals } = request.token;
           console.log('Received RRC token details:', { name, symbol, decimals });
@@ -118,7 +118,7 @@ export default class AddTokenStore {
           this.decimals = decimals;
         } else {
           console.log('RRC token details request failed');
-          this.getQRCTokenDetailsFailed = true;
+          this.getRRCTokenDetailsFailed = true;
         }
         break;
       default:
