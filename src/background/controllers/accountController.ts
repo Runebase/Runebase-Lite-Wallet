@@ -1,5 +1,5 @@
 // background/controllers/accountController.ts
-import { isEmpty, find, cloneDeep } from 'lodash';
+import { isEmpty, find, cloneDeep, round } from 'lodash';
 import { Wallet as RunebaseWallet, RunebaseInfo } from 'runebasejs-wallet';
 import assert from 'assert';
 import { Buffer } from 'buffer'; // Add this line to import Buffer
@@ -10,6 +10,8 @@ import { MESSAGE_TYPE, STORAGE, NETWORK_NAMES, RUNEBASECHROME_ACCOUNT_CHANGE } f
 import Account from '../../models/Account';
 import Wallet from '../../models/Wallet';
 import { TRANSACTION_SPEED } from '../../constants';
+import Transaction from '../../models/Transaction';
+import moment from 'moment';
 
 globalThis.Buffer = Buffer;
 
@@ -460,7 +462,14 @@ export default class AccountController extends IController {
         throw Error('feeRate not set');
       }
 
-      await this.loggedInAccount.wallet.send(receiverAddress, amount, {feeRate});
+      const transaction = await this.loggedInAccount.wallet.send(receiverAddress, amount, {feeRate});
+      const newTransaction = new Transaction({
+        id: transaction.txid,
+        timestamp: moment().format('MM-DD-YYYY, HH:mm'), // Use current timestamp for the new transaction
+        confirmations: 0, // Transaction is not confirmed initially
+        amount: round(Number(amount), 8),
+      });
+      this.main.transaction.addTransaction(newTransaction);
       chrome.runtime.sendMessage({ type: MESSAGE_TYPE.SEND_TOKENS_SUCCESS });
     } catch (err) {
       chrome.runtime.sendMessage({ type: MESSAGE_TYPE.SEND_TOKENS_FAILURE, error: err });

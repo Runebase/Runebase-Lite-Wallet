@@ -1,5 +1,4 @@
 import { observable, action, reaction, makeObservable } from 'mobx';
-
 import AppStore from './AppStore';
 import { MESSAGE_TYPE } from '../../constants';
 import Transaction from '../../models/Transaction';
@@ -87,27 +86,6 @@ export default class AccountDetailStore {
     chrome.runtime.sendMessage({ type: MESSAGE_TYPE.START_TOKEN_BALANCE_HISTORY_POLLING });
     chrome.runtime.sendMessage({ type: MESSAGE_TYPE.STOP_TX_POLLING });
   };
-
-
-  // private onTokenTabSelected = () => {
-  //   chrome.runtime.sendMessage({ type: MESSAGE_TYPE.GET_RRC_TOKEN_LIST }, (response: any) => {
-  //     console.log('Received token list:', response);
-  //     this.verifiedTokens = response;
-  //     this.tokens = [];
-  //     this.app.sessionStore.walletInfo?.qrc20Balances.forEach((tokenInfo) => {
-  //       const { name, symbol, decimals, balance, address } = tokenInfo;
-  //       const newToken = new RRCToken(name, symbol, Number(decimals), address);
-  //       const isTokenVerified = this.verifiedTokens.find(x => x.address === newToken.address);
-  //       if (isTokenVerified) {
-  //         newToken.balance = new BigNumber(balance).dividedBy(`1e${decimals}`).toNumber();
-  //         this.tokens.push(newToken);
-  //       } else {
-  //         // TODO: Make a visible unverified token balance list
-  //       }
-  //     });
-  //   });
-  //   chrome.runtime.sendMessage({ type: MESSAGE_TYPE.STOP_TX_POLLING });
-  // };
 
   @action private handleMessage = (request: any) => {
     console.log('ACCOUNT DETAIL STOERE MESSAGE RECEIVED: ', request);

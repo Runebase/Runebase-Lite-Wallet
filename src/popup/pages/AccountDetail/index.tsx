@@ -40,6 +40,8 @@ const AccountDetail: React.FC<IProps> = ({ store }) => {
     loginStore,
     blockchainInfo,
     blockchainInfo?.height,
+    accountDetailStore.tokenBalanceHistory,
+    accountDetailStore.transactions
   ]);
 
   useEffect(() => {

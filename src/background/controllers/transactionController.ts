@@ -13,7 +13,7 @@ export default class TransactionController extends IController {
   public transactions: Transaction[] = [];
   public pageNum: number = 0;
   public pagesTotal?: number;
-  public totalTransactions?: number;
+  public totalTransactions: number = 0;
   public get hasMore(): boolean {
     return !!this.pagesTotal && (this.pagesTotal > this.pageNum + 1);
   }
@@ -26,6 +26,11 @@ export default class TransactionController extends IController {
     chrome.runtime.onMessage.addListener(this.handleMessage);
     this.initFinished();
   }
+  public addTransaction = (transaction: Transaction) => {
+    this.transactions.unshift(transaction); // Add the new transaction to the beginning of the array
+    this.totalTransactions += 1;
+    this.sendTransactionsMessage(); // Update the UI with the new transactions
+  };
 
   /*
   * Fetches the first page of transactions.

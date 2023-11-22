@@ -36,7 +36,9 @@ const AccountInfo: React.FC<IProps> = ({ hasRightArrow, store }) => {
     store?.sessionStore.walletInfo,
     store?.accountDetailStore.verifiedTokens,
     store?.sessionStore.blockchainInfo,
-    store?.accountDetailStore.tokenBalanceHistory
+    store?.accountDetailStore.tokenBalanceHistory,
+    store?.accountDetailStore.transactions,
+    store?.sessionStore.walletInfo?.qrc20Balances,
   ]);
 
   const handleClick = (id: string, event: React.MouseEvent<HTMLElement>) => {
