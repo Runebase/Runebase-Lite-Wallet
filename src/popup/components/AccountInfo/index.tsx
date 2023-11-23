@@ -10,6 +10,7 @@ import CallReceivedIcon from '@mui/icons-material/CallReceived';
 import { TOKEN_IMAGES } from '../../../constants';
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 import StarIcon from '@mui/icons-material/Star';
+import PersonIcon from '@mui/icons-material/Person';
 
 interface IProps {
   store?: AppStore;
@@ -36,7 +37,6 @@ const AccountInfo: React.FC<IProps> = ({ hasRightArrow, store }) => {
     store?.sessionStore.walletInfo,
     store?.accountDetailStore.verifiedTokens,
     store?.sessionStore.blockchainInfo,
-    store?.accountDetailStore.tokenBalanceHistory,
     store?.accountDetailStore.transactions,
     store?.sessionStore.walletInfo?.qrc20Balances,
   ]);
@@ -67,7 +67,14 @@ const AccountInfo: React.FC<IProps> = ({ hasRightArrow, store }) => {
 
   return (
     <div className={classes.root}>
-      <Typography className={classes.acctName}>{loggedInAccountName}</Typography>
+      <Typography
+        variant="subtitle2"
+        gutterBottom
+        style={{ display: 'flex', alignItems: 'center' }}
+      >
+        <PersonIcon style={{ marginRight: '5px' }} />
+        {loggedInAccountName}
+      </Typography>
       <Grid container>
         <Grid item xs={6}>
           <Typography
@@ -80,7 +87,14 @@ const AccountInfo: React.FC<IProps> = ({ hasRightArrow, store }) => {
           </Typography>
         </Grid>
       </Grid>
-      <Typography className={classes.address}>{info.address}</Typography>
+      <Typography
+        variant="subtitle2"
+        gutterBottom
+        style={{ display: 'flex', alignItems: 'center' }}
+      >
+        <CallReceivedIcon />
+        {info.address}
+      </Typography>
       <Divider />
       <Box className={classes.amountContainer}>
         <img
