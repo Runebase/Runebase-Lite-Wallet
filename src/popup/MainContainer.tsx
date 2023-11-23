@@ -38,6 +38,19 @@ const MainContainer: React.FC<IProps> = inject('store')(observer(({ history, sto
     };
   }, []);
 
+  const { accountDetailStore, sessionStore } = store;
+
+  useEffect(() => {
+    accountDetailStore.init();
+    return () => {
+      accountDetailStore.deinit();
+    };
+  }, [
+    accountDetailStore,
+    sessionStore.walletInfo
+  ]);
+
+
   return (
     <div style={{ width: '100%', height: '100%' }}>
       <Router history={history || createBrowserHistory()}>

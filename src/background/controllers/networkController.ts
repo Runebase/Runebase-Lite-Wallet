@@ -7,8 +7,8 @@ import QryNetwork from '../../models/QryNetwork';
 
 export default class NetworkController extends IController {
   public static NETWORKS: QryNetwork[] = [
-    new QryNetwork(NETWORK_NAMES.MAINNET, networks.mainnet, 'https://explorer2.runebase.io/tx'),
-    new QryNetwork(NETWORK_NAMES.TESTNET, networks.testnet, 'https://testnet2.runebase.io/tx'),
+    new QryNetwork(NETWORK_NAMES.MAINNET, networks.mainnet, 'https://explorer.runebase.io/tx'),
+    new QryNetwork(NETWORK_NAMES.TESTNET, networks.testnet, 'https://testnet.runebase.io/tx'),
     new QryNetwork(NETWORK_NAMES.REGTEST, networks.regtest, 'http://localhost:3001/tx'),
   ];
 

@@ -1,11 +1,11 @@
 import { RunebaseInfo } from 'runebasejs-wallet';
-import { map, round } from 'lodash';
+import { round } from 'lodash';
 import moment from 'moment';
 
 import RunebaseChromeController from '.';
 import IController from './iController';
 import { MESSAGE_TYPE } from '../../constants';
-import Transaction from '../../models/Transaction';
+import Transaction, { Qrc20TokenTransfer } from '../../models/Transaction';
 
 export default class TransactionController extends IController {
   private static GET_TX_INTERVAL_MS: number = 60000;
@@ -29,6 +29,7 @@ export default class TransactionController extends IController {
   public addTransaction = (transaction: Transaction) => {
     this.transactions.unshift(transaction); // Add the new transaction to the beginning of the array
     this.totalTransactions += 1;
+    console.log('new transactions after adding: ', this.transactions);
     this.sendTransactionsMessage(); // Update the UI with the new transactions
   };
 
@@ -105,46 +106,70 @@ export default class TransactionController extends IController {
     limit: number = 10,
     offset: number = 0
   ): Promise<Transaction[]> => {
-    if (!this.main.account.loggedInAccount
-      || !this.main.account.loggedInAccount.wallet
-      || !this.main.account.loggedInAccount.wallet.qjsWallet
+    if (
+      !this.main.account.loggedInAccount ||
+      !this.main.account.loggedInAccount.wallet ||
+      !this.main.account.loggedInAccount.wallet.qjsWallet
     ) {
-      console.error('Cannot get transactions without wallet instance.');
+      console.error('Cannot get transactions without a wallet instance.');
       return [];
     }
 
     const wallet = this.main.account.loggedInAccount.wallet.qjsWallet;
-    // assert.containsAllKeys(rawTxs, ["transactions", "totalCount"])
-    const {
-      totalCount,
-      transactions
-    } =  await wallet.getTransactions(
+
+    const { totalCount, transactions } = await wallet.getWalletTransactions(
       limit,
-      offset,
+      offset
     );
-    // this.pagesTotal = pagesTotal;
+
     this.totalTransactions = totalCount;
 
-    return map(transactions, (tx: RunebaseInfo.IRawTransactionInfo) => {
-      console.log('tx');
-      console.log(tx);
+    return transactions.map((tx: RunebaseInfo.IRawWalletTransactionInfo) => {
+      let amount = 0;
       const {
         timestamp,
         confirmations,
         id,
-        amount,
+        inputs,
+        outputs,
+        qrc20TokenTransfers,
       } = tx;
 
+      // Sum up input values
+      const inputSum = inputs.reduce((sum: number, input: any) => {
+        if (
+          input.address ===
+          this.main.account.loggedInAccount!.wallet!.info!.address
+        ) {
+          sum += Number(input.value);
+        }
+        return sum;
+      }, 0);
 
-      return new Transaction({
+      // Sum up output values
+      const outputSum = outputs.reduce((sum: number, output: any) => {
+        if (
+          output.address ===
+          this.main.account.loggedInAccount!.wallet!.info!.address
+        ) {
+          sum += Number(output.value);
+        }
+        return sum;
+      }, 0);
+
+      amount += outputSum - inputSum;
+
+      const transaction = new Transaction({
         id: id,
         timestamp: moment(new Date(timestamp * 1000)).format('MM-DD-YYYY, HH:mm'),
         confirmations,
-        amount: round(
-          Number(amount),
-          8
+        amount: round(Number(amount), 8),
+        qrc20TokenTransfers: qrc20TokenTransfers && qrc20TokenTransfers.map(
+          (transfer: any) => new Qrc20TokenTransfer(transfer)
         ),
       });
+
+      return transaction;
     });
   };
 

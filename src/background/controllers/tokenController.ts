@@ -14,6 +14,8 @@ import testnetTokenList from '../../contracts/testnetTokenList';
 import regtestTokenList from '../../contracts/regtestTokenList';
 import { generateRequestId } from '../../utils';
 import { IRPCCallResponse } from '../../types';
+import moment from 'moment';
+import Transaction from '../../models/Transaction';
 
 const INIT_VALUES = {
   tokens: undefined,
@@ -210,6 +212,7 @@ export default class TokenController extends IController {
   ) => {
     try {
       console.log('token in sendRRCToken Background.js');
+      console.log('amount: ', amount);
       console.log(token);
       // bn.js does not handle decimals well (Ex: BN(1.2) => 1 not 1.2) so we use BigNumber
       const bnAmount = new BigNumber(amount).times(new BigNumber(10 ** token.decimals));
@@ -219,7 +222,30 @@ export default class TokenController extends IController {
       console.log('Sending RRCToken with the following arguments:', args);
 
       const requestId = generateRequestId();
-      const { error } = await this.main.rpc.sendToContract(requestId, args);
+      const response = await this.main.rpc.sendToContract(requestId, args);
+      const { error, result } = response as { error: any, result: RunebaseInfo.ISendRawTxResult };
+
+      console.log('sendRRCToken result: ', result);
+      console.log(`sendRRCToken result: gaslimit: ${gasLimit} gasPrice: ${gasPrice} = (${new BigNumber(gasLimit).times(new BigNumber(gasPrice).times(1e8)).dp(0).toNumber()})`);
+      const newTransaction = new Transaction({
+        id: result && result.txid ? result.txid : undefined,
+        timestamp: moment().format('MM-DD-YYYY, HH:mm'),
+        confirmations: 0,
+        amount: new BigNumber(gasLimit).times(new BigNumber(gasPrice).times(1e8)).dp(0).toNumber(),
+        qrc20TokenTransfers: [
+          {
+            address: token.address,
+            addressHex: token.address,
+            name: token.name,
+            symbol: token.symbol,
+            decimals: token.decimals,
+            value: bnAmount.toString(),
+            from: this.main.account.loggedInAccount?.wallet?.info?.address,
+            to: receiverAddress,
+          }
+        ]
+      });
+      this.main.transaction.addTransaction(newTransaction);
 
       if (error) {
         console.error('Error sending RRCToken:', error);

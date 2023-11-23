@@ -1,5 +1,5 @@
 // background/controllers/accountController.ts
-import { isEmpty, find, cloneDeep, round } from 'lodash';
+import { isEmpty, find, cloneDeep } from 'lodash';
 import { Wallet as RunebaseWallet, RunebaseInfo } from 'runebasejs-wallet';
 import assert from 'assert';
 import { Buffer } from 'buffer'; // Add this line to import Buffer
@@ -12,6 +12,7 @@ import Wallet from '../../models/Wallet';
 import { TRANSACTION_SPEED } from '../../constants';
 import Transaction from '../../models/Transaction';
 import moment from 'moment';
+import BigNumber from 'bignumber.js';
 
 globalThis.Buffer = Buffer;
 
@@ -467,7 +468,7 @@ export default class AccountController extends IController {
         id: transaction.txid,
         timestamp: moment().format('MM-DD-YYYY, HH:mm'), // Use current timestamp for the new transaction
         confirmations: 0, // Transaction is not confirmed initially
-        amount: round(Number(amount), 8),
+        amount: new BigNumber(amount).times(1e8).dp(0).toNumber(),
       });
       this.main.transaction.addTransaction(newTransaction);
       chrome.runtime.sendMessage({ type: MESSAGE_TYPE.SEND_TOKENS_SUCCESS });

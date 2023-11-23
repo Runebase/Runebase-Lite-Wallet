@@ -97,7 +97,7 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "runebasejs-lib": "github:Runebase/runebasejs-lib",
-    "runebasejs-wallet": "github:runebase/runebasejs-wallet#28b760bc72244c9bf4cf2b83a2f5bd4ac74c1b42",
+    "runebasejs-wallet": "github:runebase/runebasejs-wallet#ec75303955ad2ed43c83093058d2500ceb817dc0",
     "rweb3": "github:runebase/rweb3.js#0779640bb4b4da3e847ad5cf79d15bd5c4cb483c",
     "secp256k1": "^5.0.0",
     "stream-browserify": "^3.0.0",
