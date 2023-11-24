@@ -61,10 +61,10 @@ export default class UtilsController extends IController {
       }
 
       const acct = this.main.account.loggedInAccount;
-      if (!acct || !acct.wallet || !acct.wallet.qjsWallet || !acct.wallet.qjsWallet.keyPair) {
+      if (!acct || !acct.wallet || !acct.wallet.rjsWallet || !acct.wallet.rjsWallet.keyPair) {
         throw Error('Invalid account or key pair.');
       }
-      const keyPair = acct.wallet.qjsWallet.keyPair;
+      const keyPair = acct.wallet.rjsWallet.keyPair;
       const hexAddress = runebase.address.fromBase58Check(superStakerAddress).hash.toString('hex');
 
       // Verify that keyPair.network.messagePrefix is set correctly for Runebase
@@ -98,7 +98,7 @@ export default class UtilsController extends IController {
       result = {
         podMessage,
         superStakerAddress,
-        delegatorAddress: acct.wallet.qjsWallet.address,
+        delegatorAddress: acct.wallet.rjsWallet.address,
       };
 
     } catch (err) {

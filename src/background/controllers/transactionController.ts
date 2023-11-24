@@ -109,13 +109,13 @@ export default class TransactionController extends IController {
     if (
       !this.main.account.loggedInAccount ||
       !this.main.account.loggedInAccount.wallet ||
-      !this.main.account.loggedInAccount.wallet.qjsWallet
+      !this.main.account.loggedInAccount.wallet.rjsWallet
     ) {
       console.error('Cannot get transactions without a wallet instance.');
       return [];
     }
 
-    const wallet = this.main.account.loggedInAccount.wallet.qjsWallet;
+    const wallet = this.main.account.loggedInAccount.wallet.rjsWallet;
 
     const { totalCount, transactions } = await wallet.getWalletTransactions(
       limit,

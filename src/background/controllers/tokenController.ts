@@ -100,7 +100,7 @@ export default class TokenController extends IController {
   private getRRCTokenBalance = async (token: RRCToken) => {
     if (!this.main.account.loggedInAccount
       || !this.main.account.loggedInAccount.wallet
-      || !this.main.account.loggedInAccount.wallet.qjsWallet
+      || !this.main.account.loggedInAccount.wallet.rjsWallet
     ) {
       console.error('Cannot getRRCTokenBalance without wallet instance.');
       return;
@@ -110,7 +110,7 @@ export default class TokenController extends IController {
     const data = rweb3.encoder.constructData(
       rrc223TokenABI,
       methodName,
-      [this.main.account.loggedInAccount.wallet.qjsWallet.address],
+      [this.main.account.loggedInAccount.wallet.rjsWallet.address],
     );
     const args = [token.address, data];
     const { result, error } = await this.main.rpc.callContract(generateRequestId(), args);

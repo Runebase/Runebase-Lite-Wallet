@@ -383,7 +383,7 @@ export default class AccountController extends IController {
   * Fetches the wallet info from the current wallet instance.
   */
   private getWalletInfo = async (sendInpageUpdate = true) => {
-    if (!this.loggedInAccount || !this.loggedInAccount.wallet || !this.loggedInAccount.wallet.qjsWallet) {
+    if (!this.loggedInAccount || !this.loggedInAccount.wallet || !this.loggedInAccount.wallet.rjsWallet) {
       console.error('Could not get wallet info.');
       return;
     }
@@ -406,7 +406,7 @@ export default class AccountController extends IController {
   * Fetches the blockchain info from the current wallet instance.
   */
   private getBlockchainInfo = async () => {
-    if (!this.loggedInAccount || !this.loggedInAccount.wallet || !this.loggedInAccount.wallet.qjsWallet) {
+    if (!this.loggedInAccount || !this.loggedInAccount.wallet || !this.loggedInAccount.wallet.rjsWallet) {
       console.error('Could not get wallet info.');
       return;
     }
@@ -443,7 +443,7 @@ export default class AccountController extends IController {
   * @param amount The amount to send.
   */
   private sendTokens = async (receiverAddress: string, amount: number, transactionSpeed: TRANSACTION_SPEED) => {
-    if (!this.loggedInAccount || !this.loggedInAccount.wallet || !this.loggedInAccount.wallet.qjsWallet) {
+    if (!this.loggedInAccount || !this.loggedInAccount.wallet || !this.loggedInAccount.wallet.rjsWallet) {
       throw Error('Cannot send with no wallet instance.');
     }
 
@@ -488,7 +488,7 @@ export default class AccountController extends IController {
    * unconfirmed UTXOs and update maxRunebaseSend accordingly.
    */
   private updateAndSendMaxRunebaseAmountToPopup = async () => {
-    if (!this.loggedInAccount || !this.loggedInAccount.wallet || !this.loggedInAccount.wallet.qjsWallet) {
+    if (!this.loggedInAccount || !this.loggedInAccount.wallet || !this.loggedInAccount.wallet.rjsWallet) {
       throw Error('Cannot calculate max balance with no wallet instance.');
     }
 
