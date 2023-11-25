@@ -402,6 +402,20 @@ export default class AccountController extends IController {
     }
   };
 
+  private getDelegationInfo = async () => {
+    if (!this.loggedInAccount || !this.loggedInAccount.wallet || !this.loggedInAccount.wallet.rjsWallet) {
+      console.error('Could not get wallet info.');
+      return;
+    }
+    const delegationInfo = await this.loggedInAccount.wallet.getDelegationInfoForAddress();
+    if (delegationInfo) {
+      chrome.runtime.sendMessage({
+        type: MESSAGE_TYPE.GET_DELEGATION_INFO_RETURN,
+        delegationInfo: delegationInfo
+      });
+    }
+  };
+
   /*
   * Fetches the blockchain info from the current wallet instance.
   */
@@ -563,6 +577,10 @@ export default class AccountController extends IController {
         console.log('Getting wallet info');
         sendResponse(this.loggedInAccount && this.loggedInAccount.wallet
           ? this.loggedInAccount.wallet.info : undefined);
+        break;
+      case MESSAGE_TYPE.GET_DELEGATION_INFO:
+        console.log('Getting wallet delegation info');
+        this.getDelegationInfo();
         break;
       case MESSAGE_TYPE.GET_RUNEBASE_USD:
         console.log('Getting RUNEBASE to USD conversion');

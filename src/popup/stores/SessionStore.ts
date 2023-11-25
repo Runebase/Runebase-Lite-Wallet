@@ -22,6 +22,13 @@ const INIT_VALUES = {
       blockGasLimit: 0,
     }
   },
+  delegationInfo: {
+    staker: '',
+    fee: 0,
+    blockHeight: 0,
+    PoD: '',
+    verified: false,
+  }
 };
 
 export default class SessionStore {
@@ -30,6 +37,7 @@ export default class SessionStore {
   @observable public loggedInAccountName?: string = INIT_VALUES.loggedInAccountName;
   @observable public walletInfo?: RunebaseInfo.IGetAddressInfo = INIT_VALUES.walletInfo;
   @observable public blockchainInfo?: RunebaseInfo.IGetBlockchainInfo = INIT_VALUES.blockchainInfo;
+  @observable public delegationInfo?: RunebaseInfo.IGetAddressDelegation = INIT_VALUES.delegationInfo;
 
   @computed public get runebaseBalanceUSD() {
     return isUndefined(this.runebaseUSD) ? 'Loading...' : `$${this.runebaseUSD} USD`;
@@ -85,6 +93,9 @@ export default class SessionStore {
       this.setWalletInfo(response);
     });
 
+    console.log('Sending message to get wallet delegation info');
+    chrome.runtime.sendMessage({ type: MESSAGE_TYPE.GET_DELEGATION_INFO });
+
     console.log('Sending message to get RUNEBASE USD');
     chrome.runtime.sendMessage({ type: MESSAGE_TYPE.GET_RUNEBASE_USD }, (response: any) => {
       console.log('Received RUNEBASE USD:', response);
@@ -106,6 +117,11 @@ export default class SessionStore {
     case MESSAGE_TYPE.GET_WALLET_INFO_RETURN:
       console.log('Received wallet info (return):', request.info);
       this.setWalletInfo(request.info);
+      break;
+    case MESSAGE_TYPE.GET_DELEGATION_INFO_RETURN:
+      console.log(request);
+      console.log('Received wallet delegation info (return):', request.delegationInfo);
+      this.setDelegationInfo(request.delegationInfo);
       break;
     case MESSAGE_TYPE.GET_BLOCKCHAIN_INFO_RETURN:
       console.log('Received blockchain info (return):', request.blockchainInfo);
@@ -166,5 +182,9 @@ export default class SessionStore {
 
   @action private setRunebaseUSD = (usd: number) => {
     this.runebaseUSD = usd;
+  };
+
+  @action private setDelegationInfo = (delegationInfo: RunebaseInfo.IGetAddressDelegation) => {
+    this.delegationInfo = delegationInfo;
   };
 }

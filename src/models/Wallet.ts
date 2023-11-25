@@ -14,6 +14,7 @@ export default class Wallet implements ISigner {
   public rjsWallet?: RunebaseWallet;
   public rpcProvider?: WalletRPCProvider;
   public info?: RunebaseInfo.IGetAddressInfo;
+  public delegationInfo?: RunebaseInfo.IGetAddressDelegation;
   public runebaseUSD?: number;
   public maxRunebaseSend?: number;
 
@@ -23,45 +24,57 @@ export default class Wallet implements ISigner {
     this.rpcProvider = new WalletRPCProvider(this.rjsWallet);
   }
 
-  @action
-  public updateInfo = async () => {
-      if (!this.rjsWallet) {
-        console.error('Cannot updateInfo without rjsWallet instance.');
-      }
+  @action public updateInfo = async () => {
+    if (!this.rjsWallet) {
+      console.error('Cannot updateInfo without rjsWallet instance.');
+    }
 
-      /**
+    /**
      * We add a timeout promise to handle if rjsWallet hangs when executing getWalletInfo.
      * (This happens if the runebase api is down)
      */
-      let timedOut = false;
-      // eslint-disable-next-line @typescript-eslint/naming-convention
-      const timeoutPromise = new Promise((_, reject) => {
-        const wait = setTimeout(() => {
-          clearTimeout(wait);
-          timedOut = true;
-          reject(Error('wallet.getWalletInfo failed, runebase api may be down'));
-        }, 30000);
-      });
+    let timedOut = false;
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    const timeoutPromise = new Promise((_, reject) => {
+      const wait = setTimeout(() => {
+        clearTimeout(wait);
+        timedOut = true;
+        reject(Error('wallet.getWalletInfo failed, runebase api may be down'));
+      }, 30000);
+    });
 
-      const getWalletInfoPromise = this.rjsWallet!.getWalletInfo();
-      const promises = [timeoutPromise, getWalletInfoPromise];
-      let newInfo: any;
-      try {
-        newInfo = await Promise.race(promises);
+    const getWalletInfoPromise = this.rjsWallet!.getWalletInfo();
+    const promises = [timeoutPromise, getWalletInfoPromise];
+    let newInfo: any;
+    try {
+      newInfo = await Promise.race(promises);
 
-        // if they are not equal, then the balance has changed
-        if (!timedOut && !deepEqual(this.info, newInfo)) {
-          this.info = newInfo;
-          console.log('Wallet info updated:', this.info); // Added logging
-          return true;
-        }
-      } catch (e) {
-        console.error('Error updating wallet info:', e); // Added logging
-        throw Error(e as any);
+      // if they are not equal, then the balance has changed
+      if (!timedOut && !deepEqual(this.info, newInfo)) {
+        this.info = newInfo;
+        console.log('Wallet info updated:', this.info); // Added logging
+        return true;
       }
+    } catch (e) {
+      console.error('Error updating wallet info:', e); // Added logging
+      throw Error(e as any);
+    }
 
-      return false;
-    };
+    return false;
+  };
+
+  public getDelegationInfoForAddress = async (): Promise<RunebaseInfo.IGetAddressDelegation> => {
+    if (!this.rjsWallet) {
+      throw Error('Cannot get blockchain info without wallet.');
+    }
+
+    try {
+      return await this.rjsWallet.getDelegationInfoForAddress();
+    } catch (error) {
+      console.error('Error getting blockchain info:', error);
+      throw error;
+    }
+  };
 
   // @param amount: (unit - whole RUNEBASE)
   public send = async (to: string, amount: number, options: ISendTxOptions): Promise<RunebaseInfo.ISendRawTxResult> => {
