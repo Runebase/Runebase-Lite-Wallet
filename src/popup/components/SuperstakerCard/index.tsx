@@ -1,5 +1,6 @@
 import React from 'react';
 import { Typography, Card, CardContent, CardActions, Button } from '@mui/material';
+import { RunebaseInfo } from 'runebasejs-wallet';
 
 interface SuperStaker {
   address: string;
@@ -13,10 +14,12 @@ interface SuperStaker {
 
 interface SuperStakerCardProps {
   superstaker: SuperStaker;
+  delegationInfo: RunebaseInfo.IGetAddressDelegation | undefined;
 }
 
 const SuperStakerCard: React.FC<SuperStakerCardProps> = ({
   superstaker,
+  delegationInfo,
 }) => {
   const addDelegation = async (
     superStakerAddress: string,
@@ -24,6 +27,7 @@ const SuperStakerCard: React.FC<SuperStakerCardProps> = ({
   ) => {
     console.log('removeDelegation: ', superStakerAddress);
     console.log('fee: ', fee);
+    console.log(delegationInfo);
   };
 
   const removeDelegation = async () => {
@@ -66,21 +70,48 @@ const SuperStakerCard: React.FC<SuperStakerCardProps> = ({
         </Typography>
       </CardContent>
       <CardActions>
+        {
+          delegationInfo
+          && delegationInfo.staker === superstaker.address
+            ? (
+              <Button
+                variant="contained"
+                onClick={() => {
+                  removeDelegation();
+                }}
+              >
+                Undelegate
+              </Button>
+            )
+            : delegationInfo && delegationInfo.staker !== ''
+              ?(
+                <Button
+                  variant="contained"
+                  onClick={() => {
+                    addDelegation(superstaker.address);
+                  }}
+                >
+                  Change Delegate
+                </Button>
+              )
+              : (
+                <Button
+                  variant="contained"
+                  onClick={() => {
+                    addDelegation(superstaker.address);
+                  }}
+                >
+                  Delegate
+                </Button>
+              )
+        }
         <Button
           variant="contained"
           onClick={() => {
             addDelegation(superstaker.address);
           }}
         >
-          Delegate
-        </Button>
-        <Button
-          variant="contained"
-          onClick={() => {
-            removeDelegation();
-          }}
-        >
-          Undelegate
+          Details
         </Button>
       </CardActions>
     </Card>

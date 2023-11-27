@@ -15,7 +15,7 @@ const Delegate: React.FC<IProps> = inject('store')(
   observer(({ store }) => {
     const classes = useStyles();
     const { sessionStore, delegateStore } = store;
-    const { loggedInAccountName, walletInfo } = sessionStore;
+    const { loggedInAccountName, walletInfo, delegationInfo } = sessionStore;
     if (!loggedInAccountName || !walletInfo) return null;
 
     useEffect(() => {
@@ -44,6 +44,7 @@ const Delegate: React.FC<IProps> = inject('store')(
                 >
                   <SuperStakerCard
                     superstaker={superstaker}
+                    delegationInfo={delegationInfo}
                   />
                 </Grid>
               ))}

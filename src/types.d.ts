@@ -13,19 +13,18 @@ import {
 } from './models';
 
 export interface SuperStaker {
-  id: number;
   address: string;
   lastProducedBlock: string;
   score: number;
   cycles: number;
-  verified: boolean;
-  enabled: boolean;
-  firstRegisteredOn: string;
-  totalBlocksProduced: number;
-  note: string;
   createdAt: string;
   updatedAt: string;
-  UserGroupId: number;
+  user: {
+    username: string;
+    user_id: string;
+    exp: number;
+    banned: boolean;
+  };
 }
 
 export type SuperStakerArray = SuperStaker[];
