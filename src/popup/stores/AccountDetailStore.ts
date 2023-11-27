@@ -37,6 +37,9 @@ export default class AccountDetailStore {
     console.log('INIT_ACCOUNT_DETAILS_TORE');
     chrome.runtime.onMessage.addListener(this.handleMessage);
     chrome.runtime.sendMessage({ type: MESSAGE_TYPE.START_TX_POLLING });
+    chrome.runtime.sendMessage({ type: MESSAGE_TYPE.GET_RRC_TOKEN_LIST }, (response: any) => {
+      this.verifiedTokens = response;
+    });
   };
 
   public deinit = () => {

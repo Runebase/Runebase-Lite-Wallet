@@ -63,7 +63,7 @@ const AccountInfo: React.FC<IProps> = ({ hasRightArrow, store }) => {
     return null;
   }
 
-  console.log('Rendering AccountInfo:', loggedInAccountName, info);
+  console.log('Rendering AccountInfo:', info);
 
   return (
     <div className={classes.root}>
@@ -108,7 +108,7 @@ const AccountInfo: React.FC<IProps> = ({ hasRightArrow, store }) => {
         <Typography className={classes.tokenAmount}>{info.balance / 1e8}</Typography>
         <Typography className={classes.token}>RUNES</Typography>
         {hasRightArrow && <KeyboardArrowRight className={classes.rightArrow} />}
-        <Typography className={classes.balanceUSD}>{`(~${runebaseBalanceUSD})`}</Typography>
+        <Typography className={classes.balanceUSD}>{`${runebaseBalanceUSD}`}</Typography>
       </Box>
 
       {info.qrc20Balances.map((

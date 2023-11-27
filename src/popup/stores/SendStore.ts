@@ -83,12 +83,12 @@ export default class SendStore {
     app: AppStore,
   ) {
     makeObservable(this);
+    chrome.runtime.onMessage.addListener(this.handleMessage);
     this.app = app;
   }
 
-  @action  public init = () => {
+  @action public init = () => {
     this.tokens = [];
-    chrome.runtime.onMessage.addListener(this.handleMessage);
     chrome.runtime.sendMessage({ type: MESSAGE_TYPE.GET_RRC_TOKEN_LIST }, (response: any) => {
       console.log('Received token list:', response);
       this.verifiedTokens = response;

@@ -40,7 +40,7 @@ export default class SessionStore {
   @observable public delegationInfo?: RunebaseInfo.IGetAddressDelegation = INIT_VALUES.delegationInfo;
 
   @computed public get runebaseBalanceUSD() {
-    return isUndefined(this.runebaseUSD) ? 'Loading...' : `$${this.runebaseUSD} USD`;
+    return isUndefined(this.runebaseUSD) ? 'Loading...' : `(~$${this.runebaseUSD})`;
   }
 
   @computed public get networkName() {

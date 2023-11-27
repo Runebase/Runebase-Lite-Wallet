@@ -1,6 +1,7 @@
 import RunebaseChromeController from '.';
 import IController from './iController';
 import { MESSAGE_TYPE } from '../../constants';
+import BigNumber from 'bignumber.js';
 
 const INIT_VALUES = {
   getPriceInterval: undefined,
@@ -19,7 +20,9 @@ export default class ExternalController extends IController {
   }
 
   public calculateRunebaseToUSD = (balance: number): number => {
-    return this.runebasePriceUSD ? Number((this.runebasePriceUSD * balance).toFixed(2)) : 0;
+    return this.runebasePriceUSD
+      ? new BigNumber(balance).dividedBy(1e8).times(this.runebasePriceUSD).dp(4).toNumber()
+      : 0;
   };
 
   /*
@@ -61,7 +64,7 @@ export default class ExternalController extends IController {
         this.main.account.loggedInAccount.wallet.info
       ) {
         const runebaseUSD = this.calculateRunebaseToUSD(
-          this.main.account.loggedInAccount.wallet.info.balance
+          Number(this.main.account.loggedInAccount.wallet.info.balance)
         );
         this.main.account.loggedInAccount.wallet.runebaseUSD = runebaseUSD;
 
