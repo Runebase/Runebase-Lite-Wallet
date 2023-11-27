@@ -11,6 +11,7 @@ import AccountDetailStore from './AccountDetailStore';
 import SendStore from './SendStore';
 import AddTokenStore from './AddTokenStore';
 import MainContainerStore from './MainContainerStore';
+import DelegateStore from './DelegateStore';
 
 export default class AppStore {
   public routerStore: RouterStore;
@@ -26,6 +27,7 @@ export default class AppStore {
   public sendStore: SendStore;
   public addTokenStore: AddTokenStore;
   public mainContainerStore: MainContainerStore;
+  public delegateStore: DelegateStore;
 
   constructor() {
     this.routerStore = new RouterStore();
@@ -40,6 +42,7 @@ export default class AppStore {
     this.accountDetailStore = new AccountDetailStore(this);
     this.sendStore = new SendStore(this);
     this.addTokenStore = new AddTokenStore(this);
+    this.delegateStore = new DelegateStore(this);
     this.mainContainerStore = new MainContainerStore(this);
   }
 }

@@ -12,6 +12,24 @@ import {
   InpageAccount
 } from './models';
 
+export interface SuperStaker {
+  id: number;
+  address: string;
+  lastProducedBlock: string;
+  score: number;
+  cycles: number;
+  verified: boolean;
+  enabled: boolean;
+  firstRegisteredOn: string;
+  totalBlocksProduced: number;
+  note: string;
+  createdAt: string;
+  updatedAt: string;
+  UserGroupId: number;
+}
+
+export type SuperStakerArray = SuperStaker[];
+
 export interface IExtensionMessageData<T> {
   target: TARGET_NAME;
   message: T;

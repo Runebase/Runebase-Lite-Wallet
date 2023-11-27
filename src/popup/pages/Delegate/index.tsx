@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { observer, inject } from 'mobx-react';
 import useStyles from './styles';
 import NavBar from '../../components/NavBar';
@@ -12,8 +12,14 @@ interface IProps {
 const Delegate: React.FC<IProps> = inject('store')(
   observer(({ store }) => {
     const classes = useStyles();
-    const { loggedInAccountName, walletInfo } = store.sessionStore;
+    const { sessionStore, delegateStore } = store;
+    const { loggedInAccountName, walletInfo } = sessionStore;
     if (!loggedInAccountName || !walletInfo) return null;
+
+    useEffect(() => {
+      delegateStore.getSuperstakers();
+    }, []);
+
 
     return (
       <div className={classes.root}>
