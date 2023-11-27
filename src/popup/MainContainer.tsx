@@ -25,6 +25,7 @@ import AppStore from './stores/AppStore';
 import { MESSAGE_TYPE } from '../constants';
 import MainContainerStore from './stores/MainContainerStore';
 import ManageTokens from './pages/ManageTokens';
+import Delegate from './pages/Delegate';
 
 interface IProps {
   history: any; // Replace with the appropriate type for your history
@@ -66,6 +67,7 @@ const MainContainer: React.FC<IProps> = inject('store')(observer(({ history, sto
           <Route exact path="/send" component={Send} />
           <Route exact path="/send-confirm" component={SendConfirm} />
           <Route exact path="/receive" component={Receive} />
+          <Route exact path="/delegate" component={Delegate} />
           <Route exact path="/manage-tokens" component={ManageTokens} />
           <Route exact path="/add-token" component={AddToken} />
         </Switch>

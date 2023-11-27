@@ -11,6 +11,7 @@ import { TOKEN_IMAGES } from '../../../constants';
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 import StarIcon from '@mui/icons-material/Star';
 import PersonIcon from '@mui/icons-material/Person';
+import ElectricBoltIcon from '@mui/icons-material/ElectricBolt';
 
 interface IProps {
   store?: AppStore;
@@ -50,6 +51,7 @@ const AccountInfo: React.FC<IProps> = ({ hasRightArrow, store }) => {
       mainCard: '/account-detail',
       sendButton: '/send',
       receiveButton: '/receive',
+      delegateButton: '/delegate',
     };
 
     const location = locations[id];
@@ -148,7 +150,25 @@ const AccountInfo: React.FC<IProps> = ({ hasRightArrow, store }) => {
         return null;
       })}
       <Divider />
-
+      <Box
+        className={classes.actionButtonsContainer}
+        sx={{
+          mt: 1,
+          mb: 1,
+        }}
+      >
+        <Button
+          id="delegateButton"
+          color="primary"
+          variant="contained"
+          size="small"
+          startIcon={<ElectricBoltIcon />}
+          className={classes.actionButton}
+          onClick={(e) => handleClick('delegateButton', e)}
+        >
+          Delegate
+        </Button>
+      </Box>
       <Box
         className={classes.actionButtonsContainer}
         sx={{
