@@ -23,6 +23,17 @@ export default class DelegateStore {
     chrome.runtime.sendMessage({ type: MESSAGE_TYPE.GET_SUPERSTAKERS });
   };
 
+  @action public undelegate = () => {
+    // this.sendState = SEND_STATE.SENDING;
+    chrome.runtime.sendMessage({
+      type: MESSAGE_TYPE.SEND_UNDELEGATE,
+    });
+  };
+
+  @action public delegate = () => {
+
+  };
+
   @action private handleMessage = (request: any) => {
     switch (request.type) {
     case MESSAGE_TYPE.GET_SUPERSTAKERS_RETURN:

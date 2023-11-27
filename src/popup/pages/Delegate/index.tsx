@@ -14,7 +14,7 @@ interface IProps {
 const Delegate: React.FC<IProps> = inject('store')(
   observer(({ store }) => {
     const classes = useStyles();
-    const { sessionStore, delegateStore } = store;
+    const { sessionStore, delegateStore, routerStore } = store;
     const { loggedInAccountName, walletInfo, delegationInfo } = sessionStore;
     if (!loggedInAccountName || !walletInfo) return null;
 
@@ -39,12 +39,13 @@ const Delegate: React.FC<IProps> = inject('store')(
                   item
                   xs={12}
                   style={{
-                    margin: '20px',
+                    padding: '10px',
                   }}
                 >
                   <SuperStakerCard
                     superstaker={superstaker}
                     delegationInfo={delegationInfo}
+                    routerStore={routerStore}
                   />
                 </Grid>
               ))}

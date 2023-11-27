@@ -17,6 +17,9 @@ export interface SuperStaker {
   lastProducedBlock: string;
   score: number;
   cycles: number;
+  firstRegisteredOn: string;
+  totalBlocksProduced: number;
+  note: string;
   createdAt: string;
   updatedAt: string;
   user: {

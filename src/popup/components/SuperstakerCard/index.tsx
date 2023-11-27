@@ -1,6 +1,12 @@
 import React from 'react';
-import { Typography, Card, CardContent, CardActions, Button } from '@mui/material';
+import { Typography, Card, CardContent, CardActions, Button, Tooltip } from '@mui/material';
 import { RunebaseInfo } from 'runebasejs-wallet';
+import { RouterStore } from 'mobx-react-router';
+import SportsScoreIcon from '@mui/icons-material/SportsScore';
+import AppRegistrationIcon from '@mui/icons-material/AppRegistration';
+import NotificationAddIcon from '@mui/icons-material/NotificationAdd';
+import DynamicFormIcon from '@mui/icons-material/DynamicForm';
+import moment from 'moment';
 
 interface SuperStaker {
   address: string;
@@ -15,100 +21,94 @@ interface SuperStaker {
 interface SuperStakerCardProps {
   superstaker: SuperStaker;
   delegationInfo: RunebaseInfo.IGetAddressDelegation | undefined;
+  routerStore: RouterStore;
 }
 
 const SuperStakerCard: React.FC<SuperStakerCardProps> = ({
   superstaker,
   delegationInfo,
+  routerStore,
 }) => {
-  const addDelegation = async (
-    superStakerAddress: string,
-    fee: number = 10,
-  ) => {
-    console.log('removeDelegation: ', superStakerAddress);
-    console.log('fee: ', fee);
-    console.log(delegationInfo);
-  };
-
-  const removeDelegation = async () => {
-    console.log('removeDelegation');
-  };
-
   return (
-    <Card sx={{ minWidth: 275 }}>
+    <Card sx={{ minWidth: 275, maxWidth: 350, backgroundColor: '#f7f7f7', border: '1px solid #e0e0e0' }}>
       <CardContent>
-        <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
-          {superstaker.address}
+        <Tooltip title="SuperStaker Wallet Address">
+          <Typography sx={{ fontSize: 14, fontWeight: 'bold', color: '#333333' }} gutterBottom>
+            {superstaker.address}
+          </Typography>
+        </Tooltip>
+        <Tooltip title="SuperStaker Registration Date">
+          <Typography sx={{ mb: 0.5, display: 'flex', alignItems: 'center', color: '#555555' }}>
+            <AppRegistrationIcon sx={{ color: '#2196f3', marginRight: 0.5 }} />{' '}
+            {moment(superstaker.firstRegisteredOn).format('YYYY-MM-DD HH:mm:ss')}
+          </Typography>
+        </Tooltip>
+        <Tooltip title="Total Blocks Produced Since Registration">
+          <Typography sx={{ mb: 0.5, display: 'flex', alignItems: 'center', color: '#555555' }}>
+            <DynamicFormIcon sx={{ color: '#4caf50', marginRight: 0.5 }} /> {superstaker.totalBlocksProduced}
+          </Typography>
+        </Tooltip>
+        <Tooltip title="Last Block Produced Date">
+          <Typography sx={{ mb: 0.5, display: 'flex', alignItems: 'center', color: '#555555' }}>
+            <NotificationAddIcon sx={{ color: '#ff9800', marginRight: 0.5 }} />{' '}
+            {moment(superstaker.lastProducedBlock).format('YYYY-MM-DD HH:mm:ss')}
+          </Typography>
+        </Tooltip>
+        <Typography sx={{ mb: 0.5, display: 'flex', alignItems: 'center', color: '#555555' }}>
+          <Tooltip title="SuperStaker Score">
+            <>
+              <SportsScoreIcon sx={{ color: '#e91e63', marginRight: 0.5 }} />
+              {superstaker.score}
+            </>
+          </Tooltip>
+          /
+          <Tooltip title="Cycles Participated">
+            <>{superstaker.cycles}</>
+          </Tooltip>
         </Typography>
-        <Typography sx={{ mb: 1.5 }} color="text.secondary">
-          cycles:
-          {' '}
-          {superstaker.cycles}
-        </Typography>
-        <Typography sx={{ mb: 1.5 }} color="text.secondary">
-          firstRegisteredOn:
-          {' '}
-          {superstaker.firstRegisteredOn}
-        </Typography>
-        <Typography sx={{ mb: 1.5 }} color="text.secondary">
-          lastProducedBlock:
-          {' '}
-          {superstaker.lastProducedBlock}
-        </Typography>
-        <Typography sx={{ mb: 1.5 }} color="text.secondary">
-          totalBlocksProduced:
-          {' '}
-          {superstaker.totalBlocksProduced}
-        </Typography>
-        <Typography sx={{ mb: 1.5 }} color="text.secondary">
-          score:
-          {' '}
-          {superstaker.score}
-        </Typography>
-        <Typography variant="body2">
-          {superstaker.note}
-        </Typography>
+        <Tooltip title="Personal Note from the SuperStaker">
+          <Typography variant="body2" sx={{ color: '#777777' }}>
+            {superstaker.note}
+          </Typography>
+        </Tooltip>
       </CardContent>
       <CardActions>
-        {
-          delegationInfo
-          && delegationInfo.staker === superstaker.address
-            ? (
-              <Button
-                variant="contained"
-                onClick={() => {
-                  removeDelegation();
-                }}
-              >
-                Undelegate
-              </Button>
-            )
-            : delegationInfo && delegationInfo.staker !== ''
-              ?(
-                <Button
-                  variant="contained"
-                  onClick={() => {
-                    addDelegation(superstaker.address);
-                  }}
-                >
-                  Change Delegate
-                </Button>
-              )
-              : (
-                <Button
-                  variant="contained"
-                  onClick={() => {
-                    addDelegation(superstaker.address);
-                  }}
-                >
-                  Delegate
-                </Button>
-              )
-        }
+        {delegationInfo && delegationInfo.staker === superstaker.address ? (
+          <Button
+            variant="contained"
+            color="secondary"
+            onClick={() => {
+              routerStore.push('/undelegate-confirm');
+            }}
+          >
+            Undelegate
+          </Button>
+        ) : delegationInfo && delegationInfo.staker !== '' ? (
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => {
+              routerStore.push('/delegate-confirm');
+            }}
+          >
+            Change Delegate
+          </Button>
+        ) : (
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => {
+              routerStore.push('/delegate-confirm');
+            }}
+          >
+            Delegate
+          </Button>
+        )}
         <Button
           variant="contained"
+          color="primary"
           onClick={() => {
-            addDelegation(superstaker.address);
+            routerStore.push('/superstaker-detail');
           }}
         >
           Details

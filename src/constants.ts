@@ -95,6 +95,7 @@ export enum MESSAGE_TYPE {
   GET_DELEGATION_INFO_RETURN = 'GET_DELEGATION_INFO_RETURN',
   GET_SUPERSTAKERS = 'GET_SUPERSTAKERS',
   GET_SUPERSTAKERS_RETURN = 'GET_SUPERSTAKERS_RETURN',
+  SEND_UNDELEGATE = 'SEND_UNDELEGATE',
 }
 
 export enum RESPONSE_TYPE {
@@ -118,6 +119,12 @@ export enum IMPORT_TYPE {
 }
 
 export enum SEND_STATE {
+  INITIAL = 'Confirm',
+  SENDING = 'Sending...',
+  SENT = 'Sent!',
+}
+
+export enum UNDELEGATE_STATE {
   INITIAL = 'Confirm',
   SENDING = 'Sending...',
   SENT = 'Sent!',
