@@ -416,6 +416,26 @@ export default class AccountController extends IController {
     }
   };
 
+  private getSuperstakerDelegations = async (address: string) => {
+    try {
+      if (!this.loggedInAccount || !this.loggedInAccount.wallet || !this.loggedInAccount.wallet.rjsWallet) {
+        console.error('Could not get wallet info.');
+        return;
+      }
+
+      const superstakerDelegations = await this.loggedInAccount.wallet.rjsWallet.getSuperStakerDelegations(address);
+      if (superstakerDelegations) {
+        chrome.runtime.sendMessage({
+          type: MESSAGE_TYPE.GET_SUPERSTAKER_DELEGATIONS_RETURN,
+          superstakerDelegations: superstakerDelegations
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching superstaker delegations:', error);
+    }
+  };
+
+
   /*
   * Fetches the blockchain info from the current wallet instance.
   */
@@ -581,6 +601,9 @@ export default class AccountController extends IController {
       case MESSAGE_TYPE.GET_DELEGATION_INFO:
         console.log('Getting wallet delegation info');
         this.getDelegationInfo();
+        break;
+      case MESSAGE_TYPE.GET_SUPERSTAKER_DELEGATIONS:
+        this.getSuperstakerDelegations(request.address);
         break;
       case MESSAGE_TYPE.GET_RUNEBASE_USD:
         console.log('Getting RUNEBASE to USD conversion');

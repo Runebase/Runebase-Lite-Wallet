@@ -19,6 +19,8 @@ const Delegate: React.FC<IProps> = inject('store')(
     if (!loggedInAccountName || !walletInfo) return null;
 
     useEffect(() => {
+      delegateStore.setSelectedSuperStaker(undefined);
+      delegateStore.setSuperStakerDelegations(undefined);
       delegateStore.getSuperstakers();
     }, []);
 
@@ -46,6 +48,7 @@ const Delegate: React.FC<IProps> = inject('store')(
                     superstaker={superstaker}
                     delegationInfo={delegationInfo}
                     routerStore={routerStore}
+                    delegateStore={delegateStore}
                   />
                 </Grid>
               ))}

@@ -7,27 +7,21 @@ import AppRegistrationIcon from '@mui/icons-material/AppRegistration';
 import NotificationAddIcon from '@mui/icons-material/NotificationAdd';
 import DynamicFormIcon from '@mui/icons-material/DynamicForm';
 import moment from 'moment';
-
-interface SuperStaker {
-  address: string;
-  note?: string;
-  cycles?: number;
-  totalBlocksProduced?: number;
-  score?: number;
-  firstRegisteredOn?: string;
-  lastProducedBlock?: string;
-}
+import DelegateStore from '../../stores/DelegateStore';
+import { SuperStaker } from '../../../types';
 
 interface SuperStakerCardProps {
   superstaker: SuperStaker;
   delegationInfo: RunebaseInfo.IGetAddressDelegation | undefined;
   routerStore: RouterStore;
+  delegateStore: DelegateStore;
 }
 
 const SuperStakerCard: React.FC<SuperStakerCardProps> = ({
   superstaker,
   delegationInfo,
   routerStore,
+  delegateStore,
 }) => {
   return (
     <Card sx={{ minWidth: 275, maxWidth: 350, backgroundColor: '#f7f7f7', border: '1px solid #e0e0e0' }}>
@@ -108,6 +102,7 @@ const SuperStakerCard: React.FC<SuperStakerCardProps> = ({
           variant="contained"
           color="primary"
           onClick={() => {
+            delegateStore.setSelectedSuperStaker(superstaker);
             routerStore.push('/superstaker-detail');
           }}
         >
