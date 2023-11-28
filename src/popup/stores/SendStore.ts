@@ -22,9 +22,9 @@ const INIT_VALUES = {
   transactionSpeed: TRANSACTION_SPEED.NORMAL,
   transactionSpeeds: [TRANSACTION_SPEED.SLOW, TRANSACTION_SPEED.NORMAL, TRANSACTION_SPEED.FAST],
   gasLimit: Config.TRANSACTION.DEFAULT_GAS_LIMIT,
-  gasPrice: Config.TRANSACTION.DEFAULT_GAS_PRICE * 1e8,
+  gasPrice: Config.TRANSACTION.DEFAULT_GAS_PRICE,
   gasLimitRecommendedAmount: Config.TRANSACTION.DEFAULT_GAS_LIMIT,
-  gasPriceRecommendedAmount: Config.TRANSACTION.DEFAULT_GAS_PRICE * 1e8, // satoshi/gas
+  gasPriceRecommendedAmount: Config.TRANSACTION.DEFAULT_GAS_PRICE, // satoshi/gas
 };
 
 export default class SendStore {
@@ -114,6 +114,13 @@ export default class SendStore {
     chrome.runtime.sendMessage({
       type: MESSAGE_TYPE.GET_MAX_RUNEBASE_SEND,
     });
+  };
+
+  @action public setGasLimit = (gasLimit: number) => {
+    this.gasLimit = gasLimit;
+  };
+  @action public setGasPrice = (gasPrice: number) => {
+    this.gasPrice = gasPrice;
   };
 
   @action public changeToken = (tokenSymbol: string) => {

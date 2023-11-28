@@ -95,27 +95,34 @@ const FromField = observer(({ classes, sendStore, sessionStore }: any) => (
   </div>
 ));
 
-const ToField = observer(({ classes, sendStore, sessionStore, onEnterPress }: any) => (
-  <div className={classes.fieldContainer}>
-    <Heading name="To" classes={classes} />
-    <div className={classes.fieldContentContainer}>
-      <TextField
-        className={classes.selectOrTextField}
-        fullWidth
-        type="text"
-        multiline={false}
-        placeholder={sessionStore?.walletInfo?.address || ''}
-        value={sendStore.receiverAddress || ''}
-        InputProps={{ className: classes.fieldTextOrInput, endAdornment: <ArrowDropDown /> }}
-        onChange={(event) => sendStore.receiverAddress = event.target.value}
-        onKeyPress={onEnterPress}
-      />
+const ToField = observer(({ classes, sendStore, sessionStore, onEnterPress }: any) => {
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Enter') {
+      onEnterPress();
+    }
+  };
+  return (
+    <div className={classes.fieldContainer}>
+      <Heading name="To" classes={classes} />
+      <div className={classes.fieldContentContainer}>
+        <TextField
+          className={classes.selectOrTextField}
+          fullWidth
+          type="text"
+          multiline={false}
+          placeholder={sessionStore?.walletInfo?.address || ''}
+          value={sendStore.receiverAddress || ''}
+          InputProps={{ className: classes.fieldTextOrInput, endAdornment: <ArrowDropDown /> }}
+          onChange={(event) => sendStore.receiverAddress = event.target.value}
+          onKeyDown={handleKeyDown}
+        />
+      </div>
+      {!!sendStore.receiverAddress && sendStore.receiverFieldError && (
+        <Typography className={classes.errorText}>{sendStore.receiverFieldError}</Typography>
+      )}
     </div>
-    {!!sendStore.receiverAddress && sendStore.receiverFieldError && (
-      <Typography className={classes.errorText}>{sendStore.receiverFieldError}</Typography>
-    )}
-  </div>
-));
+  );
+});
 
 const TokenField = observer(({ classes, sendStore }: any) => (
   <div className={classes.fieldContainer}>
@@ -204,93 +211,108 @@ const TransactionSpeedField = observer(({ classes, sendStore }: any) => (
   </div>
 ));
 
-const GasLimitField = observer(({ classes, sendStore, onEnterPress }: any) => (
-  <div className={classes.fieldContainer}>
-    <div className={classes.buttonFieldHeadingContainer}>
-      <div className={classes.buttonFieldHeadingTextContainer}>
-        <Heading name="Gas Limit" classes={classes} />
-      </div>
-      <Typography className={classes.fieldButtonText}>{sendStore.gasLimitRecommendedAmount}</Typography>
-      <Button
-        color="primary"
-        className={classes.fieldButton}
-        onClick={() => sendStore.gasLimit = sendStore.gasLimitRecommendedAmount}
-      >
-        Recommended
-      </Button>
-    </div>
-    <div className={classes.fieldContentContainer}>
-      <TextField
-        className={classes.selectOrTextField}
-        fullWidth
-        type="number"
-        multiline={false}
-        placeholder={sendStore.gasLimitRecommendedAmount.toString()}
-        value={sendStore.gasLimit}
-        InputProps={{
-          classes: {
-            input: classes.fieldInput,
-          },
-          className: classes.fieldTextOrInput,
-          endAdornment: (
-            <Typography className={classes.fieldTextAdornment}>
-              GAS
-            </Typography>
-          ),
-        }}
-        onChange={(event) => sendStore.gasLimit = event.target.value}
-        onKeyPress={onEnterPress}
-      />
-    </div>
-    {sendStore.gasLimitFieldError && (
-      <Typography className={classes.errorText}>{sendStore.gasLimitFieldError}</Typography>
-    )}
-  </div>
-));
+const GasLimitField = observer(({ classes, sendStore, onEnterPress }: any) => {
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Enter') {
+      onEnterPress();
+    }
+  };
 
-const GasPriceField = observer(({ classes, sendStore, onEnterPress }: any) => (
-  <div className={classes.fieldContainer}>
-    <div className={classes.buttonFieldHeadingContainer}>
-      <div className={classes.buttonFieldHeadingTextContainer}>
-        <Heading name="Gas Price" classes={classes} />
+  return (
+    <div className={classes.fieldContainer}>
+      <div className={classes.buttonFieldHeadingContainer}>
+        <div className={classes.buttonFieldHeadingTextContainer}>
+          <Heading name="Gas Limit" classes={classes} />
+        </div>
+        <Typography className={classes.fieldButtonText}>{sendStore.gasLimitRecommendedAmount}</Typography>
+        <Button
+          color="primary"
+          className={classes.fieldButton}
+          onClick={() => (sendStore.gasLimit = sendStore.gasLimitRecommendedAmount)}
+        >
+          Recommended
+        </Button>
       </div>
-      <Typography className={classes.fieldButtonText}>{sendStore.gasPriceRecommendedAmount}</Typography>
-      <Button
-        color="primary"
-        className={classes.fieldButton}
-        onClick={() => sendStore.gasPrice = sendStore.gasPriceRecommendedAmount}
-      >
-        Recommended
-      </Button>
+      <div className={classes.fieldContentContainer}>
+        <TextField
+          className={classes.selectOrTextField}
+          fullWidth
+          type="number"
+          multiline={false}
+          placeholder={sendStore.gasLimitRecommendedAmount.toString()}
+          value={sendStore.gasLimit}
+          InputProps={{
+            classes: {
+              input: classes.fieldInput,
+            },
+            className: classes.fieldTextOrInput,
+            endAdornment: (
+              <Typography className={classes.fieldTextAdornment}>GAS</Typography>
+            ),
+          }}
+          onChange={(event) => sendStore.setGasLimit(Number(event.target.value))}
+          onKeyDown={handleKeyDown}
+        />
+      </div>
+      {sendStore.gasLimitFieldError && (
+        <Typography className={classes.errorText}>{sendStore.gasLimitFieldError}</Typography>
+      )}
     </div>
-    <div className={classes.fieldContentContainer}>
-      <TextField
-        className={classes.selectOrTextField}
-        fullWidth
-        type="number"
-        multiline={false}
-        placeholder={sendStore.gasPriceRecommendedAmount.toString()}
-        value={sendStore.gasPrice.toString()}
-        InputProps={{
-          classes: {
-            input: classes.fieldInput,
-          },
-          className: classes.fieldTextOrInput,
-          endAdornment: (
-            <Typography className={classes.fieldTextAdornment}>
-              SATOSHI/GAS
-            </Typography>
-          ),
-        }}
-        onChange={(event) => sendStore.gasPrice = event.target.value}
-        onKeyPress={onEnterPress}
-      />
+  );
+});
+
+const GasPriceField = observer(({ classes, sendStore, onEnterPress }: any) => {
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Enter') {
+      onEnterPress();
+    }
+  };
+
+  return (
+    <div className={classes.fieldContainer}>
+      <div className={classes.buttonFieldHeadingContainer}>
+        <div className={classes.buttonFieldHeadingTextContainer}>
+          <Heading name="Gas Price" classes={classes} />
+        </div>
+        <Typography className={classes.fieldButtonText}>{sendStore.gasPriceRecommendedAmount}</Typography>
+        <Button
+          color="primary"
+          className={classes.fieldButton}
+          onClick={() => sendStore.gasPrice = sendStore.gasPriceRecommendedAmount}
+        >
+          Recommended
+        </Button>
+      </div>
+      <div className={classes.fieldContentContainer}>
+        <TextField
+          className={classes.selectOrTextField}
+          fullWidth
+          type="number"
+          multiline={false}
+          placeholder={sendStore.gasPriceRecommendedAmount.toString()}
+          value={sendStore.gasPrice.toString()}
+          InputProps={{
+            classes: {
+              input: classes.fieldInput,
+            },
+            className: classes.fieldTextOrInput,
+            endAdornment: (
+              <Typography className={classes.fieldTextAdornment}>
+                SATOSHI/GAS
+              </Typography>
+            ),
+          }}
+          onChange={(event) => sendStore.setGasPrice(Number(event.target.value))}
+          onKeyDown={handleKeyDown}
+        />
+      </div>
+      {sendStore.gasPriceFieldError && (
+        <Typography className={classes.errorText}>{sendStore.gasPriceFieldError}</Typography>
+      )}
     </div>
-    {sendStore.gasPriceFieldError && (
-      <Typography className={classes.errorText}>{sendStore.gasPriceFieldError}</Typography>
-    )}
-  </div>
-));
+  );
+});
+
 
 const SendButton = observer(({ classes, sendStore }: any) => (
   <Button
