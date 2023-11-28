@@ -8,7 +8,6 @@ import ExternalController from './externalController';
 import RPCController from './rpcController';
 import InpageAccountController from './inpageAccountController';
 import TransactionController from './transactionController';
-import TokenBalanceHistoryController from './tokenBalanceHistoryController';
 import SessionController from './sessionController';
 import OnInstallController from './onInstallController';
 import { API_TYPE, MESSAGE_TYPE } from '../../constants';
@@ -26,7 +25,6 @@ export default class RunebaseChromeController {
   public session: SessionController;
   public onInstall: OnInstallController;
   public utils: UtilsController;
-  public tokenTransfer: TokenBalanceHistoryController;
 
   private initialized: Record<string, boolean> = {};
 
@@ -42,7 +40,6 @@ export default class RunebaseChromeController {
     this.session = new SessionController(this);
     this.onInstall = new OnInstallController(this);
     this.utils = new UtilsController(this);
-    this.tokenTransfer = new TokenBalanceHistoryController(this);
 
     chrome.runtime.onMessage.addListener((msg) => {
       switch (msg.type) {

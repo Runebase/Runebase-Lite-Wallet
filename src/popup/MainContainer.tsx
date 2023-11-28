@@ -8,7 +8,6 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogActions from '@mui/material/DialogActions';
 import { createBrowserHistory } from 'history';
-
 import Loading from './components/Loading';
 import Login from './pages/Login';
 import CreateWallet from './pages/CreateWallet';
@@ -25,6 +24,12 @@ import AppStore from './stores/AppStore';
 import { MESSAGE_TYPE } from '../constants';
 import MainContainerStore from './stores/MainContainerStore';
 import ManageTokens from './pages/ManageTokens';
+import Delegate from './pages/Delegate';
+import SuperstakerDetail from './pages/SuperstakerDetail';
+import AddDelegation from './pages/AddDelegation';
+import AddDelegationConfirm from './pages/AddDelegationConfirm';
+import RemoveDelegation from './pages/RemoveDelegation';
+import RemoveDelegationConfirm from './pages/RemoveDelegationConfirm';
 
 interface IProps {
   history: any; // Replace with the appropriate type for your history
@@ -37,6 +42,19 @@ const MainContainer: React.FC<IProps> = inject('store')(observer(({ history, sto
       chrome.runtime.sendMessage({ type: MESSAGE_TYPE.LOGOUT });
     };
   }, []);
+
+  const { accountDetailStore, sessionStore } = store;
+
+  useEffect(() => {
+    accountDetailStore.init();
+    return () => {
+      accountDetailStore.deinit();
+    };
+  }, [
+    accountDetailStore,
+    sessionStore.walletInfo
+  ]);
+
 
   return (
     <div style={{ width: '100%', height: '100%' }}>
@@ -53,6 +71,12 @@ const MainContainer: React.FC<IProps> = inject('store')(observer(({ history, sto
           <Route exact path="/send" component={Send} />
           <Route exact path="/send-confirm" component={SendConfirm} />
           <Route exact path="/receive" component={Receive} />
+          <Route exact path="/delegate" component={Delegate} />
+          <Route exact path="/superstaker-detail" component={SuperstakerDetail} />
+          <Route exact path="/add-delegation" component={AddDelegation} />
+          <Route exact path="/add-delegation-confirm" component={AddDelegationConfirm} />
+          <Route exact path="/remove-delegation" component={RemoveDelegation} />
+          <Route exact path="/remove-delegation-confirm" component={RemoveDelegationConfirm} />
           <Route exact path="/manage-tokens" component={ManageTokens} />
           <Route exact path="/add-token" component={AddToken} />
         </Switch>

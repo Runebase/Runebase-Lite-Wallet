@@ -7,12 +7,6 @@ const useStyles = makeStyles((theme) => ({
     display: 'flex',
     flexDirection: 'column',
   },
-  contentContainer: {
-    flex: 1,
-    display: 'flex',
-    flexDirection: 'column',
-    margin: theme.spacing(2), // Use spacing instead of padding
-  },
   accountName: {
     color: theme.palette.text.primary,
     fontSize: theme.typography.fontSizeLarge, // Use typography instead of font

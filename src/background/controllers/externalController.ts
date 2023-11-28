@@ -1,6 +1,8 @@
 import RunebaseChromeController from '.';
 import IController from './iController';
 import { MESSAGE_TYPE } from '../../constants';
+import BigNumber from 'bignumber.js';
+import { SuperStaker, SuperStakerArray } from '../../types';
 
 const INIT_VALUES = {
   getPriceInterval: undefined,
@@ -15,11 +17,14 @@ export default class ExternalController extends IController {
 
   constructor(main: RunebaseChromeController) {
     super('external', main);
+    chrome.runtime.onMessage.addListener(this.handleMessage);
     this.initFinished();
   }
 
   public calculateRunebaseToUSD = (balance: number): number => {
-    return this.runebasePriceUSD ? Number((this.runebasePriceUSD * balance).toFixed(2)) : 0;
+    return this.runebasePriceUSD
+      ? new BigNumber(balance).dividedBy(1e8).times(this.runebasePriceUSD).dp(4).toNumber()
+      : 0;
   };
 
   /*
@@ -61,7 +66,7 @@ export default class ExternalController extends IController {
         this.main.account.loggedInAccount.wallet.info
       ) {
         const runebaseUSD = this.calculateRunebaseToUSD(
-          this.main.account.loggedInAccount.wallet.info.balance
+          Number(this.main.account.loggedInAccount.wallet.info.balance)
         );
         this.main.account.loggedInAccount.wallet.runebaseUSD = runebaseUSD;
 
@@ -72,6 +77,54 @@ export default class ExternalController extends IController {
       }
     } catch (err) {
       console.log(err);
+    }
+  };
+
+  private getSuperstakers = async () => {
+    try {
+      const response = await fetch('https://discord.runebase.io/api/super-stakers');
+      const jsonObj = await response.json();
+      chrome.runtime.sendMessage({
+        type: MESSAGE_TYPE.GET_SUPERSTAKERS_RETURN,
+        superstakers: jsonObj.result as SuperStakerArray,
+      });
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  private getSuperstaker = async (
+    address: string,
+  ) => {
+    try {
+      const response = await fetch(`https://discord.runebase.io/api/super-staker/${address}`);
+      const jsonObj = await response.json();
+      chrome.runtime.sendMessage({
+        type: MESSAGE_TYPE.GET_SUPERSTAKER_RETURN,
+        superstaker: jsonObj.result as SuperStaker,
+      });
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  private handleMessage = async (
+    request: any
+  ) => {
+    try {
+      switch (request.type) {
+      case MESSAGE_TYPE.GET_SUPERSTAKERS:
+        this.getSuperstakers();
+        break;
+      case MESSAGE_TYPE.GET_SUPERSTAKER:
+        this.getSuperstaker(request.address);
+        break;
+      default:
+        break;
+      }
+    } catch (err) {
+      console.error(err);
+      this.main.displayErrorOnPopup(err as any);
     }
   };
 }

@@ -5,17 +5,6 @@ const useStyles = makeStyles((theme) => ({
     paddingLeft: theme.spacing(2), // Use spacing instead of padding
     paddingRight: theme.spacing(2), // Use spacing instead of padding
   },
-  acctName: {
-    fontSize: theme.typography.h4.fontSize, // Adjust the font size based on your design
-    fontWeight: theme.typography.fontWeightBold, // Use typography properties
-    // color: theme.palette.secondary.main,
-    marginBottom: theme.spacing(1), // Use spacing instead of padding
-  },
-  address: {
-    fontSize: theme.typography.caption.fontSize, // Adjust the font size based on your design
-    // color: theme.palette.secondary.main,
-    marginBottom: theme.spacing(2), // Use spacing instead of padding
-  },
   amountContainer: {
     width: '100%',
     flexDirection: 'row',

@@ -1,8 +1,6 @@
-import React, { useEffect, useRef, ChangeEvent } from 'react';
+import React, { useEffect, useRef } from 'react';
 import {
   Paper,
-  Tabs,
-  Tab,
   List,
   ListItem,
   Typography,
@@ -19,8 +17,8 @@ import AccountInfo from '../../components/AccountInfo';
 import AppStore from '../../stores/AppStore';
 import { shortenTxid } from '../../../utils';
 import useStyles from './styles';
-import TokenTransfer from '../../../models/TokenTransfer';
 import { TOKEN_IMAGES } from '../../../constants';
+import BigNumber from 'bignumber.js';
 
 interface IProps {
   classes: Record<string, string>;
@@ -40,27 +38,18 @@ const AccountDetail: React.FC<IProps> = ({ store }) => {
     loginStore,
     blockchainInfo,
     blockchainInfo?.height,
+    accountDetailStore.transactions
   ]);
 
   useEffect(() => {
-    accountDetailStore.init();
-
     if (accountDetailStore.shouldScrollToBottom === true) {
       scrollToBottom();
     }
-
-    return () => {
-      store.accountDetailStore.deinit();
-    };
   }, [accountDetailStore, store]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     accountDetailStore.shouldScrollToBottom = false;
-  };
-
-  const handleTabChange = (_: ChangeEvent<{}>, value: number) => {
-    accountDetailStore.activeTabIdx = value;
   };
 
   return (
@@ -75,24 +64,8 @@ const AccountDetail: React.FC<IProps> = ({ store }) => {
           {/* <NavBar hasBackButton isDarkTheme title="Account Detail" /> */}
           <AccountInfo />
         </Paper>
-        <Paper className={classes.tabsPaper} elevation={1}>
-          <Tabs
-            indicatorColor="primary"
-            textColor="primary"
-            value={accountDetailStore.activeTabIdx}
-            onChange={handleTabChange}
-          >
-            <Tab label="Transactions" className={classes.tab} />
-            <Tab label="Token Transfers" className={classes.tab} />
-          </Tabs>
-        </Paper>
         <List className={classes.list}>
-          {accountDetailStore.activeTabIdx === 0 ? (
-            <TransactionList classes={classes} store={store} />
-          ) : (
-            <TokenTransferList classes={classes} store={store} />
-          )}
-          <div ref={messagesEndRef}></div>
+          <TransactionList classes={classes} store={store} />
         </List>
       </div>
     </div>
@@ -105,34 +78,59 @@ const TransactionList: React.FC<{
 }> = observer(({ classes, store }) => (
   <div>
     {store.accountDetailStore.transactions.map(
-      ({ id, pending, confirmations, timestamp, amount }: Transaction) => (
-        <ListItem
-          divider
-          key={id}
-          className={classes.listItem}
-          onClick={() => store.accountDetailStore.onTransactionClick(id ?? '')}
-        >
-          <div className={classes.txInfoContainer}>
-            {pending ? (
-              <Typography className={cx(classes.txState, 'pending')}>
-                pending
-              </Typography>
-            ) : (
-              <Typography className={classes.txState}>{`${confirmations} confirmations`}</Typography>
-            )}
-            <Typography className={classes.txId}>{`txid: ${shortenTxid(
-              id
-            )}`}</Typography>
-            <Typography className={classes.txTime}>
-              {timestamp || '01-01-2018 00:00'}
-            </Typography>
-          </div>
-          <AmountInfo classes={classes} amount={amount / 1e8} token={{symbol: 'RUNES', address: ''}} />
-          <div>
-            <KeyboardArrowRight className={classes.arrowRight} />
-          </div>
-        </ListItem>
-      )
+      ({ id, pending, confirmations, timestamp, amount, qrc20TokenTransfers }: Transaction) => {
+        const filteredTransfers =
+          qrc20TokenTransfers &&
+          qrc20TokenTransfers.filter(
+            (tokenTransfer) =>
+              tokenTransfer.to === store.sessionStore.walletInfo?.address ||
+              tokenTransfer.from === store.sessionStore.walletInfo?.address
+          );
+
+        return (
+          <ListItem
+            divider
+            key={id}
+            className={classes.listItem}
+            onClick={() => store.accountDetailStore.onTransactionClick(id ?? '')}
+          >
+            <div className={classes.txInfoContainer}>
+              {pending ? (
+                <Typography className={cx(classes.txState, 'pending')}>pending</Typography>
+              ) : (
+                <Typography className={classes.txState}>{`${confirmations} confirmations`}</Typography>
+              )}
+              <Typography className={classes.txId}>{`txid: ${shortenTxid(
+                id
+              )}`}</Typography>
+              <Typography className={classes.txTime}>{timestamp || '01-01-2018 00:00'}</Typography>
+            </div>
+            <div style={{ textAlign: 'right' }}>
+              <Box style={{ width: '100%' }}>
+                <AmountInfo classes={classes} amount={amount / 1e8} token={{ symbol: 'RUNES', address: '' }} />
+              </Box>
+              {filteredTransfers &&
+                filteredTransfers.length > 0 &&
+                filteredTransfers.map((tokenTransfer, index) => (
+                  <Box key={index} style={{ width: '100%' }}>
+                    <AmountInfo
+                      classes={classes}
+                      amount={
+                        tokenTransfer.to === store.sessionStore.walletInfo?.address
+                          ? new BigNumber(tokenTransfer.value || '0').dividedBy(`1e${tokenTransfer.decimals}`).toNumber()
+                          : new BigNumber(tokenTransfer.value || '0').dividedBy(`-1e${tokenTransfer.decimals}`).toNumber()
+                      }
+                      token={{ symbol: tokenTransfer.symbol || '', address: tokenTransfer.address || '' }}
+                    />
+                  </Box>
+                ))}
+            </div>
+            <div>
+              <KeyboardArrowRight className={classes.arrowRight} />
+            </div>
+          </ListItem>
+        );
+      }
     )}
     <div className={cx(classes.bottomButtonWrap, 'center')}>
       {store.accountDetailStore.hasMore && (
@@ -149,87 +147,6 @@ const TransactionList: React.FC<{
     </div>
   </div>
 ));
-
-const TokenTransferList: React.FC<{
-  classes: Record<string, string>;
-  store: AppStore;
-}> = observer(({ classes, store: {
-  accountDetailStore,
-  sessionStore,
-} }) => {
-  return (
-    <div>
-      {accountDetailStore.tokenBalanceHistory.map(
-        ({
-          id,
-          // blockHash,
-          blockHeight,
-          timestamp,
-          tokens,
-        }: TokenTransfer) => {
-          const confirmations: number = (sessionStore.blockchainInfo?.height || 0) - blockHeight;
-          return (
-            <ListItem
-              divider
-              key={id}
-              className={classes.listItem}
-              onClick={() => accountDetailStore.onTransactionClick(id ?? '')}
-            >
-              <div className={classes.txInfoContainer}>
-                {confirmations <= 0 ? (
-                  <Typography className={cx(classes.txState, 'pending')}>
-                  pending
-                  </Typography>
-                ) : (
-                  <Typography className={classes.txState}>{`${confirmations} confirmations`}</Typography>
-                )}
-                <Typography className={classes.txId}>{`txid: ${shortenTxid(
-                  id
-                )}`}</Typography>
-                <Typography className={classes.txTime}>
-                  {timestamp || '01-01-2018 00:00'}
-                </Typography>
-              </div>
-              {tokens.map((
-                token,
-                index: number,
-              ) => {
-                return(
-                  <Box
-                    // fullWidth
-                    key={index}
-                  >
-                    <AmountInfo
-                      key={index} // Assuming you have a unique identifier for each token
-                      classes={classes}
-                      amount={Number(token.amount) / 1e8}
-                      token={token} // Assuming 'symbol' is the property you want to use for the token name
-                    />
-                  </Box>
-                );})}
-              <div>
-                <KeyboardArrowRight className={classes.arrowRight} />
-              </div>
-            </ListItem>
-          );
-        }
-      )}
-      <div className={cx(classes.bottomButtonWrap, 'center')}>
-        {accountDetailStore.hasMore && (
-          <Button
-            className={classes.bottomButton}
-            id="loadingButton"
-            color="primary"
-            size="small"
-            onClick={accountDetailStore.fetchMoreTxs}
-          >
-          Load More
-          </Button>
-        )}
-      </div>
-    </div>
-  );});
-
 
 const AmountInfo: React.FC<{
   classes: Record<string, string>;

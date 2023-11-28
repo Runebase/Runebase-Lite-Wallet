@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Fragment } from 'react';
 import { RunebaseInfo } from 'runebasejs-wallet';
 import { observer, inject } from 'mobx-react';
 import { Typography, Button, Box, Divider, Grid } from '@mui/material';
@@ -10,6 +10,8 @@ import CallReceivedIcon from '@mui/icons-material/CallReceived';
 import { TOKEN_IMAGES } from '../../../constants';
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 import StarIcon from '@mui/icons-material/Star';
+import PersonIcon from '@mui/icons-material/Person';
+import ElectricBoltIcon from '@mui/icons-material/ElectricBolt';
 
 interface IProps {
   store?: AppStore;
@@ -30,13 +32,14 @@ const AccountInfo: React.FC<IProps> = ({ hasRightArrow, store }) => {
     setRunebaseBalanceUSD(store?.sessionStore.runebaseBalanceUSD);
     // setNetworkBalAnnotation(store?.sessionStore.networkBalAnnotation || null);
   }, [
-    store,
     store?.sessionStore.loggedInAccountName,
     store?.sessionStore.runebaseBalanceUSD,
     store?.sessionStore.walletInfo,
     store?.accountDetailStore.verifiedTokens,
     store?.sessionStore.blockchainInfo,
-    store?.accountDetailStore.tokenBalanceHistory
+    store?.accountDetailStore.transactions,
+    store?.sessionStore.walletInfo?.qrc20Balances,
+    store?.sessionStore.delegationInfo?.staker
   ]);
 
   const handleClick = (id: string, event: React.MouseEvent<HTMLElement>) => {
@@ -48,6 +51,7 @@ const AccountInfo: React.FC<IProps> = ({ hasRightArrow, store }) => {
       mainCard: '/account-detail',
       sendButton: '/send',
       receiveButton: '/receive',
+      delegateButton: '/delegate',
     };
 
     const location = locations[id];
@@ -61,24 +65,60 @@ const AccountInfo: React.FC<IProps> = ({ hasRightArrow, store }) => {
     return null;
   }
 
-  console.log('Rendering AccountInfo:', loggedInAccountName, info);
+  console.log('Rendering AccountInfo:', info);
 
   return (
     <div className={classes.root}>
-      <Typography className={classes.acctName}>{loggedInAccountName}</Typography>
-      <Grid container>
-        <Grid item xs={6}>
+      <Typography
+        variant="subtitle2"
+        gutterBottom
+        style={{ display: 'flex', alignItems: 'center' }}
+      >
+        <PersonIcon style={{ marginRight: '5px' }} />
+        {loggedInAccountName}
+      </Typography>
+      {
+        store?.sessionStore.delegationInfo?.staker && (
           <Typography
             variant="subtitle2"
             gutterBottom
             style={{ display: 'flex', alignItems: 'center' }}
           >
-            <StarIcon style={{ marginRight: '5px' }} />
-            #{info.ranking}
+            <ElectricBoltIcon style={{ marginRight: '5px', color: '#FFD700' }} />
+            <span
+              style={{
+                color: 'blue', // Set the text color to blue to mimic a hyperlink
+                textDecoration: 'none', // Add an underline
+                cursor: 'pointer', // Change the cursor to a pointer to indicate interactivity
+                transition: 'text-decoration 0.3s ease', // Add a smooth transition effect
+              }}
+              onClick={() => {
+                store?.delegateStore.getSuperstaker(store?.sessionStore.delegationInfo?.staker || '');
+              }}
+              onMouseEnter={(event) => (event.currentTarget.style.textDecoration = 'underline')}
+              onMouseLeave={(event) => (event.currentTarget.style.textDecoration = 'none')}
+            >
+              Visit my superstaker
+            </span>
           </Typography>
-        </Grid>
-      </Grid>
-      <Typography className={classes.address}>{info.address}</Typography>
+        )
+      }
+      <Typography
+        variant="subtitle2"
+        gutterBottom
+        style={{ display: 'flex', alignItems: 'center' }}
+      >
+        <StarIcon style={{ marginRight: '5px' }} />
+        #{info.ranking}
+      </Typography>
+      <Typography
+        variant="subtitle2"
+        gutterBottom
+        style={{ display: 'flex', alignItems: 'center' }}
+      >
+        <CallReceivedIcon />
+        {info.address}
+      </Typography>
       <Divider />
       <Box className={classes.amountContainer}>
         <img
@@ -92,7 +132,7 @@ const AccountInfo: React.FC<IProps> = ({ hasRightArrow, store }) => {
         <Typography className={classes.tokenAmount}>{info.balance / 1e8}</Typography>
         <Typography className={classes.token}>RUNES</Typography>
         {hasRightArrow && <KeyboardArrowRight className={classes.rightArrow} />}
-        <Typography className={classes.balanceUSD}>{`(~${runebaseBalanceUSD})`}</Typography>
+        <Typography className={classes.balanceUSD}>{`${runebaseBalanceUSD}`}</Typography>
       </Box>
 
       {info.qrc20Balances.map((
@@ -103,10 +143,11 @@ const AccountInfo: React.FC<IProps> = ({ hasRightArrow, store }) => {
         const tokenLogoSrc = TOKEN_IMAGES[token.address];
         if (isVerifiedToken) {
           return (
-            <>
+            <Fragment
+              key={index}
+            >
               <Divider />
               <Box
-                key={index}
                 className={`${classes.amountContainer} ${!tokenLogoSrc ? classes.tokenContainer : ''}`}
               >
                 {
@@ -126,13 +167,31 @@ const AccountInfo: React.FC<IProps> = ({ hasRightArrow, store }) => {
                 </Typography>
                 <Typography className={classes.token}>{token.symbol}</Typography>
               </Box>
-            </>
+            </Fragment>
           );
         }
         return null;
       })}
       <Divider />
-
+      <Box
+        className={classes.actionButtonsContainer}
+        sx={{
+          mt: 1,
+          mb: 1,
+        }}
+      >
+        <Button
+          id="delegateButton"
+          color="primary"
+          variant="contained"
+          size="small"
+          startIcon={<ElectricBoltIcon style={{ color: '#FFD700' }}/>}
+          className={classes.actionButton}
+          onClick={(e) => handleClick('delegateButton', e)}
+        >
+          Delegate
+        </Button>
+      </Box>
       <Box
         className={classes.actionButtonsContainer}
         sx={{

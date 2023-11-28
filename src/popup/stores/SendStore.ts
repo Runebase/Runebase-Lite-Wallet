@@ -22,9 +22,9 @@ const INIT_VALUES = {
   transactionSpeed: TRANSACTION_SPEED.NORMAL,
   transactionSpeeds: [TRANSACTION_SPEED.SLOW, TRANSACTION_SPEED.NORMAL, TRANSACTION_SPEED.FAST],
   gasLimit: Config.TRANSACTION.DEFAULT_GAS_LIMIT,
-  gasPrice: Config.TRANSACTION.DEFAULT_GAS_PRICE * 1e8,
+  gasPrice: Config.TRANSACTION.DEFAULT_GAS_PRICE,
   gasLimitRecommendedAmount: Config.TRANSACTION.DEFAULT_GAS_LIMIT,
-  gasPriceRecommendedAmount: Config.TRANSACTION.DEFAULT_GAS_PRICE * 1e8, // satoshi/gas
+  gasPriceRecommendedAmount: Config.TRANSACTION.DEFAULT_GAS_PRICE, // satoshi/gas
 };
 
 export default class SendStore {
@@ -83,12 +83,12 @@ export default class SendStore {
     app: AppStore,
   ) {
     makeObservable(this);
+    chrome.runtime.onMessage.addListener(this.handleMessage);
     this.app = app;
   }
 
-  @action  public init = () => {
+  @action public init = () => {
     this.tokens = [];
-    chrome.runtime.onMessage.addListener(this.handleMessage);
     chrome.runtime.sendMessage({ type: MESSAGE_TYPE.GET_RRC_TOKEN_LIST }, (response: any) => {
       console.log('Received token list:', response);
       this.verifiedTokens = response;
@@ -116,7 +116,26 @@ export default class SendStore {
     });
   };
 
-  @action  public changeToken = (tokenSymbol: string) => {
+  @action public setGasLimit = (gasLimit: number) => {
+    this.gasLimit = gasLimit;
+  };
+  @action public setGasPrice = (gasPrice: number) => {
+    this.gasPrice = gasPrice;
+  };
+  @action public setSenderAddress = (senderAddress: string) => {
+    this.senderAddress = senderAddress;
+  };
+  @action public setReceiverAddress = (receiverAddress: string) => {
+    this.receiverAddress = receiverAddress;
+  };
+  @action public setTransactionSpeed = (transactionSpeed: string) => {
+    this.transactionSpeed = transactionSpeed;
+  };
+  @action public setAmount = (amount: number | string) => {
+    this.amount = amount;
+  };
+
+  @action public changeToken = (tokenSymbol: string) => {
     console.log('tokenSymbol: ', tokenSymbol);
     const token = find(this.tokens, { symbol: tokenSymbol });
     if (token) {
@@ -125,70 +144,67 @@ export default class SendStore {
     }
   };
 
-  @action
-  public routeToSendConfirm = () => {
-      this.app.routerStore.push('/send-confirm');
-    };
+  @action public routeToSendConfirm = () => {
+    this.app.routerStore.push('/send-confirm');
+  };
 
-  @action
-  public send = () => {
-      if (!this.token) {
-        return;
-      }
+  @action public send = () => {
+    if (!this.token) {
+      return;
+    }
 
-      this.sendState = SEND_STATE.SENDING;
-      if (this.token.symbol === 'RUNES') {
-        console.log('Sending RUNES:', {
-          receiverAddress: this.receiverAddress,
-          amount: Number(this.amount),
-          transactionSpeed: this.transactionSpeed,
-        });
-        chrome.runtime.sendMessage({
-          type: MESSAGE_TYPE.SEND_TOKENS,
-          receiverAddress: this.receiverAddress,
-          amount: Number(this.amount),
-          transactionSpeed: this.transactionSpeed,
-        });
-      } else {
-        console.log('Sending RRC tokens:', {
-          receiverAddress: this.receiverAddress,
-          amount: Number(this.amount),
-          token: this.token,
-          gasLimit: Number(this.gasLimit),
-          gasPrice: Number(this.gasPrice * 1e-8),
-        });
-        chrome.runtime.sendMessage({
-          type: MESSAGE_TYPE.SEND_RRC_TOKENS,
-          receiverAddress: this.receiverAddress,
-          amount: Number(this.amount),
-          token: this.token,
-          gasLimit: Number(this.gasLimit),
-          gasPrice: Number(this.gasPrice * 1e-8),
-        });
-      }
-    };
+    this.sendState = SEND_STATE.SENDING;
+    if (this.token.symbol === 'RUNES') {
+      console.log('Sending RUNES:', {
+        receiverAddress: this.receiverAddress,
+        amount: Number(this.amount),
+        transactionSpeed: this.transactionSpeed,
+      });
+      chrome.runtime.sendMessage({
+        type: MESSAGE_TYPE.SEND_TOKENS,
+        receiverAddress: this.receiverAddress,
+        amount: Number(this.amount),
+        transactionSpeed: this.transactionSpeed,
+      });
+    } else {
+      console.log('Sending RRC tokens:', {
+        receiverAddress: this.receiverAddress,
+        amount: Number(this.amount),
+        token: this.token,
+        gasLimit: Number(this.gasLimit),
+        gasPrice: Number(this.gasPrice * 1e-8),
+      });
+      chrome.runtime.sendMessage({
+        type: MESSAGE_TYPE.SEND_RRC_TOKENS,
+        receiverAddress: this.receiverAddress,
+        amount: Number(this.amount),
+        token: this.token,
+        gasLimit: Number(this.gasLimit),
+        gasPrice: Number(this.gasPrice * 1e-8),
+      });
+    }
+  };
 
-  @action
-  private handleMessage = (request: any) => {
-      let runebaseToken;
-      switch (request.type) {
-      case MESSAGE_TYPE.SEND_TOKENS_SUCCESS:
-        console.log('Send tokens success:', request);
-        // this.app.routerStore.push('/home'); // so pressing back won't go back to sendConfirm page
-        this.app.routerStore.push('/account-detail');
-        this.sendState = SEND_STATE.INITIAL;
-        break;
-      case MESSAGE_TYPE.SEND_TOKENS_FAILURE:
-        console.log('Send tokens failure:', request);
-        this.sendState = SEND_STATE.INITIAL;
-        this.errorMessage = request.error.message;
-        break;
-      case MESSAGE_TYPE.GET_MAX_RUNEBASE_SEND_RETURN:
-        runebaseToken = this.tokens[0];
-        this.maxRunebaseSend = request.maxRunebaseAmount / (10 ** runebaseToken.decimals);
-        break;
-      default:
-        break;
-      }
-    };
+  @action private handleMessage = (request: any) => {
+    let runebaseToken;
+    switch (request.type) {
+    case MESSAGE_TYPE.SEND_TOKENS_SUCCESS:
+      console.log('Send tokens success:', request);
+      // this.app.routerStore.push('/home'); // so pressing back won't go back to sendConfirm page
+      this.app.routerStore.push('/account-detail');
+      this.sendState = SEND_STATE.INITIAL;
+      break;
+    case MESSAGE_TYPE.SEND_TOKENS_FAILURE:
+      console.log('Send tokens failure:', request);
+      this.sendState = SEND_STATE.INITIAL;
+      this.errorMessage = request.error.message;
+      break;
+    case MESSAGE_TYPE.GET_MAX_RUNEBASE_SEND_RETURN:
+      runebaseToken = this.tokens[0];
+      this.maxRunebaseSend = request.maxRunebaseAmount / (10 ** runebaseToken.decimals);
+      break;
+    default:
+      break;
+    }
+  };
 }

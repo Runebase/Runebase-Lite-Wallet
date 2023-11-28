@@ -1,4 +1,3 @@
-import { WalletRPCProvider } from 'runebasejs-wallet';
 import RunebaseChromeController from '.';
 import IController from './iController';
 import { API_TYPE, MESSAGE_TYPE } from '../../constants';
@@ -27,16 +26,7 @@ export default class UtilsController extends IController {
     this.initFinished();
   }
 
-  /*
-  * Gets the current logged in RPC provider.
-  * @return Logged in account's RPC provider.
-  */
-  private rpcProvider = (): WalletRPCProvider | undefined => {
-    const acct = this.main.account.loggedInAccount;
-    return acct && acct.wallet && acct.wallet.rpcProvider;
-  };
-
-  private handleSignPodRequest = (request: any) => {
+  private handleSignPodRequestExternal = (request: any) => {
     const { id, superStakerAddress } = request.payload;
     this.handleSignPod(id, superStakerAddress);
   };
@@ -49,22 +39,16 @@ export default class UtilsController extends IController {
   public handleSignPod = async (id: string, superStakerAddress: string): Promise<PodSignResponse> => {
     let result: any;
     let error: string | undefined;
-
     try {
-      const rpcProvider = this.rpcProvider();
-      if (!rpcProvider) {
-        throw Error('Cannot call contract without RPC provider.');
-      }
-
       if (!superStakerAddress) {
         throw Error('Requires first two arguments: contractAddress and data.');
       }
 
       const acct = this.main.account.loggedInAccount;
-      if (!acct || !acct.wallet || !acct.wallet.qjsWallet || !acct.wallet.qjsWallet.keyPair) {
+      if (!acct || !acct.wallet || !acct.wallet.rjsWallet || !acct.wallet.rjsWallet.keyPair) {
         throw Error('Invalid account or key pair.');
       }
-      const keyPair = acct.wallet.qjsWallet.keyPair;
+      const keyPair = acct.wallet.rjsWallet.keyPair;
       const hexAddress = runebase.address.fromBase58Check(superStakerAddress).hash.toString('hex');
 
       // Verify that keyPair.network.messagePrefix is set correctly for Runebase
@@ -98,7 +82,7 @@ export default class UtilsController extends IController {
       result = {
         podMessage,
         superStakerAddress,
-        delegatorAddress: acct.wallet.qjsWallet.address,
+        delegatorAddress: acct.wallet.rjsWallet.address,
       };
 
     } catch (err) {
@@ -123,7 +107,7 @@ export default class UtilsController extends IController {
    */
   private sendPodResponseToActiveTab = (id: string, result: any, error?: string) => {
     chrome.tabs.query({ active: true, currentWindow: true }, ([{ id: tabID }]) => {
-      chrome.tabs.sendMessage(tabID!, { type: MESSAGE_TYPE.SIGN_POD_RETURN, id, result, error });
+      chrome.tabs.sendMessage(tabID!, { type: MESSAGE_TYPE.SIGN_POD_EXTERNAL_RETURN, id, result, error });
     });
   };
 
@@ -132,25 +116,35 @@ export default class UtilsController extends IController {
   * @param id Request ID.
   * @param args Request arguments. [contractAddress, data, amount?, gasLimit?, gasPrice?]
   */
-  private signPodMessage = async (id: string, superStakerAddress: string) => {
-    if (!this.rpcProvider()) {
-      throw Error('Cannot call RPC without provider.');
-    }
-
+  private signPodMessageExternal = async (id: string, superStakerAddress: string) => {
     const { result, error } = await this.handleSignPod(id, superStakerAddress);
     this.sendPodResponseToActiveTab(id, result, error);
   };
+
+  private signPodMessage = async (superStakerAddress: string) => {
+    const { result } = await this.handleSignPod('', superStakerAddress);
+    if (result) {
+      chrome.runtime.sendMessage({
+        type: MESSAGE_TYPE.SIGN_POD_RETURN,
+        result: result
+      });
+    }
+  };
+
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/naming-convention
   private handleMessage = (request: any, _: chrome.runtime.MessageSender) => {
     try {
       switch (request.type) {
       case MESSAGE_TYPE.SIGN_POD:
-        this.signPodMessage(request.id, request.superStakerAddress);
+        this.signPodMessage(request.superStakerAddress);
         break;
-      case API_TYPE.SIGN_POD_REQUEST:
-        this.handleSignPodRequest(request);
-        break;  // Add this break statement
+      case MESSAGE_TYPE.SIGN_POD_EXTERNAL:
+        this.signPodMessageExternal(request.id, request.superStakerAddress);
+        break;
+      case API_TYPE.SIGN_POD_EXTERNAL_REQUEST:
+        this.handleSignPodRequestExternal(request);
+        break;
       default:
         break;
       }

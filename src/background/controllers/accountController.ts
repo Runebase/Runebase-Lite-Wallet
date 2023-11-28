@@ -2,14 +2,20 @@
 import { isEmpty, find, cloneDeep } from 'lodash';
 import { Wallet as RunebaseWallet, RunebaseInfo } from 'runebasejs-wallet';
 import assert from 'assert';
-import { Buffer } from 'buffer'; // Add this line to import Buffer
-
+import { Buffer } from 'buffer';
+import runebase from 'runebasejs-lib';
 import RunebaseChromeController from '.';
 import IController from './iController';
 import { MESSAGE_TYPE, STORAGE, NETWORK_NAMES, RUNEBASECHROME_ACCOUNT_CHANGE } from '../../constants';
 import Account from '../../models/Account';
 import Wallet from '../../models/Wallet';
-import { TRANSACTION_SPEED } from '../../constants';
+import { TRANSACTION_SPEED, DELEGATION_CONTRACT_ADDRESS } from '../../constants';
+import Transaction from '../../models/Transaction';
+import moment from 'moment';
+import BigNumber from 'bignumber.js';
+import { PodReturnResult } from '../../types';
+import { generateRequestId } from '../../utils';
+import abi from 'ethjs-abi';
 
 globalThis.Buffer = Buffer;
 
@@ -380,7 +386,7 @@ export default class AccountController extends IController {
   * Fetches the wallet info from the current wallet instance.
   */
   private getWalletInfo = async (sendInpageUpdate = true) => {
-    if (!this.loggedInAccount || !this.loggedInAccount.wallet || !this.loggedInAccount.wallet.qjsWallet) {
+    if (!this.loggedInAccount || !this.loggedInAccount.wallet || !this.loggedInAccount.wallet.rjsWallet) {
       console.error('Could not get wallet info.');
       return;
     }
@@ -399,11 +405,45 @@ export default class AccountController extends IController {
     }
   };
 
+  private getDelegationInfo = async () => {
+    if (!this.loggedInAccount || !this.loggedInAccount.wallet || !this.loggedInAccount.wallet.rjsWallet) {
+      console.error('Could not get wallet info.');
+      return;
+    }
+    const delegationInfo = await this.loggedInAccount.wallet.getDelegationInfoForAddress();
+    if (delegationInfo) {
+      chrome.runtime.sendMessage({
+        type: MESSAGE_TYPE.GET_DELEGATION_INFO_RETURN,
+        delegationInfo: delegationInfo
+      });
+    }
+  };
+
+  private getSuperstakerDelegations = async (address: string) => {
+    try {
+      if (!this.loggedInAccount || !this.loggedInAccount.wallet || !this.loggedInAccount.wallet.rjsWallet) {
+        console.error('Could not get wallet info.');
+        return;
+      }
+
+      const superstakerDelegations = await this.loggedInAccount.wallet.rjsWallet.getSuperStakerDelegations(address);
+      if (superstakerDelegations) {
+        chrome.runtime.sendMessage({
+          type: MESSAGE_TYPE.GET_SUPERSTAKER_DELEGATIONS_RETURN,
+          superstakerDelegations: superstakerDelegations
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching superstaker delegations:', error);
+    }
+  };
+
+
   /*
   * Fetches the blockchain info from the current wallet instance.
   */
   private getBlockchainInfo = async () => {
-    if (!this.loggedInAccount || !this.loggedInAccount.wallet || !this.loggedInAccount.wallet.qjsWallet) {
+    if (!this.loggedInAccount || !this.loggedInAccount.wallet || !this.loggedInAccount.wallet.rjsWallet) {
       console.error('Could not get wallet info.');
       return;
     }
@@ -440,7 +480,7 @@ export default class AccountController extends IController {
   * @param amount The amount to send.
   */
   private sendTokens = async (receiverAddress: string, amount: number, transactionSpeed: TRANSACTION_SPEED) => {
-    if (!this.loggedInAccount || !this.loggedInAccount.wallet || !this.loggedInAccount.wallet.qjsWallet) {
+    if (!this.loggedInAccount || !this.loggedInAccount.wallet || !this.loggedInAccount.wallet.rjsWallet) {
       throw Error('Cannot send with no wallet instance.');
     }
 
@@ -460,7 +500,14 @@ export default class AccountController extends IController {
         throw Error('feeRate not set');
       }
 
-      await this.loggedInAccount.wallet.send(receiverAddress, amount, {feeRate});
+      const transaction = await this.loggedInAccount.wallet.send(receiverAddress, amount, {feeRate});
+      const newTransaction = new Transaction({
+        id: transaction.txid,
+        timestamp: moment().format('MM-DD-YYYY, HH:mm'), // Use current timestamp for the new transaction
+        confirmations: 0, // Transaction is not confirmed initially
+        amount: new BigNumber(amount).times(1e8).dp(0).toNumber(),
+      });
+      this.main.transaction.addTransaction(newTransaction);
       chrome.runtime.sendMessage({ type: MESSAGE_TYPE.SEND_TOKENS_SUCCESS });
     } catch (err) {
       chrome.runtime.sendMessage({ type: MESSAGE_TYPE.SEND_TOKENS_FAILURE, error: err });
@@ -478,7 +525,7 @@ export default class AccountController extends IController {
    * unconfirmed UTXOs and update maxRunebaseSend accordingly.
    */
   private updateAndSendMaxRunebaseAmountToPopup = async () => {
-    if (!this.loggedInAccount || !this.loggedInAccount.wallet || !this.loggedInAccount.wallet.qjsWallet) {
+    if (!this.loggedInAccount || !this.loggedInAccount.wallet || !this.loggedInAccount.wallet.rjsWallet) {
       throw Error('Cannot calculate max balance with no wallet instance.');
     }
 
@@ -487,6 +534,94 @@ export default class AccountController extends IController {
       chrome.runtime.sendMessage({ type: MESSAGE_TYPE.GET_MAX_RUNEBASE_SEND_RETURN,
         maxRunebaseAmount: this.loggedInAccount!.wallet!.maxRunebaseSend });
     });
+  };
+
+  private sendDelegationConfirm = async (
+    signedPoD: PodReturnResult,
+    fee: number,
+    gasLimit: number,
+    gasPrice: number
+  ) => {
+    if (!this.loggedInAccount || !this.loggedInAccount.wallet || !this.loggedInAccount.wallet.rjsWallet) {
+      throw Error('Cannot send with no wallet instance.');
+    }
+    const hexAddress = runebase.address.fromBase58Check(signedPoD.superStakerAddress).hash.toString('hex');
+    const params = [`0x${hexAddress}`, fee, signedPoD.podMessage];
+    const encodedData = abi.encodeMethod({
+      name: 'addDelegation',
+      inputs: [
+        { name: 'staker', type: 'address' },
+        { name: 'fee', type: 'uint8' },
+        { name: 'PoD', type: 'bytes' },
+      ],
+    }, params).substr(2);
+
+    const args = [
+      DELEGATION_CONTRACT_ADDRESS,
+      encodedData,
+      null,
+      gasLimit,
+      gasPrice
+    ];
+
+    const requestId = generateRequestId();
+    const response = await this.main.rpc.sendToContract(requestId, args);
+    const { error, result } = response as { error: any, result: RunebaseInfo.ISendRawTxResult };
+    const newTransaction = new Transaction({
+      id: result && result.txid ? result.txid : undefined,
+      timestamp: moment().format('MM-DD-YYYY, HH:mm'),
+      confirmations: 0,
+      amount: new BigNumber(gasLimit).times(new BigNumber(gasPrice).times(1e8)).dp(0).toNumber(),
+      qrc20TokenTransfers: []
+    });
+    this.main.transaction.addTransaction(newTransaction);
+
+    if (error) {
+      console.error('Error sendDelegationConfirm:', error);
+      chrome.runtime.sendMessage({ type: MESSAGE_TYPE.SEND_DELEGATION_CONFIRM_FAILURE, error });
+      return;
+    }
+
+    console.log('sendDelegationConfirm sent successfully!');
+    chrome.runtime.sendMessage({ type: MESSAGE_TYPE.SEND_DELEGATION_CONFIRM_SUCCESS });
+  };
+
+  private sendRemoveDelegationConfirm = async (
+    gasLimit: number,
+    gasPrice: number
+  ) => {
+    if (!this.loggedInAccount || !this.loggedInAccount.wallet || !this.loggedInAccount.wallet.rjsWallet) {
+      throw Error('Cannot send with no wallet instance.');
+    }
+    const encodedData = abi.encodeMethod({ name: 'removeDelegation', inputs: [] }, []).substr(2);
+    const args = [
+      DELEGATION_CONTRACT_ADDRESS,
+      encodedData,
+      null,
+      gasLimit,
+      gasPrice
+    ];
+
+    const requestId = generateRequestId();
+    const response = await this.main.rpc.sendToContract(requestId, args);
+    const { error, result } = response as { error: any, result: RunebaseInfo.ISendRawTxResult };
+    const newTransaction = new Transaction({
+      id: result && result.txid ? result.txid : undefined,
+      timestamp: moment().format('MM-DD-YYYY, HH:mm'),
+      confirmations: 0,
+      amount: new BigNumber(gasLimit).times(new BigNumber(gasPrice).times(1e8)).dp(0).toNumber(),
+      qrc20TokenTransfers: []
+    });
+    this.main.transaction.addTransaction(newTransaction);
+
+    if (error) {
+      console.error('Error sendRemoveDelegationConfirm:', error);
+      chrome.runtime.sendMessage({ type: MESSAGE_TYPE.SEND_REMOVE_DELEGATION_CONFIRM_FAILURE, error });
+      return;
+    }
+
+    console.log('sendRemoveDelegationConfirm sent successfully!');
+    chrome.runtime.sendMessage({ type: MESSAGE_TYPE.SEND_REMOVE_DELEGATION_CONFIRM_SUCCESS });
   };
 
   private handleMessage = async (
@@ -521,6 +656,14 @@ export default class AccountController extends IController {
         console.log(`Sending tokens: ${request.receiverAddress}, Amount: ${request.amount}, Speed: ${request.transactionSpeed}`);
         this.sendTokens(request.receiverAddress, request.amount, request.transactionSpeed);
         break;
+      case MESSAGE_TYPE.SEND_DELEGATION_CONFIRM:
+        console.log(`sendDelegationConfirm: ${JSON.stringify(request)}`);
+        this.sendDelegationConfirm(request.signedPoD, request.fee, request.gasLimit, request.gasPrice);
+        break;
+      case MESSAGE_TYPE.SEND_REMOVE_DELEGATION_CONFIRM:
+        console.log(`sendRemoveDelegationConfirm: ${JSON.stringify(request)}`);
+        this.sendRemoveDelegationConfirm(request.gasLimit, request.gasPrice);
+        break;
       case MESSAGE_TYPE.LOGOUT:
         console.log('Logging out');
         this.logoutAccount();
@@ -553,6 +696,13 @@ export default class AccountController extends IController {
         console.log('Getting wallet info');
         sendResponse(this.loggedInAccount && this.loggedInAccount.wallet
           ? this.loggedInAccount.wallet.info : undefined);
+        break;
+      case MESSAGE_TYPE.GET_DELEGATION_INFO:
+        console.log('Getting wallet delegation info');
+        this.getDelegationInfo();
+        break;
+      case MESSAGE_TYPE.GET_SUPERSTAKER_DELEGATIONS:
+        this.getSuperstakerDelegations(request.address);
         break;
       case MESSAGE_TYPE.GET_RUNEBASE_USD:
         console.log('Getting RUNEBASE to USD conversion');
