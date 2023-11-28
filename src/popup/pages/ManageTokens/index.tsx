@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { observer, inject } from 'mobx-react';
-import { Typography, ListItem, Button } from '@mui/material';
+import { Typography, Button, Divider } from '@mui/material';
 
 import useStyles from './styles';
 import NavBar from '../../components/NavBar';
@@ -17,6 +17,14 @@ const ManageTokens: React.FC<IProps> = inject('store')(
   observer(({ store }) => {
     const classes = useStyles();
     const { sessionStore, loginStore, accountDetailStore } = store;
+
+    useEffect(() => {
+      accountDetailStore.init();
+      return () => {
+        accountDetailStore.deinit();
+      };
+    }, [accountDetailStore, store]);
+
     useEffect(() => {
       console.log('useEffect ManageTokens');
       console.log(accountDetailStore.tokens);
@@ -26,13 +34,8 @@ const ManageTokens: React.FC<IProps> = inject('store')(
       loginStore,
       accountDetailStore,
       accountDetailStore.tokens,
+      accountDetailStore.verifiedTokens,
     ]);
-    useEffect(() => {
-      accountDetailStore.init();
-      return () => {
-        accountDetailStore.deinit();
-      };
-    }, [accountDetailStore, store]);
 
     return (
       <div className={classes.root}>
@@ -47,31 +50,34 @@ const ManageTokens: React.FC<IProps> = inject('store')(
 
 const TokenList: React.FC<{ classes: Record<string, string>; store: AppStore }> = observer(({ classes, store }) => (
   <div>
-    {store.accountDetailStore.tokens &&
-      store.accountDetailStore.tokens.map(({ name, symbol, balance, address }: RRCToken) => (
-        <ListItem
-          divider
-          key={symbol}
-          className={classes.listItem}
-          onClick={() => store.accountDetailStore.editTokenMode && store.accountDetailStore.removeToken(address)}
-        >
-          {store.accountDetailStore.editTokenMode && (
-            <Button className={classes.tokenDeleteButton} id="removeTokenButton">
-              <img src="images/ic_delete.svg" alt="Delete Token" />
-            </Button>
-          )}
-          <div className={classes.tokenInfoContainer}>
-            <Typography className={classes.tokenName}>{name}</Typography>
-          </div>
+    {store.accountDetailStore.verifiedTokens
+    && store.accountDetailStore.verifiedTokens.map(({ name, symbol, balance, address }: RRCToken) => (
+      <div
+        key={symbol}
+        onClick={() => store.accountDetailStore.editTokenMode && store.accountDetailStore.removeToken(address)}
+      >
+        {store.accountDetailStore.editTokenMode && (
+          <Button className={classes.tokenDeleteButton} id="removeTokenButton">
+            <img src="images/ic_delete.svg" alt="Delete Token" />
+          </Button>
+        )}
+        <div className={classes.tokenInfoContainer}>
+          <Typography className={classes.tokenName}>{name}</Typography>
           <AmountInfo
             classes={classes}
             amount={balance}
             token={symbol}
             convertedValue={0}
           />
-        </ListItem>
-      ))}
-    <div className={classes.bottomButtonWrap}>
+        </div>
+        <div style={{ float: 'left', width: '100%' }}>
+          <Typography variant="caption">{address}</Typography>
+        </div>
+        <Divider variant="fullWidth" style={{ border: '1px solid #e0e0e0' }} />
+      </div>
+    ))}
+
+    <div className={`${classes.bottomButtonWrap} ${classes.listItem}`}>
       <Button
         className={classes.bottomButton}
         id="editTokenButton"

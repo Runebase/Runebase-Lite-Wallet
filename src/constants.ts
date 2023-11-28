@@ -171,7 +171,7 @@ export enum RUNEBASECHROME_ACCOUNT_CHANGE {
 
 export const TOKEN_IMAGES: Record<string, string> = {
   '': 'images/runes.png',
-  '4a344d24f909e4cb4ee667371d67cdfca432d0c8': 'images/credits.png',
+  '579efd47ed4c7dfd0c3b4ec570fb727e1e732df7': 'images/credits.png',
 };
 
 export const DELEGATION_CONTRACT_ADDRESS = '0000000000000000000000000000000000000086';
