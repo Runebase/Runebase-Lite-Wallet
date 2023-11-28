@@ -122,6 +122,18 @@ export default class SendStore {
   @action public setGasPrice = (gasPrice: number) => {
     this.gasPrice = gasPrice;
   };
+  @action public setSenderAddress = (senderAddress: string) => {
+    this.senderAddress = senderAddress;
+  };
+  @action public setReceiverAddress = (receiverAddress: string) => {
+    this.receiverAddress = receiverAddress;
+  };
+  @action public setTransactionSpeed = (transactionSpeed: string) => {
+    this.transactionSpeed = transactionSpeed;
+  };
+  @action public setAmount = (amount: number | string) => {
+    this.amount = amount;
+  };
 
   @action public changeToken = (tokenSymbol: string) => {
     console.log('tokenSymbol: ', tokenSymbol);
