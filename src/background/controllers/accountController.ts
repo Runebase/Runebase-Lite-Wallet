@@ -586,6 +586,44 @@ export default class AccountController extends IController {
     chrome.runtime.sendMessage({ type: MESSAGE_TYPE.SEND_DELEGATION_CONFIRM_SUCCESS });
   };
 
+  private sendRemoveDelegationConfirm = async (
+    gasLimit: number,
+    gasPrice: number
+  ) => {
+    if (!this.loggedInAccount || !this.loggedInAccount.wallet || !this.loggedInAccount.wallet.rjsWallet) {
+      throw Error('Cannot send with no wallet instance.');
+    }
+    const encodedData = abi.encodeMethod({ name: 'removeDelegation', inputs: [] }, []).substr(2);
+    const args = [
+      DELEGATION_CONTRACT_ADDRESS,
+      encodedData,
+      null,
+      gasLimit,
+      gasPrice
+    ];
+
+    const requestId = generateRequestId();
+    const response = await this.main.rpc.sendToContract(requestId, args);
+    const { error, result } = response as { error: any, result: RunebaseInfo.ISendRawTxResult };
+    const newTransaction = new Transaction({
+      id: result && result.txid ? result.txid : undefined,
+      timestamp: moment().format('MM-DD-YYYY, HH:mm'),
+      confirmations: 0,
+      amount: new BigNumber(gasLimit).times(new BigNumber(gasPrice).times(1e8)).dp(0).toNumber(),
+      qrc20TokenTransfers: []
+    });
+    this.main.transaction.addTransaction(newTransaction);
+
+    if (error) {
+      console.error('Error sendRemoveDelegationConfirm:', error);
+      chrome.runtime.sendMessage({ type: MESSAGE_TYPE.SEND_REMOVE_DELEGATION_CONFIRM_FAILURE, error });
+      return;
+    }
+
+    console.log('sendRemoveDelegationConfirm sent successfully!');
+    chrome.runtime.sendMessage({ type: MESSAGE_TYPE.SEND_REMOVE_DELEGATION_CONFIRM_SUCCESS });
+  };
+
   private handleMessage = async (
     request: any,
     // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -621,6 +659,10 @@ export default class AccountController extends IController {
       case MESSAGE_TYPE.SEND_DELEGATION_CONFIRM:
         console.log(`sendDelegationConfirm: ${JSON.stringify(request)}`);
         this.sendDelegationConfirm(request.signedPoD, request.fee, request.gasLimit, request.gasPrice);
+        break;
+      case MESSAGE_TYPE.SEND_REMOVE_DELEGATION_CONFIRM:
+        console.log(`sendRemoveDelegationConfirm: ${JSON.stringify(request)}`);
+        this.sendRemoveDelegationConfirm(request.gasLimit, request.gasPrice);
         break;
       case MESSAGE_TYPE.LOGOUT:
         console.log('Logging out');

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Fragment } from 'react';
 import { RunebaseInfo } from 'runebasejs-wallet';
 import { observer, inject } from 'mobx-react';
 import { Typography, Button, Box, Divider, Grid } from '@mui/material';
@@ -143,10 +143,11 @@ const AccountInfo: React.FC<IProps> = ({ hasRightArrow, store }) => {
         const tokenLogoSrc = TOKEN_IMAGES[token.address];
         if (isVerifiedToken) {
           return (
-            <>
+            <Fragment
+              key={index}
+            >
               <Divider />
               <Box
-                key={index}
                 className={`${classes.amountContainer} ${!tokenLogoSrc ? classes.tokenContainer : ''}`}
               >
                 {
@@ -166,7 +167,7 @@ const AccountInfo: React.FC<IProps> = ({ hasRightArrow, store }) => {
                 </Typography>
                 <Typography className={classes.token}>{token.symbol}</Typography>
               </Box>
-            </>
+            </Fragment>
           );
         }
         return null;

@@ -92,12 +92,8 @@ export default class DelegateStore {
       this.app.routerStore.push('/add-delegation-confirm');
     }
   };
-
-  @action public undelegate = () => {
-    // this.sendState = SEND_STATE.SENDING;
-    chrome.runtime.sendMessage({
-      type: MESSAGE_TYPE.SEND_UNDELEGATE,
-    });
+  @action public routeToRemoveDelegationConfirm = () => {
+    this.app.routerStore.push('/remove-delegation-confirm');
   };
 
   @action public sendDelegationConfirm = () => {
@@ -105,6 +101,14 @@ export default class DelegateStore {
       type: MESSAGE_TYPE.SEND_DELEGATION_CONFIRM,
       signedPoD: this.signedPoD,
       fee: this.delegationFee,
+      gasLimit: Number(this.gasLimit),
+      gasPrice: Number(this.gasPrice * 1e-8),
+    });
+  };
+
+  @action public sendRemoveDelegationConfirm = () => {
+    chrome.runtime.sendMessage({
+      type: MESSAGE_TYPE.SEND_REMOVE_DELEGATION_CONFIRM,
       gasLimit: Number(this.gasLimit),
       gasPrice: Number(this.gasPrice * 1e-8),
     });
@@ -160,6 +164,14 @@ export default class DelegateStore {
       this.app.routerStore.push('/account-detail');
       break;
     case MESSAGE_TYPE.SEND_DELEGATION_CONFIRM_FAILURE:
+      console.log('SEND_DELEGATION_CONFIRM_FAILURE:', request);
+      this.errorMessage = request.error.message;
+      break;
+    case MESSAGE_TYPE.SEND_REMOVE_DELEGATION_CONFIRM_SUCCESS:
+      console.log('SEND_REMOVE_DELEGATION_CONFIRM_SUCCESS:', request);
+      this.app.routerStore.push('/account-detail');
+      break;
+    case MESSAGE_TYPE.SEND_REMOVE_DELEGATION_CONFIRM_FAILURE:
       console.log('SEND_DELEGATION_CONFIRM_FAILURE:', request);
       this.errorMessage = request.error.message;
       break;
