@@ -32,7 +32,6 @@ const AccountInfo: React.FC<IProps> = ({ hasRightArrow, store }) => {
     setRunebaseBalanceUSD(store?.sessionStore.runebaseBalanceUSD);
     // setNetworkBalAnnotation(store?.sessionStore.networkBalAnnotation || null);
   }, [
-    store,
     store?.sessionStore.loggedInAccountName,
     store?.sessionStore.runebaseBalanceUSD,
     store?.sessionStore.walletInfo,
@@ -40,6 +39,7 @@ const AccountInfo: React.FC<IProps> = ({ hasRightArrow, store }) => {
     store?.sessionStore.blockchainInfo,
     store?.accountDetailStore.transactions,
     store?.sessionStore.walletInfo?.qrc20Balances,
+    store?.sessionStore.delegationInfo?.staker
   ]);
 
   const handleClick = (id: string, event: React.MouseEvent<HTMLElement>) => {
@@ -77,18 +77,40 @@ const AccountInfo: React.FC<IProps> = ({ hasRightArrow, store }) => {
         <PersonIcon style={{ marginRight: '5px' }} />
         {loggedInAccountName}
       </Typography>
-      <Grid container>
-        <Grid item xs={6}>
+      {
+        store?.sessionStore.delegationInfo?.staker && (
           <Typography
             variant="subtitle2"
             gutterBottom
             style={{ display: 'flex', alignItems: 'center' }}
           >
-            <StarIcon style={{ marginRight: '5px' }} />
-            #{info.ranking}
+            <ElectricBoltIcon style={{ marginRight: '5px', color: '#FFD700' }} />
+            <span
+              style={{
+                color: 'blue', // Set the text color to blue to mimic a hyperlink
+                textDecoration: 'none', // Add an underline
+                cursor: 'pointer', // Change the cursor to a pointer to indicate interactivity
+                transition: 'text-decoration 0.3s ease', // Add a smooth transition effect
+              }}
+              onClick={() => {
+                store?.delegateStore.getSuperstaker(store?.sessionStore.delegationInfo?.staker || '');
+              }}
+              onMouseEnter={(event) => (event.currentTarget.style.textDecoration = 'underline')}
+              onMouseLeave={(event) => (event.currentTarget.style.textDecoration = 'none')}
+            >
+              Visit my superstaker
+            </span>
           </Typography>
-        </Grid>
-      </Grid>
+        )
+      }
+      <Typography
+        variant="subtitle2"
+        gutterBottom
+        style={{ display: 'flex', alignItems: 'center' }}
+      >
+        <StarIcon style={{ marginRight: '5px' }} />
+        #{info.ranking}
+      </Typography>
       <Typography
         variant="subtitle2"
         gutterBottom
@@ -162,7 +184,7 @@ const AccountInfo: React.FC<IProps> = ({ hasRightArrow, store }) => {
           color="primary"
           variant="contained"
           size="small"
-          startIcon={<ElectricBoltIcon />}
+          startIcon={<ElectricBoltIcon style={{ color: '#FFD700' }}/>}
           className={classes.actionButton}
           onClick={(e) => handleClick('delegateButton', e)}
         >

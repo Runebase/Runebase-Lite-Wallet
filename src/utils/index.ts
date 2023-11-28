@@ -94,6 +94,11 @@ export const isValidGasPrice = (gasPrice: number) => {
   return isFinite(gasPrice) && gasPrice > 0;
 };
 
+export const isValidDelegationFee = (delegationFee: number) => {
+  const isWholeNumber = Number.isInteger(delegationFee);
+  return isWholeNumber && delegationFee > 0 && delegationFee < 100;
+};
+
 /*
 * Handles the Enter key pressed of an input field.
 * @param event The event object.

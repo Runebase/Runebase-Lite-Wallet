@@ -16,7 +16,7 @@ export class Utils {
 
       // Post SIGN_POD_REQUEST message
       postWindowMessage<PodSignRequest>(TARGET_NAME.CONTENTSCRIPT, {
-        type: API_TYPE.SIGN_POD_REQUEST,
+        type: API_TYPE.SIGN_POD_EXTERNAL_REQUEST,
         payload: {
           id,
           superStakerAddress,

@@ -2,17 +2,20 @@
 import { isEmpty, find, cloneDeep } from 'lodash';
 import { Wallet as RunebaseWallet, RunebaseInfo } from 'runebasejs-wallet';
 import assert from 'assert';
-import { Buffer } from 'buffer'; // Add this line to import Buffer
-
+import { Buffer } from 'buffer';
+import runebase from 'runebasejs-lib';
 import RunebaseChromeController from '.';
 import IController from './iController';
 import { MESSAGE_TYPE, STORAGE, NETWORK_NAMES, RUNEBASECHROME_ACCOUNT_CHANGE } from '../../constants';
 import Account from '../../models/Account';
 import Wallet from '../../models/Wallet';
-import { TRANSACTION_SPEED } from '../../constants';
+import { TRANSACTION_SPEED, DELEGATION_CONTRACT_ADDRESS } from '../../constants';
 import Transaction from '../../models/Transaction';
 import moment from 'moment';
 import BigNumber from 'bignumber.js';
+import { PodReturnResult } from '../../types';
+import { generateRequestId } from '../../utils';
+import abi from 'ethjs-abi';
 
 globalThis.Buffer = Buffer;
 
@@ -533,6 +536,56 @@ export default class AccountController extends IController {
     });
   };
 
+  private sendDelegationConfirm = async (
+    signedPoD: PodReturnResult,
+    fee: number,
+    gasLimit: number,
+    gasPrice: number
+  ) => {
+    if (!this.loggedInAccount || !this.loggedInAccount.wallet || !this.loggedInAccount.wallet.rjsWallet) {
+      throw Error('Cannot send with no wallet instance.');
+    }
+    const hexAddress = runebase.address.fromBase58Check(signedPoD.superStakerAddress).hash.toString('hex');
+    const params = [`0x${hexAddress}`, fee, signedPoD.podMessage];
+    const encodedData = abi.encodeMethod({
+      name: 'addDelegation',
+      inputs: [
+        { name: 'staker', type: 'address' },
+        { name: 'fee', type: 'uint8' },
+        { name: 'PoD', type: 'bytes' },
+      ],
+    }, params).substr(2);
+
+    const args = [
+      DELEGATION_CONTRACT_ADDRESS,
+      encodedData,
+      null,
+      gasLimit,
+      gasPrice
+    ];
+
+    const requestId = generateRequestId();
+    const response = await this.main.rpc.sendToContract(requestId, args);
+    const { error, result } = response as { error: any, result: RunebaseInfo.ISendRawTxResult };
+    const newTransaction = new Transaction({
+      id: result && result.txid ? result.txid : undefined,
+      timestamp: moment().format('MM-DD-YYYY, HH:mm'),
+      confirmations: 0,
+      amount: new BigNumber(gasLimit).times(new BigNumber(gasPrice).times(1e8)).dp(0).toNumber(),
+      qrc20TokenTransfers: []
+    });
+    this.main.transaction.addTransaction(newTransaction);
+
+    if (error) {
+      console.error('Error sendDelegationConfirm:', error);
+      chrome.runtime.sendMessage({ type: MESSAGE_TYPE.SEND_DELEGATION_CONFIRM_FAILURE, error });
+      return;
+    }
+
+    console.log('sendDelegationConfirm sent successfully!');
+    chrome.runtime.sendMessage({ type: MESSAGE_TYPE.SEND_DELEGATION_CONFIRM_SUCCESS });
+  };
+
   private handleMessage = async (
     request: any,
     // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -564,6 +617,10 @@ export default class AccountController extends IController {
       case MESSAGE_TYPE.SEND_TOKENS:
         console.log(`Sending tokens: ${request.receiverAddress}, Amount: ${request.amount}, Speed: ${request.transactionSpeed}`);
         this.sendTokens(request.receiverAddress, request.amount, request.transactionSpeed);
+        break;
+      case MESSAGE_TYPE.SEND_DELEGATION_CONFIRM:
+        console.log(`sendDelegationConfirm: ${JSON.stringify(request)}`);
+        this.sendDelegationConfirm(request.signedPoD, request.fee, request.gasLimit, request.gasPrice);
         break;
       case MESSAGE_TYPE.LOGOUT:
         console.log('Logging out');

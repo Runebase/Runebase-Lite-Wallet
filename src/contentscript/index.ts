@@ -113,7 +113,7 @@ function handleSignPodRequest(message: PodSignRequest) {
     if (!account) {
       // Not logged in, send error response to Inpage
       postWindowMessage<PodSignResponse>(TARGET_NAME.INPAGE, {
-        type: API_TYPE.SIGN_POD_RESPONSE,
+        type: API_TYPE.SIGN_POD_EXTERNAL_RESPONSE,
         payload: {
           id,
           error: 'Not logged in. Please log in to RunebaseChrome first.',
@@ -121,7 +121,7 @@ function handleSignPodRequest(message: PodSignRequest) {
       });
       return;
     }
-    chrome.runtime.sendMessage({ type: MESSAGE_TYPE.SIGN_POD, id, superStakerAddress });
+    chrome.runtime.sendMessage({ type: MESSAGE_TYPE.SIGN_POD_EXTERNAL, id, superStakerAddress });
   });
 }
 
@@ -145,7 +145,7 @@ function handleInPageMessage(event: MessageEvent) {
 
   const message: IExtensionAPIMessage<any> = event.data.message;
   switch (message.type) {
-  case API_TYPE.SIGN_POD_REQUEST:
+  case API_TYPE.SIGN_POD_EXTERNAL_REQUEST:
     handleSignPodRequest(message.payload);
     break;
   case API_TYPE.RPC_REQUEST:
@@ -173,9 +173,9 @@ function handleBackgroundScriptMessage(message: any) {
       payload: message,
     });
     break;
-  case MESSAGE_TYPE.SIGN_POD_RETURN:
+  case MESSAGE_TYPE.SIGN_POD_EXTERNAL_RETURN:
     postWindowMessage<IRPCCallResponse>(TARGET_NAME.INPAGE, {
-      type: API_TYPE.SIGN_POD_RESPONSE,
+      type: API_TYPE.SIGN_POD_EXTERNAL_RESPONSE,
       payload: message,
     });
     break;

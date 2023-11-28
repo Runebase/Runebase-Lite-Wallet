@@ -38,6 +38,7 @@ const Delegate: React.FC<IProps> = inject('store')(
             >
               {delegateStore.superstakers.map((superstaker) => (
                 <Grid
+                  key={superstaker.address}
                   item
                   xs={12}
                   style={{

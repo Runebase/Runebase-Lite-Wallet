@@ -9,7 +9,7 @@ interface IProps {
   store: AppStore;
 }
 
-const DelegateConfirm: React.FC<IProps> = inject('store')(
+const RemoveDelegation: React.FC<IProps> = inject('store')(
   observer(({ store }) => {
     const classes = useStyles();
     const { sessionStore } = store;
@@ -21,10 +21,13 @@ const DelegateConfirm: React.FC<IProps> = inject('store')(
 
     return (
       <div className={classes.root}>
-        <NavBar hasBackButton title="Delegate Confirm" />
+        <NavBar hasBackButton title="Remove Delegation" />
+        <div className={classes.contentContainer}>
+          // Remove delegation fields
+        </div>
       </div>
     );
   })
 );
 
-export default DelegateConfirm;
+export default RemoveDelegation;

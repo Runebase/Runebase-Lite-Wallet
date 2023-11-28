@@ -12,6 +12,12 @@ import {
   InpageAccount
 } from './models';
 
+export interface PodReturnResult {
+  podMessage: string;
+  superStakerAddress: string;
+  delegatorAddress: string;
+}
+
 export interface SuperStaker {
   address: string;
   lastProducedBlock: string;

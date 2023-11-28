@@ -1,3 +1,4 @@
+// https://discordapp.com/users/217379915803131906 <- (how to link discord users)
 import React from 'react';
 import { Typography, Card, CardContent, CardActions, Button, Tooltip } from '@mui/material';
 import { RunebaseInfo } from 'runebasejs-wallet';
@@ -72,7 +73,7 @@ const SuperStakerCard: React.FC<SuperStakerCardProps> = ({
             variant="contained"
             color="secondary"
             onClick={() => {
-              routerStore.push('/undelegate-confirm');
+              routerStore.push('/remove-delegation');
             }}
           >
             Undelegate
@@ -82,7 +83,8 @@ const SuperStakerCard: React.FC<SuperStakerCardProps> = ({
             variant="contained"
             color="primary"
             onClick={() => {
-              routerStore.push('/delegate-confirm');
+              delegateStore.setSelectedSuperStaker(superstaker);
+              routerStore.push('/add-delegation');
             }}
           >
             Change Delegate
@@ -92,7 +94,8 @@ const SuperStakerCard: React.FC<SuperStakerCardProps> = ({
             variant="contained"
             color="primary"
             onClick={() => {
-              routerStore.push('/delegate-confirm');
+              delegateStore.setSelectedSuperStaker(superstaker);
+              routerStore.push('/add-delegation');
             }}
           >
             Delegate

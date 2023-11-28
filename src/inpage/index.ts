@@ -47,7 +47,7 @@ function handleInpageMessage(event: MessageEvent) {
   let accountWrapper: IInpageAccountWrapper;
 
   switch (message.type) {
-  case API_TYPE.SIGN_POD_RESPONSE:
+  case API_TYPE.SIGN_POD_EXTERNAL_RESPONSE:
     console.log(`SIGN_POD_RESPONSE INPAGE: ${message.payload.result}`);
     return message.payload.result;
     // break;

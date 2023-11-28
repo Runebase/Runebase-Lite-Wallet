@@ -2,7 +2,7 @@ import RunebaseChromeController from '.';
 import IController from './iController';
 import { MESSAGE_TYPE } from '../../constants';
 import BigNumber from 'bignumber.js';
-import { SuperStakerArray } from '../../types';
+import { SuperStaker, SuperStakerArray } from '../../types';
 
 const INIT_VALUES = {
   getPriceInterval: undefined,
@@ -93,6 +93,21 @@ export default class ExternalController extends IController {
     }
   };
 
+  private getSuperstaker = async (
+    address: string,
+  ) => {
+    try {
+      const response = await fetch(`https://discord.runebase.io/api/super-staker/${address}`);
+      const jsonObj = await response.json();
+      chrome.runtime.sendMessage({
+        type: MESSAGE_TYPE.GET_SUPERSTAKER_RETURN,
+        superstaker: jsonObj.result as SuperStaker,
+      });
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
   private handleMessage = async (
     request: any
   ) => {
@@ -100,6 +115,9 @@ export default class ExternalController extends IController {
       switch (request.type) {
       case MESSAGE_TYPE.GET_SUPERSTAKERS:
         this.getSuperstakers();
+        break;
+      case MESSAGE_TYPE.GET_SUPERSTAKER:
+        this.getSuperstaker(request.address);
         break;
       default:
         break;
