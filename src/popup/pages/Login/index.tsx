@@ -34,6 +34,7 @@ const Login: React.FC<IProps> = inject('store')(
     useEffect(() => {
       loginStore.init();
     }, [loginStore]);
+    useEffect(() => { }, [hasAccounts]);
 
     const handlePasswordChange = (e: any) => {
       loginStore.password = e.target.value;
