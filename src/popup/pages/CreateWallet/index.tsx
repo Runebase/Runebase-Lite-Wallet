@@ -34,7 +34,11 @@ const CreateWallet: React.FC<IProps> = ({ store }) => {
 
   return (
     <div className={classes.root}>
-      <NavBar hasBackButton={createWalletStore.showBackButton} hasNetworkSelector title="" />
+      <NavBar
+        hasBackButton={createWalletStore.showBackButton}
+        // hasNetworkSelector
+        title=""
+      />
       <div className={classes.contentContainer}>
         <Logo />
         <div className={classes.fieldContainer}>

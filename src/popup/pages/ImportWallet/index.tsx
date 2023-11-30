@@ -35,7 +35,10 @@ const ImportWallet: React.FC<IProps> = ({ store }) => {
 
   return (
     <div className={classes.root}>
-      <NavBar hasNetworkSelector title="" />
+      <NavBar
+      // hasNetworkSelector
+        title=""
+      />
       <div className={classes.contentContainer}>
         <Typography className={classes.headerText}>Import Wallet</Typography>
         <div className={classes.inputContainer}>

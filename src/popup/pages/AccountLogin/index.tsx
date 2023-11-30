@@ -22,7 +22,11 @@ const AccountLogin: React.FC<IProps> = inject('store')(
     return (
       <div className={classes.root}>
         <Paper className={classes.headerContainer}>
-          <NavBar hasNetworkSelector isDarkTheme title="Account Login" />
+          <NavBar
+          // hasNetworkSelector
+            isDarkTheme
+            title="Account Login"
+          />
           <AccountSection {...{ classes, store }} />
         </Paper>
         <PermissionSection {...{ classes }} />
