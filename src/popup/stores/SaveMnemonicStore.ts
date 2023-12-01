@@ -4,6 +4,7 @@ import { Buffer } from 'buffer';
 
 import AppStore from './AppStore';
 import { MESSAGE_TYPE } from '../../constants';
+import { sendMessage } from '../abstraction';
 
 globalThis.Buffer = Buffer;
 
@@ -43,10 +44,10 @@ export default class SaveMnemonicStore {
   public createWallet = (saveFile: boolean) => {
     console.log('Creating wallet');
     this.app.routerStore.push('/loading');
-    chrome.runtime.sendMessage({
+    sendMessage({
       type: saveFile ? MESSAGE_TYPE.SAVE_TO_FILE : MESSAGE_TYPE.IMPORT_MNEMONIC,
       accountName: this.walletName,
       mnemonicPrivateKey: this.mnemonic,
-    });
+    }, () => {});
   };
 }

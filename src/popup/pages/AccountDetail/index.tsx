@@ -19,6 +19,7 @@ import { shortenTxid } from '../../../utils';
 import useStyles from './styles';
 import { TOKEN_IMAGES } from '../../../constants';
 import BigNumber from 'bignumber.js';
+import { getImageUrl } from '../../abstraction';
 
 interface IProps {
   classes: Record<string, string>;
@@ -177,7 +178,7 @@ const AmountInfo: React.FC<{
                   height: '18px',
                   width: '18px'
                 }}
-                src={chrome.runtime.getURL(tokenLogoSrc)}
+                src={getImageUrl(tokenLogoSrc)}
                 alt={token.symbol}
               />
             )

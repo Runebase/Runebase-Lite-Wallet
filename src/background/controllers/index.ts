@@ -12,6 +12,7 @@ import SessionController from './sessionController';
 import OnInstallController from './onInstallController';
 import { API_TYPE, MESSAGE_TYPE } from '../../constants';
 import UtilsController from './utilsController';
+import { sendMessage } from '../../popup/abstraction';
 
 export default class RunebaseChromeController {
   public crypto: CryptoController;
@@ -41,26 +42,28 @@ export default class RunebaseChromeController {
     this.onInstall = new OnInstallController(this);
     this.utils = new UtilsController(this);
 
-    chrome.runtime.onMessage.addListener((msg) => {
-      switch (msg.type) {
-      case API_TYPE.OPEN_WALLET_EXTENSION:
-        chrome.windows.create({
-          url: 'chrome-extension://' + chrome.runtime.id + '/popup.html', // Replace with the correct path
-          type: 'popup',    // Type of the window ('normal', 'popup', 'panel', or 'detached_panel')
-          focused: true,    // Whether the new window should be focused
-          incognito: false, // Whether the new window should be in incognito mode
-          width: 350,       // Width of the window in pixels
-          height: 650,      // Height of the window in pixels
-          left: undefined,  // Left position of the window in pixels
-          top: undefined,   // Top position of the window in pixels
-          state: 'normal',  // Initial state of the window ('normal', 'minimized', 'maximized', or 'fullscreen')
-          setSelfAsOpener: false, // Whether the new window should be opened with the current extension as the opener
-          tabId: undefined, // The ID of the tab for which you want to adopt to the new window
-          // Additional options as needed
-        });
-        break;
-      }
-    });
+    if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.id) {
+      chrome.runtime.onMessage.addListener((msg) => {
+        switch (msg.type) {
+        case API_TYPE.OPEN_WALLET_EXTENSION:
+          chrome.windows.create({
+            url: 'chrome-extension://' + chrome.runtime.id + '/popup.html', // Replace with the correct path
+            type: 'popup',    // Type of the window ('normal', 'popup', 'panel', or 'detached_panel')
+            focused: true,    // Whether the new window should be focused
+            incognito: false, // Whether the new window should be in incognito mode
+            width: 350,       // Width of the window in pixels
+            height: 650,      // Height of the window in pixels
+            left: undefined,  // Left position of the window in pixels
+            top: undefined,   // Top position of the window in pixels
+            state: 'normal',  // Initial state of the window ('normal', 'minimized', 'maximized', or 'fullscreen')
+            setSelfAsOpener: false, // Whether the new window should be opened with the current extension as the opener
+            tabId: undefined, // The ID of the tab for which you want to adopt to the new window
+            // Additional options as needed
+          });
+          break;
+        }
+      });
+    }
   }
 
   /*
@@ -79,11 +82,16 @@ export default class RunebaseChromeController {
     this.initialized[name] = true;
 
     if (every(this.initialized)) {
-      chrome.runtime.sendMessage({ type: MESSAGE_TYPE.ROUTE_LOGIN });
+      sendMessage({
+        type: MESSAGE_TYPE.ROUTE_LOGIN
+      }, () => {});
     }
   };
 
   public displayErrorOnPopup = (err: Error)  => {
-    chrome.runtime.sendMessage({ type: MESSAGE_TYPE.UNEXPECTED_ERROR, error: err.message });
+    sendMessage({
+      type: MESSAGE_TYPE.UNEXPECTED_ERROR,
+      error: err.message
+    }, () => {});
   };
 }

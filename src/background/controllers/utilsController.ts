@@ -5,6 +5,7 @@ import { PodSignResponse } from '../../types';
 import runebase from 'runebasejs-lib';
 import secp256k1 from 'secp256k1';
 import createHash from 'create-hash';
+import { addMessageListener, isExtensionEnvironment, sendMessage } from '../../popup/abstraction';
 
 export function sha256(buffer: Buffer) {
   return createHash('sha256')
@@ -22,7 +23,7 @@ export default class UtilsController extends IController {
   constructor(main: RunebaseChromeController) {
     super('utils', main);
 
-    chrome.runtime.onMessage.addListener(this.handleMessage);
+    addMessageListener(this.handleMessage);
     this.initFinished();
   }
 
@@ -62,7 +63,7 @@ export default class UtilsController extends IController {
 
       const { signature, recid } = secp256k1.ecdsaSign(
         hash,
-        keyPair.d.toBuffer()
+        keyPair.d.toBuffer(32)
       );
       const signed = Buffer.concat([
         Buffer.from([recid + (keyPair.compressed ? 31 : 27)]),
@@ -70,7 +71,7 @@ export default class UtilsController extends IController {
       ]);
       const podMessage = `0x${signed.toString('hex')}`;
 
-      const pubKey = secp256k1.publicKeyCreate(keyPair.d.toBuffer());
+      const pubKey = secp256k1.publicKeyCreate(keyPair.d.toBuffer(32));
       const verified = secp256k1.ecdsaVerify(signature, hash, pubKey);
       if (!verified) {
         throw Error('Unable to verify signature');
@@ -124,26 +125,27 @@ export default class UtilsController extends IController {
   private signPodMessage = async (superStakerAddress: string) => {
     const { result } = await this.handleSignPod('', superStakerAddress);
     if (result) {
-      chrome.runtime.sendMessage({
+      sendMessage({
         type: MESSAGE_TYPE.SIGN_POD_RETURN,
         result: result
-      });
+      }, () => {});
     }
   };
 
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/naming-convention
   private handleMessage = (request: any, _: chrome.runtime.MessageSender) => {
+    const requestData = isExtensionEnvironment() ? request : request.data;
     try {
-      switch (request.type) {
+      switch (requestData.type) {
       case MESSAGE_TYPE.SIGN_POD:
-        this.signPodMessage(request.superStakerAddress);
+        this.signPodMessage(requestData.superStakerAddress);
         break;
       case MESSAGE_TYPE.SIGN_POD_EXTERNAL:
-        this.signPodMessageExternal(request.id, request.superStakerAddress);
+        this.signPodMessageExternal(requestData.id, requestData.superStakerAddress);
         break;
       case API_TYPE.SIGN_POD_EXTERNAL_REQUEST:
-        this.handleSignPodRequestExternal(request);
+        this.handleSignPodRequestExternal(requestData);
         break;
       default:
         break;

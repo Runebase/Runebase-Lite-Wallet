@@ -151,3 +151,7 @@ You can connect RunebaseChrome to regtest. You will need to set the following in
 2. `password` + `appSalt` runs through `scrpyt` encryption for ~3 seconds to generate `passwordHash`
 3. Existing account is fetched from storage
 4. `passwordHash` is used to decrypted the `encryptedPrivateKey`. On successful decryption of the wallet, the password is validated.
+
+**Running a WebApp Abstraction**
+1. Navigate to dist folder
+2. start http server `http-server -c-1`

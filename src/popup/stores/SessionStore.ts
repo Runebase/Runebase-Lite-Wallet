@@ -4,6 +4,8 @@ import { isUndefined } from 'lodash';
 
 import { MESSAGE_TYPE, NETWORK_NAMES } from '../../constants';
 import QryNetwork from '../../models/QryNetwork';
+import { addMessageListener, isExtensionEnvironment, sendMessage } from '../abstraction';
+
 
 const INIT_VALUES = {
   networkIndex: 0,
@@ -55,81 +57,57 @@ export default class SessionStore {
 
   constructor() {
     makeObservable(this);
-    chrome.runtime.onMessage.addListener(this.handleMessage);
-
-    console.log('Sending message to get networks');
-    chrome.runtime.sendMessage({ type: MESSAGE_TYPE.GET_NETWORKS }, (response: any) => {
-      console.log('Received networks:', response);
-      this.networks = response;
-    });
-
-    console.log('Sending message to get network index');
-    chrome.runtime.sendMessage({ type: MESSAGE_TYPE.GET_NETWORK_INDEX }, (response: any) => {
-      console.log('Received network index:', response);
-      if (response !== undefined) {
-        this.networkIndex = response;
-      }
-    });
+    addMessageListener(this.handleMessage);
+    sendMessage({ type: MESSAGE_TYPE.GET_NETWORKS }, () => {});
+    sendMessage({ type: MESSAGE_TYPE.GET_NETWORK_INDEX }, () => {});
   }
 
   @action public init = () => {
-    console.log('Initializing SessionStore');
-
-    console.log('Sending message to get logged-in account name');
-    chrome.runtime.sendMessage({ type: MESSAGE_TYPE.GET_LOGGED_IN_ACCOUNT_NAME }, (response: any) => {
-      console.log('Received logged-in account name:', response);
-      this.setLoggedInAccountName(response);
-    });
-
-    console.log('Sending message to get blockchain info');
-    chrome.runtime.sendMessage({ type: MESSAGE_TYPE.GET_BLOCKCHAIN_INFO }, (response: any) => {
-      console.log('Received blockchain info:', response);
-      this.setBlockchainInfo(response);
-    });
-
-    console.log('Sending message to get wallet info');
-    chrome.runtime.sendMessage({ type: MESSAGE_TYPE.GET_WALLET_INFO }, (response: any) => {
-      console.log('Received wallet info:', response);
-      this.setWalletInfo(response);
-    });
-
-    console.log('Sending message to get wallet delegation info');
-    chrome.runtime.sendMessage({ type: MESSAGE_TYPE.GET_DELEGATION_INFO });
-
-    console.log('Sending message to get RUNEBASE USD');
-    chrome.runtime.sendMessage({ type: MESSAGE_TYPE.GET_RUNEBASE_USD }, (response: any) => {
-      console.log('Received RUNEBASE USD:', response);
-      this.setRunebaseUSD(response);
-    });
+    sendMessage({ type: MESSAGE_TYPE.GET_LOGGED_IN_ACCOUNT_NAME }, () => {});
+    sendMessage({ type: MESSAGE_TYPE.GET_BLOCKCHAIN_INFO }, () => {});
+    sendMessage({ type: MESSAGE_TYPE.GET_WALLET_INFO }, () => {});
+    sendMessage({  type: MESSAGE_TYPE.GET_DELEGATION_INFO }, () => {});
+    sendMessage({ type: MESSAGE_TYPE.GET_RUNEBASE_USD }, () => {});
   };
 
   @action private handleMessage = (request: any) => {
-    console.log('Session Store Received message:', request);
-    switch (request.type) {
+    const requestData = isExtensionEnvironment() ? request : request.data;
+    console.log('sessionstore received request: ', requestData);
+    switch (requestData.type) {
+    case MESSAGE_TYPE.GET_LOGGED_IN_ACCOUNT_NAME_RETURN:
+      this.setLoggedInAccountName(requestData.accountName);
+      break;
+    case MESSAGE_TYPE.GET_NETWORK_INDEX_RETURN:
+      this.setNetworkIndex(requestData.networkIndex);
+      break;
+    case MESSAGE_TYPE.GET_NETWORKS_RETURN:
+      console.log('setting networks: ', requestData.networks);
+      this.networks = requestData.networks;
+      break;
     case MESSAGE_TYPE.CHANGE_NETWORK_SUCCESS:
-      console.log('Changing network success. New network index:', request.networkIndex);
-      this.setNetworkIndex(request.networkIndex);
+      console.log('Changing network success. New network index:', requestData.networkIndex);
+      this.setNetworkIndex(requestData.networkIndex);
       break;
     case MESSAGE_TYPE.ACCOUNT_LOGIN_SUCCESS:
       console.log('Account login success. Initializing SessionStore');
       this.init();
       break;
     case MESSAGE_TYPE.GET_WALLET_INFO_RETURN:
-      console.log('Received wallet info (return):', request.info);
-      this.setWalletInfo(request.info);
+      console.log('Received wallet info (return):', requestData.info);
+      this.setWalletInfo(requestData.info);
       break;
     case MESSAGE_TYPE.GET_DELEGATION_INFO_RETURN:
-      console.log(request);
-      console.log('Received wallet delegation info (return):', request.delegationInfo);
-      this.setDelegationInfo(request.delegationInfo);
+      console.log(requestData);
+      console.log('Received wallet delegation info (return):', requestData.delegationInfo);
+      this.setDelegationInfo(requestData.delegationInfo);
       break;
     case MESSAGE_TYPE.GET_BLOCKCHAIN_INFO_RETURN:
-      console.log('Received blockchain info (return):', request.blockchainInfo);
-      this.setBlockchainInfo(request.blockchainInfo);
+      console.log('Received blockchain info (return):', requestData.blockchainInfo);
+      this.setBlockchainInfo(requestData.blockchainInfo);
       break;
     case MESSAGE_TYPE.GET_RUNEBASE_USD_RETURN:
-      console.log('Received RUNEBASE USD (return):', request.runebaseUSD);
-      this.setRunebaseUSD(request.runebaseUSD);
+      console.log('Received RUNEBASE USD (return):', requestData.runebaseUSD);
+      this.setRunebaseUSD(requestData.runebaseUSD);
       break;
     default:
       break;

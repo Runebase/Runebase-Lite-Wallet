@@ -1,7 +1,8 @@
-import { observable, makeObservable } from 'mobx';
+import { observable, makeObservable, action } from 'mobx';
 
 import { INTERVAL_NAMES, MESSAGE_TYPE } from '../../constants';
 import { SessionLogoutInterval } from '../../models/SessionLogoutInterval';
+import { addMessageListener, isExtensionEnvironment, sendMessage } from '../abstraction';
 
 const INIT_VALUES = {
   sessionLogoutInterval: 0,
@@ -14,7 +15,8 @@ export default class SettingsStore {
 
   constructor() {
     makeObservable(this);
-    chrome.runtime.sendMessage({ type: MESSAGE_TYPE.GET_SESSION_LOGOUT_INTERVAL }, (response: any) => {
+    addMessageListener(this.handleMessage);
+    sendMessage({ type: MESSAGE_TYPE.GET_SESSION_LOGOUT_INTERVAL }, (response: any) => {
       this.sessionLogoutInterval = response;
     });
 
@@ -30,9 +32,21 @@ export default class SettingsStore {
 
   public changeSessionLogoutInterval = (sliInterval: number) => {
     this.sessionLogoutInterval = sliInterval;
-    chrome.runtime.sendMessage({
+    sendMessage({
       type: MESSAGE_TYPE.SAVE_SESSION_LOGOUT_INTERVAL,
       value: this.sessionLogoutInterval,
-    });
+    }, () => {});
+  };
+
+  @action private handleMessage = (request: any) => {
+    const requestData = isExtensionEnvironment() ? request : request.data;
+    switch (requestData.type) {
+    case MESSAGE_TYPE.GET_SESSION_LOGOUT_INTERVAL_RETURN:
+      this.sessionLogoutInterval = requestData.sessionLogoutInterval;
+      break;
+
+    default:
+      break;
+    }
   };
 }

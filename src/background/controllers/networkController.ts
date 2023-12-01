@@ -1,9 +1,9 @@
 import { networks, Network } from 'runebasejs-wallet';
-
 import RunebaseChromeController from '.';
 import IController from './iController';
 import { MESSAGE_TYPE, STORAGE, NETWORK_NAMES } from '../../constants';
 import QryNetwork from '../../models/QryNetwork';
+import { addMessageListener, getStorageValue, isExtensionEnvironment, sendMessage, setStorageValue } from '../../popup/abstraction';
 
 export default class NetworkController extends IController {
   public static NETWORKS: QryNetwork[] = [
@@ -22,6 +22,8 @@ export default class NetworkController extends IController {
     return NetworkController.NETWORKS[this.networkIndex].explorerUrl;
   }
   public get networkName(): string {
+    console.log('getting network name');
+    console.log(this.networkIndex);
     return NetworkController.NETWORKS[this.networkIndex].name;
   }
 
@@ -30,48 +32,67 @@ export default class NetworkController extends IController {
   constructor(main: RunebaseChromeController) {
     super('network', main);
 
-    chrome.runtime.onMessage.addListener(this.handleMessage);
-    chrome.storage.local.get([STORAGE.NETWORK_INDEX], ({ networkIndex }: any) => {
-      if (networkIndex !== undefined) {
-        this.networkIndex = networkIndex;
-        chrome.runtime.sendMessage({ type: MESSAGE_TYPE.CHANGE_NETWORK_SUCCESS, networkIndex: this.networkIndex });
-      }
+    addMessageListener(this.handleMessage);
 
+    const key = STORAGE.NETWORK_INDEX;
+    getStorageValue(key).then((networkIndex) => {
+      console.log('getting network index from store:', networkIndex);
+      if (networkIndex) {
+        console.log('FOUND NETWORKINDEX IN LOCAL STORE: ', networkIndex);
+        this.networkIndex = networkIndex;
+        sendMessage({
+          type: MESSAGE_TYPE.CHANGE_NETWORK_SUCCESS,
+          networkIndex: this.networkIndex,
+        }, () => {});
+      }
       this.initFinished();
     });
+
   }
 
   /*
   * Changes the networkIndex and logs out of the loggedInAccount.
   * @param networkIndex The index of the network to change to.
   */
-  public changeNetwork = (networkIndex: number) => {
+  public changeNetwork = async (networkIndex: number) => {
+    console.log('CHANGING NETWORK TO ID:' , networkIndex);
     if (this.networkIndex !== networkIndex) {
       this.networkIndex = networkIndex;
-      chrome.storage.local.set({
-        [STORAGE.NETWORK_INDEX]: networkIndex,
-      }, () => console.log('networkIndex changed', networkIndex));
 
-      chrome.runtime.sendMessage({ type: MESSAGE_TYPE.CHANGE_NETWORK_SUCCESS, networkIndex });
+      await setStorageValue(STORAGE.NETWORK_INDEX, networkIndex);
+      console.log('networkIndex changed', networkIndex);
+
+      sendMessage({
+        type: MESSAGE_TYPE.CHANGE_NETWORK_SUCCESS,
+        networkIndex,
+      }, () => {});
+
       this.main.account.logoutAccount();
     }
   };
 
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  private handleMessage = (request: any, _: chrome.runtime.MessageSender, sendResponse: (response: any) => void) => {
+  private handleMessage = (request: any, _?: chrome.runtime.MessageSender, sendResponse?: (response: any) => void) => {
+    const requestData = isExtensionEnvironment() ? request : request.data;
     try {
-      switch (request.type) {
+      console.log('network received request handleMessage: ', requestData);
+      switch (requestData.type) {
       case MESSAGE_TYPE.CHANGE_NETWORK:
-        this.changeNetwork(request.networkIndex);
+        this.changeNetwork(requestData.networkIndex);
         break;
       case MESSAGE_TYPE.GET_NETWORKS:
-        sendResponse(NetworkController.NETWORKS);
+        sendMessage({
+          type: MESSAGE_TYPE.GET_NETWORKS_RETURN,
+          networks: NetworkController.NETWORKS,
+        }, () => {});
         break;
       case MESSAGE_TYPE.GET_NETWORK_INDEX:
-        sendResponse(this.networkIndex);
+        sendMessage({
+          type: MESSAGE_TYPE.GET_NETWORK_INDEX_RETURN,
+          networkIndex: this.networkIndex,
+        }, () => {});
         break;
       case MESSAGE_TYPE.GET_NETWORK_EXPLORER_URL:
-        sendResponse(this.explorerUrl);
+        sendResponse && sendResponse(this.explorerUrl);
         break;
       default:
         break;

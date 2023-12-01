@@ -4,6 +4,7 @@ import { isEmpty } from 'lodash';
 
 import AppStore from './AppStore';
 import { MESSAGE_TYPE, RESPONSE_TYPE } from '../../constants';
+import { addMessageListener, isExtensionEnvironment, sendMessage } from '../abstraction';
 
 const INIT_VALUES = {
   hasAccounts: false,
@@ -32,17 +33,12 @@ export default class LoginStore {
   constructor(app: AppStore) {
     makeObservable(this);
     this.app = app;
+    addMessageListener(this.handleMessage);
+    sendMessage({ type: MESSAGE_TYPE.HAS_ACCOUNTS }, () => {});
 
-    // Check if there are accounts
-    chrome.runtime.sendMessage({ type: MESSAGE_TYPE.HAS_ACCOUNTS }, action((response: any) => {
-      console.log('Received hasAccounts response:', response);
-      runInAction(() => {
-        this.hasAccounts = response;
-      });
-    }));
 
     // Attempt to restore session
-    chrome.runtime.sendMessage({ type: MESSAGE_TYPE.RESTORE_SESSION }, action((response: any) => {
+    sendMessage({ type: MESSAGE_TYPE.RESTORE_SESSION }, action((response: any) => {
       console.log('Received restore session response:', response);
 
       if (response === RESPONSE_TYPE.RESTORING_SESSION) {
@@ -53,7 +49,7 @@ export default class LoginStore {
     }));
   }
 
-  @action  public init = () => {
+  @action public init = () => {
     console.log('LoginStore init method called');
     runInAction(() => {
       this.password = INIT_VALUES.password;
@@ -61,13 +57,13 @@ export default class LoginStore {
     });
   };
 
-  @action  public login = () => {
+  @action public login = () => {
     if (this.error === false) {
       console.log('Attempting login...');
       runInAction(() => {
         this.app.routerStore.push('/loading');
       });
-      chrome.runtime.sendMessage({ type: MESSAGE_TYPE.LOGIN, password: this.password, algorithm: this.algorithm });
+      sendMessage({ type: MESSAGE_TYPE.LOGIN, password: this.password, algorithm: this.algorithm }, () => {});
     }
   };
 
@@ -77,5 +73,19 @@ export default class LoginStore {
       error = 'Passwords do not match.';
     }
     return error;
+  };
+  @action private handleMessage = (request: any) => {
+    const requestData = isExtensionEnvironment() ? request : request.data;
+    switch (requestData.type) {
+    case MESSAGE_TYPE.HAS_ACCOUNTS_RETURN:
+      this.hasAccounts = requestData.hasAccounts;
+      break;
+    case MESSAGE_TYPE.RESTORING_SESSION_RETURN:
+      this.app.routerStore.push('/loading');
+      break;
+
+    default:
+      break;
+    }
   };
 }

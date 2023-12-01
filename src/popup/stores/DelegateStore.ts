@@ -4,6 +4,7 @@ import AppStore from './AppStore';
 import { PodReturnResult, SuperStaker, SuperStakerArray } from '../../types';
 import { RunebaseInfo } from 'runebasejs-wallet';
 import { isValidDelegationFee, isValidGasLimit, isValidGasPrice } from '../../utils';
+import { addMessageListener, sendMessage } from '../abstraction';
 
 
 
@@ -37,7 +38,7 @@ export default class DelegateStore {
   constructor(app: AppStore) {
     makeObservable(this);
     this.app = app;
-    chrome.runtime.onMessage.addListener(this.handleMessage);
+    addMessageListener(this.handleMessage);
   }
 
   @computed public get gasLimitFieldError(): string | undefined {
@@ -61,13 +62,13 @@ export default class DelegateStore {
   };
 
   @action public getSuperstakers = () => {
-    chrome.runtime.sendMessage({ type: MESSAGE_TYPE.GET_SUPERSTAKERS });
+    sendMessage({ type: MESSAGE_TYPE.GET_SUPERSTAKERS }, () => {});
   };
 
   @action public getSuperstaker = (
     address: string,
   ) => {
-    chrome.runtime.sendMessage({ type: MESSAGE_TYPE.GET_SUPERSTAKER, address: address, });
+    sendMessage({ type: MESSAGE_TYPE.GET_SUPERSTAKER, address: address, }, () => {});
   };
 
   @action public setSelectedSuperStaker = (superstaker?: SuperStaker) => {
@@ -76,19 +77,19 @@ export default class DelegateStore {
 
   @action public getSelectedSuperstakerDelegations = () => {
     if (this.selectedSuperstaker) {
-      chrome.runtime.sendMessage({
+      sendMessage({
         type: MESSAGE_TYPE.GET_SUPERSTAKER_DELEGATIONS,
         address: this.selectedSuperstaker.address,
-      });
+      }, () => {});
     }
   };
 
   @action public routeToAddDelegationConfirm = () => {
     if (this.selectedSuperstaker) {
-      chrome.runtime.sendMessage({
+      sendMessage({
         type: MESSAGE_TYPE.SIGN_POD,
         superStakerAddress: this.selectedSuperstaker.address,
-      });
+      }, () => {});
       this.app.routerStore.push('/add-delegation-confirm');
     }
   };
@@ -97,21 +98,21 @@ export default class DelegateStore {
   };
 
   @action public sendDelegationConfirm = () => {
-    chrome.runtime.sendMessage({
+    sendMessage({
       type: MESSAGE_TYPE.SEND_DELEGATION_CONFIRM,
       signedPoD: this.signedPoD,
       fee: this.delegationFee,
       gasLimit: Number(this.gasLimit),
       gasPrice: Number(this.gasPrice * 1e-8),
-    });
+    }, () => {});
   };
 
   @action public sendRemoveDelegationConfirm = () => {
-    chrome.runtime.sendMessage({
+    sendMessage({
       type: MESSAGE_TYPE.SEND_REMOVE_DELEGATION_CONFIRM,
       gasLimit: Number(this.gasLimit),
       gasPrice: Number(this.gasPrice * 1e-8),
-    });
+    }, () => {});
   };
 
   @action private setSuperStakers = (

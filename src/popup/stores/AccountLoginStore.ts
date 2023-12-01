@@ -4,20 +4,24 @@ import { isEmpty } from 'lodash';
 import AppStore from './AppStore';
 import { MESSAGE_TYPE } from '../../constants';
 import Account from '../../models/Account';
+import { addMessageListener, isExtensionEnvironment, sendMessage } from '../abstraction';
 
 const INIT_VALUES = {
   selectedWalletName: '',
+  validatesNetwork: false,
 };
 
 export default class AccountLoginStore {
   @observable public selectedWalletName: string = INIT_VALUES.selectedWalletName;
   @observable public accounts: Account[] = [];
+  @observable public validatesNetwork: boolean = INIT_VALUES.validatesNetwork;
 
   private app: AppStore;
   private selectedWalletNetworkIndex: number;
 
   constructor(app: AppStore) {
     makeObservable(this);
+    addMessageListener(this.handleMessage);
     this.app = app;
     this.selectedWalletNetworkIndex = this.app.sessionStore.networkIndex;
 
@@ -37,22 +41,10 @@ export default class AccountLoginStore {
    * where the displayed accounts matches the network. This is not desirable when
    * creating the first account for a network.
    */
-  @action
-  public getAccounts = (validateNetwork: boolean = false) => {
-      console.log('Getting accounts');
-      chrome.runtime.sendMessage({ type: MESSAGE_TYPE.GET_ACCOUNTS }, (response: any) => {
-        if (!isEmpty(response)) {
-          console.log('Received accounts:', response);
-          this.accounts = response;
-          this.setSelectedWallet();
-        } else {
-          if (validateNetwork) {
-            console.log('No accounts received. Validating network.');
-            this.validateNetwork();
-          }
-        }
-      });
-    };
+  @action public getAccounts = (validatesNetwork: boolean = false) => {
+    this.validatesNetwork = validatesNetwork;
+    sendMessage({ type: MESSAGE_TYPE.GET_ACCOUNTS }, () => {});
+  };
 
   /**
    * In some rare instances, the user can navigate to the AccountLogin page while on a
@@ -66,40 +58,55 @@ export default class AccountLoginStore {
    * changing the network to that of the selectedWallet.
    */
   public validateNetwork = () => {
-    console.log('Validating network');
     if (this.app.sessionStore.networkIndex !== this.selectedWalletNetworkIndex) {
       this.app.navBarStore.changeNetwork(this.selectedWalletNetworkIndex);
     }
   };
 
-  @action
-  public setSelectedWallet = () => {
-      console.log('Setting selected wallet');
-      if (!isEmpty(this.accounts)) {
-        this.selectedWalletName = this.accounts[0].name;
-        this.selectedWalletNetworkIndex = this.app.sessionStore.networkIndex;
+  @action public setSelectedWallet = () => {
+    if (!isEmpty(this.accounts)) {
+      this.selectedWalletName = this.accounts[0].name;
+      this.selectedWalletNetworkIndex = this.app.sessionStore.networkIndex;
+    }
+  };
+
+  @action public loginAccount = () => {
+    console.log('Logging in account:', this.selectedWalletName);
+    this.app.routerStore.push('/loading');
+    sendMessage({
+      type: MESSAGE_TYPE.ACCOUNT_LOGIN,
+      selectedWalletName: this.selectedWalletName,
+    }, () => {});
+  };
+
+  @action public routeToCreateWallet = () => {
+    console.log('Routing to create wallet');
+    this.app.routerStore.push('/create-wallet');
+  };
+
+  @action public reset = () => {
+    console.log('Resetting account login store');
+    Object.assign(this, INIT_VALUES);
+  };
+  @action private handleMessage = (request: any) => {
+    const requestData = isExtensionEnvironment() ? request : request.data;
+    switch (requestData.type) {
+    case MESSAGE_TYPE.GET_ACCOUNTS_RETURN:
+      this.accounts = requestData.accounts;
+      if (!isEmpty(requestData.accounts)) {
+        console.log('Received accounts:', requestData.accounts);
+        this.accounts = requestData.accounts;
+        this.setSelectedWallet();
+      } else {
+        if (this.validatesNetwork) {
+          console.log('No accounts received. Validating network.');
+          this.validateNetwork();
+        }
       }
-    };
+      break;
 
-  @action
-  public loginAccount = () => {
-      console.log('Logging in account:', this.selectedWalletName);
-      this.app.routerStore.push('/loading');
-      chrome.runtime.sendMessage({
-        type: MESSAGE_TYPE.ACCOUNT_LOGIN,
-        selectedWalletName: this.selectedWalletName,
-      });
-    };
-
-  @action
-  public routeToCreateWallet = () => {
-      console.log('Routing to create wallet');
-      this.app.routerStore.push('/create-wallet');
-    };
-
-  @action
-  public reset = () => {
-      console.log('Resetting account login store');
-      Object.assign(this, INIT_VALUES);
-    };
+    default:
+      break;
+    }
+  };
 }

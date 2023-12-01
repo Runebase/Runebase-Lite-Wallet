@@ -6,6 +6,7 @@ import RunebaseChromeController from '.';
 import IController from './iController';
 import { MESSAGE_TYPE } from '../../constants';
 import Transaction, { Qrc20TokenTransfer } from '../../models/Transaction';
+import { addMessageListener, isExtensionEnvironment, sendMessage } from '../../popup/abstraction';
 
 export default class TransactionController extends IController {
   private static GET_TX_INTERVAL_MS: number = 60000;
@@ -23,7 +24,7 @@ export default class TransactionController extends IController {
   constructor(main: RunebaseChromeController) {
     super('transaction', main);
 
-    chrome.runtime.onMessage.addListener(this.handleMessage);
+    addMessageListener(this.handleMessage);
     this.initFinished();
   }
   public addTransaction = (transaction: Transaction) => {
@@ -177,16 +178,17 @@ export default class TransactionController extends IController {
   * Sends the message after fetching transactions.
   */
   private sendTransactionsMessage = () => {
-    chrome.runtime.sendMessage({
+    sendMessage({
       type: MESSAGE_TYPE.GET_TXS_RETURN,
       transactions: this.transactions,
       hasMore: this.hasMore,
-    });
+    }, () => {});
   };
 
   private handleMessage = (request: any) => {
+    const requestData = isExtensionEnvironment() ? request : request.data;
     try {
-      switch (request.type) {
+      switch (requestData.type) {
       case MESSAGE_TYPE.START_TX_POLLING:
         this.startPolling();
         break;

@@ -3,6 +3,7 @@ import IController from './iController';
 import { MESSAGE_TYPE } from '../../constants';
 import BigNumber from 'bignumber.js';
 import { SuperStaker, SuperStakerArray } from '../../types';
+import { addMessageListener, isExtensionEnvironment, sendMessage } from '../../popup/abstraction';
 
 const INIT_VALUES = {
   getPriceInterval: undefined,
@@ -17,7 +18,7 @@ export default class ExternalController extends IController {
 
   constructor(main: RunebaseChromeController) {
     super('external', main);
-    chrome.runtime.onMessage.addListener(this.handleMessage);
+    addMessageListener(this.handleMessage);
     this.initFinished();
   }
 
@@ -70,10 +71,10 @@ export default class ExternalController extends IController {
         );
         this.main.account.loggedInAccount.wallet.runebaseUSD = runebaseUSD;
 
-        chrome.runtime.sendMessage({
+        sendMessage({
           type: MESSAGE_TYPE.GET_RUNEBASE_USD_RETURN,
           runebaseUSD,
-        });
+        }, () => {});
       }
     } catch (err) {
       console.log(err);
@@ -84,10 +85,10 @@ export default class ExternalController extends IController {
     try {
       const response = await fetch('https://discord.runebase.io/api/super-stakers');
       const jsonObj = await response.json();
-      chrome.runtime.sendMessage({
+      sendMessage({
         type: MESSAGE_TYPE.GET_SUPERSTAKERS_RETURN,
         superstakers: jsonObj.result as SuperStakerArray,
-      });
+      }, () => {});
     } catch (err) {
       console.log(err);
     }
@@ -99,10 +100,10 @@ export default class ExternalController extends IController {
     try {
       const response = await fetch(`https://discord.runebase.io/api/super-staker/${address}`);
       const jsonObj = await response.json();
-      chrome.runtime.sendMessage({
+      sendMessage({
         type: MESSAGE_TYPE.GET_SUPERSTAKER_RETURN,
         superstaker: jsonObj.result as SuperStaker,
-      });
+      }, () => {});
     } catch (err) {
       console.log(err);
     }
@@ -111,13 +112,14 @@ export default class ExternalController extends IController {
   private handleMessage = async (
     request: any
   ) => {
+    const requestData = isExtensionEnvironment() ? request : request.data;
     try {
-      switch (request.type) {
+      switch (requestData.type) {
       case MESSAGE_TYPE.GET_SUPERSTAKERS:
         this.getSuperstakers();
         break;
       case MESSAGE_TYPE.GET_SUPERSTAKER:
-        this.getSuperstaker(request.address);
+        this.getSuperstaker(requestData.address);
         break;
       default:
         break;

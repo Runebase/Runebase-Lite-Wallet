@@ -4,12 +4,13 @@ import IController from './iController';
 import { MESSAGE_TYPE, RPC_METHOD } from '../../constants';
 import { IRPCCallResponse } from '../../types';
 import Config from '../../config';
+import { addMessageListener, isExtensionEnvironment } from '../../popup/abstraction';
 
 export default class RPCController extends IController {
   constructor(main: RunebaseChromeController) {
     super('rpc', main);
 
-    chrome.runtime.onMessage.addListener(this.handleMessage);
+    addMessageListener(this.handleMessage);
     this.initFinished();
   }
 
@@ -153,16 +154,17 @@ export default class RPCController extends IController {
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/naming-convention
   private handleMessage = (request: any, _: chrome.runtime.MessageSender) => {
+    const requestData = isExtensionEnvironment() ? request : request.data;
     try {
-      switch (request.type) {
+      switch (requestData.type) {
       case MESSAGE_TYPE.EXTERNAL_RAW_CALL:
-        this.externalRawCall(request.id, request.method, request.args);
+        this.externalRawCall(requestData.id, requestData.method, requestData.args);
         break;
       case MESSAGE_TYPE.EXTERNAL_SEND_TO_CONTRACT:
-        this.externalSendToContract(request.id, request.args);
+        this.externalSendToContract(requestData.id, requestData.args);
         break;
       case MESSAGE_TYPE.EXTERNAL_CALL_CONTRACT:
-        this.externalCallContract(request.id, request.args);
+        this.externalCallContract(requestData.id, requestData.args);
         break;
       default:
         break;
