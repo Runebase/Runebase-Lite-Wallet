@@ -156,25 +156,34 @@ You can connect RunebaseChrome to regtest. You will need to set the following in
 1. Navigate to dist folder
 2. start http server `http-server -c-1`
 
-# Cordova smartphone builds
-# Step 1: Install cordova
+## Cordova Smartphone Builds
+### Step 1: Install Cordova
+```bash
 npm install cordova -g
+```
 
-# Step 2: Add platforms
+### Step 2: Add platforms
+```bash
 cordova platform add android
 cordova platform add ios
-# Add other platforms as needed
+```
+Add other platforms as needed
 
-# Step 4: Install plugins
+### Step 3: Install plugins
+```bash
 cordova plugin add cordova-plugin-camera
-# Add other plugins as needed
+```
+Add other plugins as needed
 
-# Step 5: Build the project
+### Step 4: Build the project
+```bash
 cordova build android
 cordova build ios
-# Build other platforms as needed
+```
 
-# Step 6: Run on emulator or device
+### Step 5: Run on emulator or device
+```bash
 cordova run android
 cordova run ios
-# Run on other platforms as needed
+```
+Run on other platforms as needed
