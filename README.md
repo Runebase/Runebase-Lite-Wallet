@@ -187,3 +187,14 @@ cordova run android
 cordova run ios
 ```
 Run on other platforms as needed
+
+### Emulator android studio
+```bash
+cd /home/bago/runebasechromewallet2/cordova/platforms/android/app/build/outputs/apk/debug/
+adb install app-debug.apk
+```
+
+### trouble-shooting
+```bash
+sdkmanager "build-tools;33.0.2"
+```
