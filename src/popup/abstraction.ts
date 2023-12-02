@@ -159,7 +159,7 @@ export class WebExtensionInfoProvider implements ExtensionInfoProvider {
   }
 
   getVersion(): string {
-    return '1.0.0'; // Provide a default version for the web
+    return String(process.env.APP_VERSION); // Provide a default version for the web
   }
 }
 

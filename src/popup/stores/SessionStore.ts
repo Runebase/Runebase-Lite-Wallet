@@ -66,13 +66,12 @@ export default class SessionStore {
     sendMessage({ type: MESSAGE_TYPE.GET_LOGGED_IN_ACCOUNT_NAME }, () => {});
     sendMessage({ type: MESSAGE_TYPE.GET_BLOCKCHAIN_INFO }, () => {});
     sendMessage({ type: MESSAGE_TYPE.GET_WALLET_INFO }, () => {});
-    sendMessage({  type: MESSAGE_TYPE.GET_DELEGATION_INFO }, () => {});
+    sendMessage({ type: MESSAGE_TYPE.GET_DELEGATION_INFO }, () => {});
     sendMessage({ type: MESSAGE_TYPE.GET_RUNEBASE_USD }, () => {});
   };
 
   @action private handleMessage = (request: any) => {
     const requestData = isExtensionEnvironment() ? request : request.data;
-    console.log('sessionstore received request: ', requestData);
     switch (requestData.type) {
     case MESSAGE_TYPE.GET_LOGGED_IN_ACCOUNT_NAME_RETURN:
       this.setLoggedInAccountName(requestData.accountName);
@@ -97,7 +96,6 @@ export default class SessionStore {
       this.setWalletInfo(requestData.info);
       break;
     case MESSAGE_TYPE.GET_DELEGATION_INFO_RETURN:
-      console.log(requestData);
       console.log('Received wallet delegation info (return):', requestData.delegationInfo);
       this.setDelegationInfo(requestData.delegationInfo);
       break;

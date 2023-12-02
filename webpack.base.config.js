@@ -117,5 +117,8 @@ module.exports = {
         { from: 'static', to: './' },
       ],
     }),
+    new webpack.DefinePlugin({
+      'process.env.APP_VERSION': JSON.stringify(require('./package.json').version),
+    }),
   ],
 };

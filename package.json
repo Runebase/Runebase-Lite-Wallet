@@ -1,5 +1,6 @@
 {
   "name": "Runebase-Chrome-Wallet",
+  "version": "1.5.1",
   "private": true,
   "scripts": {
     "clean": "rm -rf dist",
@@ -32,7 +33,7 @@
     "@types/classnames": "^2.2.4",
     "@types/create-hash": "^1.2.6",
     "@types/prop-types": "^15.7.11",
-    "@types/react": "^18.2.40",
+    "@types/react": "^18.2.41",
     "@types/react-dom": "^18.2.17",
     "@types/react-router-dom": "^5.3.3",
     "@typescript-eslint/eslint-plugin": "^6.13.1",
@@ -41,7 +42,7 @@
     "copy-webpack-plugin": "^11.0.0",
     "css-loader": "^6.8.1",
     "css-minimizer-webpack-plugin": "^5.0.1",
-    "eslint": "^8.54.0",
+    "eslint": "^8.55.0",
     "eslint-webpack-plugin": "^4.0.1",
     "husky": "^8.0.3",
     "lint-staged": "^15.1.0",

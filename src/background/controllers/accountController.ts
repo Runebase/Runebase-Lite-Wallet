@@ -739,7 +739,7 @@ export default class AccountController extends IController {
       case MESSAGE_TYPE.GET_WALLET_INFO:
         console.log('Getting wallet info');
         sendMessage({
-          type: MESSAGE_TYPE.GET_BLOCKCHAIN_INFO_RETURN,
+          type: MESSAGE_TYPE.GET_WALLET_INFO_RETURN,
           info: this.loggedInAccount && this.loggedInAccount.wallet
             ? this.loggedInAccount.wallet.info : undefined,
         }, () => {});
