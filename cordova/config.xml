@@ -1,11 +1,16 @@
 <?xml version='1.0' encoding='utf-8'?>
 <widget id="io.runebase.runebasechromewallet" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
-    <name>RunebaseChromeWallet</name>
-    <description>Sample Apache Cordova App</description>
-    <author email="dev@cordova.apache.org" href="https://cordova.apache.org">
-        Apache Cordova Team
+    <name>Runebase-Chrome-Wallet</name>
+    <description>An abstraction of the Runebase Chrome Wallet</description>
+    <author email="support@runebase.io" href="https://www.runebase.io">
+        Bago
     </author>
     <content src="popup.html" />
     <allow-intent href="http://*/*" />
     <allow-intent href="https://*/*" />
+    <icon src="resources/icons/logo-main-32.png" density="ldpi" />
+    <icon src="resources/icons/logo-main-64.png" density="mdpi" />
+    <icon src="resources/icons/logo-main-128.png" density="hdpi" />
+    <icon src="resources/icons/logo-main-144.png" density="xhdpi" />
+    <icon src="resources/icons/logo-main-192.png" density="xxhdpi" />
 </widget>

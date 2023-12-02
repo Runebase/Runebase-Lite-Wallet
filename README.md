@@ -198,3 +198,12 @@ adb install app-debug.apk
 ```bash
 sdkmanager "build-tools;33.0.2"
 ```
+
+### Updating icons & splash scress
+```bash
+# Install cordova-res globally if you haven't already
+npm install -g cordova-res
+
+# Run cordova-res in the cordova directory to generate icons and splash screens
+cordova-res
+```
