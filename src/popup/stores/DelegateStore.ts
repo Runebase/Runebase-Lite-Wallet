@@ -3,7 +3,7 @@ import { MESSAGE_TYPE } from '../../constants';
 import AppStore from './AppStore';
 import { PodReturnResult, SuperStaker, SuperStakerArray } from '../../types';
 import { RunebaseInfo } from 'runebasejs-wallet';
-import { isValidDelegationFee, isValidGasLimit, isValidGasPrice } from '../../utils';
+import { isValidDelegationFee, isValidGasLimit, isValidGasPrice, parseJsonOrFallback } from '../../utils';
 import { addMessageListener, isExtensionEnvironment, sendMessage } from '../abstraction';
 
 
@@ -98,9 +98,10 @@ export default class DelegateStore {
   };
 
   @action public sendDelegationConfirm = () => {
+    const stringifiedSignedPoD = JSON.stringify(this.signedPoD); // Stringify the signedPoD
     sendMessage({
       type: MESSAGE_TYPE.SEND_DELEGATION_CONFIRM,
-      signedPoD: this.signedPoD,
+      signedPoD: stringifiedSignedPoD,
       fee: this.delegationFee,
       gasLimit: Number(this.gasLimit),
       gasPrice: Number(this.gasPrice * 1e-8),
@@ -158,8 +159,8 @@ export default class DelegateStore {
       this.setSuperStakerDelegations(requestData.superstakerDelegations);
       break;
     case MESSAGE_TYPE.SIGN_POD_RETURN:
-      console.log('SIGN_POD_RETURN: ', requestData);
-      this.setProofOfDelegationMessage(requestData.result);
+      console.log('SIGN_POD_RETURN: ', parseJsonOrFallback(requestData));
+      this.setProofOfDelegationMessage(parseJsonOrFallback(requestData.result));
       break;
     case MESSAGE_TYPE.SEND_DELEGATION_CONFIRM_SUCCESS:
       console.log('SEND_DELEGATION_CONFIRM_SUCCESS:', requestData);

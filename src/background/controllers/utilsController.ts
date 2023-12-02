@@ -123,13 +123,12 @@ export default class UtilsController extends IController {
   };
 
   private signPodMessage = async (superStakerAddress: string) => {
-    const { result } = await this.handleSignPod('', superStakerAddress);
-    if (result) {
-      sendMessage({
-        type: MESSAGE_TYPE.SIGN_POD_RETURN,
-        result: result
-      }, () => {});
-    }
+    const { result, error } = await this.handleSignPod('', superStakerAddress);
+    sendMessage({
+      type: MESSAGE_TYPE.SIGN_POD_RETURN,
+      result: JSON.stringify(result),
+      error: error,
+    }, () => {});
   };
 
 

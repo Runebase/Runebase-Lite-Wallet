@@ -14,7 +14,7 @@ import Transaction from '../../models/Transaction';
 import moment from 'moment';
 import BigNumber from 'bignumber.js';
 import { PodReturnResult } from '../../types';
-import { generateRequestId } from '../../utils';
+import { generateRequestId, parseJsonOrFallback } from '../../utils';
 import abi from 'ethjs-abi';
 import { addMessageListener, getMultipleStorageValues, isExtensionEnvironment, sendMessage, setStorageValue } from '../../popup/abstraction';
 
@@ -688,7 +688,12 @@ export default class AccountController extends IController {
         break;
       case MESSAGE_TYPE.SEND_DELEGATION_CONFIRM:
         console.log(`sendDelegationConfirm: ${JSON.stringify(request)}`);
-        this.sendDelegationConfirm(requestData.signedPoD, requestData.fee, requestData.gasLimit, requestData.gasPrice);
+        this.sendDelegationConfirm(
+          parseJsonOrFallback(requestData.signedPoD),
+          requestData.fee,
+          requestData.gasLimit,
+          requestData.gasPrice
+        );
         break;
       case MESSAGE_TYPE.SEND_REMOVE_DELEGATION_CONFIRM:
         console.log(`sendRemoveDelegationConfirm: ${JSON.stringify(request)}`);
