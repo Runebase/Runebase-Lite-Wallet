@@ -4,6 +4,7 @@ import { MESSAGE_TYPE } from '../../constants';
 import RRCToken from '../../models/RRCToken';
 import Transaction from '../../models/Transaction';
 import { addMessageListener, isExtensionEnvironment, openUrlInNewTab, removeMessageListener, sendMessage, TabOpener } from '../abstraction';
+import { parseJsonOrFallback } from '../../utils';
 // import BigNumber from 'bignumber.js';
 
 // Chrome-specific implementation for opening tabs
@@ -100,19 +101,23 @@ export default class AccountDetailStore {
 
   @action private handleMessage = (request: any) => {
     const requestData = isExtensionEnvironment() ? request : request.data;
-    switch (requestData.type) {
-    case MESSAGE_TYPE.GET_TXS_RETURN:
-      console.log('GET_TXS_RETURN', requestData);
-      this.transactions = requestData.transactions;
-      this.hasMore = requestData.hasMore;
-      break;
-    case MESSAGE_TYPE.RRC_TOKENS_RETURN: {
-      console.log('RRC_TOKENS_RETURN', requestData);
-      this.verifiedTokens = requestData.tokens;
-      break;
-    }
-    default:
-      break;
+    try {
+      switch (requestData.type) {
+      case MESSAGE_TYPE.GET_TXS_RETURN:
+        console.log('GET_TXS_RETURN', requestData);
+        this.transactions = parseJsonOrFallback(requestData.transactions);
+        this.hasMore = requestData.hasMore;
+        break;
+      case MESSAGE_TYPE.RRC_TOKENS_RETURN: {
+        console.log('RRC_TOKENS_RETURN', requestData);
+        this.verifiedTokens = parseJsonOrFallback(requestData.tokens);
+        break;
+      }
+      default:
+        break;
+      }
+    } catch (err) {
+      console.error(err);
     }
   };
 }

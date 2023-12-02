@@ -178,9 +178,10 @@ export default class TransactionController extends IController {
   * Sends the message after fetching transactions.
   */
   private sendTransactionsMessage = () => {
+    const stringifiedTransactions = this.transactions.map(transaction => ({ ...transaction })); // Make a shallow copy to avoid modifying the original object
     sendMessage({
       type: MESSAGE_TYPE.GET_TXS_RETURN,
-      transactions: this.transactions,
+      transactions: JSON.stringify(stringifiedTransactions),
       hasMore: this.hasMore,
     }, () => {});
   };

@@ -131,3 +131,13 @@ export const shortenTxid = (txid?: string) => {
   const charToShow = 5;
   return `${txid.substr(0, charToShow)}...${txid.substr(txid.length - charToShow, txid.length)}`;
 };
+
+// Utility function to parse JSON if possible
+export const parseJsonOrFallback = (data: string): any => {
+  try {
+    return JSON.parse(data);
+  } catch (error) {
+    // If parsing fails, return the original data
+    return data;
+  }
+};

@@ -9,21 +9,24 @@ const messageListeners: { callback: MessageCallback }[] = [];
 export const messageCallbacks = {};
 
 export function sendMessage(message: any, callback: any) {
-  if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.id) {
-    chrome.runtime.sendMessage(message, callback);
-  } else {
-    window.postMessage(message, '*');
+  try {
+    if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.id) {
+      chrome.runtime.sendMessage(message, callback);
+    } else {
+      window.postMessage(message, '*');
+    }
+  } catch (error) {
+    console.error('Error in sendMessage:', error);
+    // You might want to add additional error handling logic here
   }
 }
 
 export function addMessageListener(handleMessage: MessageCallback) {
-  console.log('addMesageListener');
   if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.onMessage) {
     // Running as a Chrome extension
     chrome.runtime.onMessage.addListener(handleMessage);
     return true;
   } else if (typeof window !== 'undefined') {
-    // Event listener for responses in a web environment
     window.addEventListener('message', handleMessage);
     return true;
   }
