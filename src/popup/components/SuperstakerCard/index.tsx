@@ -25,7 +25,13 @@ const SuperStakerCard: React.FC<SuperStakerCardProps> = ({
   delegateStore,
 }) => {
   return (
-    <Card sx={{ minWidth: 275, maxWidth: 350, backgroundColor: '#f7f7f7', border: '1px solid #e0e0e0' }}>
+    <Card
+      sx={{
+        width: '100%',
+        backgroundColor: '#f7f7f7',
+        border: '1px solid #e0e0e0'
+      }}
+    >
       <CardContent>
         <Tooltip title="SuperStaker Wallet Address">
           <Typography sx={{ fontSize: 14, fontWeight: 'bold', color: '#333333' }} gutterBottom>
