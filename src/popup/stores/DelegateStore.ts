@@ -4,7 +4,7 @@ import AppStore from './AppStore';
 import { PodReturnResult, SuperStaker, SuperStakerArray } from '../../types';
 import { RunebaseInfo } from 'runebasejs-wallet';
 import { isValidDelegationFee, isValidGasLimit, isValidGasPrice } from '../../utils';
-import { addMessageListener, sendMessage } from '../abstraction';
+import { addMessageListener, isExtensionEnvironment, sendMessage } from '../abstraction';
 
 
 
@@ -142,39 +142,40 @@ export default class DelegateStore {
   };
 
   @action private handleMessage = (request: any) => {
-    switch (request.type) {
+    const requestData = isExtensionEnvironment() ? request : request.data;
+    switch (requestData.type) {
     case MESSAGE_TYPE.GET_SUPERSTAKERS_RETURN:
-      console.log('GET_SUPERSTAKERS_RETURN: ', request);
-      this.setSuperStakers(request.superstakers);
+      console.log('GET_SUPERSTAKERS_RETURN: ', requestData);
+      this.setSuperStakers(requestData.superstakers);
       break;
     case MESSAGE_TYPE.GET_SUPERSTAKER_RETURN:
-      console.log('GET_SUPERSTAKER_RETURN: ', request);
-      this.setSelectedSuperStaker(request.superstaker);
+      console.log('GET_SUPERSTAKER_RETURN: ', requestData);
+      this.setSelectedSuperStaker(requestData.superstaker);
       this.app.routerStore.push('/superstaker-detail');
       break;
     case MESSAGE_TYPE.GET_SUPERSTAKER_DELEGATIONS_RETURN:
-      console.log('GET_SUPERSTAKER_DELEGATIONS_RETURN: ', request);
-      this.setSuperStakerDelegations(request.superstakerDelegations);
+      console.log('GET_SUPERSTAKER_DELEGATIONS_RETURN: ', requestData);
+      this.setSuperStakerDelegations(requestData.superstakerDelegations);
       break;
     case MESSAGE_TYPE.SIGN_POD_RETURN:
-      console.log('SIGN_POD_RETURN: ', request);
-      this.setProofOfDelegationMessage(request.result);
+      console.log('SIGN_POD_RETURN: ', requestData);
+      this.setProofOfDelegationMessage(requestData.result);
       break;
     case MESSAGE_TYPE.SEND_DELEGATION_CONFIRM_SUCCESS:
-      console.log('SEND_DELEGATION_CONFIRM_SUCCESS:', request);
+      console.log('SEND_DELEGATION_CONFIRM_SUCCESS:', requestData);
       this.app.routerStore.push('/account-detail');
       break;
     case MESSAGE_TYPE.SEND_DELEGATION_CONFIRM_FAILURE:
-      console.log('SEND_DELEGATION_CONFIRM_FAILURE:', request);
-      this.errorMessage = request.error.message;
+      console.log('SEND_DELEGATION_CONFIRM_FAILURE:', requestData);
+      this.errorMessage = requestData.error.message;
       break;
     case MESSAGE_TYPE.SEND_REMOVE_DELEGATION_CONFIRM_SUCCESS:
-      console.log('SEND_REMOVE_DELEGATION_CONFIRM_SUCCESS:', request);
+      console.log('SEND_REMOVE_DELEGATION_CONFIRM_SUCCESS:', requestData);
       this.app.routerStore.push('/account-detail');
       break;
     case MESSAGE_TYPE.SEND_REMOVE_DELEGATION_CONFIRM_FAILURE:
-      console.log('SEND_DELEGATION_CONFIRM_FAILURE:', request);
-      this.errorMessage = request.error.message;
+      console.log('SEND_DELEGATION_CONFIRM_FAILURE:', requestData);
+      this.errorMessage = requestData.error.message;
       break;
     default:
       break;
