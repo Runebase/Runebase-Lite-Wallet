@@ -302,9 +302,10 @@ export default class TokenController extends IController {
       switch (requestData.type) {
       case MESSAGE_TYPE.GET_RRC_TOKEN_LIST:
         sendMessage({
-          type: MESSAGE_TYPE.GET_RRC_TOKEN_LIST_RETURN,
-          tokens: this.tokens,
-        }, () => {});
+          type: MESSAGE_TYPE.USE_CALLBACK,
+          id: requestData.id,// include the messageId in the response for the identifying correct window to close
+          result: this.tokens,
+        });
         break;
       case MESSAGE_TYPE.SEND_RRC_TOKENS:
         this.sendRRCToken(

@@ -8,11 +8,29 @@ export interface TabOpener {
 const messageListeners: { callback: MessageCallback }[] = [];
 export const messageCallbacks = {};
 
-export function sendMessage(message: any, callback: any) {
+export function sendMessage(message: any, callback?: any) {
   try {
     if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.id) {
       chrome.runtime.sendMessage(message, callback);
     } else {
+      if (
+        callback
+        && typeof callback === 'function'
+        && message.type !== 'USE_CALLBACK'
+      ) {
+        const messageId = Math.random().toString(36).substr(2, 9);
+        const handler = (event: MessageEvent) => {
+          if (
+            event.data.id === messageId
+            && event.data.type !== message.type
+          ) {
+            callback(event.data.result);
+            window.removeEventListener('message', handler);
+          }
+        };
+        window.addEventListener('message', handler);
+        message.id = messageId;
+      }
       window.postMessage(message, '*');
     }
   } catch (error) {
@@ -180,4 +198,96 @@ export function getImageUrl(path: string): string {
       : new WebExtensionInfoProvider();
 
   return extensionInfoProvider.getURL(path);
+}
+
+export function saveFile(content, filename) {
+  if (isCordova()) {
+    // Cordova environment
+    downloadAndSaveFileCordova(content, filename);
+  } else {
+    // Web or Chrome extension environment
+    downloadFileWeb(content, filename);
+  }
+}
+
+export function isCordova() {
+  return window.cordova !== undefined;
+}
+
+// Broken, Couldn't figure out how to fix this. supposed to be for downloading seedphrase to file
+function downloadAndSaveFileCordova(content: string, filename: string) {
+  console.log('downloadAndSaveFileCordova calleds');
+
+  document.addEventListener('deviceready', function () {
+    console.log('deviceready event triggered');
+
+    console.log('Content:', content);
+    console.log('Content type:', typeof content);
+
+    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+
+    // Request WRITE_EXTERNAL_STORAGE permission
+    window.plugins.permissions.requestPermission(
+      window.plugins.permissions.WRITE_EXTERNAL_STORAGE,
+      function (status) {
+        if (status.hasPermission) {
+          // Permission granted, proceed with file operations
+          window.resolveLocalFileSystemURL(
+            cordova.file.dataDirectory,
+            function (directoryEntry) {
+              // Create or open the file
+              directoryEntry.getFile(
+                filename,
+                { create: true, exclusive: false },
+                function (fileEntry: any) {
+                  // Create a FileWriter object
+                  fileEntry.createWriter(
+                    function (fileWriter: any) {
+                      fileWriter.onwriteend = function () {
+                        console.log('File saved locally: ' + fileEntry.toURL());
+                        // Handle further operations here, if needed
+                      };
+
+                      fileWriter.onerror = function (error: any) {
+                        console.error('Error writing to file: ' + JSON.stringify(error));
+                      };
+
+                      // Write the blob to the file
+                      fileWriter.write(blob);
+                    },
+                    function (error: any) {
+                      console.error('Error creating FileWriter: ' + JSON.stringify(error));
+                    }
+                  );
+                },
+                function (error: any) {
+                  console.error('Error creating or opening file: ' + JSON.stringify(error));
+                }
+              );
+            },
+            function (error) {
+              console.error('Error resolving file system URL: ' + JSON.stringify(error));
+            }
+          );
+        } else {
+          console.error('WRITE_EXTERNAL_STORAGE permission denied');
+        }
+      },
+      function () {
+        console.error('Error requesting WRITE_EXTERNAL_STORAGE permission');
+      }
+    );
+  }, false);
+}
+
+
+function downloadFileWeb(content: string, filename: string) {
+  const blob = new Blob([content], { type: 'text/plain' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
 }

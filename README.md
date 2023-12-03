@@ -171,6 +171,9 @@ Add other platforms as needed
 
 ### Step 3: Install plugins
 ```bash
+cordova plugin add cordova-plugin-android-permissions
+cordova plugin add cordova-plugin-file
+cordova plugin add cordova-plugin-splashscreen
 cordova plugin add cordova-plugin-camera
 ```
 Add other plugins as needed

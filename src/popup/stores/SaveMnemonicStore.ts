@@ -48,6 +48,6 @@ export default class SaveMnemonicStore {
       type: saveFile ? MESSAGE_TYPE.SAVE_TO_FILE : MESSAGE_TYPE.IMPORT_MNEMONIC,
       accountName: this.walletName,
       mnemonicPrivateKey: this.mnemonic,
-    }, () => {});
+    });
   };
 }

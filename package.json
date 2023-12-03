@@ -5,7 +5,8 @@
   "scripts": {
     "clean": "rm -rf dist",
     "start": "yarn clean && mkdir dist && ./scripts/create-empty-thunk.sh && webpack --progress --config webpack.dev.config.js --watch --devtool source-map & yarn css-types -w",
-    "build": "yarn clean && webpack --config webpack.prod.config.js && ./scripts/create-empty-thunk.sh && cp -R dist/* cordova/www",
+    "build": "yarn clean && webpack --config webpack.prod.config.js && ./scripts/create-empty-thunk.sh && rm -rf cordova/www/* && cp -R dist/* cordova/www",
+
     "css-types": "tcm src",
     "postinstall": "yarn css-types",
     "lint": "eslint . --ext .ts",

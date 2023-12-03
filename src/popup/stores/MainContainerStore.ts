@@ -2,7 +2,7 @@ import { action, observable, makeObservable } from 'mobx';
 
 import AppStore from './AppStore';
 import { MESSAGE_TYPE } from '../../constants';
-import { addMessageListener, isExtensionEnvironment } from '../abstraction';
+import { addMessageListener, isExtensionEnvironment, saveFile } from '../abstraction';
 
 export default class MainContainerStore {
   @observable public unexpectedError?: string = undefined;
@@ -20,14 +20,9 @@ export default class MainContainerStore {
     const { loginStore, importStore, routerStore }: any = this.app;
     switch (requestData.type) {
     case MESSAGE_TYPE.SAVE_SEED_TO_FILE_RETURN: {
-      const blob = new Blob([requestData.content], { type: 'text/plain' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = requestData.filename;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
+      const content = requestData.content;
+      const filename = requestData.filename;
+      saveFile(content, filename);
       break;
     }
     case MESSAGE_TYPE.ROUTE_LOGIN:

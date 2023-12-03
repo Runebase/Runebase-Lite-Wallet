@@ -58,16 +58,16 @@ export default class SessionStore {
   constructor() {
     makeObservable(this);
     addMessageListener(this.handleMessage);
-    sendMessage({ type: MESSAGE_TYPE.GET_NETWORKS }, () => {});
-    sendMessage({ type: MESSAGE_TYPE.GET_NETWORK_INDEX }, () => {});
+    sendMessage({ type: MESSAGE_TYPE.GET_NETWORKS });
+    sendMessage({ type: MESSAGE_TYPE.GET_NETWORK_INDEX });
   }
 
   @action public init = () => {
-    sendMessage({ type: MESSAGE_TYPE.GET_LOGGED_IN_ACCOUNT_NAME }, () => {});
-    sendMessage({ type: MESSAGE_TYPE.GET_BLOCKCHAIN_INFO }, () => {});
-    sendMessage({ type: MESSAGE_TYPE.GET_WALLET_INFO }, () => {});
-    sendMessage({ type: MESSAGE_TYPE.GET_DELEGATION_INFO }, () => {});
-    sendMessage({ type: MESSAGE_TYPE.GET_RUNEBASE_USD }, () => {});
+    sendMessage({ type: MESSAGE_TYPE.GET_LOGGED_IN_ACCOUNT_NAME });
+    sendMessage({ type: MESSAGE_TYPE.GET_BLOCKCHAIN_INFO });
+    sendMessage({ type: MESSAGE_TYPE.GET_WALLET_INFO });
+    sendMessage({ type: MESSAGE_TYPE.GET_DELEGATION_INFO });
+    sendMessage({ type: MESSAGE_TYPE.GET_RUNEBASE_USD });
   };
 
   @action private handleMessage = (request: any) => {

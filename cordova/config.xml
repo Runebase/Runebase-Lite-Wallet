@@ -2,13 +2,14 @@
 <widget id="io.runebase.runebasechromewallet" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
     <name>Runebase-Chrome-Wallet</name>
     <description>An abstraction of the Runebase Chrome Wallet</description>
-    <author email="support@runebase.io" href="https://www.runebase.io">
-        Bago
-    </author>
+    <author email="support@runebase.io" href="https://www.runebase.io">Bago</author>
     <content src="popup.html" />
     <allow-intent href="http://*/*" />
     <allow-intent href="https://*/*" />
+
     <platform name="android">
+        <!-- <preference name="AndroidPersistentFileLocation" value="internal" /> -->
+        <!-- <hook type="after_prepare" src="scripts/after_prepare.js" /> -->
         <!-- Icons -->
         <icon density="hdpi" src="resources/android/icon/drawable-hdpi-icon.png" />
         <icon density="ldpi" src="resources/android/icon/drawable-ldpi-icon.png" />
@@ -16,31 +17,13 @@
         <icon density="xhdpi" src="resources/android/icon/drawable-xhdpi-icon.png" />
         <icon density="xxhdpi" src="resources/android/icon/drawable-xxhdpi-icon.png" />
         <icon density="xxxhdpi" src="resources/android/icon/drawable-xxxhdpi-icon.png" />
-
-        <!-- Splash Screens -->
-        <splash density="land-hdpi" src="resources/android/splash/drawable-land-hdpi-screen.png" />
-        <splash density="land-ldpi" src="resources/android/splash/drawable-land-ldpi-screen.png" />
-        <splash density="land-mdpi" src="resources/android/splash/drawable-land-mdpi-screen.png" />
-        <splash density="land-xhdpi" src="resources/android/splash/drawable-land-xhdpi-screen.png" />
-        <splash density="land-xxhdpi" src="resources/android/splash/drawable-land-xxhdpi-screen.png" />
-        <splash density="land-xxxhdpi" src="resources/android/splash/drawable-land-xxxhdpi-screen.png" />
-
-        <splash density="port-hdpi" src="resources/android/splash/drawable-port-hdpi-screen.png" />
-        <splash density="port-ldpi" src="resources/android/splash/drawable-port-ldpi-screen.png" />
-        <splash density="port-mdpi" src="resources/android/splash/drawable-port-mdpi-screen.png" />
-        <splash density="port-xhdpi" src="resources/android/splash/drawable-port-xhdpi-screen.png" />
-        <splash density="port-xxhdpi" src="resources/android/splash/drawable-port-xxhdpi-screen.png" />
-        <splash density="port-xxxhdpi" src="resources/android/splash/drawable-port-xxxhdpi-screen.png" />
+        <!-- Splash -->
+        <preference name="AndroidWindowSplashScreenIcon" value="resources/android/splash/splashscreen.xml" />
+        <preference name="AndroidWindowSplashScreenIconBackgroundColor" value="#00FFFF" />
     </platform>
 
     <platform name="ios">
-        <!-- Icons (iOS uses a single icon file) -->
         <icon src="resources/ios/icon/icon.png" />
-
-        <!-- Splash Screens -->
         <splash height="2732" src="resources/ios/splash/splash.png" width="2732" />
-        <!-- Add other iOS splash screens as needed -->
     </platform>
-
-
 </widget>

@@ -47,7 +47,6 @@ export default class ImportStore {
       () => this.accountName,
       () => {
         console.log('Account name changed:', this.accountName);
-
         sendMessage(
           {
             type: MESSAGE_TYPE.VALIDATE_WALLET_NAME,
@@ -82,7 +81,7 @@ export default class ImportStore {
         this.importType === IMPORT_TYPE.MNEMONIC
           ? MESSAGE_TYPE.IMPORT_MNEMONIC
           : MESSAGE_TYPE.IMPORT_PRIVATE_KEY;
-      chrome.runtime.sendMessage({
+      sendMessage({
         type: msgType,
         accountName: this.accountName,
         mnemonicPrivateKey: this.mnemonicPrivateKey,
@@ -91,7 +90,6 @@ export default class ImportStore {
   };
 
   @action public cancelImport = () => {
-    console.log('Cancelling import');
     this.app.routerStore.goBack();
   };
 }

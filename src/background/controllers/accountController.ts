@@ -17,7 +17,6 @@ import { PodReturnResult } from '../../types';
 import { generateRequestId, parseJsonOrFallback } from '../../utils';
 import abi from 'ethjs-abi';
 import { addMessageListener, getMultipleStorageValues, isExtensionEnvironment, sendMessage, setStorageValue } from '../../popup/abstraction';
-
 globalThis.Buffer = Buffer;
 
 const INIT_VALUES = {
@@ -176,7 +175,9 @@ export default class AccountController extends IController {
     // Validate that we don't already have the wallet in our accountList
     const exists = await this.walletAlreadyExists(privateKeyHash);
     if (exists) {
-      chrome.runtime.sendMessage({ type: MESSAGE_TYPE.IMPORT_MNEMONIC_PRKEY_FAILURE });
+      sendMessage({
+        type: MESSAGE_TYPE.IMPORT_MNEMONIC_PRKEY_FAILURE
+      }, () => {});
       return;
     }
 
@@ -709,7 +710,7 @@ export default class AccountController extends IController {
         sendMessage({
           type: MESSAGE_TYPE.HAS_ACCOUNTS_RETURN,
           hasAccounts: this.hasAccounts,
-        }, () => {});
+        });
         break;
       case MESSAGE_TYPE.GET_ACCOUNTS:
         console.log('Getting accounts');
@@ -717,7 +718,7 @@ export default class AccountController extends IController {
         sendMessage({
           type: MESSAGE_TYPE.GET_ACCOUNTS_RETURN,
           accounts: this.accounts,
-        }, () => {});
+        });
         break;
       case MESSAGE_TYPE.GET_LOGGED_IN_ACCOUNT:
         console.log('Getting logged-in account');
@@ -732,14 +733,14 @@ export default class AccountController extends IController {
         sendMessage({
           type: MESSAGE_TYPE.GET_LOGGED_IN_ACCOUNT_NAME_RETURN,
           accountName: this.loggedInAccount ? this.loggedInAccount.name : undefined,
-        }, () => {});
+        });
         break;
       case MESSAGE_TYPE.GET_BLOCKCHAIN_INFO:
         console.log('Getting blockchain info');
         sendMessage({
           type: MESSAGE_TYPE.GET_BLOCKCHAIN_INFO_RETURN,
           blockchainInfo: this.blockchainInfo ? this.blockchainInfo : undefined,
-        }, () => {});
+        });
         break;
       case MESSAGE_TYPE.GET_WALLET_INFO:
         console.log('Getting wallet info');
@@ -747,7 +748,7 @@ export default class AccountController extends IController {
           type: MESSAGE_TYPE.GET_WALLET_INFO_RETURN,
           info: this.loggedInAccount && this.loggedInAccount.wallet
             ? this.loggedInAccount.wallet.info : undefined,
-        }, () => {});
+        });
         break;
       case MESSAGE_TYPE.GET_DELEGATION_INFO:
         console.log('Getting wallet delegation info');
@@ -762,11 +763,15 @@ export default class AccountController extends IController {
           type: MESSAGE_TYPE.GET_RUNEBASE_USD_RETURN,
           runebaseUSD: this.loggedInAccount && this.loggedInAccount.wallet
             ? this.loggedInAccount.wallet.runebaseUSD : undefined,
-        }, () => {});
+        });
         break;
       case MESSAGE_TYPE.VALIDATE_WALLET_NAME:
         console.log(`Validating wallet name: ${requestData.name}`);
-        sendResponse && sendResponse(this.isWalletNameTaken(requestData.name));
+        sendMessage({
+          type: MESSAGE_TYPE.USE_CALLBACK,
+          id: requestData.id,// include the messageId in the response for the identifying correct window to close
+          result: this.isWalletNameTaken(requestData.name),
+        });
         break;
       case MESSAGE_TYPE.GET_MAX_RUNEBASE_SEND:
         console.log('Getting max RUNEBASE send amount');

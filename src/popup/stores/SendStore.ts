@@ -90,7 +90,20 @@ export default class SendStore {
 
   @action public init = () => {
     this.tokens = [];
-    sendMessage({ type: MESSAGE_TYPE.GET_RRC_TOKEN_LIST }, () => {});
+    sendMessage({ type: MESSAGE_TYPE.GET_RRC_TOKEN_LIST }, (response: any) => {
+      this.verifiedTokens = response;
+      this.app.sessionStore.walletInfo?.qrc20Balances.forEach((tokenInfo) => {
+        const { name, symbol, decimals, balance, address } = tokenInfo;
+        const newToken = new RRCToken(name, symbol, Number(decimals), address);
+        const isTokenVerified = this.verifiedTokens.find(x => x.address === newToken.address);
+        if (isTokenVerified) {
+          newToken.balance = new BigNumber(balance).dividedBy(`1e${decimals}`).toNumber();
+          this.tokens.push(newToken);
+        } else {
+          // TODO: Make a visible unverified token balance list
+        }
+      });
+    });
 
     this.tokens.unshift(new RRCToken('Runebase Token', 'RUNES', 8, ''));
     this.tokens[0].balance = this.app.sessionStore.walletInfo
@@ -100,7 +113,7 @@ export default class SendStore {
       ? this.app.sessionStore.walletInfo.address : undefined;
     sendMessage({
       type: MESSAGE_TYPE.GET_MAX_RUNEBASE_SEND,
-    }, () => {});
+    });
   };
 
   @action public setGasLimit = (gasLimit: number) => {
@@ -152,7 +165,7 @@ export default class SendStore {
         receiverAddress: this.receiverAddress,
         amount: Number(this.amount),
         transactionSpeed: this.transactionSpeed,
-      }, () => {});
+      });
     } else {
       console.log('Sending RRC tokens:', {
         receiverAddress: this.receiverAddress,
@@ -168,7 +181,7 @@ export default class SendStore {
         token: this.token,
         gasLimit: Number(this.gasLimit),
         gasPrice: Number(this.gasPrice * 1e-8),
-      }, () => {});
+      });
     }
   };
 
@@ -176,24 +189,8 @@ export default class SendStore {
     const requestData = isExtensionEnvironment() ? request : request.data;
     let runebaseToken;
     switch (requestData.type) {
-    case MESSAGE_TYPE.GET_RRC_TOKEN_LIST_RETURN:
-      console.log('Received token list:', requestData.tokens);
-      this.verifiedTokens = requestData.tokens;
-      this.app.sessionStore.walletInfo?.qrc20Balances.forEach((tokenInfo) => {
-        const { name, symbol, decimals, balance, address } = tokenInfo;
-        const newToken = new RRCToken(name, symbol, Number(decimals), address);
-        const isTokenVerified = this.verifiedTokens.find(x => x.address === newToken.address);
-        if (isTokenVerified) {
-          newToken.balance = new BigNumber(balance).dividedBy(`1e${decimals}`).toNumber();
-          this.tokens.push(newToken);
-        } else {
-          // TODO: Make a visible unverified token balance list
-        }
-      });
-      break;
     case MESSAGE_TYPE.SEND_TOKENS_SUCCESS:
       console.log('Send tokens success:', requestData);
-      // this.app.routerStore.push('/home'); // so pressing back won't go back to sendConfirm page
       this.app.routerStore.push('/account-detail');
       this.sendState = SEND_STATE.INITIAL;
       break;
