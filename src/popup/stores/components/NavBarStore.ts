@@ -2,6 +2,7 @@ import { observable, action, makeObservable } from 'mobx';
 
 import { MESSAGE_TYPE } from '../../../constants';
 import AppStore from '../AppStore';
+import { sendMessage } from '../../abstraction';
 
 const INIT_VALUES = {
   settingsMenuAnchor: undefined,
@@ -22,7 +23,8 @@ export default class NavBarStore {
   };
 
   @action public changeNetwork = (index: number) => {
-    chrome.runtime.sendMessage({ type: MESSAGE_TYPE.CHANGE_NETWORK, networkIndex: index });
+    console.log('CALLED CHANGENETWORK to INDEX', index);
+    sendMessage({ type: MESSAGE_TYPE.CHANGE_NETWORK, networkIndex: index }, () => {});
   };
 
   @action public routeToSettings = () => {
@@ -38,6 +40,6 @@ export default class NavBarStore {
   @action public logout = () => {
     this.reset();
     this.app.routerStore.push('/loading');
-    chrome.runtime.sendMessage({ type: MESSAGE_TYPE.LOGOUT });
+    sendMessage({ type: MESSAGE_TYPE.LOGOUT }, () => {});
   };
 }

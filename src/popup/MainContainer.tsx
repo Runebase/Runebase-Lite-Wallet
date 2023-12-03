@@ -30,6 +30,7 @@ import AddDelegation from './pages/AddDelegation';
 import AddDelegationConfirm from './pages/AddDelegationConfirm';
 import RemoveDelegation from './pages/RemoveDelegation';
 import RemoveDelegationConfirm from './pages/RemoveDelegationConfirm';
+import { sendMessage } from './abstraction';
 
 interface IProps {
   history: any; // Replace with the appropriate type for your history
@@ -39,11 +40,23 @@ interface IProps {
 const MainContainer: React.FC<IProps> = inject('store')(observer(({ history, store }) => {
   useEffect(() => {
     return () => {
-      chrome.runtime.sendMessage({ type: MESSAGE_TYPE.LOGOUT });
+      sendMessage({
+        type: MESSAGE_TYPE.LOGOUT,
+      }, () => {});
     };
   }, []);
 
-  const { accountDetailStore, sessionStore } = store;
+  const { accountDetailStore, sessionStore, loginStore } = store;
+
+  useEffect(() => {
+    store?.sessionStore.init();
+  }, []);
+  useEffect(() => {
+
+  }, [
+    loginStore,
+    loginStore.hasAccounts,
+  ]);
 
   useEffect(() => {
     accountDetailStore.init();

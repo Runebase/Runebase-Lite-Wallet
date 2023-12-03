@@ -12,6 +12,7 @@ import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 import StarIcon from '@mui/icons-material/Star';
 import PersonIcon from '@mui/icons-material/Person';
 import ElectricBoltIcon from '@mui/icons-material/ElectricBolt';
+import { getImageUrl } from '../../abstraction';
 
 interface IProps {
   store?: AppStore;
@@ -26,6 +27,7 @@ const AccountInfo: React.FC<IProps> = ({ hasRightArrow, store }) => {
   // const [networkBalAnnotation, setNetworkBalAnnotation] = useState<string | null>(null);
 
   useEffect(() => {
+    console.log('walletInfo: ', store?.sessionStore.walletInfo);
     console.log('useEffect - store:', store);
     setLoggedInAccountName(store?.sessionStore.loggedInAccountName || null);
     setInfo(store?.sessionStore.walletInfo || null);
@@ -126,7 +128,7 @@ const AccountInfo: React.FC<IProps> = ({ hasRightArrow, store }) => {
             height: '24px',
             width: '24px'
           }}
-          src={chrome.runtime.getURL('images/runes.png')}
+          src={getImageUrl('images/runes.png')}
           alt={'Runes'}
         />
         <Typography className={classes.tokenAmount}>{info.balance / 1e8}</Typography>
@@ -157,7 +159,7 @@ const AccountInfo: React.FC<IProps> = ({ hasRightArrow, store }) => {
                         height: '24px',
                         width: '24px'
                       }}
-                      src={chrome.runtime.getURL(tokenLogoSrc)}
+                      src={getImageUrl(tokenLogoSrc)}
                       alt={token.symbol}
                     />
                   )

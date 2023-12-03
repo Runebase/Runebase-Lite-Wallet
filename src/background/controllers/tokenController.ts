@@ -16,6 +16,7 @@ import { generateRequestId } from '../../utils';
 import { IRPCCallResponse } from '../../types';
 import moment from 'moment';
 import Transaction from '../../models/Transaction';
+import { getStorageValue, setStorageValue, addMessageListener, sendMessage, isExtensionEnvironment } from '../../popup/abstraction';
 
 const INIT_VALUES = {
   tokens: undefined,
@@ -33,7 +34,7 @@ export default class TokenController extends IController {
   constructor(main: RunebaseChromeController) {
     super('token', main);
 
-    chrome.runtime.onMessage.addListener(this.handleMessage);
+    addMessageListener(this.handleMessage);
     this.initFinished();
   }
 
@@ -49,9 +50,11 @@ export default class TokenController extends IController {
       return;
     }
 
-    chrome.storage.local.get([this.chromeStorageAccountTokenListKey()], (res: any) => {
+    const tokenListKey = this.chromeStorageAccountTokenListKey();
+
+    getStorageValue(tokenListKey).then((res) => {
       if (!isEmpty(res)) {
-        this.tokens = res[this.chromeStorageAccountTokenListKey()];
+        this.tokens = res;
       } else if (this.main.network.networkName === NETWORK_NAMES.MAINNET) {
         this.tokens = mainnetTokenList;
       } else if (this.main.network.networkName === NETWORK_NAMES.TESTNET) {
@@ -132,7 +135,7 @@ export default class TokenController extends IController {
       this.tokens![index].balance = balance;
     }
 
-    chrome.runtime.sendMessage({ type: MESSAGE_TYPE.RRC_TOKENS_RETURN, tokens: this.tokens });
+    sendMessage({ type: MESSAGE_TYPE.RRC_TOKENS_RETURN, tokens: this.tokens }, () => {});
   };
 
   /**
@@ -200,7 +203,7 @@ export default class TokenController extends IController {
       };
     }
 
-    chrome.runtime.sendMessage(msg);
+    sendMessage(msg, () => {});
   };
 
   private sendRRCToken = async (
@@ -249,15 +252,15 @@ export default class TokenController extends IController {
 
       if (error) {
         console.error('Error sending RRCToken:', error);
-        chrome.runtime.sendMessage({ type: MESSAGE_TYPE.SEND_TOKENS_FAILURE, error });
+        sendMessage({ type: MESSAGE_TYPE.SEND_TOKENS_FAILURE, error }, () => {});
         return;
       }
 
       console.log('RRCToken sent successfully!');
-      chrome.runtime.sendMessage({ type: MESSAGE_TYPE.SEND_TOKENS_SUCCESS });
+      sendMessage({ type: MESSAGE_TYPE.SEND_TOKENS_SUCCESS }, () => {});
     } catch (e: any) {
       console.error('An unexpected error occurred:', e);
-      chrome.runtime.sendMessage({ type: MESSAGE_TYPE.SEND_TOKENS_FAILURE, error: e.message });
+      sendMessage({ type: MESSAGE_TYPE.SEND_TOKENS_FAILURE, error: e.message }, () => {});
     }
   };
 
@@ -265,25 +268,27 @@ export default class TokenController extends IController {
   private addToken = async (contractAddress: string, name: string, symbol: string, decimals: number) => {
     const newToken = new RRCToken(name, symbol, decimals, contractAddress);
     this.tokens!.push(newToken);
-    this.setTokenListInChromeStorage();
+    this.setTokenListInStorage();
     await this.getRRCTokenBalance(newToken);
   };
 
   private removeToken = (contractAddress: string) => {
     const index = findIndex(this.tokens, { address: contractAddress });
     this.tokens!.splice(index, 1);
-    this.setTokenListInChromeStorage();
+    this.setTokenListInStorage();
   };
 
-  private setTokenListInChromeStorage = () => {
-    chrome.storage.local.set({
-      [this.chromeStorageAccountTokenListKey()]: this.tokens,
-    }, () => {
-      chrome.runtime.sendMessage({
-        type: MESSAGE_TYPE.RRC_TOKENS_RETURN,
-        tokens: this.tokens,
-      });
-    });
+  private setTokenListInStorage = async () => {
+    const storageKey = this.chromeStorageAccountTokenListKey();
+
+    // Add tokens to storage
+    await setStorageValue(storageKey, this.tokens);
+
+    // Send a message to the runtime
+    sendMessage({
+      type: MESSAGE_TYPE.RRC_TOKENS_RETURN,
+      tokens: this.tokens,
+    }, () => {});
   };
 
   private chromeStorageAccountTokenListKey = () => {
@@ -291,23 +296,34 @@ export default class TokenController extends IController {
   };
 
   // eslint-disable-next-line @typescript-eslint/naming-convention
-  private handleMessage = (request: any, _: chrome.runtime.MessageSender, sendResponse: (response: any) => void) => {
+  private handleMessage = (request: any) => {
+    const requestData = isExtensionEnvironment() ? request : request.data;
     try {
-      switch (request.type) {
+      switch (requestData.type) {
       case MESSAGE_TYPE.GET_RRC_TOKEN_LIST:
-        sendResponse(this.tokens);
+        sendMessage({
+          type: MESSAGE_TYPE.USE_CALLBACK,
+          id: requestData.id,// include the messageId in the response for the identifying correct window to close
+          result: this.tokens,
+        });
         break;
       case MESSAGE_TYPE.SEND_RRC_TOKENS:
-        this.sendRRCToken(request.receiverAddress, request.amount, request.token, request.gasLimit, request.gasPrice);
+        this.sendRRCToken(
+          requestData.receiverAddress,
+          requestData.amount,
+          requestData.token,
+          requestData.gasLimit,
+          requestData.gasPrice
+        );
         break;
       case MESSAGE_TYPE.ADD_TOKEN:
-        this.addToken(request.contractAddress, request.name, request.symbol, request.decimals);
+        this.addToken(requestData.contractAddress, requestData.name, requestData.symbol, requestData.decimals);
         break;
       case MESSAGE_TYPE.GET_RRC_TOKEN_DETAILS:
-        this.getRRCTokenDetails(request.contractAddress);
+        this.getRRCTokenDetails(requestData.contractAddress);
         break;
       case MESSAGE_TYPE.REMOVE_TOKEN:
-        this.removeToken(request.contractAddress);
+        this.removeToken(requestData.contractAddress);
         break;
       default:
         break;

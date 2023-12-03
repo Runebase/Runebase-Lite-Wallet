@@ -190,3 +190,4 @@ declare module '@mui/material/styles/createMuiTheme' {
     };
   }
 }
+

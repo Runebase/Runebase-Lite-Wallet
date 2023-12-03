@@ -19,6 +19,7 @@ import { shortenTxid } from '../../../utils';
 import useStyles from './styles';
 import { TOKEN_IMAGES } from '../../../constants';
 import BigNumber from 'bignumber.js';
+import { getImageUrl } from '../../abstraction';
 
 interface IProps {
   classes: Record<string, string>;
@@ -38,7 +39,13 @@ const AccountDetail: React.FC<IProps> = ({ store }) => {
     loginStore,
     blockchainInfo,
     blockchainInfo?.height,
-    accountDetailStore.transactions
+    accountDetailStore.transactions,
+    walletInfo?.balance,
+    walletInfo?.address,
+    walletInfo?.qrc20Balances,
+    walletInfo?.qrc721Balances,
+    accountDetailStore.transactions,
+    sessionStore.delegationInfo,
   ]);
 
   useEffect(() => {
@@ -177,7 +184,7 @@ const AmountInfo: React.FC<{
                   height: '18px',
                   width: '18px'
                 }}
-                src={chrome.runtime.getURL(tokenLogoSrc)}
+                src={getImageUrl(tokenLogoSrc)}
                 alt={token.symbol}
               />
             )

@@ -45,15 +45,21 @@ const SaveMnemonic: React.FC<IProps> = ({ store }) => {
         >
           I Copied It Somewhere Safe
         </Button>
-        <Button
-          className={classes.actionButton}
-          fullWidth
-          variant="contained"
-          color="primary"
-          onClick={() => store.saveMnemonicStore.createWallet(true)}
-        >
-          Save To File
-        </Button>
+        {/*
+          Developer Note: Download functionality is disabled for Cordova
+          since i encountered issues in making it work.
+        */}
+        {typeof window.cordova === 'undefined' || window.cordova === null ? null : (
+          <Button
+            className={classes.actionButton}
+            fullWidth
+            variant="contained"
+            color="primary"
+            onClick={() => store.saveMnemonicStore.createWallet(true)}
+          >
+            Save To File
+          </Button>
+        )}
       </div>
     </div>
   );

@@ -4,6 +4,7 @@ import { findIndex } from 'lodash';
 import AppStore from './AppStore';
 import { MESSAGE_TYPE } from '../../constants';
 import { isValidContractAddressLength } from '../../utils';
+import { addMessageListener, sendMessage } from '../abstraction';
 
 const INIT_VALUES = {
   contractAddress: '',
@@ -54,10 +55,10 @@ export default class AddTokenStore {
         // If valid contract address, send rpc call to fetch other contract details
         if (this.contractAddress && !this.contractAddressFieldError) {
           console.log('Fetching RRC token details for:', this.contractAddress);
-          chrome.runtime.sendMessage({
+          sendMessage({
             type: MESSAGE_TYPE.GET_RRC_TOKEN_DETAILS,
             contractAddress: this.contractAddress
-          });
+          }, () => {});
         }
       },
     );
@@ -70,59 +71,54 @@ export default class AddTokenStore {
       symbol: this.symbol,
       decimals: this.decimals,
     });
-    chrome.runtime.sendMessage({
+    sendMessage({
       type: MESSAGE_TYPE.ADD_TOKEN,
       contractAddress: this.contractAddress,
       name: this.name,
       symbol: this.symbol,
       decimals: this.decimals,
-    });
+    }, () => {});
     this.app.routerStore.push('/manage-tokens');
     this.app.accountDetailStore.shouldScrollToBottom = true;
     this.setInitValues();
   };
 
-  @action
-  public init = () => {
-      chrome.runtime.onMessage.addListener(this.handleMessage);
-    };
+  @action public init = () => {
+    addMessageListener(this.handleMessage);
+  };
 
-  @action
-  private setInitValues = () => {
-      this.contractAddress = INIT_VALUES.contractAddress;
-      this.resetTokenDetails();
-    };
+  @action private setInitValues = () => {
+    this.contractAddress = INIT_VALUES.contractAddress;
+    this.resetTokenDetails();
+  };
 
-  @action
-  public setContractAddress = (value: string) => {
-      this.contractAddress = value;
-    };
+  @action public setContractAddress = (value: string) => {
+    this.contractAddress = value;
+  };
 
-  @action
-  private resetTokenDetails = () => {
-      this.name = INIT_VALUES.name;
-      this.symbol = INIT_VALUES.symbol;
-      this.decimals = INIT_VALUES.decimals;
-      this.getRRCTokenDetailsFailed = INIT_VALUES.getRRCTokenDetailsFailed;
-    };
+  @action private resetTokenDetails = () => {
+    this.name = INIT_VALUES.name;
+    this.symbol = INIT_VALUES.symbol;
+    this.decimals = INIT_VALUES.decimals;
+    this.getRRCTokenDetailsFailed = INIT_VALUES.getRRCTokenDetailsFailed;
+  };
 
-  @action
-  private handleMessage = (request: any) => {
-      switch (request.type) {
-      case MESSAGE_TYPE.RRC_TOKEN_DETAILS_RETURN:
-        if (request.isValid) {
-          const { name, symbol, decimals } = request.token;
-          console.log('Received RRC token details:', { name, symbol, decimals });
-          this.name = name;
-          this.symbol = symbol;
-          this.decimals = decimals;
-        } else {
-          console.log('RRC token details request failed');
-          this.getRRCTokenDetailsFailed = true;
-        }
-        break;
-      default:
-        break;
+  @action private handleMessage = (request: any) => {
+    switch (request.type) {
+    case MESSAGE_TYPE.RRC_TOKEN_DETAILS_RETURN:
+      if (request.isValid) {
+        const { name, symbol, decimals } = request.token;
+        console.log('Received RRC token details:', { name, symbol, decimals });
+        this.name = name;
+        this.symbol = symbol;
+        this.decimals = decimals;
+      } else {
+        console.log('RRC token details request failed');
+        this.getRRCTokenDetailsFailed = true;
       }
-    };
+      break;
+    default:
+      break;
+    }
+  };
 }

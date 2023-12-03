@@ -3,6 +3,7 @@ import { isEmpty } from 'lodash';
 
 import AppStore from './AppStore';
 import { MESSAGE_TYPE } from '../../constants';
+import { sendMessage } from '../abstraction';
 
 const INIT_VALUES = {
   walletName: '',
@@ -40,53 +41,45 @@ export default class CreateWalletStore {
         console.log(`Wallet name changed: ${newWalletName}`);
 
         // Send a message to the background script to validate wallet name
-        chrome.runtime.sendMessage(
+        sendMessage(
           {
             type: MESSAGE_TYPE.VALIDATE_WALLET_NAME,
             name: newWalletName,
-          },
-          (response: any) => {
-            // MobX action
-            this.setWalletNameTaken(response);
+          }, (response: any) => {
             console.log(`Wallet name taken: ${response}`);
+            this.setWalletNameTaken(response);
           }
         );
       }
     );
   }
 
-  @action
-  public reset = () => {
-      console.log('Resetting CreateWalletStore');
-      Object.assign(this, INIT_VALUES);
-    };
+  @action public reset = () => {
+    console.log('Resetting CreateWalletStore');
+    Object.assign(this, INIT_VALUES);
+  };
 
-  @action
-  public routeToSaveMnemonic = () => {
-      console.log('Routing to SaveMnemonic');
-      this.app.routerStore.push('/save-mnemonic');
-    };
+  @action public routeToSaveMnemonic = () => {
+    console.log('Routing to SaveMnemonic');
+    this.app.routerStore.push('/save-mnemonic');
+  };
 
-  @action
-  public routeToImportWallet = () => {
-      console.log('Routing to ImportWallet');
-      this.app.routerStore.push('/import-wallet');
-    };
+  @action public routeToImportWallet = () => {
+    console.log('Routing to ImportWallet');
+    this.app.routerStore.push('/import-wallet');
+  };
 
-  @action
-  public updateWalletName = (newWalletName: string) => {
-      this.walletName = newWalletName;
-    };
+  @action public updateWalletName = (newWalletName: string) => {
+    this.walletName = newWalletName;
+  };
 
-  @action
-  public setWalletNameTaken = (isTaken: boolean) => {
-      this.walletNameTaken = isTaken;
-    };
+  @action public setWalletNameTaken = (isTaken: boolean) => {
+    this.walletNameTaken = isTaken;
+  };
 
-  @action
-  public handleEnterPress = () => {
-      if (this.walletName) {
-        this.routeToSaveMnemonic();
-      }
-    };
+  @action public handleEnterPress = () => {
+    if (this.walletName) {
+      this.routeToSaveMnemonic();
+    }
+  };
 }

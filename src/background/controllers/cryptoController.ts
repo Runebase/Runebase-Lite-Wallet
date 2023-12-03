@@ -4,6 +4,7 @@ import { pbkdf2 } from 'crypto';
 import RunebaseChromeController from '.';
 import IController from './iController';
 import { STORAGE } from '../../constants';
+import { getStorageValue, setStorageValue } from '../../popup/abstraction';
 
 const INIT_VALUES = {
   securityAlgorithm: undefined,
@@ -33,7 +34,7 @@ export default class CryptoController extends IController {
   constructor(main: RunebaseChromeController) {
     super('crypto', main);
 
-    chrome.storage.local.get([STORAGE.APP_SALT], ({ appSalt }: any) => {
+    getStorageValue(STORAGE.APP_SALT).then((appSalt) => {
       if (!isEmpty(appSalt)) {
         const array = split(appSalt, ',').map((str) => parseInt(str, 10));
         this.appSalt = Uint8Array.from(array);
@@ -45,7 +46,7 @@ export default class CryptoController extends IController {
       this.initFinished();
     });
 
-    chrome.storage.local.get([STORAGE.SECURITY_ALGORITHM], ({ securityAlgorithm }: any) => {
+    getStorageValue(STORAGE.SECURITY_ALGORITHM).then((securityAlgorithm) => {
       if (!isEmpty(securityAlgorithm)) this.securityAlgorithm = securityAlgorithm;
       this.initFinished();
     });
@@ -59,34 +60,31 @@ export default class CryptoController extends IController {
     this.passwordHash = INIT_VALUES.passwordHash;
   };
 
-  public generateAppSaltIfNecessary = () => {
+  public generateAppSaltIfNecessary = async () => {
     try {
       if (!this.appSalt) {
         const appSalt: Uint8Array = crypto.getRandomValues(new Uint8Array(16)) as Uint8Array;
         this.appSalt = appSalt;
-        chrome.storage.local.set(
-          { [STORAGE.APP_SALT]: Array.from(appSalt).join(',') },
-          () => console.log('appSalt set'),
-        );
+
+        await setStorageValue(STORAGE.APP_SALT, Array.from(appSalt).join(','));
+        console.log('appSalt set');
       }
     } catch (err) {
-      throw Error('Error generating appSalt');
+      throw new Error('Error generating appSalt');
     }
   };
 
-  public setMasterAccountSecurityAlgo = (
-    algorithm: string,
-  ) => {
+  public setMasterAccountSecurityAlgo = async (algorithm: string) => {
     try {
       this.securityAlgorithm = algorithm;
-      chrome.storage.local.set(
-        { [STORAGE.SECURITY_ALGORITHM]: algorithm },
-        () => console.log('securityAlgorithm set'),
-      );
+
+      await setStorageValue(STORAGE.SECURITY_ALGORITHM, algorithm);
+      console.log('securityAlgorithm set');
     } catch (err) {
-      throw Error('Error setting securityAlgorithm');
+      throw new Error('Error setting securityAlgorithm');
     }
   };
+
 
   public derivePasswordHash = (
     password: string,

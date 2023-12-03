@@ -3,7 +3,26 @@ import AppStore from './AppStore';
 import { MESSAGE_TYPE } from '../../constants';
 import RRCToken from '../../models/RRCToken';
 import Transaction from '../../models/Transaction';
+import { addMessageListener, isExtensionEnvironment, openUrlInNewTab, removeMessageListener, sendMessage, TabOpener } from '../abstraction';
+import { parseJsonOrFallback } from '../../utils';
 // import BigNumber from 'bignumber.js';
+
+// Chrome-specific implementation for opening tabs
+class ChromeTabOpener implements TabOpener {
+  openUrlInNewTab(url: string): void {
+    chrome.tabs.create({ url });
+  }
+}
+
+// Web-compatible implementation for opening tabs
+class WebTabOpener implements TabOpener {
+  openUrlInNewTab(url: string): void {
+    // Implement your web-specific logic for opening a new tab
+    // For example, you might use window.open or another method
+    window.open(url, '_blank');
+  }
+}
+
 
 const INIT_VALUES = {
   activeTabIdx: 0,
@@ -35,32 +54,45 @@ export default class AccountDetailStore {
 
   @action public init = () => {
     console.log('INIT_ACCOUNT_DETAILS_TORE');
-    chrome.runtime.onMessage.addListener(this.handleMessage);
-    chrome.runtime.sendMessage({ type: MESSAGE_TYPE.START_TX_POLLING });
-    chrome.runtime.sendMessage({ type: MESSAGE_TYPE.GET_RRC_TOKEN_LIST });
+    addMessageListener(this.handleMessage);
+    sendMessage({ type: MESSAGE_TYPE.START_TX_POLLING }, () => {});
+    sendMessage({ type: MESSAGE_TYPE.GET_RRC_TOKEN_LIST }, () => {});
   };
 
   public deinit = () => {
-    chrome.runtime.onMessage.removeListener(this.handleMessage);
-    chrome.runtime.sendMessage({ type: MESSAGE_TYPE.STOP_TX_POLLING });
+    removeMessageListener(this.handleMessage);
+    sendMessage({ type: MESSAGE_TYPE.STOP_TX_POLLING }, () => {});
   };
 
   public fetchMoreTxs = () => {
-    chrome.runtime.sendMessage({ type: MESSAGE_TYPE.GET_MORE_TXS });
+    sendMessage({ type: MESSAGE_TYPE.GET_MORE_TXS }, () => {});
   };
+
+  public handleNetworkExplorerResponse(response: any, txid: string, tabOpener: TabOpener): void {
+    if (response) {
+      const url = `${response}/${txid}`;
+      openUrlInNewTab(url, tabOpener);
+    } else {
+      console.error('Error: Invalid response for network explorer URL.');
+    }
+  }
 
 
   public onTransactionClick = (txid: string) => {
-    chrome.runtime.sendMessage({ type: MESSAGE_TYPE.GET_NETWORK_EXPLORER_URL }, (response: any) => {
-      chrome.tabs.create({ url: `${response}/${txid}` });
+    sendMessage({
+      type: MESSAGE_TYPE.GET_NETWORK_EXPLORER_URL,
+    }, (response: any) => {
+      // Determine the environment and use the appropriate tab opener
+      const tabOpener = typeof chrome !== 'undefined' ? new ChromeTabOpener() : new WebTabOpener();
+      this.handleNetworkExplorerResponse(response, txid, tabOpener);
     });
   };
 
   public removeToken = (contractAddress: string) => {
-    chrome.runtime.sendMessage({
+    sendMessage({
       type: MESSAGE_TYPE.REMOVE_TOKEN,
       contractAddress,
-    });
+    }, () => {});
   };
 
   public routeToAddToken = () => {
@@ -68,18 +100,24 @@ export default class AccountDetailStore {
   };
 
   @action private handleMessage = (request: any) => {
-    console.log('ACCOUNT DETAIL STOERE MESSAGE RECEIVED: ', request);
-    switch (request.type) {
-    case MESSAGE_TYPE.GET_TXS_RETURN:
-      this.transactions = request.transactions;
-      this.hasMore = request.hasMore;
-      break;
-    case MESSAGE_TYPE.RRC_TOKENS_RETURN: {
-      this.verifiedTokens = request.tokens;
-      break;
-    }
-    default:
-      break;
+    const requestData = isExtensionEnvironment() ? request : request.data;
+    try {
+      switch (requestData.type) {
+      case MESSAGE_TYPE.GET_TXS_RETURN:
+        console.log('GET_TXS_RETURN', requestData);
+        this.transactions = parseJsonOrFallback(requestData.transactions);
+        this.hasMore = requestData.hasMore;
+        break;
+      case MESSAGE_TYPE.RRC_TOKENS_RETURN: {
+        console.log('RRC_TOKENS_RETURN', requestData);
+        this.verifiedTokens = parseJsonOrFallback(requestData.tokens);
+        break;
+      }
+      default:
+        break;
+      }
+    } catch (err) {
+      console.error(err);
     }
   };
 }

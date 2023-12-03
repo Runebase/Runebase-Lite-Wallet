@@ -151,3 +151,62 @@ You can connect RunebaseChrome to regtest. You will need to set the following in
 2. `password` + `appSalt` runs through `scrpyt` encryption for ~3 seconds to generate `passwordHash`
 3. Existing account is fetched from storage
 4. `passwordHash` is used to decrypted the `encryptedPrivateKey`. On successful decryption of the wallet, the password is validated.
+
+**Running a WebApp Abstraction**
+1. Navigate to dist folder
+2. start http server `http-server -c-1`
+
+## Cordova Smartphone Builds
+### Step 1: Install Cordova
+```bash
+npm install cordova -g
+```
+
+### Step 2: Add platforms
+```bash
+cordova platform add android
+cordova platform add ios
+```
+Add other platforms as needed
+
+### Step 3: Install plugins
+```bash
+cordova plugin add cordova-plugin-android-permissions
+cordova plugin add cordova-plugin-file
+cordova plugin add cordova-plugin-splashscreen
+cordova plugin add cordova-plugin-camera
+```
+Add other plugins as needed
+
+### Step 4: Build the project
+```bash
+cordova build android
+cordova build ios
+```
+
+### Step 5: Run on emulator or device
+```bash
+cordova run android
+cordova run ios
+```
+Run on other platforms as needed
+
+### Emulator android studio
+```bash
+cd /home/bago/runebasechromewallet2/cordova/platforms/android/app/build/outputs/apk/debug/
+adb install app-debug.apk
+```
+
+### trouble-shooting
+```bash
+sdkmanager "build-tools;33.0.2"
+```
+
+### Updating icons & splash scress
+```bash
+# Install cordova-res globally if you haven't already
+npm install -g cordova-res
+
+# Run cordova-res in the cordova directory to generate icons and splash screens
+cordova-res
+```

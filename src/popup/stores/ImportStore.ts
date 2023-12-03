@@ -4,6 +4,7 @@ import { isEmpty } from 'lodash';
 import AppStore from './AppStore';
 import { isValidPrivateKey } from '../../utils';
 import { MESSAGE_TYPE, IMPORT_TYPE } from '../../constants';
+import { sendMessage } from '../abstraction';
 
 const INIT_VALUES = {
   mnemonicPrivateKey: '',
@@ -46,8 +47,7 @@ export default class ImportStore {
       () => this.accountName,
       () => {
         console.log('Account name changed:', this.accountName);
-
-        chrome.runtime.sendMessage(
+        sendMessage(
           {
             type: MESSAGE_TYPE.VALIDATE_WALLET_NAME,
             name: this.accountName,
@@ -61,40 +61,35 @@ export default class ImportStore {
     );
   }
 
-  @action
-  public changeImportType = (type: string) => {
-      console.log('Import type changed:', type);
-      this.importType = type;
-    };
+  @action public changeImportType = (type: string) => {
+    console.log('Import type changed:', type);
+    this.importType = type;
+  };
 
-  @action
-  public reset = () => {
-      console.log('Resetting import store');
-      const tempImportType = this.importType;
-      Object.assign(this, INIT_VALUES);
-      this.importType = tempImportType;
-    };
+  @action public reset = () => {
+    console.log('Resetting import store');
+    const tempImportType = this.importType;
+    Object.assign(this, INIT_VALUES);
+    this.importType = tempImportType;
+  };
 
-  @action
-  public importMnemonicOrPrKey = () => {
-      if (!this.mnemonicPrKeyPageError) {
-        console.log('Importing mnemonic or private key');
-        this.app.routerStore.push('/loading');
-        const msgType =
+  @action public importMnemonicOrPrKey = () => {
+    if (!this.mnemonicPrKeyPageError) {
+      console.log('Importing mnemonic or private key');
+      this.app.routerStore.push('/loading');
+      const msgType =
         this.importType === IMPORT_TYPE.MNEMONIC
           ? MESSAGE_TYPE.IMPORT_MNEMONIC
           : MESSAGE_TYPE.IMPORT_PRIVATE_KEY;
-        chrome.runtime.sendMessage({
-          type: msgType,
-          accountName: this.accountName,
-          mnemonicPrivateKey: this.mnemonicPrivateKey,
-        });
-      }
-    };
+      sendMessage({
+        type: msgType,
+        accountName: this.accountName,
+        mnemonicPrivateKey: this.mnemonicPrivateKey,
+      });
+    }
+  };
 
-  @action
-  public cancelImport = () => {
-      console.log('Cancelling import');
-      this.app.routerStore.goBack();
-    };
+  @action public cancelImport = () => {
+    this.app.routerStore.goBack();
+  };
 }

@@ -14,11 +14,13 @@ export default class OnInstallController extends IController {
     * To get refreshed, dapp tabs must implement the
     * handleRunebaseChromeInstallOrUpdate event listener described in the Readme.
     */
-    chrome.runtime.onInstalled.addListener((details) => {
-      if (details.reason === 'install' || details.reason === 'update') {
-        this.refreshAllDappTabs();
-      }
-    });
+    if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.id) {
+      chrome.runtime.onInstalled.addListener((details) => {
+        if (details.reason === 'install' || details.reason === 'update') {
+          this.refreshAllDappTabs();
+        }
+      });
+    }
 
     this.initFinished();
   }
