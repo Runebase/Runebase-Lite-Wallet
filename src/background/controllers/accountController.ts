@@ -231,9 +231,7 @@ export default class AccountController extends IController {
       type: MESSAGE_TYPE.SAVE_SEED_TO_FILE_RETURN,
       filename,
       content: mnemonic,
-    }, () => {});
-
-    this.importMnemonic(accountName, mnemonic);
+    });
   };
 
   public loginAccount = async (accountName: string) => {

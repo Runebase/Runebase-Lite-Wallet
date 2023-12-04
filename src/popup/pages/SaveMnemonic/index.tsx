@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Typography, Button, Grid, useMediaQuery, useTheme, TextField, InputAdornment } from '@mui/material';
 import { inject, observer } from 'mobx-react';
 import cx from 'classnames';
@@ -6,6 +6,8 @@ import NavBar from '../../components/NavBar';
 import AppStore from '../../stores/AppStore';
 import useStyles from './styles';
 import WarningIcon from '@mui/icons-material/Warning';
+import SaveIcon from '@mui/icons-material/Save';
+import FactCheckIcon from '@mui/icons-material/FactCheck';
 const strings = require('../../localization/locales/en_US.json');
 
 interface IProps {
@@ -17,24 +19,20 @@ const SaveMnemonic: React.FC<IProps> = ({ store }) => {
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
   const isLargeScreen = useMediaQuery(theme.breakpoints.up('lg'));
+  const [isCordova, setIsCordova] = useState<boolean>(false);
   useEffect(() => {
-    console.log('SaveMnemonic');
-    // console.log(store);
+    setIsCordova(typeof window.cordova !== 'undefined');
     store.saveMnemonicStore.generateMnemonic();
-
-    return () => {
-      // Cleanup code (if needed) when the component unmounts
-    };
   }, [store.saveMnemonicStore]);
 
   const renderMnemonicTiles = () => {
     const { mnemonic } = store.saveMnemonicStore;
-    let wordsPerRow = 4;
+    let wordsPerRow = 3;
 
     if (isSmallScreen) {
-      wordsPerRow = 3;
+      wordsPerRow = 2;
     } else if (isLargeScreen) {
-      wordsPerRow = 6;
+      wordsPerRow = 4;
     }
 
     return (
@@ -85,25 +83,28 @@ const SaveMnemonic: React.FC<IProps> = ({ store }) => {
           fullWidth
           variant="contained"
           color="primary"
-          onClick={() => store.saveMnemonicStore.createWallet(false)}
+          onClick={() => store.routerStore.push('/verify-mnemonic')}
+          startIcon={<FactCheckIcon />}
         >
-          I Copied It Somewhere Safe
+          Verify Seed Phrase
         </Button>
         {/*
           Developer Note: Download functionality is disabled for Cordova
           since i encountered issues in making it work.
         */}
-        {typeof window.cordova === 'undefined' || window.cordova === null ? null : (
-          <Button
-            className={classes.actionButton}
-            fullWidth
-            variant="contained"
-            color="primary"
-            onClick={() => store.saveMnemonicStore.createWallet(true)}
-          >
-            Save To File
-          </Button>
-        )}
+        {
+          !isCordova && (
+            <Button
+              className={cx(classes.actionButton, classes.saveButton)}
+              fullWidth
+              variant="contained"
+              color="secondary"
+              onClick={() => store.saveMnemonicStore.saveToFile()}
+              startIcon={<SaveIcon />}
+            >
+              Save Seed Phrase to File
+            </Button>
+          )}
       </div>
     </div>
   );

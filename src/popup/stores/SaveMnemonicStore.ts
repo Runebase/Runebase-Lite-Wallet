@@ -47,4 +47,13 @@ export default class SaveMnemonicStore {
       mnemonicPrivateKey: this.mnemonic.join(' '),
     });
   };
+
+  public saveToFile = () => {
+    console.log('Saving Wallet To File');
+    sendMessage({
+      type: MESSAGE_TYPE.SAVE_TO_FILE,
+      accountName: this.walletName,
+      mnemonicPrivateKey: this.mnemonic.join(' '),
+    });
+  };
 }

@@ -31,6 +31,7 @@ import AddDelegationConfirm from './pages/AddDelegationConfirm';
 import RemoveDelegation from './pages/RemoveDelegation';
 import RemoveDelegationConfirm from './pages/RemoveDelegationConfirm';
 import { sendMessage } from './abstraction';
+import VerifyMnemonic from './pages/VerifyMnemonic';
 
 interface IProps {
   history: any; // Replace with the appropriate type for your history
@@ -79,6 +80,7 @@ const MainContainer: React.FC<IProps> = inject('store')(observer(({ history, sto
           <Route exact path="/create-wallet" component={CreateWallet} />
           <Route exact path="/account-detail" component={AccountDetail} />
           <Route exact path="/save-mnemonic" component={SaveMnemonic} />
+          <Route exact path="/verify-mnemonic" component={VerifyMnemonic} />
           <Route exact path="/import-wallet" component={ImportWallet} />
           <Route exact path="/settings" component={Settings} />
           <Route exact path="/send" component={Send} />

@@ -56,13 +56,6 @@ const useStyles = makeStyles((theme) => ({
     flexDirection: 'column',
     alignItems: 'center', // Center the content horizontally
   },
-  saveButton: {
-    backgroundColor: theme.palette.secondary.main, // Use the secondary color for Save button
-    '&:hover': {
-      backgroundColor: theme.palette.secondary.dark, // Darken the color on hover
-    },
-    color: theme.palette.getContrastText(theme.palette.secondary.main), // Text color based on background color
-  },
   walletCreatedHeader: {
     marginBottom: theme.spacing(1),
     fontSize: theme.typography.h6.fontSize,

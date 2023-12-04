@@ -6,7 +6,6 @@
     "clean": "rm -rf dist",
     "start": "yarn clean && mkdir dist && ./scripts/create-empty-thunk.sh && webpack --progress --config webpack.dev.config.js --watch --devtool source-map & yarn css-types -w",
     "build": "yarn clean && webpack --config webpack.prod.config.js && ./scripts/create-empty-thunk.sh && rm -rf cordova/www/* && cp -R dist/* cordova/www",
-
     "css-types": "tcm src",
     "postinstall": "yarn css-types",
     "lint": "eslint . --ext .ts",
@@ -71,7 +70,7 @@
     "@types/har-format": "^1.2.15",
     "@types/history": "^4.6.2",
     "@types/lodash": "^4.14.202",
-    "@types/node": "^20.10.2",
+    "@types/node": "^20.10.3",
     "@types/qrcode.react": "^1.0.5",
     "@types/react-router": "^5.1.20",
     "@types/scryptsy": "^2.0.0",
