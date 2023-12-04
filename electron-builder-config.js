@@ -1,17 +1,11 @@
 module.exports = {
-  productName: 'Runebase-Light-Wallet',
-  appId: 'com.yourcompany.runebase-light-wallet',
+  productName: 'Runebase-lite-Wallet',
+  appId: 'io.runebase.runebase-lite-wallet',
   files: [
     'dist/**/*',
     'electron/**/*',
     'package.json',
     'main.js'
-  ],
-  extraResources: [
-    {
-      from: 'assets',
-      to: 'assets'
-    }
   ],
   win: {
     icon: 'dist/icons/icon.ico'
