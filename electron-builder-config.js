@@ -2,7 +2,7 @@ module.exports = {
   productName: 'Runebase-Light-Wallet',
   appId: 'com.yourcompany.runebase-light-wallet',
   files: [
-    'src/**/*',
+    'dist/**/*',
     'electron/**/*',
     'package.json',
     'main.js'
@@ -13,7 +13,15 @@ module.exports = {
       to: 'assets'
     }
   ],
+  win: {
+    icon: 'dist/icons/icon.ico'
+  },
+  linux: {
+    category: 'Utility',
+    icon: 'dist/icons/icon.png'
+  },
   mac: {
+    icon: 'dist/icons/icon.icns',
     category: 'your.app.category'
   },
   dmg: {
