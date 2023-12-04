@@ -1,6 +1,6 @@
 import React, { ChangeEvent, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { Typography, Button, Divider } from '@mui/material';
+import { Button, Divider } from '@mui/material';
 import { inject, observer } from 'mobx-react';
 import NavBar from '../../components/NavBar';
 import Logo from '../../components/Logo';
@@ -9,7 +9,6 @@ import AppStore from '../../stores/AppStore';
 import useStyles from './styles';
 
 interface IProps {
-  classes: Record<string, string>;
   store: AppStore;
 }
 
@@ -20,15 +19,12 @@ const CreateWallet: React.FC<IProps> = ({ store }) => {
   useEffect(() => {}, [createWalletStore]);
 
   const onWalletNameChange = (event: ChangeEvent<HTMLInputElement>) => {
-    // MobX action
     createWalletStore.updateWalletName(event.target.value);
     saveMnemonicStore.updateWalletName(event.target.value);
   };
 
   const handleEnterPress = () => {
     const { createWalletStore } = store;
-
-    // MobX action
     createWalletStore.handleEnterPress();
   };
 
@@ -61,15 +57,11 @@ const CreateWallet: React.FC<IProps> = ({ store }) => {
         >
           Create Wallet
         </Button>
-        <div className={classes.selectionDividerContainer}>
-          <Divider className={classes.selectionDivider} />
-          <Typography className={classes.selectionDividerText}>or</Typography>
-          <Divider className={classes.selectionDivider} />
-        </div>
+        <Divider sx={{margin: '20px'}}>Or</Divider>
         <Button
-          className={classes.importButton}
+          className={classes.loginButton}
           fullWidth
-          disableRipple
+          variant="contained"
           color="primary"
           onClick={createWalletStore.routeToImportWallet}
         >

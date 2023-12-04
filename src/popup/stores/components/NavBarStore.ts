@@ -24,22 +24,22 @@ export default class NavBarStore {
 
   @action public changeNetwork = (index: number) => {
     console.log('CALLED CHANGENETWORK to INDEX', index);
-    sendMessage({ type: MESSAGE_TYPE.CHANGE_NETWORK, networkIndex: index }, () => {});
+    sendMessage({ type: MESSAGE_TYPE.CHANGE_NETWORK, networkIndex: index });
   };
 
   @action public routeToSettings = () => {
     this.reset();
-    this.app.routerStore.push('/settings');
+    this.app?.navigate?.('/settings');
   };
 
   @action public routeToManageTokens = () => {
     this.reset();
-    this.app.routerStore.push('/manage-tokens');
+    this.app?.navigate?.('/manage-tokens');
   };
 
   @action public logout = () => {
     this.reset();
-    this.app.routerStore.push('/loading');
-    sendMessage({ type: MESSAGE_TYPE.LOGOUT }, () => {});
+    this.app?.navigate?.('/loading');
+    sendMessage({ type: MESSAGE_TYPE.LOGOUT });
   };
 }

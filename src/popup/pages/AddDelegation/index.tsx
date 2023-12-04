@@ -12,14 +12,13 @@ import DisabledSuperstakerAddressField from '../../components/DisabledSuperstake
 import DelegationFeeField from '../../components/DelegationFeeField';
 
 interface IProps {
-  classes: Record<string, string>;
   store: AppStore;
 }
 
 const AddDelegation: React.FC<IProps> = inject('store')(
   observer(({ store }) => {
     const classes = useStyles();
-    const { sessionStore, delegateStore, routerStore } = store;
+    const { sessionStore, delegateStore } = store;
     const { loggedInAccountName, walletInfo } = sessionStore;
     if (!loggedInAccountName || !walletInfo) return null;
 
@@ -30,7 +29,7 @@ const AddDelegation: React.FC<IProps> = inject('store')(
     const onEnterPress = (event: React.KeyboardEvent) => {
       handleEnterPress(event, () => {
         if (!delegateStore.buttonDisabled) {
-          routerStore.push('/add-delegation-confirm');
+          store.navigate?.('/add-delegation-confirm');
         }
       });
     };

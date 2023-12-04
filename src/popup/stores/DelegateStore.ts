@@ -90,11 +90,11 @@ export default class DelegateStore {
         type: MESSAGE_TYPE.SIGN_POD,
         superStakerAddress: this.selectedSuperstaker.address,
       }, () => {});
-      this.app.routerStore.push('/add-delegation-confirm');
+      this.app?.navigate?.('/add-delegation-confirm');
     }
   };
   @action public routeToRemoveDelegationConfirm = () => {
-    this.app.routerStore.push('/remove-delegation-confirm');
+    this.app?.navigate?.('/remove-delegation-confirm');
   };
 
   @action public sendDelegationConfirm = () => {
@@ -152,7 +152,7 @@ export default class DelegateStore {
     case MESSAGE_TYPE.GET_SUPERSTAKER_RETURN:
       console.log('GET_SUPERSTAKER_RETURN: ', requestData);
       this.setSelectedSuperStaker(requestData.superstaker);
-      this.app.routerStore.push('/superstaker-detail');
+      this.app?.navigate?.('/superstaker-detail');
       break;
     case MESSAGE_TYPE.GET_SUPERSTAKER_DELEGATIONS_RETURN:
       console.log('GET_SUPERSTAKER_DELEGATIONS_RETURN: ', requestData);
@@ -164,7 +164,7 @@ export default class DelegateStore {
       break;
     case MESSAGE_TYPE.SEND_DELEGATION_CONFIRM_SUCCESS:
       console.log('SEND_DELEGATION_CONFIRM_SUCCESS:', requestData);
-      this.app.routerStore.push('/account-detail');
+      this.app?.navigate?.('/account-detail');
       break;
     case MESSAGE_TYPE.SEND_DELEGATION_CONFIRM_FAILURE:
       console.log('SEND_DELEGATION_CONFIRM_FAILURE:', requestData);
@@ -172,7 +172,7 @@ export default class DelegateStore {
       break;
     case MESSAGE_TYPE.SEND_REMOVE_DELEGATION_CONFIRM_SUCCESS:
       console.log('SEND_REMOVE_DELEGATION_CONFIRM_SUCCESS:', requestData);
-      this.app.routerStore.push('/account-detail');
+      this.app?.navigate?.('/account-detail');
       break;
     case MESSAGE_TYPE.SEND_REMOVE_DELEGATION_CONFIRM_FAILURE:
       console.log('SEND_DELEGATION_CONFIRM_FAILURE:', requestData);

@@ -8,7 +8,6 @@ import AppStore from '../../stores/AppStore';
 import BigNumber from 'bignumber.js';
 
 interface IProps {
-  classes: Record<string, string>;
   store: AppStore;
 }
 

@@ -145,7 +145,7 @@ export default class SendStore {
   };
 
   @action public routeToSendConfirm = () => {
-    this.app.routerStore.push('/send-confirm');
+    this.app?.navigate?.('/send-confirm');
   };
 
   @action public send = () => {
@@ -191,7 +191,7 @@ export default class SendStore {
     switch (requestData.type) {
     case MESSAGE_TYPE.SEND_TOKENS_SUCCESS:
       console.log('Send tokens success:', requestData);
-      this.app.routerStore.push('/account-detail');
+      this.app?.navigate?.('/account-detail');
       this.sendState = SEND_STATE.INITIAL;
       break;
     case MESSAGE_TYPE.SEND_TOKENS_FAILURE:

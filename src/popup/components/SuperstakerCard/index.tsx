@@ -2,7 +2,6 @@
 import React from 'react';
 import { Typography, Card, CardContent, CardActions, Button, Tooltip } from '@mui/material';
 import { RunebaseInfo } from 'runebasejs-wallet';
-import { RouterStore } from 'mobx-react-router';
 import SportsScoreIcon from '@mui/icons-material/SportsScore';
 import AppRegistrationIcon from '@mui/icons-material/AppRegistration';
 import NotificationAddIcon from '@mui/icons-material/NotificationAdd';
@@ -10,18 +9,19 @@ import DynamicFormIcon from '@mui/icons-material/DynamicForm';
 import moment from 'moment';
 import DelegateStore from '../../stores/DelegateStore';
 import { SuperStaker } from '../../../types';
+import { NavigateFunction } from 'react-router-dom';
 
 interface SuperStakerCardProps {
   superstaker: SuperStaker;
   delegationInfo: RunebaseInfo.IGetAddressDelegation | undefined;
-  routerStore: RouterStore;
+  navigate: NavigateFunction | undefined;
   delegateStore: DelegateStore;
 }
 
 const SuperStakerCard: React.FC<SuperStakerCardProps> = ({
   superstaker,
   delegationInfo,
-  routerStore,
+  navigate,
   delegateStore,
 }) => {
   return (
@@ -79,7 +79,7 @@ const SuperStakerCard: React.FC<SuperStakerCardProps> = ({
             variant="contained"
             color="secondary"
             onClick={() => {
-              routerStore.push('/remove-delegation');
+              navigate?.('/remove-delegation');
             }}
           >
             Undelegate
@@ -90,7 +90,7 @@ const SuperStakerCard: React.FC<SuperStakerCardProps> = ({
             color="primary"
             onClick={() => {
               delegateStore.setSelectedSuperStaker(superstaker);
-              routerStore.push('/add-delegation');
+              navigate?.('/add-delegation');
             }}
           >
             Change Delegate
@@ -101,7 +101,7 @@ const SuperStakerCard: React.FC<SuperStakerCardProps> = ({
             color="primary"
             onClick={() => {
               delegateStore.setSelectedSuperStaker(superstaker);
-              routerStore.push('/add-delegation');
+              navigate?.('/add-delegation');
             }}
           >
             Delegate
@@ -112,7 +112,7 @@ const SuperStakerCard: React.FC<SuperStakerCardProps> = ({
           color="primary"
           onClick={() => {
             delegateStore.setSelectedSuperStaker(superstaker);
-            routerStore.push('/superstaker-detail');
+            navigate?.('/superstaker-detail');
           }}
         >
           Details

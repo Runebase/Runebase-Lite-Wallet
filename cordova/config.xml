@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='utf-8'?>
-<widget id="io.runebase.runebasechromewallet" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
-    <name>Runebase-Chrome-Wallet</name>
+<widget id="io.runebase.runebaselightwallet" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+    <name>Runebase Light Wallet</name>
     <description>An abstraction of the Runebase Chrome Wallet</description>
     <author email="support@runebase.io" href="https://www.runebase.io">Bago</author>
     <content src="popup.html" />

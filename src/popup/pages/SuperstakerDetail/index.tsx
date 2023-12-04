@@ -10,14 +10,13 @@ import NotificationAddIcon from '@mui/icons-material/NotificationAdd';
 import DynamicFormIcon from '@mui/icons-material/DynamicForm';
 import moment from 'moment';
 interface IProps {
-  classes: Record<string, string>;
   store: AppStore;
 }
 
 const SuperstakerDetail: React.FC<IProps> = inject('store')(
   observer(({ store }) => {
     const classes = useStyles();
-    const { sessionStore, delegateStore, routerStore } = store;
+    const { sessionStore, delegateStore } = store;
     const { loggedInAccountName, walletInfo, delegationInfo } = sessionStore;
     const { selectedSuperstakerDelegations, selectedSuperstaker } = delegateStore;
     if (!loggedInAccountName || !walletInfo) return null;
@@ -81,7 +80,7 @@ const SuperstakerDetail: React.FC<IProps> = inject('store')(
                   variant="contained"
                   color="secondary"
                   onClick={() => {
-                    routerStore.push('/undelegate-confirm');
+                    store.navigate?.('/remove-delegation');
                   }}
                 >
                 Undelegate
@@ -91,7 +90,7 @@ const SuperstakerDetail: React.FC<IProps> = inject('store')(
                   variant="contained"
                   color="primary"
                   onClick={() => {
-                    routerStore.push('/delegate-confirm');
+                    store.navigate?.('/add-delegation');
                   }}
                 >
                 Change Delegate
@@ -101,7 +100,7 @@ const SuperstakerDetail: React.FC<IProps> = inject('store')(
                   variant="contained"
                   color="primary"
                   onClick={() => {
-                    routerStore.push('/delegate-confirm');
+                    store.navigate?.('/add-delegation');
                   }}
                 >
                 Delegate

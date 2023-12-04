@@ -1,13 +1,12 @@
 import React, { useEffect } from 'react';
 import { observer, inject } from 'mobx-react';
-import { Router, Route, Switch } from 'react-router-dom';
+import { Routes, Route, useNavigate } from 'react-router-dom';
 import Dialog from '@mui/material/Dialog';
 import Button from '@mui/material/Button';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogActions from '@mui/material/DialogActions';
-import { createBrowserHistory } from 'history';
 import Loading from './components/Loading';
 import Login from './pages/Login';
 import CreateWallet from './pages/CreateWallet';
@@ -31,13 +30,18 @@ import AddDelegationConfirm from './pages/AddDelegationConfirm';
 import RemoveDelegation from './pages/RemoveDelegation';
 import RemoveDelegationConfirm from './pages/RemoveDelegationConfirm';
 import { sendMessage } from './abstraction';
+import VerifyMnemonic from './pages/VerifyMnemonic';
 
 interface IProps {
-  history: any; // Replace with the appropriate type for your history
   store: AppStore;
 }
 
-const MainContainer: React.FC<IProps> = inject('store')(observer(({ history, store }) => {
+const MainContainer: React.FC<IProps> = inject('store')(observer(({ store }) => {
+  const navigate = useNavigate();
+  useEffect(() => {
+    store.setNavigate(navigate);
+  }, []);
+
   useEffect(() => {
     return () => {
       sendMessage({
@@ -68,32 +72,30 @@ const MainContainer: React.FC<IProps> = inject('store')(observer(({ history, sto
     sessionStore.walletInfo
   ]);
 
-
   return (
     <div style={{ width: '100%', height: '100%' }}>
-      <Router history={history || createBrowserHistory()}>
-        <Switch>
-          <Route exact path="/loading" component={Loading} />
-          <Route exact path="/login" component={Login} />
-          <Route exact path="/account-login" component={AccountLogin} />
-          <Route exact path="/create-wallet" component={CreateWallet} />
-          <Route exact path="/account-detail" component={AccountDetail} />
-          <Route exact path="/save-mnemonic" component={SaveMnemonic} />
-          <Route exact path="/import-wallet" component={ImportWallet} />
-          <Route exact path="/settings" component={Settings} />
-          <Route exact path="/send" component={Send} />
-          <Route exact path="/send-confirm" component={SendConfirm} />
-          <Route exact path="/receive" component={Receive} />
-          <Route exact path="/delegate" component={Delegate} />
-          <Route exact path="/superstaker-detail" component={SuperstakerDetail} />
-          <Route exact path="/add-delegation" component={AddDelegation} />
-          <Route exact path="/add-delegation-confirm" component={AddDelegationConfirm} />
-          <Route exact path="/remove-delegation" component={RemoveDelegation} />
-          <Route exact path="/remove-delegation-confirm" component={RemoveDelegationConfirm} />
-          <Route exact path="/manage-tokens" component={ManageTokens} />
-          <Route exact path="/add-token" component={AddToken} />
-        </Switch>
-      </Router>
+      <Routes>
+        <Route path="/loading" element={<Loading />} />
+        <Route path="/login" element={<Login store={store} />} />
+        <Route path="/account-login" element={<AccountLogin store={store} />} />
+        <Route path="/create-wallet" element={<CreateWallet store={store} />} />
+        <Route path="/account-detail" element={<AccountDetail store={store} />} />
+        <Route path="/save-mnemonic" element={<SaveMnemonic store={store} />} />
+        <Route path="/verify-mnemonic" element={<VerifyMnemonic store={store} />} />
+        <Route path="/import-wallet" element={<ImportWallet store={store} />} />
+        <Route path="/settings" element={<Settings store={store} />} />
+        <Route path="/send" element={<Send store={store} />} />
+        <Route path="/send-confirm" element={<SendConfirm store={store} />} />
+        <Route path="/receive" element={<Receive store={store} />} />
+        <Route path="/delegate" element={<Delegate store={store} />} />
+        <Route path="/superstaker-detail" element={<SuperstakerDetail store={store} />} />
+        <Route path="/add-delegation" element={<AddDelegation store={store} />} />
+        <Route path="/add-delegation-confirm" element={<AddDelegationConfirm store={store} />} />
+        <Route path="/remove-delegation" element={<RemoveDelegation store={store} />} />
+        <Route path="/remove-delegation-confirm" element={<RemoveDelegationConfirm store={store} />} />
+        <Route path="/manage-tokens" element={<ManageTokens store={store} />} />
+        <Route path="/add-token" element={<AddToken store={store} />} />
+      </Routes>
       <UnexpectedErrorDialog mainContainerStore={store.mainContainerStore} />
     </div>
   );

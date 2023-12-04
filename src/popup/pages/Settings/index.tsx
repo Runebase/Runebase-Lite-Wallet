@@ -9,7 +9,6 @@ import AppStore from '../../stores/AppStore';
 import { SessionLogoutInterval } from '../../../models/SessionLogoutInterval';
 
 interface IProps {
-  classes: Record<string, string>;
   store: AppStore;
 }
 

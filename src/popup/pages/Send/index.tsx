@@ -15,7 +15,6 @@ import TokenField from '../../components/TokenField';
 import TransactionSpeedField from '../../components/TransactionSpeedField';
 
 interface IProps {
-  classes: Record<string, string>;
   store: AppStore;
 }
 

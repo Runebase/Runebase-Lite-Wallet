@@ -58,7 +58,7 @@ export default class AddTokenStore {
           sendMessage({
             type: MESSAGE_TYPE.GET_RRC_TOKEN_DETAILS,
             contractAddress: this.contractAddress
-          }, () => {});
+          });
         }
       },
     );
@@ -77,8 +77,8 @@ export default class AddTokenStore {
       name: this.name,
       symbol: this.symbol,
       decimals: this.decimals,
-    }, () => {});
-    this.app.routerStore.push('/manage-tokens');
+    });
+    this.app?.navigate?.('/manage-tokens');
     this.app.accountDetailStore.shouldScrollToBottom = true;
     this.setInitValues();
   };

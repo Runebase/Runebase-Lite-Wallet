@@ -22,7 +22,6 @@ import BigNumber from 'bignumber.js';
 import { getImageUrl } from '../../abstraction';
 
 interface IProps {
-  classes: Record<string, string>;
   store: AppStore;
 }
 

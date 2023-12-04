@@ -61,12 +61,12 @@ export default class CreateWalletStore {
 
   @action public routeToSaveMnemonic = () => {
     console.log('Routing to SaveMnemonic');
-    this.app.routerStore.push('/save-mnemonic');
+    this.app?.navigate?.('/save-mnemonic');
   };
 
   @action public routeToImportWallet = () => {
     console.log('Routing to ImportWallet');
-    this.app.routerStore.push('/import-wallet');
+    this.app?.navigate?.('/import-wallet');
   };
 
   @action public updateWalletName = (newWalletName: string) => {

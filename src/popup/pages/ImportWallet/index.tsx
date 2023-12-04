@@ -19,7 +19,6 @@ import { IMPORT_TYPE } from '../../../constants';
 import useStyles from './styles';
 
 interface IProps {
-  classes: Record<string, string>;
   store: AppStore;
 }
 

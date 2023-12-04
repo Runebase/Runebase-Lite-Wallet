@@ -72,7 +72,7 @@ export default class AccountLoginStore {
 
   @action public loginAccount = () => {
     console.log('Logging in account:', this.selectedWalletName);
-    this.app.routerStore.push('/loading');
+    this.app?.navigate?.('/loading');
     sendMessage({
       type: MESSAGE_TYPE.ACCOUNT_LOGIN,
       selectedWalletName: this.selectedWalletName,
@@ -81,7 +81,7 @@ export default class AccountLoginStore {
 
   @action public routeToCreateWallet = () => {
     console.log('Routing to create wallet');
-    this.app.routerStore.push('/create-wallet');
+    this.app?.navigate?.('/create-wallet');
   };
 
   @action public reset = () => {
