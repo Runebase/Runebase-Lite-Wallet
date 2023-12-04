@@ -6,43 +6,86 @@ const useStyles = makeStyles((theme) => ({
     display: 'flex',
     flexDirection: 'column',
   },
+  mnemonicTilesContainer: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    justifyContent: 'center', // Center the tiles horizontally
+    marginBottom: theme.spacing(2), // Add some margin at the bottom
+  },
+  mnemonicTile: {
+    border: `1px solid ${theme.palette.divider}`,
+    textAlign: 'center',
+    marginBottom: theme.spacing(2),
+    boxSizing: 'border-box',
+    borderRadius: theme.shape.borderRadius,
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center', // Center the text horizontally
+  },
+  tileNumber: {
+    fontSize: theme.typography.fontSizeSmall,
+    color: theme.palette.text.secondary, // Light color for numbers
+  },
+  tileWord: {
+    fontSize: theme.typography.h6.fontSize, // Larger size for words
+    fontWeight: theme.typography.fontWeightBold, // Bold for words
+    color: theme.palette.text.primary, // Dark color for words
+  },
+  tileContainer: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(173, 216, 230, 0.2)', // Grayish background color with a tint of aqua
+    borderRadius: theme.shape.borderRadius,
+    border: `1px solid ${theme.palette.divider}`,
+  },
+  disabledInput: {
+    border: 'none',
+    backgroundColor: 'transparent',
+    width: '100%',
+  },
   contentContainer: {
     flex: 1,
     display: 'flex',
     flexDirection: 'column',
-    margin: theme.spacing(2), // Use spacing instead of padding
+    alignItems: 'center', // Center the content horizontally
+    marginTop: theme.spacing(2), // Add some margin at the top
   },
   topContainer: {
     flex: 1,
     display: 'flex',
     flexDirection: 'column',
+    alignItems: 'center', // Center the content horizontally
   },
   walletCreatedHeader: {
-    // fontSize: theme.typography.h6.fontSize, // Use typography instead of hard-coded value
-    // fontWeight: theme.typography.fontWeightBold as FontWeightProperty, // Use typography instead of fontWeight
-    marginBottom: theme.spacing(1), // Use spacing instead of padding
+    marginBottom: theme.spacing(1),
+    fontSize: theme.typography.h6.fontSize,
+    fontWeight: theme.typography.fontWeightBold,
   },
   mnemonicText: {
-    padding: theme.spacing(2), // Use spacing instead of padding
-    marginBottom: theme.spacing(2), // Use spacing instead of padding
-    // fontSize: theme.typography.fontSizeLarge, // Use typography instead of font
+    padding: theme.spacing(2),
+    marginBottom: theme.spacing(2),
     fontFamily: 'Roboto Mono, monospace',
-    // color: theme.palette.text.primary,
     border: '1px solid black',
-    // borderRadius: theme.shape.borderRadius, // Use shape instead of border
+    borderRadius: theme.shape.borderRadius,
+    textAlign: 'center', // Center the text
   },
   warningText: {
-    // fontSize: theme.typography.fontSizeSmall, // Use typography instead of font
-    // lineHeight: theme.typography.lineHeightMedium, // Use typography instead of lineHeight
-    // color: theme.palette.text.secondary,
+    fontSize: theme.typography.fontSizeSmall,
+    color: theme.palette.warning.main,
+    textAlign: 'center',
+    display: 'flex',
+    flexDirection: 'column', // Display icon and text in a column layout
+    alignItems: 'center',
+  },
+  warningIcon: {
+    color: theme.palette.warning.main,
+    marginBottom: theme.spacing(1), // Add some spacing between the icon and text
   },
   actionButton: {
-    height: theme.spacing(8), // Adjust to your desired value using spacing
-    // borderRadius: theme.shape.borderRadius, // Use shape instead of border
-    marginBottom: theme.spacing(1), // Use spacing instead of padding
-    '&.marginBottom': {
-      marginBottom: theme.spacing(1), // Use spacing instead of padding
-    },
+    height: theme.spacing(8),
+    borderRadius: theme.shape.borderRadius,
+    margin: theme.spacing(2),
   },
 }));
 

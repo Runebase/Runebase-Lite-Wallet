@@ -1,10 +1,11 @@
 import React, { useEffect } from 'react';
-import { Typography, Button } from '@mui/material';
+import { Typography, Button, Grid, useMediaQuery, useTheme, TextField, InputAdornment } from '@mui/material';
 import { inject, observer } from 'mobx-react';
 import cx from 'classnames';
 import NavBar from '../../components/NavBar';
 import AppStore from '../../stores/AppStore';
 import useStyles from './styles';
+import WarningIcon from '@mui/icons-material/Warning';
 const strings = require('../../localization/locales/en_US.json');
 
 interface IProps {
@@ -13,6 +14,9 @@ interface IProps {
 
 const SaveMnemonic: React.FC<IProps> = ({ store }) => {
   const classes = useStyles();
+  const theme = useTheme();
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
+  const isLargeScreen = useMediaQuery(theme.breakpoints.up('lg'));
   useEffect(() => {
     console.log('SaveMnemonic');
     // console.log(store);
@@ -23,16 +27,56 @@ const SaveMnemonic: React.FC<IProps> = ({ store }) => {
     };
   }, [store.saveMnemonicStore]);
 
+  const renderMnemonicTiles = () => {
+    const { mnemonic } = store.saveMnemonicStore;
+    let wordsPerRow = 4;
+
+    if (isSmallScreen) {
+      wordsPerRow = 3;
+    } else if (isLargeScreen) {
+      wordsPerRow = 6;
+    }
+
+    return (
+      <Grid container className={classes.mnemonicTilesContainer}>
+        {mnemonic.map((word, index) => (
+          <Grid item xs={12 / wordsPerRow} key={index} className={classes.mnemonicTile}>
+            <div className={classes.tileContainer}>
+              <TextField
+                className={classes.disabledInput}
+                value={word}
+                disabled
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start" className={classes.tileNumber}>
+                      {index + 1}.
+                    </InputAdornment>
+                  ),
+                }}
+                sx={{
+                  '& .MuiInputBase-input.Mui-disabled': {
+                    WebkitTextFillColor: theme.palette.text.primary, // Adjust color as needed
+                  },
+                }}
+              />
+            </div>
+          </Grid>
+        ))}
+      </Grid>
+    );
+  };
+
   return (
     <div className={classes.root}>
       <NavBar hasBackButton title={''} />
       <div className={classes.contentContainer}>
         <div className={classes.topContainer}>
           <Typography className={classes.walletCreatedHeader}>
-            {strings['saveMnemonic.walletCreated']}
+            Creating Wallet
           </Typography>
-          <Typography className={classes.mnemonicText}>{store.saveMnemonicStore.mnemonic}</Typography>
+          {renderMnemonicTiles()}
           <Typography className={classes.warningText}>
+            <WarningIcon className={classes.warningIcon} />
             {strings['saveMnemonic.warningText']}
           </Typography>
         </div>

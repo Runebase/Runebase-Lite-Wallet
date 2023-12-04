@@ -9,12 +9,12 @@ import { sendMessage } from '../abstraction';
 globalThis.Buffer = Buffer;
 
 const INIT_VALUES = {
-  mnemonic: '',
+  mnemonic: [],
   walletName: '',
 };
 
 export default class SaveMnemonicStore {
-  @observable public mnemonic: string = INIT_VALUES.mnemonic;
+  @observable public mnemonic: Array<string> = INIT_VALUES.mnemonic;
   @observable public walletName: string = INIT_VALUES.walletName;
 
   private app: AppStore;
@@ -24,22 +24,19 @@ export default class SaveMnemonicStore {
     this.app = app;
   }
 
-  @action
-  public generateMnemonic = () => {
-      this.mnemonic = generateMnemonic();
-      console.log('Generated mnemonic:', this.mnemonic);
-    };
+  @action public generateMnemonic = () => {
+    this.mnemonic = generateMnemonic().split(' ');
+    console.log('Generated mnemonic:', this.mnemonic);
+  };
 
-  @action
-  public updateWalletName = (newWalletName: string) => {
-      this.walletName = newWalletName;
-    };
+  @action public updateWalletName = (newWalletName: string) => {
+    this.walletName = newWalletName;
+  };
 
-  @action
-  public reset = () => {
-      console.log('Resetting save mnemonic store');
-      Object.assign(this, INIT_VALUES);
-    };
+  @action public reset = () => {
+    console.log('Resetting save mnemonic store');
+    Object.assign(this, INIT_VALUES);
+  };
 
   public createWallet = (saveFile: boolean) => {
     console.log('Creating wallet');
@@ -47,7 +44,7 @@ export default class SaveMnemonicStore {
     sendMessage({
       type: saveFile ? MESSAGE_TYPE.SAVE_TO_FILE : MESSAGE_TYPE.IMPORT_MNEMONIC,
       accountName: this.walletName,
-      mnemonicPrivateKey: this.mnemonic,
+      mnemonicPrivateKey: this.mnemonic.join(' '),
     });
   };
 }
