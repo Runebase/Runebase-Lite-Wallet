@@ -432,3 +432,4 @@ __pycache__/
 # End of https://www.gitignore.io/api/node,linux,macos,windows,visualstudio,visualstudiocode
 
 cordova/build.json
+dist-electron

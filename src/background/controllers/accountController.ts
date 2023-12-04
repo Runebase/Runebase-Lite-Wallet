@@ -658,7 +658,8 @@ export default class AccountController extends IController {
     _?: chrome.runtime.MessageSender,
     sendResponse?: (response: any) => void,
   ) => {
-    const requestData = isExtensionEnvironment() ? request : request.data;
+    const inExtensionEnvironment = isExtensionEnvironment();
+    const requestData = inExtensionEnvironment ? request : request.data;
     try {
       switch (requestData.type) {
       case MESSAGE_TYPE.LOGIN:
@@ -720,8 +721,8 @@ export default class AccountController extends IController {
         break;
       case MESSAGE_TYPE.GET_LOGGED_IN_ACCOUNT:
         console.log('Getting logged-in account');
-        if (isExtensionEnvironment() && sendResponse) {
-          sendResponse(this.loggedInAccount && this.loggedInAccount.wallet && this.loggedInAccount.wallet.info
+        if (isExtensionEnvironment()) {
+          sendResponse?.(this.loggedInAccount && this.loggedInAccount.wallet && this.loggedInAccount.wallet.info
             ? { name: this.loggedInAccount.name, address: this.loggedInAccount!.wallet!.info!.address }
             : undefined);
         }
@@ -765,11 +766,15 @@ export default class AccountController extends IController {
         break;
       case MESSAGE_TYPE.VALIDATE_WALLET_NAME:
         console.log(`Validating wallet name: ${requestData.name}`);
-        sendMessage({
-          type: MESSAGE_TYPE.USE_CALLBACK,
-          id: requestData.id,// include the messageId in the response for the identifying correct window to close
-          result: this.isWalletNameTaken(requestData.name),
-        });
+        if (inExtensionEnvironment) {
+          sendResponse?.(this.isWalletNameTaken(requestData.name));
+        } else {
+          sendMessage({
+            type: MESSAGE_TYPE.USE_CALLBACK,
+            id: requestData.id,// include the messageId in the response for the identifying correct window to close
+            result: this.isWalletNameTaken(requestData.name),
+          });
+        }
         break;
       case MESSAGE_TYPE.GET_MAX_RUNEBASE_SEND:
         console.log('Getting max RUNEBASE send amount');

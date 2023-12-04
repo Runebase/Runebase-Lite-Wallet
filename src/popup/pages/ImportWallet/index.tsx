@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Typography,
   TextField,
@@ -17,6 +17,7 @@ import BorderTextField from '../../components/BorderTextField';
 import AppStore from '../../stores/AppStore';
 import { IMPORT_TYPE } from '../../../constants';
 import useStyles from './styles';
+import SeedPhraseInput from '../../components/SeedphraseInput';
 
 interface IProps {
   store: AppStore;
@@ -25,6 +26,7 @@ interface IProps {
 const ImportWallet: React.FC<IProps> = ({ store }) => {
   const { importStore } = store;
   const classes = useStyles();
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
     return () => {
@@ -36,27 +38,39 @@ const ImportWallet: React.FC<IProps> = ({ store }) => {
     <div className={classes.root}>
       <NavBar
       // hasNetworkSelector
-        title=""
+        title="Import Wallet"
       />
       <div className={classes.contentContainer}>
-        <Typography className={classes.headerText}>Import Wallet</Typography>
         <div className={classes.inputContainer}>
           <div className={classes.fieldContainer}>
             <TypeField classes={classes} store={store} />
-            <TextField
-              className={classes.mnemonicPrKeyTextField}
-              autoFocus
-              required
-              multiline
-              rows={5}
-              type="text"
-              placeholder={`Enter your ${importStore.importType} here to import your wallet.`}
-              onChange={(e) => (importStore.mnemonicPrivateKey = e.target.value)}
-              InputProps={{
-                classes: { input: classes.mnemonicPrKeyFieldInput },
-              }}
-            />
-            {!!importStore.mnemonicPrivateKey && importStore.privateKeyError && (
+            {importStore.importType === IMPORT_TYPE.PRIVATE_KEY && (
+              <TextField
+                className={classes.mnemonicPrKeyTextField}
+                autoFocus
+                required
+                multiline
+                rows={2}
+                type="text"
+                placeholder={`Enter your ${importStore.importType} here to import your wallet.`}
+                onChange={(e) => importStore.setPrivateKey(e.target.value)}
+                InputProps={{
+                  classes: { input: classes.mnemonicPrKeyFieldInput },
+                }}
+              />
+            )
+            }
+            {importStore.importType === IMPORT_TYPE.MNEMONIC && (
+              <SeedPhraseInput
+                phrase={importStore.mnemonic}
+                setPhrase={importStore.setMnemonic}
+                error={errorMessage}
+                setError={setErrorMessage}
+                disabled={false}
+              />
+            )
+            }
+            {!!importStore.privateKey && importStore.privateKeyError && (
               <Typography className={classes.errorText}>{importStore.privateKeyError}</Typography>
             )}
             <BorderTextField
@@ -64,8 +78,15 @@ const ImportWallet: React.FC<IProps> = ({ store }) => {
               placeholder="Wallet name"
               error={importStore.walletNameTaken}
               errorText={importStore.walletNameError}
-              onChange={(e: any) => (importStore.accountName = e.target.value)}
-              onEnterPress={importStore.importMnemonicOrPrKey}
+              onChange={(e: any) => importStore.setAccountName(e.target.value)}
+              onEnterPress={() => {
+                if (importStore.importType === IMPORT_TYPE.PRIVATE_KEY) {
+                  importStore.importPrivateKey();
+                }
+                if (importStore.importType === IMPORT_TYPE.MNEMONIC) {
+                  importStore.importSeedPhrase();
+                }
+              }}
             />
           </div>
         </div>
@@ -75,8 +96,21 @@ const ImportWallet: React.FC<IProps> = ({ store }) => {
             fullWidth
             variant="contained"
             color="primary"
-            onClick={importStore.importMnemonicOrPrKey}
-            disabled={importStore.mnemonicPrKeyPageError}
+            onClick={() => {
+              if (importStore.importType === IMPORT_TYPE.PRIVATE_KEY) {
+                importStore.importPrivateKey();
+              }
+              if (importStore.importType === IMPORT_TYPE.MNEMONIC) {
+                importStore.importSeedPhrase();
+              }
+            }}
+            disabled={
+              importStore.importType === IMPORT_TYPE.PRIVATE_KEY
+                ? importStore.privateKeyPageError
+                : importStore.importType === IMPORT_TYPE.MNEMONIC
+                  ? importStore.mnemonicPageError
+                  : false // Return default value or false if needed
+            }
           >
             Import
           </Button>
@@ -95,13 +129,9 @@ const ImportWallet: React.FC<IProps> = ({ store }) => {
   );
 };
 
-const Heading: React.FC<any> = ({ classes, name }) => (
-  <Typography className={classes.fieldHeading}>{name}</Typography>
-);
-
 const TypeField: React.FC<any> = observer(({ classes, store }) => (
   <div className={classes.fieldContainer}>
-    <Heading name="Select Type" classes={classes} />
+    <Typography className={classes.fieldHeading}>Select Type</Typography>
     <div className={classes.fieldContentContainer}>
       <Select
         className={classes.typeSelect}
