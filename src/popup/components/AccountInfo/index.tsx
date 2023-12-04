@@ -59,7 +59,7 @@ const AccountInfo: React.FC<IProps> = ({ hasRightArrow, store }) => {
     const location = locations[id];
 
     if (location) {
-      store?.routerStore.push(location);
+      store?.navigate?.(location);
     }
   };
 

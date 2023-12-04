@@ -19,9 +19,7 @@ import PasswordInput from '../../components/PasswordInput';
 import Logo from '../../components/Logo';
 import AppStore from '../../stores/AppStore';
 import useStyles from './styles';
-
 interface IProps {
-  classes: Record<string, string>;
   store: AppStore;
 }
 

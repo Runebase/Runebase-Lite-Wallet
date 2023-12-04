@@ -38,11 +38,11 @@ export default class SaveMnemonicStore {
     Object.assign(this, INIT_VALUES);
   };
 
-  public createWallet = (saveFile: boolean) => {
+  public createWallet = () => {
     console.log('Creating wallet');
-    this.app.routerStore.push('/loading');
+    this.app?.navigate?.('/loading');
     sendMessage({
-      type: saveFile ? MESSAGE_TYPE.SAVE_TO_FILE : MESSAGE_TYPE.IMPORT_MNEMONIC,
+      type: MESSAGE_TYPE.IMPORT_MNEMONIC,
       accountName: this.walletName,
       mnemonicPrivateKey: this.mnemonic.join(' '),
     });

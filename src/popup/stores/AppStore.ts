@@ -1,4 +1,4 @@
-import { RouterStore } from 'mobx-react-router';
+// AppStore.ts
 import NavBarStore from './components/NavBarStore';
 import SessionStore from './SessionStore';
 import LoginStore from './LoginStore';
@@ -12,9 +12,10 @@ import SendStore from './SendStore';
 import AddTokenStore from './AddTokenStore';
 import MainContainerStore from './MainContainerStore';
 import DelegateStore from './DelegateStore';
+import { NavigateFunction } from 'react-router-dom';
 
 export default class AppStore {
-  public routerStore: RouterStore;
+  public navigate?: NavigateFunction;
   public sessionStore: SessionStore;
   public navBarStore: NavBarStore;
   public loginStore: LoginStore;
@@ -30,7 +31,6 @@ export default class AppStore {
   public delegateStore: DelegateStore;
 
   constructor() {
-    this.routerStore = new RouterStore();
     this.sessionStore = new SessionStore();
     this.navBarStore = new NavBarStore(this);
     this.loginStore = new LoginStore(this);
@@ -45,6 +45,11 @@ export default class AppStore {
     this.delegateStore = new DelegateStore(this);
     this.mainContainerStore = new MainContainerStore(this);
   }
+
+  // Add this method to set the custom navigation functions
+  public setNavigate = (navigate: NavigateFunction) => {
+    this.navigate = navigate;
+  };
 }
 
 export const store = new AppStore();

@@ -8,7 +8,6 @@ import { Button, Divider, Paper, Typography } from '@mui/material';
 import { Send as SendIcon } from '@mui/icons-material';
 
 interface IProps {
-  classes: Record<string, string>;
   store: AppStore;
 }
 

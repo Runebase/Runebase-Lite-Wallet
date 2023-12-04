@@ -7,14 +7,13 @@ import { Grid } from '@mui/material';
 import SuperStakerCard from '../../components/SuperstakerCard';
 
 interface IProps {
-  classes: Record<string, string>;
   store: AppStore;
 }
 
 const Delegate: React.FC<IProps> = inject('store')(
   observer(({ store }) => {
     const classes = useStyles();
-    const { sessionStore, delegateStore, routerStore } = store;
+    const { sessionStore, delegateStore } = store;
     const { loggedInAccountName, walletInfo, delegationInfo } = sessionStore;
     if (!loggedInAccountName || !walletInfo) return null;
 
@@ -48,7 +47,7 @@ const Delegate: React.FC<IProps> = inject('store')(
                   <SuperStakerCard
                     superstaker={superstaker}
                     delegationInfo={delegationInfo}
-                    routerStore={routerStore}
+                    navigate={store.navigate}
                     delegateStore={delegateStore}
                   />
                 </Grid>

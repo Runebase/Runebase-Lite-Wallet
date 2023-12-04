@@ -9,7 +9,6 @@ import AppStore from '../../stores/AppStore';
 import useStyles from './styles';
 
 interface IProps {
-  classes: Record<string, string>;
   store: AppStore;
 }
 

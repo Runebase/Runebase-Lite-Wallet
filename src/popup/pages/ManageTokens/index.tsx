@@ -9,7 +9,6 @@ import RRCToken from '../../../models/RRCToken';
 import { isUndefined } from 'lodash';
 
 interface IProps {
-  classes: Record<string, string>;
   store: AppStore;
 }
 

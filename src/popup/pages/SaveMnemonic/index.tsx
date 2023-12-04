@@ -83,7 +83,7 @@ const SaveMnemonic: React.FC<IProps> = ({ store }) => {
           fullWidth
           variant="contained"
           color="primary"
-          onClick={() => store.routerStore.push('/verify-mnemonic')}
+          onClick={() => store.navigate?.('/verify-mnemonic')}
           startIcon={<FactCheckIcon />}
         >
           Verify Seed Phrase

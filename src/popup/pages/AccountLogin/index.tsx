@@ -7,7 +7,6 @@ import Account from '../../../models/Account';
 import useStyles from './styles';
 
 interface IProps {
-  classes: Record<string, string>;
   store: AppStore;
 }
 

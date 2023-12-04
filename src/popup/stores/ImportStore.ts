@@ -76,7 +76,7 @@ export default class ImportStore {
   @action public importMnemonicOrPrKey = () => {
     if (!this.mnemonicPrKeyPageError) {
       console.log('Importing mnemonic or private key');
-      this.app.routerStore.push('/loading');
+      this.app?.navigate?.('/loading');
       const msgType =
         this.importType === IMPORT_TYPE.MNEMONIC
           ? MESSAGE_TYPE.IMPORT_MNEMONIC
@@ -90,6 +90,6 @@ export default class ImportStore {
   };
 
   @action public cancelImport = () => {
-    this.app.routerStore.goBack();
+    this.app?.navigate?.(-1);
   };
 }

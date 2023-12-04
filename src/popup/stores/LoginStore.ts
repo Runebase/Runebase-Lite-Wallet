@@ -43,7 +43,7 @@ export default class LoginStore {
 
       if (response === RESPONSE_TYPE.RESTORING_SESSION) {
         runInAction(() => {
-          this.app.routerStore.push('/loading');
+          this.app?.navigate?.('/loading');
         });
       }
     }));
@@ -61,7 +61,7 @@ export default class LoginStore {
     if (this.error === false) {
       console.log('Attempting login...');
       runInAction(() => {
-        this.app.routerStore.push('/loading');
+        this.app?.navigate?.('/loading');
       });
       sendMessage({ type: MESSAGE_TYPE.LOGIN, password: this.password, algorithm: this.algorithm }, () => {});
     }
@@ -81,7 +81,7 @@ export default class LoginStore {
       this.hasAccounts = requestData.hasAccounts;
       break;
     case MESSAGE_TYPE.RESTORING_SESSION_RETURN:
-      this.app.routerStore.push('/loading');
+      this.app?.navigate?.('/loading');
       break;
 
     default:

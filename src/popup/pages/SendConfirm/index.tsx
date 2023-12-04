@@ -9,7 +9,6 @@ import NavBar from '../../components/NavBar';
 import AppStore from '../../stores/AppStore';
 
 interface IProps {
-  classes: Record<string, string>;
   store: AppStore;
 }
 

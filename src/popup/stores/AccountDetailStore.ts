@@ -96,7 +96,7 @@ export default class AccountDetailStore {
   };
 
   public routeToAddToken = () => {
-    this.app.routerStore.push('/add-token');
+    this.app?.navigate?.('/add-token');
   };
 
   @action private handleMessage = (request: any) => {

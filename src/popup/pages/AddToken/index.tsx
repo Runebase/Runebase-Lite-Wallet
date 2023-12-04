@@ -8,7 +8,6 @@ import { handleEnterPress } from '../../../utils';
 import useStyles from './styles';
 
 interface IProps {
-  classes: Record<string, string>;
   store: AppStore;
 }
 

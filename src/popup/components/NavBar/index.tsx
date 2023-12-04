@@ -52,9 +52,9 @@ const NavBar: FC<IProps> = inject('store')(observer((props: IProps) => {
   );
 }));
 
-const BackButton: FC<IProps> = ({ classes, isDarkTheme, store: { routerStore } }: any) => (
+const BackButton: FC<IProps> = ({ classes, isDarkTheme, store: { navigate } }: any) => (
   <IconButton
-    onClick={() => routerStore.goBack()}
+    onClick={() => navigate?.(-1)}
     className={classes.backIconButton}
     size="large">
     <ArrowBack className={cx(classes.backButton, isDarkTheme ? 'white' : '')} />

@@ -10,14 +10,13 @@ import { Send as SendIcon } from '@mui/icons-material';
 import { handleEnterPress } from '../../../utils';
 
 interface IProps {
-  classes: Record<string, string>;
   store: AppStore;
 }
 
 const RemoveDelegation: React.FC<IProps> = inject('store')(
   observer(({ store }) => {
     const classes = useStyles();
-    const { sessionStore, delegateStore, routerStore } = store;
+    const { sessionStore, delegateStore } = store;
     const { loggedInAccountName, walletInfo } = sessionStore;
     if (!loggedInAccountName || !walletInfo) return null;
 
@@ -26,7 +25,7 @@ const RemoveDelegation: React.FC<IProps> = inject('store')(
     const onEnterPress = (event: React.KeyboardEvent) => {
       handleEnterPress(event, () => {
         if (!delegateStore.buttonDisabled) {
-          routerStore.push('/remove-delegation-confirm');
+          store.navigate?.('/remove-delegation-confirm');
         }
       });
     };
