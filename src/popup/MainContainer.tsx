@@ -46,7 +46,7 @@ const MainContainer: React.FC<IProps> = inject('store')(observer(({ store }) => 
     return () => {
       sendMessage({
         type: MESSAGE_TYPE.LOGOUT,
-      }, () => {});
+      });
     };
   }, []);
 

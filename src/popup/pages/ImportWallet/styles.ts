@@ -10,7 +10,9 @@ const useStyles = makeStyles((theme) => ({
     flex: 1,
     display: 'flex',
     flexDirection: 'column',
-    margin: theme.spacing(2), // Use spacing instead of padding
+    marginLeft: theme.spacing(2), // Use spacing instead of padding
+    marginRight: theme.spacing(2), // Use spacing instead of padding
+    marginBottom: theme.spacing(2), // Use spacing instead of padding
   },
   headerText: {
     // fontSize: theme.typography.h6.fontSize, // Use typography instead of hard-coded value

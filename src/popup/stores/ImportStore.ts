@@ -7,7 +7,8 @@ import { MESSAGE_TYPE, IMPORT_TYPE } from '../../constants';
 import { sendMessage } from '../abstraction';
 
 const INIT_VALUES = {
-  mnemonicPrivateKey: '',
+  privateKey: '',
+  mnemonic: [],
   accountName: '',
   walletNameTaken: false,
   importMnemonicPrKeyFailed: false,
@@ -16,25 +17,32 @@ const INIT_VALUES = {
 
 export default class ImportStore {
   // User input field, could be mnemonic or privateKey, depending on importType
-  @observable public mnemonicPrivateKey: string = INIT_VALUES.mnemonicPrivateKey;
   @observable public accountName: string = INIT_VALUES.accountName;
   @observable public walletNameTaken: boolean = INIT_VALUES.walletNameTaken;
   @observable public importMnemonicPrKeyFailed: boolean = INIT_VALUES.importMnemonicPrKeyFailed;
   @observable public importType: string = INIT_VALUES.importType;
+  @observable public mnemonic: Array<string> = Array.from({ length: 12 }, () => '');
+  @observable public privateKey: string = INIT_VALUES.privateKey;
 
   @computed public get walletNameError(): string | undefined {
     return this.walletNameTaken ? 'Wallet name is taken' : undefined;
   }
-  @computed public get mnemonicPrKeyPageError(): boolean {
-    return [this.mnemonicPrivateKey, this.accountName].some(isEmpty)
-      || !!this.walletNameError || !!this.privateKeyError;
+  @computed public get privateKeyPageError(): boolean {
+    return [this.privateKey, this.accountName].some(isEmpty)
+      || !!this.walletNameError || !!this.privateKeyError || this.accountName.length < 1;
   }
   @computed public get privateKeyError(): string | undefined {
     if (this.importType === IMPORT_TYPE.PRIVATE_KEY) {
-      return isValidPrivateKey(this.mnemonicPrivateKey) ? undefined : 'Not a valid private key';
+      return isValidPrivateKey(this.privateKey) ? undefined : 'Not a valid private key';
     } else {
       return undefined;
     }
+  }
+
+  @computed public get mnemonicPageError(): boolean {
+    const isMnemonicValid = this.mnemonic.length === 12 && this.mnemonic.every(word => word.length > 0);
+    console.log('isMnemonicValid: ', isMnemonicValid);
+    return !isMnemonicValid || !!this.walletNameError || this.accountName.length < 1;
   }
 
   private app: AppStore;
@@ -54,12 +62,16 @@ export default class ImportStore {
           },
           (response: any) => {
             console.log('Wallet name validation response:', response);
-            this.walletNameTaken = response;
+            this.setWalletNameTaken(response);
           },
         );
       },
     );
   }
+
+  @action public setWalletNameTaken = (walletNameTaken: boolean) => {
+    this.walletNameTaken = walletNameTaken;
+  };
 
   @action public changeImportType = (type: string) => {
     console.log('Import type changed:', type);
@@ -73,23 +85,47 @@ export default class ImportStore {
     this.importType = tempImportType;
   };
 
-  @action public importMnemonicOrPrKey = () => {
-    if (!this.mnemonicPrKeyPageError) {
-      console.log('Importing mnemonic or private key');
+  @action public importPrivateKey = () => {
+    if (!this.privateKeyPageError) {
+      console.log('Importing private key');
       this.app?.navigate?.('/loading');
-      const msgType =
-        this.importType === IMPORT_TYPE.MNEMONIC
-          ? MESSAGE_TYPE.IMPORT_MNEMONIC
-          : MESSAGE_TYPE.IMPORT_PRIVATE_KEY;
       sendMessage({
-        type: msgType,
+        type: MESSAGE_TYPE.IMPORT_PRIVATE_KEY,
         accountName: this.accountName,
-        mnemonicPrivateKey: this.mnemonicPrivateKey,
+        mnemonicPrivateKey: this.privateKey,
+      });
+    }
+  };
+
+  @action public importSeedPhrase = () => {
+    if (!this.mnemonicPageError) {
+      console.log('Importing seed phrase');
+      this.app?.navigate?.('/loading');
+      sendMessage({
+        type: MESSAGE_TYPE.IMPORT_MNEMONIC,
+        accountName: this.accountName,
+        mnemonicPrivateKey: this.mnemonic.join(' '),
       });
     }
   };
 
   @action public cancelImport = () => {
     this.app?.navigate?.(-1);
+  };
+  @action public setPrivateKey = (
+    privateKey: string,
+  ) => {
+    this.privateKey = privateKey;
+  };
+  @action public setMnemonic = (
+    mnemonic: Array<string>,
+  ) => {
+    this.mnemonic = mnemonic;
+    console.log(this.mnemonic);
+  };
+  @action public setAccountName = (
+    accountName: string,
+  ) => {
+    this.accountName = accountName;
   };
 }
