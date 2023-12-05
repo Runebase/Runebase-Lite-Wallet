@@ -26,6 +26,8 @@ function createWindow() {
   Menu.setApplicationMenu(null);
   mainWindow.setMinimumSize(350, 600);
 
+  // mainWindow.webContents.openDevTools();
+
   mainWindow.on('closed', function () {
     mainWindow = null;
   });
