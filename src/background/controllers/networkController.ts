@@ -43,7 +43,7 @@ export default class NetworkController extends IController {
         sendMessage({
           type: MESSAGE_TYPE.CHANGE_NETWORK_SUCCESS,
           networkIndex: this.networkIndex,
-        }, () => {});
+        });
       }
       this.initFinished();
     });
@@ -65,14 +65,15 @@ export default class NetworkController extends IController {
       sendMessage({
         type: MESSAGE_TYPE.CHANGE_NETWORK_SUCCESS,
         networkIndex,
-      }, () => {});
+      });
 
       this.main.account.logoutAccount();
     }
   };
 
   private handleMessage = (request: any, _?: chrome.runtime.MessageSender, sendResponse?: (response: any) => void) => {
-    const requestData = isExtensionEnvironment() ? request : request.data;
+    const inExtensionEnvironment = isExtensionEnvironment();
+    const requestData = inExtensionEnvironment ? request : request.data;
     try {
       console.log('network received request handleMessage: ', requestData);
       switch (requestData.type) {
@@ -83,16 +84,25 @@ export default class NetworkController extends IController {
         sendMessage({
           type: MESSAGE_TYPE.GET_NETWORKS_RETURN,
           networks: NetworkController.NETWORKS,
-        }, () => {});
+        });
         break;
       case MESSAGE_TYPE.GET_NETWORK_INDEX:
         sendMessage({
           type: MESSAGE_TYPE.GET_NETWORK_INDEX_RETURN,
           networkIndex: this.networkIndex,
-        }, () => {});
+        });
         break;
       case MESSAGE_TYPE.GET_NETWORK_EXPLORER_URL:
         sendResponse && sendResponse(this.explorerUrl);
+        if (inExtensionEnvironment) {
+          sendResponse?.(this.explorerUrl);
+        } else {
+          sendMessage({
+            type: MESSAGE_TYPE.USE_CALLBACK,
+            id: requestData.id,// include the messageId in the response for the identifying correct window to close
+            result: this.explorerUrl,
+          });
+        }
         break;
       default:
         break;

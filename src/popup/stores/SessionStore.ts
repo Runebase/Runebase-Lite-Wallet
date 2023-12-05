@@ -5,7 +5,12 @@ import { isUndefined } from 'lodash';
 import { MESSAGE_TYPE, NETWORK_NAMES } from '../../constants';
 import QryNetwork from '../../models/QryNetwork';
 import { addMessageListener, isExtensionEnvironment, sendMessage } from '../abstraction';
+import AppStore from './AppStore';
 
+interface WalletBackupInfo {
+  address: string;
+  privateKey: string;
+}
 
 const INIT_VALUES = {
   networkIndex: 0,
@@ -30,6 +35,10 @@ const INIT_VALUES = {
     blockHeight: 0,
     PoD: '',
     verified: false,
+  },
+  walletBackupInfo: {
+    address: '',
+    privateKey: '',
   }
 };
 
@@ -40,6 +49,7 @@ export default class SessionStore {
   @observable public walletInfo?: RunebaseInfo.IGetAddressInfo = INIT_VALUES.walletInfo;
   @observable public blockchainInfo?: RunebaseInfo.IGetBlockchainInfo = INIT_VALUES.blockchainInfo;
   @observable public delegationInfo?: RunebaseInfo.IGetAddressDelegation = INIT_VALUES.delegationInfo;
+  @observable public walletBackupInfo: WalletBackupInfo = INIT_VALUES.walletBackupInfo;
 
   @computed public get runebaseBalanceUSD() {
     return isUndefined(this.runebaseUSD) ? 'Loading...' : `(~$${this.runebaseUSD})`;
@@ -54,9 +64,11 @@ export default class SessionStore {
   }
 
   private runebaseUSD?: number = INIT_VALUES.runebaseUSD;
+  private app: AppStore;
 
-  constructor() {
+  constructor(app: AppStore) {
     makeObservable(this);
+    this.app = app;
     addMessageListener(this.handleMessage);
     sendMessage({ type: MESSAGE_TYPE.GET_NETWORKS });
     sendMessage({ type: MESSAGE_TYPE.GET_NETWORK_INDEX });
@@ -70,9 +82,30 @@ export default class SessionStore {
     sendMessage({ type: MESSAGE_TYPE.GET_RUNEBASE_USD });
   };
 
+  @action public setWalletBackupInfo = (
+    address: string,
+    privateKey: string,
+  ) => {
+    this.walletBackupInfo = {
+      address,
+      privateKey,
+    };
+  };
+
+  @action public initWalletBackupInfo = () => {
+    this.walletBackupInfo = {
+      address: '',
+      privateKey: '',
+    };
+  };
+
   @action private handleMessage = (request: any) => {
     const requestData = isExtensionEnvironment() ? request : request.data;
     switch (requestData.type) {
+    case MESSAGE_TYPE.REQUEST_BACKUP_WALLET_INFO_RETURN:
+      this.setWalletBackupInfo(requestData.address, requestData.privateKey);
+      this.app?.navigate?.('/backup-wallet');
+      break;
     case MESSAGE_TYPE.GET_LOGGED_IN_ACCOUNT_NAME_RETURN:
       this.setLoggedInAccountName(requestData.accountName);
       break;

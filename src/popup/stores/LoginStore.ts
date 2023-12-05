@@ -34,7 +34,7 @@ export default class LoginStore {
     makeObservable(this);
     this.app = app;
     addMessageListener(this.handleMessage);
-    sendMessage({ type: MESSAGE_TYPE.HAS_ACCOUNTS }, () => {});
+    sendMessage({ type: MESSAGE_TYPE.HAS_ACCOUNTS });
 
 
     // Attempt to restore session
@@ -57,14 +57,46 @@ export default class LoginStore {
     });
   };
 
+  @action public setPassword = (
+    password: string,
+  ) => {
+    this.password = password;
+  };
+
+  @action public setConfirmPassword = (
+    confirmPassword: string,
+  ) => {
+    this.confirmPassword = confirmPassword;
+  };
+
   @action public login = () => {
     if (this.error === false) {
       console.log('Attempting login...');
       runInAction(() => {
         this.app?.navigate?.('/loading');
       });
-      sendMessage({ type: MESSAGE_TYPE.LOGIN, password: this.password, algorithm: this.algorithm }, () => {});
+      sendMessage({
+        type: MESSAGE_TYPE.LOGIN,
+        password: this.password,
+        algorithm: this.algorithm
+      });
+      this.setPassword('');
     }
+  };
+
+  @action public loginRequest = (
+    MessageType: string
+  ) => {
+    console.log(`Attempting loginRequest with MESSAGE_TYPE.${MessageType}`);
+    runInAction(() => {
+      this.app?.navigate?.('/loading');
+    });
+    sendMessage({
+      type: MessageType,
+      password: this.password,
+      algorithm: this.algorithm
+    });
+    this.setPassword('');
   };
 
   private getMatchError = (): string | undefined => {

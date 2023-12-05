@@ -10,7 +10,7 @@ export const messageCallbacks = {};
 
 let targetOrigin = '*'; // Default to allow cross-origin communication
 if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.id) {
-  targetOrigin = window.location.origin;
+  targetOrigin = chrome.runtime.getURL('/');
 } else if (typeof process !== 'undefined' && process.type) {
   targetOrigin = 'file://';
 } else {
@@ -32,6 +32,7 @@ if (typeof document !== 'undefined' && typeof document.addEventListener === 'fun
 export function sendMessage(message: any, callback?: any) {
   try {
     if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.id) {
+      console.log('sending message on chrome');
       chrome.runtime.sendMessage(message, callback);
     } else {
       if (
@@ -52,6 +53,7 @@ export function sendMessage(message: any, callback?: any) {
         window.addEventListener('message', handler);
         message.id = messageId;
       }
+      console.log('sending message with window');
       window.postMessage(message, targetOrigin);
     }
   } catch (error) {

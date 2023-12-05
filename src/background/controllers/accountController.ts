@@ -104,8 +104,9 @@ export default class AccountController extends IController {
     algorithm: string,
   ) => {
     this.main.crypto.generateAppSaltIfNecessary();
-    this.main.crypto.derivePasswordHash(password, algorithm);
+    this.main.crypto.derivePasswordHash(password, algorithm, true);
   };
+
 
   public finishLogin = async () => {
     if (!this.hasAccounts) {
@@ -123,7 +124,31 @@ export default class AccountController extends IController {
 
     sendMessage({
       type: MESSAGE_TYPE.LOGIN_FAILURE,
-    }, () => {});
+    });
+  };
+
+  public requestWalletBackupInfo = async (
+    password: string,
+    algorithm: string,
+  ) => {
+    this.main.crypto.generateAppSaltIfNecessary();
+    this.main.crypto.derivePasswordHash(
+      password,
+      algorithm,
+      false,
+    );
+    const isPwValid = await this.validatePassword();
+    if (isPwValid) {
+      sendMessage({
+        address: this.loggedInAccount?.wallet?.rjsWallet?.address,
+        privateKey: this.loggedInAccount?.wallet?.rjsWallet?.keyPair.toWIF(),
+        type: MESSAGE_TYPE.REQUEST_BACKUP_WALLET_INFO_RETURN,
+      });
+    } else {
+      sendMessage({
+        type: MESSAGE_TYPE.LOGIN_FAILURE,
+      });
+    }
   };
 
   /*
@@ -177,7 +202,7 @@ export default class AccountController extends IController {
     if (exists) {
       sendMessage({
         type: MESSAGE_TYPE.IMPORT_MNEMONIC_PRKEY_FAILURE
-      }, () => {});
+      });
       return;
     }
 
@@ -206,7 +231,7 @@ export default class AccountController extends IController {
     if (exists) {
       sendMessage({
         type: MESSAGE_TYPE.IMPORT_MNEMONIC_PRKEY_FAILURE,
-      }, () => {});
+      });
       return;
     }
 
@@ -272,13 +297,13 @@ export default class AccountController extends IController {
       // Accounts not found, route to Create Wallet page
       sendMessage({
         type: MESSAGE_TYPE.LOGIN_SUCCESS_NO_ACCOUNTS,
-      }, () => {});
+      });
     } else {
       console.log('LOGIN_SUCCESS_WITH_ACCOUNTS');
       // Accounts found, route to Account Login page
       sendMessage({
         type: MESSAGE_TYPE.LOGIN_SUCCESS_WITH_ACCOUNTS,
-      }, () => {});
+      });
     }
   };
 
@@ -310,7 +335,7 @@ export default class AccountController extends IController {
     }
     sendMessage({
       type: MESSAGE_TYPE.ACCOUNT_LOGIN_SUCCESS,
-    }, () => {});
+    });
   };
 
   /*
@@ -406,7 +431,7 @@ export default class AccountController extends IController {
       sendMessage({
         type: MESSAGE_TYPE.GET_WALLET_INFO_RETURN,
         info: this.loggedInAccount.wallet.info,
-      }, () => {});
+      });
       if (sendInpageUpdate) {
         this.main.inpageAccount.sendInpageAccountAllPorts(RUNEBASECHROME_ACCOUNT_CHANGE.BALANCE_CHANGE);
       }
@@ -425,7 +450,7 @@ export default class AccountController extends IController {
       sendMessage({
         type: MESSAGE_TYPE.GET_DELEGATION_INFO_RETURN,
         delegationInfo,
-      }, () => {});
+      });
     }
   };
 
@@ -441,7 +466,7 @@ export default class AccountController extends IController {
         sendMessage({
           type: MESSAGE_TYPE.GET_SUPERSTAKER_DELEGATIONS_RETURN,
           superstakerDelegations,
-        }, () => {});
+        });
       }
     } catch (error) {
       console.error('Error fetching superstaker delegations:', error);
@@ -464,7 +489,7 @@ export default class AccountController extends IController {
       sendMessage({
         type: MESSAGE_TYPE.GET_BLOCKCHAIN_INFO_RETURN,
         blockchainInfo: this.blockchainInfo,
-      }, () => {});
+      });
     }
   };
 
@@ -520,12 +545,12 @@ export default class AccountController extends IController {
       this.main.transaction.addTransaction(newTransaction);
       sendMessage({
         type: MESSAGE_TYPE.SEND_TOKENS_SUCCESS,
-      }, () => {});
+      });
     } catch (err) {
       sendMessage({
         type: MESSAGE_TYPE.SEND_TOKENS_FAILURE,
         error: err,
-      }, () => {});
+      });
       throw (err);
     }
   };
@@ -550,7 +575,7 @@ export default class AccountController extends IController {
       sendMessage({
         type: MESSAGE_TYPE.GET_MAX_RUNEBASE_SEND_RETURN,
         maxRunebaseAmount,
-      }, () => {});
+      });
     });
   };
 
@@ -599,14 +624,14 @@ export default class AccountController extends IController {
       sendMessage({
         type: MESSAGE_TYPE.SEND_DELEGATION_CONFIRM_FAILURE,
         error,
-      }, () => {});
+      });
       return;
     }
 
     console.log('sendDelegationConfirm sent successfully!');
     sendMessage({
       type: MESSAGE_TYPE.SEND_DELEGATION_CONFIRM_SUCCESS,
-    }, () => {});
+    });
   };
 
   private sendRemoveDelegationConfirm = async (
@@ -642,14 +667,14 @@ export default class AccountController extends IController {
       sendMessage({
         type: MESSAGE_TYPE.SEND_REMOVE_DELEGATION_CONFIRM_FAILURE,
         error,
-      }, () => {});
+      });
       return;
     }
 
     console.log('sendRemoveDelegationConfirm sent successfully!');
     sendMessage({
       type: MESSAGE_TYPE.SEND_REMOVE_DELEGATION_CONFIRM_SUCCESS,
-    }, () => {});
+    });
   };
 
   private handleMessage = async (
@@ -663,9 +688,12 @@ export default class AccountController extends IController {
     try {
       switch (requestData.type) {
       case MESSAGE_TYPE.LOGIN:
-        console.log(`Logging in with password: ${requestData.password}`);
         this.login(requestData.password, requestData.algorithm);
         break;
+      case MESSAGE_TYPE.REQUEST_BACKUP_WALLET_INFO: {
+        this.requestWalletBackupInfo(requestData.password, requestData.algorithm);
+        break;
+      }
       case MESSAGE_TYPE.IMPORT_MNEMONIC:
         console.log(`Importing mnemonic: ${requestData.accountName}, ${requestData.mnemonicPrivateKey}`);
         await this.importMnemonic(requestData.accountName, requestData.mnemonicPrivateKey);

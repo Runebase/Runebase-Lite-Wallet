@@ -89,6 +89,7 @@ export default class CryptoController extends IController {
   public derivePasswordHash = (
     password: string,
     algorithm: string,
+    needsFinishLoginCallback: boolean,
   ) => {
     if (!this.appSalt) {
       throw Error('appSalt should not be empty');
@@ -115,7 +116,8 @@ export default class CryptoController extends IController {
             throw Error('Error calculating PBKDF2 derivedKey');
           }
           this.passwordHash = derivedKey.toString('hex');
-          this.main.account.finishLogin();
+          console.log('needs to finish login route? ', needsFinishLoginCallback);
+          needsFinishLoginCallback && this.main.account.finishLogin();
         }
       );
     }
@@ -142,7 +144,7 @@ export default class CryptoController extends IController {
             throw Error('scrypt failed to calculate derivedKey');
           }
           this.passwordHash = e.data.passwordHash;
-          this.main.account.finishLogin();
+          needsFinishLoginCallback && this.main.account.finishLogin();
         };
       }
     }
