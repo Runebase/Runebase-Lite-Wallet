@@ -5,11 +5,11 @@ import AppStore from '../AppStore';
 import { sendMessage } from '../../abstraction';
 
 const INIT_VALUES = {
-  settingsMenuAnchor: undefined,
+  settingsMenuAnchor: null,
 };
 
 export default class NavBarStore {
-  @observable public settingsMenuAnchor?: string = INIT_VALUES.settingsMenuAnchor;
+  @observable public settingsMenuAnchor?: Element | null = INIT_VALUES.settingsMenuAnchor;
 
   private app: AppStore;
 

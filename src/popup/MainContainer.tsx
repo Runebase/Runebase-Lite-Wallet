@@ -31,6 +31,7 @@ import RemoveDelegation from './pages/RemoveDelegation';
 import RemoveDelegationConfirm from './pages/RemoveDelegationConfirm';
 import { sendMessage } from './abstraction';
 import VerifyMnemonic from './pages/VerifyMnemonic';
+import BackupWallet from './pages/BackupWallet';
 
 interface IProps {
   store: AppStore;
@@ -95,6 +96,7 @@ const MainContainer: React.FC<IProps> = inject('store')(observer(({ store }) => 
         <Route path="/remove-delegation-confirm" element={<RemoveDelegationConfirm store={store} />} />
         <Route path="/manage-tokens" element={<ManageTokens store={store} />} />
         <Route path="/add-token" element={<AddToken store={store} />} />
+        <Route path="/backup-wallet" element={<BackupWallet store={store} />} />
       </Routes>
       <UnexpectedErrorDialog mainContainerStore={store.mainContainerStore} />
     </div>

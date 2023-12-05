@@ -34,14 +34,6 @@ const Login: React.FC<IProps> = inject('store')(
     }, [loginStore]);
     useEffect(() => { }, [hasAccounts]);
 
-    const handlePasswordChange = (e: any) => {
-      loginStore.password = e.target.value;
-    };
-
-    const handleConfirmPasswordChange = (e: any) => {
-      loginStore.confirmPassword = e.target.value;
-    };
-
     return (
       <div className={classes.root}>
         <Logo />
@@ -54,7 +46,7 @@ const Login: React.FC<IProps> = inject('store')(
             <PasswordInput
               autoFocus={true}
               placeholder="Password"
-              onChange={handlePasswordChange}
+              onChange={(e) => loginStore.setPassword(e.target.value)}
               onEnterPress={loginStore.login}
             />
           </Box>
@@ -69,7 +61,7 @@ const Login: React.FC<IProps> = inject('store')(
                   placeholder="Confirm password"
                   error={!!matchError}
                   errorText={matchError}
-                  onChange={handleConfirmPasswordChange}
+                  onChange={(e) => loginStore.setConfirmPassword(e.target.value)}
                   onEnterPress={loginStore.login}
                 />
               </Box>

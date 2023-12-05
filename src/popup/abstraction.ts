@@ -8,9 +8,31 @@ export interface TabOpener {
 const messageListeners: { callback: MessageCallback }[] = [];
 export const messageCallbacks = {};
 
+let targetOrigin = '*'; // Default to allow cross-origin communication
+if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.id) {
+  targetOrigin = chrome.runtime.getURL('/');
+} else if (typeof process !== 'undefined' && process.type) {
+  targetOrigin = 'file://';
+} else {
+  console.log('Not running in Cordova environment');
+  targetOrigin = window.location.origin;
+}
+
+function setTargetOriginForCordova() {
+  if (typeof window.cordova !== 'undefined') {
+    console.log('Running in Cordova environment');
+    targetOrigin = 'https://localhost';
+  }
+}
+
+if (typeof document !== 'undefined' && typeof document.addEventListener === 'function') {
+  document.addEventListener('deviceready', setTargetOriginForCordova, false);
+}
+
 export function sendMessage(message: any, callback?: any) {
   try {
     if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.id) {
+      console.log('sending message on chrome');
       chrome.runtime.sendMessage(message, callback);
     } else {
       if (
@@ -31,13 +53,16 @@ export function sendMessage(message: any, callback?: any) {
         window.addEventListener('message', handler);
         message.id = messageId;
       }
-      window.postMessage(message, '*');
+      console.log('sending message with window');
+      window.postMessage(message, targetOrigin);
     }
   } catch (error) {
     console.error('Error in sendMessage:', error);
     // You might want to add additional error handling logic here
   }
 }
+
+
 
 export function addMessageListener(handleMessage: MessageCallback) {
   if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.onMessage) {

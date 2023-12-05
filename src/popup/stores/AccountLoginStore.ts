@@ -43,7 +43,7 @@ export default class AccountLoginStore {
    */
   @action public getAccounts = (validatesNetwork: boolean = false) => {
     this.validatesNetwork = validatesNetwork;
-    sendMessage({ type: MESSAGE_TYPE.GET_ACCOUNTS }, () => {});
+    sendMessage({ type: MESSAGE_TYPE.GET_ACCOUNTS });
   };
 
   /**
@@ -76,7 +76,7 @@ export default class AccountLoginStore {
     sendMessage({
       type: MESSAGE_TYPE.ACCOUNT_LOGIN,
       selectedWalletName: this.selectedWalletName,
-    }, () => {});
+    });
   };
 
   @action public routeToCreateWallet = () => {

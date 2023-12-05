@@ -48,6 +48,10 @@ const AccountDetail: React.FC<IProps> = ({ store }) => {
   ]);
 
   useEffect(() => {
+    sessionStore.initWalletBackupInfo();
+  }, []);
+
+  useEffect(() => {
     if (accountDetailStore.shouldScrollToBottom === true) {
       scrollToBottom();
     }

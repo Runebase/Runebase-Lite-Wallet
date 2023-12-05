@@ -1,5 +1,7 @@
 {
   "name": "Runebase-Light-Wallet",
+  "description": "LightWeight wallet for the Runebase blockchain",
+  "author": "Bago",
   "version": "1.5.1",
   "private": true,
   "scripts": {
