@@ -86,7 +86,7 @@ export default class CryptoController extends IController {
   };
 
 
-  public derivePasswordHash = (
+  public derivePasswordHash = async (
     password: string,
     algorithm: string,
     needsFinishLoginCallback: boolean,
@@ -105,22 +105,33 @@ export default class CryptoController extends IController {
     console.log('picked algorithm:', pickSecurityAlgorithm);
     if (pickSecurityAlgorithm === 'PBKDF2') {
       console.log('execute PBKDF2');
-      pbkdf2(
-        password,
-        Buffer.from(this.appSalt),
-        CryptoController.PBKDF2_ITERATIONS,
-        CryptoController.PBKDF2_KEY_LENGTH,
-        CryptoController.PBKDF2_ALGORITHM,
-        (err, derivedKey) => {
-          if (err) {
-            throw Error('Error calculating PBKDF2 derivedKey');
-          }
-          this.passwordHash = derivedKey.toString('hex');
-          console.log('needs to finish login route? ', needsFinishLoginCallback);
-          needsFinishLoginCallback && this.main.account.finishLogin();
-        }
-      );
+      const pbkdf2Async = () =>
+        new Promise<string>((resolve, reject) => {
+          pbkdf2(
+            password,
+            Buffer.from(this.appSalt || ''),
+            CryptoController.PBKDF2_ITERATIONS,
+            CryptoController.PBKDF2_KEY_LENGTH,
+            CryptoController.PBKDF2_ALGORITHM,
+            (err, derivedKey) => {
+              if (err) {
+                reject('Error calculating PBKDF2 derivedKey');
+              } else {
+                resolve(derivedKey.toString('hex'));
+              }
+            }
+          );
+        });
+
+      try {
+        this.passwordHash = await pbkdf2Async();
+        console.log('needs to finish login route? ', needsFinishLoginCallback);
+        needsFinishLoginCallback && this.main.account.finishLogin();
+      } catch (error) {
+        throw new Error(error as any);
+      }
     }
+
     if (pickSecurityAlgorithm === 'Scrypt') {
       /*
       * Create a web worker for the scrypt key derivation, so that it doesn't freeze the loading screen ui.

@@ -131,8 +131,8 @@ export default class AccountController extends IController {
     password: string,
     algorithm: string,
   ) => {
-    this.main.crypto.generateAppSaltIfNecessary();
-    this.main.crypto.derivePasswordHash(
+    await this.main.crypto.generateAppSaltIfNecessary();
+    await this.main.crypto.derivePasswordHash(
       password,
       algorithm,
       false,

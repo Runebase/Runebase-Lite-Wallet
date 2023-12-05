@@ -80,6 +80,7 @@ export default class SessionStore {
     sendMessage({ type: MESSAGE_TYPE.GET_WALLET_INFO });
     sendMessage({ type: MESSAGE_TYPE.GET_DELEGATION_INFO });
     sendMessage({ type: MESSAGE_TYPE.GET_RUNEBASE_USD });
+    this.initWalletBackupInfo();
   };
 
   @action public setWalletBackupInfo = (
@@ -104,7 +105,6 @@ export default class SessionStore {
     switch (requestData.type) {
     case MESSAGE_TYPE.REQUEST_BACKUP_WALLET_INFO_RETURN:
       this.setWalletBackupInfo(requestData.address, requestData.privateKey);
-      this.app?.navigate?.('/backup-wallet');
       break;
     case MESSAGE_TYPE.GET_LOGGED_IN_ACCOUNT_NAME_RETURN:
       this.setLoggedInAccountName(requestData.accountName);

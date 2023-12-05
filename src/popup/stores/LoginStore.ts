@@ -88,9 +88,9 @@ export default class LoginStore {
     MessageType: string
   ) => {
     console.log(`Attempting loginRequest with MESSAGE_TYPE.${MessageType}`);
-    runInAction(() => {
-      this.app?.navigate?.('/loading');
-    });
+    if (MessageType === MESSAGE_TYPE.REQUEST_BACKUP_WALLET_INFO) {
+      this.app?.navigate?.('/backup-wallet');
+    }
     sendMessage({
       type: MessageType,
       password: this.password,
