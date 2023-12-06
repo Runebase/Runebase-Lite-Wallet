@@ -5,7 +5,6 @@ import { isUndefined } from 'lodash';
 import { MESSAGE_TYPE, NETWORK_NAMES } from '../../constants';
 import QryNetwork from '../../models/QryNetwork';
 import { addMessageListener, isExtensionEnvironment, sendMessage } from '../abstraction';
-import AppStore from './AppStore';
 
 interface WalletBackupInfo {
   address: string;
@@ -64,11 +63,9 @@ export default class SessionStore {
   }
 
   private runebaseUSD?: number = INIT_VALUES.runebaseUSD;
-  private app: AppStore;
 
-  constructor(app: AppStore) {
+  constructor() {
     makeObservable(this);
-    this.app = app;
     addMessageListener(this.handleMessage);
     sendMessage({ type: MESSAGE_TYPE.GET_NETWORKS });
     sendMessage({ type: MESSAGE_TYPE.GET_NETWORK_INDEX });

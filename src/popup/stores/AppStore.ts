@@ -31,7 +31,7 @@ export default class AppStore {
   public delegateStore: DelegateStore;
 
   constructor() {
-    this.sessionStore = new SessionStore(this);
+    this.sessionStore = new SessionStore();
     this.navBarStore = new NavBarStore(this);
     this.loginStore = new LoginStore(this);
     this.createWalletStore = new CreateWalletStore(this);

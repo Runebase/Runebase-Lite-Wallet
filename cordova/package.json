@@ -12,20 +12,16 @@
   ],
   "author": "Apache Cordova Team",
   "license": "Apache-2.0",
-  "devDependencies": {
-    "cordova-android": "^12.0.1",
-    "cordova-plugin-splashscreen": "^6.0.1"
-  },
   "cordova": {
     "platforms": [
       "android"
     ],
     "plugins": {
-      "cordova-plugin-android-permissions": {},
       "cordova-plugin-splashscreen": {}
     }
   },
-  "dependencies": {
-    "cordova-plugin-android-permissions": "1.1.5"
+  "devDependencies": {
+    "cordova-android": "^12.0.1",
+    "cordova-plugin-splashscreen": "^6.0.1"
   }
 }

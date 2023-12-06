@@ -1,3 +1,4 @@
+// eslint-disable-next-line no-undef
 module.exports = {
   productName: 'Runebase-lite-Wallet',
   appId: 'io.runebase.runebase-lite-wallet',

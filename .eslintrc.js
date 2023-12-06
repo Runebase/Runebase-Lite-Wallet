@@ -1,3 +1,4 @@
+// eslint-disable-next-line no-undef
 module.exports = {
   extends: ['eslint:recommended', 'plugin:@typescript-eslint/recommended'],
   parser: '@typescript-eslint/parser',
@@ -13,7 +14,7 @@ module.exports = {
     'sort-keys': 'off',
     'import/order': 'off',
     'no-console': 'off',
-    "indent": ["error", 2],
+    'indent': ['error', 2],
     quotes: ['error', 'single', { avoidEscape: true, allowTemplateLiterals: false }],
     // '@typescript-eslint/naming-convention': [
     //   'error',
