@@ -16,7 +16,6 @@ const SeedPhraseInput: React.FC<any> = ({
   const isLargeScreen = useMediaQuery(theme.breakpoints.up('lg'));
 
   // State to keep track of selected inputs and focused state
-  const [selectedInputs, setSelectedInputs] = useState<number[]>([]);
   const [focusedInput, setFocusedInput] = useState<number | null>(null);
 
   const handlePhraseChange = (index: number, value: string) => {
@@ -26,15 +25,6 @@ const SeedPhraseInput: React.FC<any> = ({
       return updatedPhrase;
     });
     setError(null);
-  };
-
-  const handleInputClick = (index: number) => {
-    setSelectedInputs(prevSelected => {
-      const isSelected = prevSelected.includes(index);
-      return isSelected
-        ? prevSelected.filter(selectedIndex => selectedIndex !== index)
-        : [...prevSelected, index];
-    });
   };
 
   const handleFocus = (index: number) => {
@@ -60,10 +50,9 @@ const SeedPhraseInput: React.FC<any> = ({
           <Grid item xs={12 / wordsPerRow} key={index} className={classes.mnemonicTile}>
             <div className={classes.tileContainer}>
               <TextField
-                type={(selectedInputs.includes(index) || focusedInput === index || disabled) ? 'text' : 'password'}
+                type={focusedInput === index || disabled ? 'text' : 'password'}
                 value={word}
                 onChange={(e) => handlePhraseChange(index, e.target.value)}
-                onClick={() => !disabled && handleInputClick(index)} // Only handle click if not disabled
                 onFocus={() => handleFocus(index)}
                 onBlur={handleBlur}
                 variant="outlined"
