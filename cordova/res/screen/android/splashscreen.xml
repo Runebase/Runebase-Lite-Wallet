@@ -1,0 +1,9 @@
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Background image -->
+    <item>
+        <bitmap
+            android:src="@mipmap/ic_launcher"
+            android:gravity="fill" />
+    </item>
+</layer-list>

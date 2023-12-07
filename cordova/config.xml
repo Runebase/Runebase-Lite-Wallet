@@ -1,29 +1,25 @@
 <?xml version='1.0' encoding='utf-8'?>
-<widget id="io.runebase.runebaselightwallet" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
-    <name>Runebase Light Wallet</name>
-    <description>An abstraction of the Runebase Chrome Wallet</description>
+<widget id="io.runebase.runebaselitewallet" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0" android-versionCode="100">
+    <name>Runebase Lite Wallet</name>
+    <description>A lightweight wallet and transaction signing client for the Runebase network</description>
     <author email="support@runebase.io" href="https://www.runebase.io">Bago</author>
     <content src="popup.html" />
     <allow-intent href="http://*/*" />
     <allow-intent href="https://*/*" />
-
+    <!-- <hook type="after_prepare" src="scripts/after_prepare" /> -->
     <platform name="android">
-        <!-- <preference name="AndroidPersistentFileLocation" value="internal" /> -->
-        <!-- <hook type="after_prepare" src="scripts/after_prepare.js" /> -->
-        <!-- Icons -->
+        <!-- Add AndroidExtraFilesystems to specify allowed directories for file insertion -->
+        <preference name="AndroidExtraFilesystems" value="files,files-external,documents,sdcard,cache,cache-external,root" />
+        <!-- <preference name="android-minSdkVersion" value="26" /> -->
+        <preference name="AndroidPersistentFileLocation" value="internal" />
         <icon density="hdpi" src="resources/android/icon/drawable-hdpi-icon.png" />
         <icon density="ldpi" src="resources/android/icon/drawable-ldpi-icon.png" />
         <icon density="mdpi" src="resources/android/icon/drawable-mdpi-icon.png" />
         <icon density="xhdpi" src="resources/android/icon/drawable-xhdpi-icon.png" />
         <icon density="xxhdpi" src="resources/android/icon/drawable-xxhdpi-icon.png" />
         <icon density="xxxhdpi" src="resources/android/icon/drawable-xxxhdpi-icon.png" />
-        <!-- Splash -->
-        <preference name="AndroidWindowSplashScreenIcon" value="resources/android/splash/splashscreen.xml" />
-        <preference name="AndroidWindowSplashScreenIconBackgroundColor" value="#00FFFF" />
-    </platform>
-
-    <platform name="ios">
-        <icon src="resources/ios/icon/icon.png" />
-        <splash height="2732" src="resources/ios/splash/splash.png" width="2732" />
+        <preference name="FadeSplashScreen" value="false" />
+        <preference name="AndroidWindowSplashScreenBackground" value="#8FD8D8" />
+        <preference name="AndroidWindowSplashScreenAnimatedIcon" value="res/screen/android/splashscreen.png" />
     </platform>
 </widget>

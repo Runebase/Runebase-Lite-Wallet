@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "RunebaseChrome",
-  "version": "1.5.1",
-  "description": "Runebase light wallet and transaction signing client.",
+  "version": "1.6.0",
+  "description": "Runebase lightweight wallet and transaction signing client.",
   "icons": {
     "16": "images/logo-main-16.png",
     "32": "images/logo-main-32.png",
