@@ -225,7 +225,13 @@ export function getImageUrl(path: string): string {
   return extensionInfoProvider.getURL(path);
 }
 
-export function saveFile(content, filename) {
+export function saveFile(
+  content: string,
+  filename: string
+) {
+  console.log(content);
+  console.log(filename);
+  console.log('saveFileContent');
   if (isCordova()) {
     // Cordova environment
     downloadAndSaveFileCordova(content, filename);
@@ -239,9 +245,12 @@ export function isCordova() {
   return window.cordova !== undefined;
 }
 
-// Broken, Couldn't figure out how to fix this. supposed to be for downloading seedphrase to file
-function downloadAndSaveFileCordova(content: string, filename: string) {
-  console.log('downloadAndSaveFileCordova calleds');
+
+function downloadAndSaveFileCordova(content: string, originalFilename: string) {
+  console.log('downloadAndSaveFileCordova called');
+  const sanitizedFilename = originalFilename.replace(/[:/\\?%*|"<>]/g, '_');
+  const filename = sanitizedFilename + '.txt';
+  console.log(filename);
 
   document.addEventListener('deviceready', function () {
     console.log('deviceready event triggered');
@@ -249,46 +258,20 @@ function downloadAndSaveFileCordova(content: string, filename: string) {
     console.log('Content:', content);
     console.log('Content type:', typeof content);
 
-    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
-
     // Request WRITE_EXTERNAL_STORAGE permission
-    window.plugins.permissions.requestPermission(
-      window.plugins.permissions.WRITE_EXTERNAL_STORAGE,
+    cordova.plugins.permissions.requestPermission(
+      cordova.plugins.permissions.WRITE_EXTERNAL_STORAGE,
       function (status) {
         if (status.hasPermission) {
-          // Permission granted, proceed with file operations
+          // Use cordova.file.externalDataDirectory for external storage (like the Download folder)
+          const fileDir = cordova.file.externalDataDirectory;
+
+          // Check if the directory exists, and create it if it doesn't
           window.resolveLocalFileSystemURL(
-            cordova.file.dataDirectory,
+            fileDir,
             function (directoryEntry) {
-              // Create or open the file
-              directoryEntry.getFile(
-                filename,
-                { create: true, exclusive: false },
-                function (fileEntry: any) {
-                  // Create a FileWriter object
-                  fileEntry.createWriter(
-                    function (fileWriter: any) {
-                      fileWriter.onwriteend = function () {
-                        console.log('File saved locally: ' + fileEntry.toURL());
-                        // Handle further operations here, if needed
-                      };
-
-                      fileWriter.onerror = function (error: any) {
-                        console.error('Error writing to file: ' + JSON.stringify(error));
-                      };
-
-                      // Write the blob to the file
-                      fileWriter.write(blob);
-                    },
-                    function (error: any) {
-                      console.error('Error creating FileWriter: ' + JSON.stringify(error));
-                    }
-                  );
-                },
-                function (error: any) {
-                  console.error('Error creating or opening file: ' + JSON.stringify(error));
-                }
-              );
+              console.log('Successfully resolved file system URL');
+              createOrOpenFile(directoryEntry, filename, content);
             },
             function (error) {
               console.error('Error resolving file system URL: ' + JSON.stringify(error));
@@ -303,7 +286,43 @@ function downloadAndSaveFileCordova(content: string, filename: string) {
       }
     );
   }, false);
+
+  function createOrOpenFile(directoryEntry, filename, content) {
+    directoryEntry.getFile(
+      filename,
+      { create: true, exclusive: false },
+      function (fileEntry) {
+        console.log('Found file');
+        // Create a FileWriter object
+        fileEntry.createWriter(
+          function (fileWriter) {
+            fileWriter.onwriteend = function () {
+              console.log('File saved locally: ' + fileEntry.toURL());
+              // Handle further operations here, if needed
+            };
+
+            fileWriter.onerror = function (error) {
+              console.error('Error writing to file: ' + JSON.stringify(error));
+            };
+
+            // Create a Blob
+            const blob = new Blob([content], { type: 'text/plain' });
+
+            // Use the WRITE flag to open the file with write access
+            fileWriter.write(blob);
+          },
+          function (error) {
+            console.error('Error creating FileWriter: ' + JSON.stringify(error));
+          }
+        );
+      },
+      function (error) {
+        console.error('Error creating or opening file: ' + JSON.stringify(error));
+      }
+    );
+  }
 }
+
 
 
 function downloadFileWeb(content: string, filename: string) {

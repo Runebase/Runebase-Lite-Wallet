@@ -10,7 +10,7 @@ const Logo: FC = () => {
   return (
     <div className={classes.logoContainer}>
       <img className={classes.logo} src={getImageUrl('images/logo.png')} alt={'Logo'} />
-      <Typography className={classes.logoText}>Runebase Light</Typography>
+      <Typography className={classes.logoText}>Runebase Lite</Typography>
       <Typography className={classes.version}>v{extensionInfoProvider.getVersion()}</Typography>
     </div>
   );

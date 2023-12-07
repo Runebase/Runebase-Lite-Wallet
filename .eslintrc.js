@@ -7,8 +7,8 @@ module.exports = {
   rules: {
     '@typescript-eslint/no-explicit-any': 'off',
     '@typescript-eslint/no-var-requires': 'off',
-    '@typescript-eslint/naming-convention': 'off', // temp
-    '@typescript-eslint/ban-types': 'off', // temp
+    '@typescript-eslint/naming-convention': 'off',
+    '@typescript-eslint/ban-types': 'off',
     semi: ['error', 'always'],
     'quote-props': 'off',
     'sort-keys': 'off',
