@@ -81,7 +81,13 @@ export default class ImportStore {
   @action public reset = () => {
     console.log('Resetting import store');
     const tempImportType = this.importType;
+
+    // Reset all properties to their initial values
     Object.assign(this, INIT_VALUES);
+
+    // Set the mnemonic to initial values
+    this.setMnemonic(Array.from({ length: 12 }, () => ''));
+
     this.importType = tempImportType;
   };
 
@@ -112,17 +118,19 @@ export default class ImportStore {
   @action public cancelImport = () => {
     this.app?.navigate?.(-1);
   };
+
   @action public setPrivateKey = (
     privateKey: string,
   ) => {
     this.privateKey = privateKey;
   };
-  @action public setMnemonic = (
-    mnemonic: Array<string>,
-  ) => {
+
+  @action public setMnemonic = async (mnemonic: Array<string>) => {
     this.mnemonic = mnemonic;
     console.log(this.mnemonic);
   };
+
+
   @action public setAccountName = (
     accountName: string,
   ) => {
