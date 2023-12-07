@@ -71,7 +71,9 @@ const ImportWallet: React.FC<IProps> = ({ store }) => {
             )
             }
             {!!importStore.privateKey && importStore.privateKeyError && (
-              <Typography className={classes.errorText}>{importStore.privateKeyError}</Typography>
+              <Typography className={classes.errorText}>
+                {importStore.privateKeyError}
+              </Typography>
             )}
             <BorderTextField
               classNames={classes.borderTextFieldContainer}

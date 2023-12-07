@@ -19,11 +19,9 @@ const SeedPhraseInput: React.FC<any> = ({
   const [focusedInput, setFocusedInput] = useState<number | null>(null);
 
   const handlePhraseChange = (index: number, value: string) => {
-    setPhrase((prevPhrase: string[]) => {
-      const updatedPhrase = [...prevPhrase];
-      updatedPhrase[index] = value.toLowerCase(); // Force the value to lowercase
-      return updatedPhrase;
-    });
+    const updatedPhrase = [...phrase];
+    updatedPhrase[index] = value.toLowerCase();
+    setPhrase(updatedPhrase); // Call the action directly
     setError(null);
   };
 
@@ -43,10 +41,11 @@ const SeedPhraseInput: React.FC<any> = ({
     } else if (isLargeScreen) {
       wordsPerRow = 4;
     }
+    console.log('Phrase: ', phrase);
 
     return (
       <Grid container className={classes.mnemonicTilesContainer}>
-        {phrase.map((word: string, index: number) => (
+        {phrase && phrase.map((word: string, index: number) => (
           <Grid item xs={12 / wordsPerRow} key={index} className={classes.mnemonicTile}>
             <div className={classes.tileContainer}>
               <TextField
