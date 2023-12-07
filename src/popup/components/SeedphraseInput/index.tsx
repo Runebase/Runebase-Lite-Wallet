@@ -18,10 +18,11 @@ const SeedPhraseInput: React.FC<any> = ({
 
   const handlePhraseChange = (index: number, value: string) => {
     const updatedPhrase = [...phrase];
-    updatedPhrase[index] = value;
+    updatedPhrase[index] = value.toLowerCase(); // Force the value to lowercase
     setPhrase(updatedPhrase);
     setError(null);
   };
+
 
   const renderMnemonicTiles = () => {
     let wordsPerRow = 3;
