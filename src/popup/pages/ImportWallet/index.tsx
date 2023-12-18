@@ -32,7 +32,7 @@ const ImportWallet: React.FC<IProps> = ({ store }) => {
     return () => {
       importStore.reset();
     };
-  }, [importStore]);
+  }, []);
 
   return (
     <div className={classes.root}>
@@ -76,7 +76,6 @@ const ImportWallet: React.FC<IProps> = ({ store }) => {
               </Typography>
             )}
             <BorderTextField
-              classNames={classes.borderTextFieldContainer}
               placeholder="Wallet name"
               error={importStore.walletNameTaken}
               errorText={importStore.walletNameError}
@@ -134,20 +133,18 @@ const ImportWallet: React.FC<IProps> = ({ store }) => {
 const TypeField: React.FC<any> = observer(({ classes, store }) => (
   <div className={classes.fieldContainer}>
     <Typography className={classes.fieldHeading}>Select Type</Typography>
-    <div className={classes.fieldContentContainer}>
-      <Select
-        className={classes.typeSelect}
-        value={store.importStore.importType}
-        onChange={(event) => store.importStore.changeImportType(event.target.value)}
-      >
-        <MenuItem value={IMPORT_TYPE.MNEMONIC}>
-          <Typography className={classes.menuItemTypography}>Seed Phrase</Typography>
-        </MenuItem>
-        <MenuItem value={IMPORT_TYPE.PRIVATE_KEY}>
-          <Typography className={classes.menuItemTypography}>Private Key</Typography>
-        </MenuItem>
-      </Select>
-    </div>
+    <Select
+      className={classes.typeSelect}
+      value={store.importStore.importType}
+      onChange={(event) => store.importStore.changeImportType(event.target.value)}
+    >
+      <MenuItem value={IMPORT_TYPE.MNEMONIC}>
+        <Typography className={classes.menuItemTypography}>Seed Phrase</Typography>
+      </MenuItem>
+      <MenuItem value={IMPORT_TYPE.PRIVATE_KEY}>
+        <Typography className={classes.menuItemTypography}>Private Key</Typography>
+      </MenuItem>
+    </Select>
   </div>
 ));
 

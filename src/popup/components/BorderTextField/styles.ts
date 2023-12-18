@@ -10,10 +10,8 @@ const styles = (theme: Theme) => createStyles({
   },
   textField: {
     flex: 1,
-    padding: theme.spacing(1), // Use spacing instead of padding
-  },
-  textFieldInput: {
-    // fontSize: theme.typography.body1.fontSize, // Adjust the font size based on your design
+    paddingTop: theme.spacing(1), // Use spacing instead of padding
+    paddingBottom: theme.spacing(1), // Use spacing instead of padding
   },
   errorText: {
     fontSize: theme.typography.caption.fontSize, // Adjust the font size based on your design

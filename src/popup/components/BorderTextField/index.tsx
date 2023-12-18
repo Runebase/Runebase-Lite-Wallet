@@ -21,9 +21,6 @@ const BorderTextField: React.FC<any> = ({
       required
       type="text"
       placeholder={placeholder}
-      InputProps={{
-        classes: { input: classes.textFieldInput },
-      }}
       onChange={onChange}
       onKeyPress={(e) => handleEnterPress(e, onEnterPress)}
     />
