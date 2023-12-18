@@ -24,6 +24,10 @@ rm -rf dist-electron/*
 rm -rf cordova/www/*
 rm -rf compiled_files/*
 
+# Create a directory for compiled files
+compiled_dir="compiled_files"
+mkdir -p "$compiled_dir"
+
 # Run the script to create an empty thunk (assuming it doesn't need special permissions)
 ./scripts/create-empty-thunk.sh
 
@@ -42,19 +46,20 @@ cd ..
 # Build the Electron app for Windows and Linux
 electron-builder --win --linux -c electron-builder-config.js
 
-# Create the zip file for the Chrome extension
-zip -r "Runebase-Lite-Wallet-$version.zip" dist/*
+# Change to the dist directory
+cd dist
 
-# Create a directory for compiled files
-compiled_dir="compiled_files"
-mkdir -p "$compiled_dir"
+# Create the zip file for the Chrome extension
+zip -r "../$compiled_dir/Runebase-Chrome-Wallet-$version.zip" *
+
+# Return to the original directory
+cd ..
 
 # Copy relevant compiled files to the new directory with renamed files
 cp -r cordova/platforms/android/app/build/outputs/apk/debug/app-debug.apk "$compiled_dir/Runebase-Lite-Wallet-v$version-debug.apk"
 cp -r cordova/platforms/android/app/build/outputs/bundle/release/app-release.aab "$compiled_dir/Runebase-Lite-Wallet-v$version-release.aab"
 cp -r dist-electron/*.AppImage "$compiled_dir"
 cp -r dist-electron/*.exe "$compiled_dir"
-cp "Runebase-Lite-Wallet-$version.zip" "$compiled_dir"
 
 # Display a message indicating where the compiled files are located
 echo "Compiled files are in the '$compiled_dir' directory."
