@@ -109,23 +109,22 @@ export default class CryptoController extends IController {
     console.log('picked algorithm:', pickSecurityAlgorithm);
     if (pickSecurityAlgorithm === 'PBKDF2') {
       console.log('execute PBKDF2');
-      const pbkdf2Async = () =>
-        new Promise<string>((resolve, reject) => {
-          pbkdf2(
-            password,
-            Buffer.from(this.appSalt || ''),
-            CryptoController.PBKDF2_ITERATIONS,
-            CryptoController.PBKDF2_KEY_LENGTH,
-            CryptoController.PBKDF2_ALGORITHM,
-            (err, derivedKey) => {
-              if (err) {
-                reject('Error calculating PBKDF2 derivedKey');
-              } else {
-                resolve(derivedKey.toString('hex'));
-              }
+      const pbkdf2Async = () => new Promise<string>((resolve, reject) => {
+        pbkdf2(
+          password,
+          Buffer.from(this.appSalt || ''),
+          CryptoController.PBKDF2_ITERATIONS,
+          CryptoController.PBKDF2_KEY_LENGTH,
+          CryptoController.PBKDF2_ALGORITHM,
+          (err, derivedKey) => {
+            if (err) {
+              reject('Error calculating PBKDF2 derivedKey');
+            } else {
+              resolve(derivedKey.toString('hex'));
             }
-          );
-        });
+          }
+        );
+      });
 
       try {
         this.passwordHash = await pbkdf2Async();

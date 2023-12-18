@@ -86,6 +86,7 @@
     "bignumber.js": "^9.1.2",
     "bip39": "^3.1.0",
     "browserify-zlib": "^0.2.0",
+    "buffer": "^6.0.3",
     "chrome-call": "^4.0.1",
     "classnames": "^2.2.6",
     "clsx": "^2.0.0",
