@@ -10,6 +10,8 @@ import {
   DialogActions,
   Select,
   MenuItem,
+  FormControl,
+  InputLabel,
 } from '@mui/material';
 import { inject, observer } from 'mobx-react';
 import NavBar from '../../components/NavBar';
@@ -37,7 +39,7 @@ const ImportWallet: React.FC<IProps> = ({ store }) => {
   return (
     <div className={classes.root}>
       <NavBar
-      // hasNetworkSelector
+        // hasNetworkSelector
         hasBackButton
         title="Import Wallet"
       />
@@ -47,7 +49,7 @@ const ImportWallet: React.FC<IProps> = ({ store }) => {
             <TypeField classes={classes} store={store} />
             {importStore.importType === IMPORT_TYPE.PRIVATE_KEY && (
               <TextField
-                className={classes.mnemonicPrKeyTextField}
+                label="Private Key"
                 autoFocus
                 required
                 multiline
@@ -77,6 +79,7 @@ const ImportWallet: React.FC<IProps> = ({ store }) => {
               </Typography>
             )}
             <BorderTextField
+              label="Wallet Name"
               placeholder="Wallet name"
               error={importStore.walletNameTaken}
               errorText={importStore.walletNameError}
@@ -125,19 +128,23 @@ const ImportWallet: React.FC<IProps> = ({ store }) => {
 
 const TypeField: React.FC<any> = observer(({ classes, store }) => (
   <div className={classes.fieldContainer}>
-    <Typography className={classes.fieldHeading}>Select Type</Typography>
-    <Select
-      className={classes.typeSelect}
-      value={store.importStore.importType}
-      onChange={(event) => store.importStore.changeImportType(event.target.value)}
-    >
-      <MenuItem value={IMPORT_TYPE.MNEMONIC}>
-        <Typography className={classes.menuItemTypography}>Seed Phrase</Typography>
-      </MenuItem>
-      <MenuItem value={IMPORT_TYPE.PRIVATE_KEY}>
-        <Typography className={classes.menuItemTypography}>Private Key</Typography>
-      </MenuItem>
-    </Select>
+    <FormControl fullWidth>
+      <InputLabel id="select-type-label">Select Type</InputLabel>
+      <Select
+        labelId="select-type-label"
+        label="Select Type"
+        className={classes.typeSelect}
+        value={store.importStore.importType}
+        onChange={(event) => store.importStore.changeImportType(event.target.value)}
+      >
+        <MenuItem value={IMPORT_TYPE.MNEMONIC}>
+          <Typography className={classes.menuItemTypography}>Seed Phrase</Typography>
+        </MenuItem>
+        <MenuItem value={IMPORT_TYPE.PRIVATE_KEY}>
+          <Typography className={classes.menuItemTypography}>Private Key</Typography>
+        </MenuItem>
+      </Select>
+    </FormControl>
   </div>
 ));
 

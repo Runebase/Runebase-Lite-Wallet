@@ -40,11 +40,6 @@ const useStyles = makeStyles((theme) => ({
   menuItemTypography: {
     // fontSize: theme.typography.fontSizeMedium, // Use typography instead of font
   },
-  mnemonicPrKeyTextField: {
-    flex: 1,
-    border: '1px solid black',
-    // borderRadius: theme.shape.borderRadius, // Use shape instead of border
-  },
   mnemonicPrKeyFieldInput: {
     padding: theme.spacing(1), // Use spacing instead of padding
     // fontSize: theme.typography.fontSize, // Use typography instead of font
