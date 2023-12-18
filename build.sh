@@ -36,7 +36,7 @@ cp -R dist/* cordova/www
 # Change to the Cordova directory and build the Android app
 cd cordova
 cordova build android
-cordova build android --release
+cordova build android --release --buildConfig=build.json
 cd ..
 
 # Build the Electron app for Windows and Linux
