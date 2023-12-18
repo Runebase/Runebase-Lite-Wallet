@@ -38,6 +38,7 @@ const ImportWallet: React.FC<IProps> = ({ store }) => {
     <div className={classes.root}>
       <NavBar
       // hasNetworkSelector
+        hasBackButton
         title="Import Wallet"
       />
       <div className={classes.contentContainer}>
@@ -114,14 +115,6 @@ const ImportWallet: React.FC<IProps> = ({ store }) => {
             }
           >
             Import
-          </Button>
-          <Button
-            className={classes.cancelButton}
-            fullWidth
-            color="primary"
-            onClick={importStore.cancelImport}
-          >
-            Cancel
           </Button>
         </div>
       </div>
