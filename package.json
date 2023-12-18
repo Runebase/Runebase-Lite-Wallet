@@ -2,7 +2,7 @@
   "name": "Runebase-Lite-Wallet",
   "description": "LightWeight wallet for the Runebase blockchain",
   "author": "Bago",
-  "version": "1.6.5",
+  "version": "1.6.6",
   "private": true,
   "scripts": {
     "clean": "rm -rf dist",
