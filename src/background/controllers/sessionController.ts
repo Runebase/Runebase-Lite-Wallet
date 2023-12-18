@@ -66,8 +66,14 @@ export default class SessionController extends IController {
   };
 
   // eslint-disable-next-line @typescript-eslint/naming-convention
-  private handleMessage = (request: any) => {
-    const requestData = isExtensionEnvironment() ? request : request.data;
+  private handleMessage = (
+    request: any,
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    _?: chrome.runtime.MessageSender,
+    sendResponse?: (response: any) => void,
+  ) => {
+    const inExtensionEnvironment = isExtensionEnvironment();
+    const requestData = inExtensionEnvironment ? request : request.data;
     try {
       switch (requestData.type) {
       case MESSAGE_TYPE.RESTORE_SESSION:
@@ -75,22 +81,27 @@ export default class SessionController extends IController {
           sendMessage({
             type: MESSAGE_TYPE.RESTORING_SESSION_RETURN,
             restoreSession: RESPONSE_TYPE.RESTORING_SESSION,
-          }, () => {});
+          });
           const isSessionRestore = true;
           this.main.account.onAccountLoggedIn(isSessionRestore);
         } else if (this.main.crypto.hasValidPasswordHash()) {
           sendMessage({
             type: MESSAGE_TYPE.RESTORING_SESSION_RETURN,
             restoreSession: RESPONSE_TYPE.RESTORING_SESSION,
-          }, () => {});
+          });
           this.main.account.routeToAccountPage();
         }
         break;
       case MESSAGE_TYPE.GET_SESSION_LOGOUT_INTERVAL:
-        sendMessage({
-          type: MESSAGE_TYPE.GET_SESSION_LOGOUT_INTERVAL_RETURN,
-          sessionLogoutInterval: this.sessionLogoutInterval,
-        }, () => {});
+        if (inExtensionEnvironment) {
+          sendResponse?.(this.sessionLogoutInterval);
+        } else {
+          sendMessage({
+            type: MESSAGE_TYPE.USE_CALLBACK,
+            id: requestData.id,// include the messageId in the response for the identifying correct window to close
+            result: this.sessionLogoutInterval,
+          });
+        }
         break;
       case MESSAGE_TYPE.SAVE_SESSION_LOGOUT_INTERVAL:
         this.sessionLogoutInterval = requestData.value;
