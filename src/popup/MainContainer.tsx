@@ -51,17 +51,14 @@ const MainContainer: React.FC<IProps> = inject('store')(observer(({ store }) => 
     };
   }, []);
 
-  const { accountDetailStore, sessionStore, loginStore } = store;
+  const {
+    accountDetailStore,
+    sessionStore,
+  } = store;
 
   useEffect(() => {
     store?.sessionStore.init();
   }, []);
-  useEffect(() => {
-
-  }, [
-    loginStore,
-    loginStore.hasAccounts,
-  ]);
 
   useEffect(() => {
     accountDetailStore.init();
