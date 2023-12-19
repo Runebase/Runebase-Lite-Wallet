@@ -21,16 +21,11 @@ export default class SessionController extends IController {
       onMessage: this.onPopupOpened,
       onDisconnect: this.onPopupClosed,
     });
-
     getStorageValue('sessionLogoutInterval').then((sessionLogoutInterval) => {
       if (sessionLogoutInterval) {
         this.sessionLogoutInterval = sessionLogoutInterval;
       }
     });
-
-
-
-
     this.initFinished();
   }
 
