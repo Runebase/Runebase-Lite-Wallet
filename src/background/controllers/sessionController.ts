@@ -80,11 +80,13 @@ export default class SessionController extends IController {
 
   private setSessionTimeOut = () => {
     try {
-      this.sessionTimeout = setTimeout(() => {
-        this.clearSession();
-        this.main.crypto.resetPasswordHash();
-        console.log('Session cleared!');
-      },  this.sessionLogoutInterval);
+      if (isExtensionEnvironment() || this.sessionLogoutInterval > 0) {
+        this.sessionTimeout = setTimeout(() => {
+          this.clearSession();
+          this.main.crypto.resetPasswordHash();
+          console.log('Session cleared!');
+        },  this.sessionLogoutInterval);
+      }
     } catch (error) {
       console.error('Error in setSessionTimeOut:', error);
     }
