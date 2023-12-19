@@ -14,8 +14,42 @@ for cmd in yarn jq zip cordova electron-builder webpack; do
     fi
 done
 
-# Define version for chrome extension zip
+# Determine the release type (patch, minor, major)
+release_type=${1:-patch}  # Default to 'patch' if no argument is provided
+
+# Read the current version from main package.json
+current_version=$(jq -r .version package.json)
+
+# Increment version based on the release type
+if [ "$release_type" = "patch" ]; then
+    new_version=$(echo "$current_version" | awk -F. '{print $1 "." $2 "." $3 + 1}')
+elif [ "$release_type" = "minor" ]; then
+    new_version=$(echo "$current_version" | awk -F. '{print $1 "." $2 + 1 ".0"}')
+elif [ "$release_type" = "major" ]; then
+    new_version=$(echo "$current_version" | awk -F. '{print $1 + 1 ".0.0"}')
+else
+    echo "Error: Invalid release type. Please use 'patch', 'minor', or 'major'."
+    exit 1
+fi
+
+# Update version in main package.json
+jq --arg new_version "$new_version" '.version = $new_version' package.json > tmp_package.json && mv tmp_package.json package.json
+
+# Update version in cordova/package.json
+jq --arg new_version "$new_version" '.version = $new_version' cordova/package.json > tmp_cordova_package.json && mv tmp_cordova_package.json cordova/package.json
+
+# Update version in config.xml
+sed -i "s/version=\"[0-9.]*\"/version=\"$new_version\"/" cordova/config.xml
+
+# Update android-versionCode in config.xml
+android_version_code=$(echo "$new_version" | tr -d .)
+sed -i "s/android-versionCode=\"[0-9]*\"/android-versionCode=\"$android_version_code\"/" cordova/config.xml
+
+# Get the updated version
 version=$(jq -r .version package.json)
+
+# Bump version in static/manifest (adjust the path as needed)
+sed -i "s/\"version\": \".*\"/\"version\": \"$version\"/" static/manifest.json
 
 # Clean and prepare directories
 yarn clean
