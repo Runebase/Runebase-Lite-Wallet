@@ -55,17 +55,17 @@ export default class AccountDetailStore {
   @action public init = () => {
     console.log('INIT_ACCOUNT_DETAILS_TORE');
     addMessageListener(this.handleMessage);
-    sendMessage({ type: MESSAGE_TYPE.START_TX_POLLING }, () => {});
-    sendMessage({ type: MESSAGE_TYPE.GET_RRC_TOKEN_LIST }, () => {});
+    sendMessage({ type: MESSAGE_TYPE.START_TX_POLLING });
+    sendMessage({ type: MESSAGE_TYPE.GET_RRC_TOKEN_LIST });
   };
 
   public deinit = () => {
     removeMessageListener(this.handleMessage);
-    sendMessage({ type: MESSAGE_TYPE.STOP_TX_POLLING }, () => {});
+    sendMessage({ type: MESSAGE_TYPE.STOP_TX_POLLING });
   };
 
   public fetchMoreTxs = () => {
-    sendMessage({ type: MESSAGE_TYPE.GET_MORE_TXS }, () => {});
+    sendMessage({ type: MESSAGE_TYPE.GET_MORE_TXS });
   };
 
   public handleNetworkExplorerResponse(response: any, txid: string, tabOpener: TabOpener): void {
@@ -92,7 +92,7 @@ export default class AccountDetailStore {
     sendMessage({
       type: MESSAGE_TYPE.REMOVE_TOKEN,
       contractAddress,
-    }, () => {});
+    });
   };
 
   public routeToAddToken = () => {

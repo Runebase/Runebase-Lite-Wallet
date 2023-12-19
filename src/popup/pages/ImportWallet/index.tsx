@@ -10,6 +10,8 @@ import {
   DialogActions,
   Select,
   MenuItem,
+  FormControl,
+  InputLabel,
 } from '@mui/material';
 import { inject, observer } from 'mobx-react';
 import NavBar from '../../components/NavBar';
@@ -32,12 +34,13 @@ const ImportWallet: React.FC<IProps> = ({ store }) => {
     return () => {
       importStore.reset();
     };
-  }, [importStore]);
+  }, []);
 
   return (
     <div className={classes.root}>
       <NavBar
-      // hasNetworkSelector
+        // hasNetworkSelector
+        hasBackButton
         title="Import Wallet"
       />
       <div className={classes.contentContainer}>
@@ -46,7 +49,7 @@ const ImportWallet: React.FC<IProps> = ({ store }) => {
             <TypeField classes={classes} store={store} />
             {importStore.importType === IMPORT_TYPE.PRIVATE_KEY && (
               <TextField
-                className={classes.mnemonicPrKeyTextField}
+                label="Private Key"
                 autoFocus
                 required
                 multiline
@@ -76,7 +79,7 @@ const ImportWallet: React.FC<IProps> = ({ store }) => {
               </Typography>
             )}
             <BorderTextField
-              classNames={classes.borderTextFieldContainer}
+              label="Wallet Name"
               placeholder="Wallet name"
               error={importStore.walletNameTaken}
               errorText={importStore.walletNameError}
@@ -116,14 +119,6 @@ const ImportWallet: React.FC<IProps> = ({ store }) => {
           >
             Import
           </Button>
-          <Button
-            className={classes.cancelButton}
-            fullWidth
-            color="primary"
-            onClick={importStore.cancelImport}
-          >
-            Cancel
-          </Button>
         </div>
       </div>
       <ErrorDialog store={store} />
@@ -133,9 +128,11 @@ const ImportWallet: React.FC<IProps> = ({ store }) => {
 
 const TypeField: React.FC<any> = observer(({ classes, store }) => (
   <div className={classes.fieldContainer}>
-    <Typography className={classes.fieldHeading}>Select Type</Typography>
-    <div className={classes.fieldContentContainer}>
+    <FormControl fullWidth>
+      <InputLabel id="select-type-label">Select Type</InputLabel>
       <Select
+        labelId="select-type-label"
+        label="Select Type"
         className={classes.typeSelect}
         value={store.importStore.importType}
         onChange={(event) => store.importStore.changeImportType(event.target.value)}
@@ -147,7 +144,7 @@ const TypeField: React.FC<any> = observer(({ classes, store }) => (
           <Typography className={classes.menuItemTypography}>Private Key</Typography>
         </MenuItem>
       </Select>
-    </div>
+    </FormControl>
   </div>
 ));
 

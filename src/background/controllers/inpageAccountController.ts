@@ -2,7 +2,6 @@ import RunebaseChromeController from '.';
 import IController from './iController';
 import { MESSAGE_TYPE, PORT_NAME, RUNEBASECHROME_ACCOUNT_CHANGE } from '../../constants';
 import { InpageAccount } from '../../models/InpageAccount';
-import { addConnectListener } from '../../popup/abstraction';
 
 export default class InpageAccountController extends IController {
   // All connected ports from content script
@@ -10,10 +9,9 @@ export default class InpageAccountController extends IController {
 
   constructor(main: RunebaseChromeController) {
     super('inpageAccount', main);
-    addConnectListener({
+    this.main.addConnectListener({
       onMessage: this.handleLongLivedConnection,
     });
-    // chrome.runtime.onConnect.addListener(this.handleLongLivedConnection);
 
     this.initFinished();
   }

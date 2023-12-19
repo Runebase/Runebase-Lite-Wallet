@@ -201,7 +201,11 @@ export default class SendStore {
       break;
     case MESSAGE_TYPE.GET_MAX_RUNEBASE_SEND_RETURN:
       runebaseToken = this.tokens[0];
-      this.maxRunebaseSend = requestData.maxRunebaseAmount / (10 ** runebaseToken.decimals);
+      if (runebaseToken) {
+        this.maxRunebaseSend = requestData.maxRunebaseAmount / (10 ** runebaseToken.decimals);
+      } else {
+        this.maxRunebaseSend = 0;
+      }
       break;
     default:
       break;

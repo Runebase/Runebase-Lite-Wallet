@@ -7,6 +7,7 @@ import styles from './styles';
 import { handleEnterPress } from '../../../utils';
 
 const BorderTextField: React.FC<any> = ({
+  label,
   classes,
   classNames,
   placeholder,
@@ -18,12 +19,10 @@ const BorderTextField: React.FC<any> = ({
   <div className={cx(classes.container, classNames)}>
     <TextField
       className={classes.textField}
+      label={label}
       required
       type="text"
       placeholder={placeholder}
-      InputProps={{
-        classes: { input: classes.textFieldInput },
-      }}
       onChange={onChange}
       onKeyPress={(e) => handleEnterPress(e, onEnterPress)}
     />

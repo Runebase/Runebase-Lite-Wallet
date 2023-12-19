@@ -9,16 +9,13 @@ const styles = (theme: Theme) => createStyles({
     flexDirection: 'column',
   },
   textField: {
-    flex: 1,
-    padding: theme.spacing(1), // Use spacing instead of padding
-  },
-  textFieldInput: {
-    // fontSize: theme.typography.body1.fontSize, // Adjust the font size based on your design
+    marginTop: theme.spacing(1),
+    marginBottom: theme.spacing(1),
   },
   errorText: {
-    fontSize: theme.typography.caption.fontSize, // Adjust the font size based on your design
+    fontSize: theme.typography.caption.fontSize,
     color: theme.palette.error.main,
-    marginTop: theme.spacing(1), // Use spacing instead of padding
+    marginTop: theme.spacing(1),
   },
 });
 

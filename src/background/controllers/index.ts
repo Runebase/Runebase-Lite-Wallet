@@ -12,7 +12,12 @@ import SessionController from './sessionController';
 import OnInstallController from './onInstallController';
 import { API_TYPE, MESSAGE_TYPE } from '../../constants';
 import UtilsController from './utilsController';
-import { sendMessage } from '../../popup/abstraction';
+import { MessageCallback, sendMessage } from '../../popup/abstraction';
+
+interface ConnectListenerOptions {
+  onMessage: MessageCallback;
+  onDisconnect?: () => void; // New optional callback for disconnect events
+}
 
 export default class RunebaseChromeController {
   public crypto: CryptoController;
@@ -84,7 +89,7 @@ export default class RunebaseChromeController {
     if (every(this.initialized)) {
       sendMessage({
         type: MESSAGE_TYPE.ROUTE_LOGIN
-      }, () => {});
+      });
     }
   };
 
@@ -92,6 +97,31 @@ export default class RunebaseChromeController {
     sendMessage({
       type: MESSAGE_TYPE.UNEXPECTED_ERROR,
       error: err.message
-    }, () => {});
+    });
+  };
+
+
+  public addConnectListener =(options: ConnectListenerOptions): void => {
+    if (
+      typeof chrome !== 'undefined'
+      && chrome.runtime
+      && chrome.runtime.onConnect
+    ) {
+      // Chrome extension compatible implementation
+      chrome.runtime.onConnect.addListener((port) => {
+        port.onMessage.addListener((message) => {
+          options.onMessage(message);
+        });
+        if (options.onDisconnect) {
+          port.onDisconnect.addListener(options.onDisconnect);
+        }
+        sendMessage({ type: MESSAGE_TYPE.POPUP_OPENED });
+      });
+    } else if (typeof window !== 'undefined') {
+      // Web-compatible implementation
+      window.addEventListener('message', (event: MessageEvent) => {
+        options.onMessage(event.data);
+      });
+    }
   };
 }
