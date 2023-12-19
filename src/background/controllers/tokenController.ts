@@ -296,16 +296,26 @@ export default class TokenController extends IController {
   };
 
   // eslint-disable-next-line @typescript-eslint/naming-convention
-  private handleMessage = (request: any) => {
-    const requestData = isExtensionEnvironment() ? request : request.data;
+  private handleMessage = (
+    request: any,
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    _?: chrome.runtime.MessageSender,
+    sendResponse?: (response: any) => void,
+  ) => {
+    const inExtensionEnvironment = isExtensionEnvironment();
+    const requestData = inExtensionEnvironment ? request : request.data;
     try {
       switch (requestData.type) {
       case MESSAGE_TYPE.GET_RRC_TOKEN_LIST:
-        sendMessage({
-          type: MESSAGE_TYPE.USE_CALLBACK,
-          id: requestData.id,// include the messageId in the response for the identifying correct window to close
-          result: this.tokens,
-        });
+        if (inExtensionEnvironment) {
+          sendResponse?.(this.tokens);
+        } else {
+          sendMessage({
+            type: MESSAGE_TYPE.USE_CALLBACK,
+            id: requestData.id,// include the messageId in the response for the identifying correct window to close
+            result: this.tokens,
+          });
+        }
         break;
       case MESSAGE_TYPE.SEND_RRC_TOKENS:
         this.sendRRCToken(
