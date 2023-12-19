@@ -1,6 +1,4 @@
 export type MessageCallback = (request: any, _?: any, sendResponse?: (response: any) => void) => void;
-
-
 export interface TabOpener {
   openUrlInNewTab(url: string): void;
 }
@@ -154,31 +152,6 @@ export function getMultipleStorageValues(keys: string[]): Promise<any> {
   });
 }
 
-interface ConnectListenerOptions {
-  onMessage: MessageCallback;
-  onDisconnect?: () => void; // New optional callback for disconnect events
-}
-
-export function addConnectListener(options: ConnectListenerOptions): void {
-  if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.onConnect) {
-    // Chrome extension compatible implementation
-    chrome.runtime.onConnect.addListener((port) => {
-      port.onMessage.addListener((message) => {
-        options.onMessage(message);
-      });
-
-      if (options.onDisconnect) {
-        port.onDisconnect.addListener(options.onDisconnect);
-      }
-    });
-  } else if (typeof window !== 'undefined') {
-    // Web-compatible implementation
-    window.addEventListener('message', (event: MessageEvent) => {
-      options.onMessage(event.data);
-    });
-  }
-}
-
 // Abstraction for accessing Chrome extension resources and manifest information
 export interface ExtensionInfoProvider {
   getURL(path: string): string;
@@ -322,8 +295,6 @@ function downloadAndSaveFileCordova(content: string, originalFilename: string) {
     );
   }
 }
-
-
 
 function downloadFileWeb(content: string, filename: string) {
   const blob = new Blob([content], { type: 'text/plain' });

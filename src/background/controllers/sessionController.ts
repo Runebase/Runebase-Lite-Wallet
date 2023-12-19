@@ -1,7 +1,13 @@
 import RunebaseChromeController from '.';
 import IController from './iController';
 import { MESSAGE_TYPE, RESPONSE_TYPE, RUNEBASECHROME_ACCOUNT_CHANGE } from '../../constants';
-import { addMessageListener, addConnectListener, isExtensionEnvironment, sendMessage, setStorageValue, getStorageValue } from '../../popup/abstraction';
+import {
+  addMessageListener,
+  isExtensionEnvironment,
+  sendMessage,
+  setStorageValue,
+  getStorageValue
+} from '../../popup/abstraction';
 
 export default class SessionController extends IController {
   public sessionTimeout?: any = undefined;
@@ -10,17 +16,20 @@ export default class SessionController extends IController {
 
   constructor(main: RunebaseChromeController) {
     super('session', main);
+    addMessageListener(this.handleMessage);
+    this.main.addConnectListener({
+      onMessage: this.onPopupOpened,
+      onDisconnect: this.onPopupClosed,
+    });
+
     getStorageValue('sessionLogoutInterval').then((sessionLogoutInterval) => {
       if (sessionLogoutInterval) {
         this.sessionLogoutInterval = sessionLogoutInterval;
       }
     });
 
-    addMessageListener(this.handleMessage);
-    addConnectListener({
-      onMessage: this.onPopupOpened,
-      onDisconnect: this.onPopupClosed,
-    });
+
+
 
     this.initFinished();
   }
@@ -57,13 +66,17 @@ export default class SessionController extends IController {
   private onPopupOpened = () => {
     // If port is reconnected (user reopened the popup), clear sessionTimeout
     const inExtensionEnvironment = isExtensionEnvironment();
-    if (inExtensionEnvironment) clearTimeout(this.sessionTimeout);
+    if (inExtensionEnvironment) {
+      console.log('onPopupOpened clearTimeout');
+      clearTimeout(this.sessionTimeout);
+    }
   };
 
   /*
   * Actions taken when the popup is closed..
   */
   private onPopupClosed = () => {
+    console.log('onPopupClosed');
     this.clearAllIntervalsExceptAccount();
 
     // Logout from bgp after interval
@@ -93,9 +106,15 @@ export default class SessionController extends IController {
 
     try {
       switch (requestData.type) {
+      case MESSAGE_TYPE.POPUP_OPENED:
+        if (inExtensionEnvironment) this.onPopupOpened();
+        break;
       case MESSAGE_TYPE.REFRESH_SESSION_TIMER:
-        clearTimeout(this.sessionTimeout);
-        this.setSessionTimeOut();
+        // Refresh is only refreshed for non-extension (for extension time-out is set when popup window is opened and closed)
+        if (!inExtensionEnvironment) {
+          clearTimeout(this.sessionTimeout);
+          this.setSessionTimeOut();
+        }
         break;
       case MESSAGE_TYPE.RESTORE_SESSION:
         if (this.main.account.loggedInAccount) {
