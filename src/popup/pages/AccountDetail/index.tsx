@@ -71,7 +71,6 @@ const AccountDetail: React.FC<IProps> = ({ store }) => {
             title="Account Detail"
             // hasNetworkSelector
           />
-          {/* <NavBar hasBackButton isDarkTheme title="Account Detail" /> */}
           <AccountInfo />
         </Paper>
         <List className={classes.list}>

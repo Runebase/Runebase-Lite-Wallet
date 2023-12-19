@@ -46,14 +46,11 @@ export default class CryptoController extends IController {
         // If no salt is stored, generate a new one
         this.generateAppSaltIfNecessary();
       }
-
-      this.initFinished();
     });
-
     getStorageValue(STORAGE.SECURITY_ALGORITHM).then((securityAlgorithm) => {
       if (!isEmpty(securityAlgorithm)) this.securityAlgorithm = securityAlgorithm;
-      this.initFinished();
     });
+    this.initFinished();
   }
 
   public hasValidPasswordHash(): boolean {

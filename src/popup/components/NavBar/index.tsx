@@ -1,18 +1,27 @@
 import React, { Fragment, FC, useState } from 'react';
 import { inject, observer } from 'mobx-react';
-
-import { Typography, Menu, MenuItem, IconButton, } from '@mui/material';
+import {
+  Typography,
+  Menu,
+  MenuItem,
+  IconButton,
+  ListItemIcon
+} from '@mui/material';
+import {
+  Toll,
+  Backup,
+  Settings as SettingsIcon,
+  AccountCircle,
+} from '@mui/icons-material';
 import withStyles from '@mui/styles/withStyles';
 import { ArrowBack, Settings } from '@mui/icons-material';
 import cx from 'classnames';
-
 import DropDownMenu from '../DropDownMenu';
 import AppStore from '../../stores/AppStore';
 import QryNetwork from '../../../models/QryNetwork';
 import styles from './styles';
 import EnterPasswordDialog from '../EnterPasswordDialog';
 import { MESSAGE_TYPE } from '../../../constants';
-
 interface IProps {
   classes: Record<string, string>;
   store?: AppStore;
@@ -66,7 +75,12 @@ interface BackupWalletMenuItemProps {
   onClick: React.MouseEventHandler<HTMLLIElement>; // Change the type here
 }
 const BackupWalletMenuItem: React.FC<BackupWalletMenuItemProps> = ({ onClick }) => (
-  <MenuItem onClick={onClick}>Backup Wallet</MenuItem>
+  <MenuItem onClick={onClick}>
+    <ListItemIcon>
+      <Backup />
+    </ListItemIcon>
+    Backup Wallet
+  </MenuItem>
 );
 
 const SettingsButton: FC<IProps> = observer(({ classes, store, isDarkTheme }) => {
@@ -94,10 +108,25 @@ const SettingsButton: FC<IProps> = observer(({ classes, store, isDarkTheme }) =>
         open={Boolean(navBarStore.settingsMenuAnchor)}
         onClose={() => navBarStore.settingsMenuAnchor = undefined}
       >
-        <MenuItem onClick={navBarStore.routeToManageTokens}>Manage Tokens</MenuItem>
+        <MenuItem onClick={navBarStore.routeToManageTokens}>
+          <ListItemIcon>
+            <Toll />
+          </ListItemIcon>
+          Manage Tokens
+        </MenuItem>
         <BackupWalletMenuItem onClick={handleOpenBackupWalletDialog} />
-        <MenuItem onClick={navBarStore.routeToSettings}>Settings</MenuItem>
-        <MenuItem onClick={navBarStore.logout}>Change Account</MenuItem>
+        <MenuItem onClick={navBarStore.routeToSettings}>
+          <ListItemIcon>
+            <SettingsIcon />
+          </ListItemIcon>
+          Settings
+        </MenuItem>
+        <MenuItem onClick={navBarStore.logout}>
+          <ListItemIcon>
+            <AccountCircle />
+          </ListItemIcon>
+          Change Account
+        </MenuItem>
       </Menu>
 
       <EnterPasswordDialog
