@@ -1,7 +1,7 @@
 import RunebaseChromeController from '.';
 import IController from './iController';
 import { MESSAGE_TYPE, RESPONSE_TYPE, RUNEBASECHROME_ACCOUNT_CHANGE } from '../../constants';
-import { addMessageListener, addConnectListener, isExtensionEnvironment, sendMessage } from '../../popup/abstraction';
+import { addMessageListener, addConnectListener, isExtensionEnvironment, sendMessage, setStorageValue, getStorageValue } from '../../popup/abstraction';
 
 export default class SessionController extends IController {
   public sessionTimeout?: any = undefined;
@@ -10,6 +10,11 @@ export default class SessionController extends IController {
 
   constructor(main: RunebaseChromeController) {
     super('session', main);
+    getStorageValue('sessionLogoutInterval').then((sessionLogoutInterval) => {
+      if (sessionLogoutInterval) {
+        this.sessionLogoutInterval = sessionLogoutInterval;
+      }
+    });
 
     addMessageListener(this.handleMessage);
     addConnectListener({
@@ -35,6 +40,9 @@ export default class SessionController extends IController {
     this.main.account.resetAccount();
     this.main.token.resetTokenList();
     this.main.inpageAccount.sendInpageAccountAllPorts(RUNEBASECHROME_ACCOUNT_CHANGE.LOGOUT);
+    sendMessage({
+      type: MESSAGE_TYPE.CLEARED_SESSION_RETURN,
+    });
   };
 
   private clearAllIntervalsExceptAccount = () => {
@@ -48,7 +56,8 @@ export default class SessionController extends IController {
   */
   private onPopupOpened = () => {
     // If port is reconnected (user reopened the popup), clear sessionTimeout
-    clearTimeout(this.sessionTimeout);
+    const inExtensionEnvironment = isExtensionEnvironment();
+    if (inExtensionEnvironment) clearTimeout(this.sessionTimeout);
   };
 
   /*
@@ -58,15 +67,22 @@ export default class SessionController extends IController {
     this.clearAllIntervalsExceptAccount();
 
     // Logout from bgp after interval
-    this.sessionTimeout = setTimeout(() => {
-      this.clearSession();
-      this.main.crypto.resetPasswordHash();
-      console.log('Session cleared');
-    },  this.sessionLogoutInterval);
+    this.setSessionTimeOut();
   };
 
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  private handleMessage = (
+  private setSessionTimeOut = () => {
+    try {
+      this.sessionTimeout = setTimeout(() => {
+        this.clearSession();
+        this.main.crypto.resetPasswordHash();
+        console.log('Session cleared!');
+      },  this.sessionLogoutInterval);
+    } catch (error) {
+      console.error('Error in setSessionTimeOut:', error);
+    }
+  };
+
+  private handleMessage = async (
     request: any,
     // eslint-disable-next-line @typescript-eslint/naming-convention
     _?: chrome.runtime.MessageSender,
@@ -74,8 +90,13 @@ export default class SessionController extends IController {
   ) => {
     const inExtensionEnvironment = isExtensionEnvironment();
     const requestData = inExtensionEnvironment ? request : request.data;
+
     try {
       switch (requestData.type) {
+      case MESSAGE_TYPE.REFRESH_SESSION_TIMER:
+        clearTimeout(this.sessionTimeout);
+        this.setSessionTimeOut();
+        break;
       case MESSAGE_TYPE.RESTORE_SESSION:
         if (this.main.account.loggedInAccount) {
           sendMessage({
@@ -104,6 +125,7 @@ export default class SessionController extends IController {
         }
         break;
       case MESSAGE_TYPE.SAVE_SESSION_LOGOUT_INTERVAL:
+        setStorageValue('sessionLogoutInterval', requestData.value);
         this.sessionLogoutInterval = requestData.value;
         break;
       default:

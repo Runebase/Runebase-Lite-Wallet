@@ -1,6 +1,6 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { observer, inject } from 'mobx-react';
-import { Routes, Route, useNavigate } from 'react-router-dom';
+import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import Dialog from '@mui/material/Dialog';
 import Button from '@mui/material/Button';
 import DialogTitle from '@mui/material/DialogTitle';
@@ -39,6 +39,7 @@ interface IProps {
 
 const MainContainer: React.FC<IProps> = inject('store')(observer(({ store }) => {
   const navigate = useNavigate();
+  const location = useLocation();
   useEffect(() => {
     store.setNavigate(navigate);
   }, []);
@@ -50,7 +51,14 @@ const MainContainer: React.FC<IProps> = inject('store')(observer(({ store }) => 
       });
     };
   }, []);
-
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
+  useEffect(() => {
+    if (!isInitialLoad) {
+      sendMessage({ type: MESSAGE_TYPE.REFRESH_SESSION_TIMER });
+    } else {
+      setIsInitialLoad(false);
+    }
+  }, [location]);
   const {
     accountDetailStore,
     sessionStore,

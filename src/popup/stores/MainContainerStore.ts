@@ -26,6 +26,10 @@ export default class MainContainerStore {
       saveFile(content, filename);
       break;
     }
+    case MESSAGE_TYPE.CLEARED_SESSION_RETURN:
+      console.log('CLEARED_SESSION_RETURN');
+      this.app?.navigate?.('/login');
+      break;
     case MESSAGE_TYPE.ROUTE_LOGIN:
       console.log('Routing to login page');
       this.app?.navigate?.('/login');
