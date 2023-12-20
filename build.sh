@@ -94,6 +94,10 @@ cp -r cordova/platforms/android/app/build/outputs/apk/debug/app-debug.apk "$comp
 cp -r cordova/platforms/android/app/build/outputs/bundle/release/app-release.aab "$compiled_dir/Runebase-Lite-Wallet-v$version-release.aab"
 cp -r dist-electron/*.AppImage "$compiled_dir"
 cp -r dist-electron/*.exe "$compiled_dir"
+cp -r dist-electron/*.deb "$compiled_dir"
+cp -r dist-electron/latest.yml "$compiled_dir"
+cp -r dist-electron/latest-linux.yml "$compiled_dir"
+
 
 # Display a message indicating where the compiled files are located
 echo "Compiled files are in the '$compiled_dir' directory."
