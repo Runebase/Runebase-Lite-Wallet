@@ -9,11 +9,13 @@ module.exports = {
     'main.js'
   ],
   win: {
-    icon: 'dist/icons/icon.ico'
+    icon: 'dist/icons/icon.ico',
+    target: ['nsis', 'portable']
   },
   linux: {
     category: 'Utility',
-    icon: 'dist/icons/icon.png'
+    icon: 'dist/icons/icon.png',
+    target: ['deb', 'AppImage']
   },
   mac: {
     icon: 'dist/icons/icon.icns',
