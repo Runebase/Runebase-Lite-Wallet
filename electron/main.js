@@ -1,10 +1,15 @@
-const { app, BrowserWindow, Menu } = require('electron');
+const { app, BrowserWindow, Menu, dialog } = require('electron');
+const axios = require('axios');
+const ProgressBar = require('electron-progressbar');
 const { autoUpdater } = require('electron-updater');
 const path = require('path');
 const url = require('url');
 
 let mainWindow;
-let feedURL = 'https://github.com/runebase/runebase-lite-wallet/releases/latest';
+let progressBar;
+let owner = 'runebase'; // Replace with the actual owner of the GitHub repository
+let repo = 'runebase-lite-wallet'; // Replace with the actual name of the GitHub repository
+
 
 function createWindow() {
   mainWindow = new BrowserWindow({
@@ -29,32 +34,81 @@ function createWindow() {
   );
 
   mainWindow.setMinimumSize(350, 600);
-  mainWindow.webContents.openDevTools();
+  // mainWindow.webContents.openDevTools();
   mainWindow.on('closed', function () {
     mainWindow = null;
   });
 }
 
-function checkForUpdates() {
-  autoUpdater.checkForUpdatesAndNotify();
+async function checkForUpdates(
+  clickedCheckForUpdates = false,
+) {
+  try {
+    const response = await axios.get(`https://api.github.com/repos/${owner}/${repo}/releases/latest`);
+    const latestVersion = response.data.tag_name.replace('v', '');
+    const currentVersion = app.getVersion();
 
-  autoUpdater.on('update-available', () => {
-    console.log('Update available');
-    mainWindow.webContents.send('update-available');
-  });
+    if (latestVersion !== currentVersion) {
+      const choice = await dialog.showMessageBox({
+        type: 'info',
+        title: 'Update Available',
+        message: `Version ${latestVersion} is available. Do you want to download and install it?`,
+        buttons: ['Yes', 'No'],
+        defaultId: 0, // Default button (Yes)
+      });
 
-  autoUpdater.on('update-downloaded', () => {
-    console.log('Update downloaded');
-    mainWindow.webContents.send('update-downloaded');
-  });
+      if (choice.response === 0) {
+        autoUpdater.once('update-downloaded', async () => {
+          progressBar.close();
 
-  autoUpdater.on('error', (err) => {
-    console.error('AutoUpdater error:', err);
-  });
+          const installChoice = await dialog.showMessageBox({
+            type: 'question',
+            buttons: ['Install and Restart', 'Later'],
+            defaultId: 0,
+            message: 'A new update has been downloaded. Would you like to install and restart the app now?',
+          });
 
-  // Additional logging for update events
-  autoUpdater.on('checking-for-update', () => console.log('Checking for update'));
-  autoUpdater.on('update-not-available', () => console.log('No update available'));
+          if (installChoice.response === 0) {
+            // User clicked 'Install and Restart'
+            autoUpdater.quitAndInstall();
+          }
+        });
+
+        // Show the progress bar before triggering download
+        progressBar = new ProgressBar({
+          indeterminate: false,
+          title: 'Downloading Update',
+          text: 'Downloading...',
+          detail: '0%',
+          browserWindow: {
+            parent: mainWindow,
+            modal: true,
+            closable: false,
+          },
+        });
+
+        autoUpdater.on('download-progress', (progressObj) => {
+          if (progressBar) {
+            progressBar.detail = `${progressObj.percent.toFixed(0)}%`;
+            progressBar.value = progressObj.percent;
+          }
+        });
+        autoUpdater.checkForUpdates();
+      }
+    } else {
+      if (clickedCheckForUpdates) {
+        dialog.showMessageBox({
+          type: 'info',
+          title: 'No Update Available',
+          message: 'Your app is already up to date.',
+          buttons: ['OK'],
+          defaultId: 0,
+        });
+      }
+    }
+  } catch (error) {
+    console.error('Error during update check:', error);
+  }
 }
 
 app.on('ready', () => {
@@ -66,15 +120,13 @@ app.on('ready', () => {
     {
       label: 'Check for Updates',
       click: () => {
-        checkForUpdates();
+        checkForUpdates(true);
       },
     },
   ]);
   Menu.setApplicationMenu(menu);
-
   createWindow();
-  // Check for updates
-  checkForUpdates();
+  checkForUpdates(false);
 });
 
 app.on('window-all-closed', function () {
