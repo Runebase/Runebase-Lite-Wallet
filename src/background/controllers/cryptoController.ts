@@ -20,24 +20,16 @@ export default class CryptoController extends IController {
   // Scrypt
   private static SCRYPT_PARAMS_PW: any = { N: 131072, r: 8, p: 1 };
   // PBKDF2
-  private static PBKDF2_ITERATIONS = 500000; // Adjust based on your security requirements
+  private static PBKDF2_ITERATIONS = 500000;
   private static PBKDF2_KEY_LENGTH = 64;
   private static PBKDF2_ALGORITHM = 'sha512';
-
-  public get validPasswordHash(): string {
-    if (!this.passwordHash) {
-      throw Error('passwordHash should be defined');
-    }
-    return this.passwordHash!;
-  }
-
+  //
   private securityAlgorithm?: string = INIT_VALUES.securityAlgorithm;
   private appSalt?: Uint8Array = INIT_VALUES.appSalt;
   private passwordHash?: string = INIT_VALUES.passwordHash;
 
   constructor(main: RunebaseChromeController) {
     super('crypto', main);
-
     getStorageValue(STORAGE.APP_SALT).then((appSalt) => {
       if (!isEmpty(appSalt)) {
         const array = split(appSalt, ',').map((str) => parseInt(str, 10));
@@ -152,4 +144,11 @@ export default class CryptoController extends IController {
       }
     }
   };
+
+  public get validPasswordHash(): string {
+    if (!this.passwordHash) {
+      throw Error('passwordHash should be defined');
+    }
+    return this.passwordHash!;
+  }
 }
