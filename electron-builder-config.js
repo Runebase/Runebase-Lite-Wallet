@@ -13,13 +13,13 @@ module.exports = {
     target: ['nsis', 'portable']
   },
   linux: {
-    category: 'Utility',
+    category: 'Finance',
     icon: 'dist/icons/icon.png',
     target: ['deb', 'AppImage']
   },
   mac: {
     icon: 'dist/icons/icon.icns',
-    category: 'your.app.category'
+    category: 'Finance'
   },
   dmg: {
     contents: [

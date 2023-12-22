@@ -210,3 +210,18 @@ npm install -g cordova-res
 # Run cordova-res in the cordova directory to generate icons and splash screens
 cordova-res
 ```
+
+## Building for MacOS
+After Bumping version, pushing to github and building release for all the other platforms.
+Go on a MacOS to compile dmg.
+
+```bash
+# Run the script to create an empty thunk (assuming it doesn't need special permissions)
+./scripts/create-empty-thunk.sh
+
+# Build the application with Webpack
+webpack --progress --config webpack.prod.config.js
+
+# Electron build dmg file
+npx electron-builder --mac -c electron-builder-config.js
+```

@@ -434,3 +434,4 @@ __pycache__/
 cordova/build.json
 dist-electron
 compiled_files
+!src/popup/pages/BackupWallet
