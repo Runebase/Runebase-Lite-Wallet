@@ -58,7 +58,6 @@ export default class CryptoController extends IController {
       if (!this.appSalt) {
         const appSalt: Uint8Array = crypto.getRandomValues(new Uint8Array(16)) as Uint8Array;
         this.appSalt = appSalt;
-
         await setStorageValue(STORAGE.APP_SALT, Array.from(appSalt).join(','));
         console.log('appSalt set');
       }

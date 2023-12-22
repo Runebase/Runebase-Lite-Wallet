@@ -15,21 +15,29 @@ const BorderTextField: React.FC<any> = ({
   errorText,
   onChange,
   onEnterPress,
-}: any) => (
-  <div className={cx(classes.container, classNames)}>
-    <TextField
-      className={classes.textField}
-      label={label}
-      required
-      type="text"
-      placeholder={placeholder}
-      onChange={onChange}
-      onKeyPress={(e) => handleEnterPress(e, onEnterPress)}
-    />
-    {error && errorText && (
-      <Typography className={classes.errorText}>{errorText}</Typography>
-    )}
-  </div>
-);
+}: any) => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      handleEnterPress(e, onEnterPress);
+    }
+  };
+
+  return (
+    <div className={cx(classes.container, classNames)}>
+      <TextField
+        className={classes.textField}
+        label={label}
+        required
+        type="text"
+        placeholder={placeholder}
+        onChange={onChange}
+        onKeyDown={handleKeyDown}
+      />
+      {error && errorText && (
+        <Typography className={classes.errorText}>{errorText}</Typography>
+      )}
+    </div>
+  );
+};
 
 export default withStyles(styles)(BorderTextField);
