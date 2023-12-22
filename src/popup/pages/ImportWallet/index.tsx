@@ -29,12 +29,7 @@ const ImportWallet: React.FC<IProps> = ({ store }) => {
   const { importStore } = store;
   const classes = useStyles();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
-  useEffect(() => {
-    return () => {
-      importStore.reset();
-    };
-  }, []);
+  useEffect(() => { importStore.reset(); }, []);
 
   return (
     <div className={classes.root}>

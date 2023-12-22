@@ -38,12 +38,20 @@ interface IProps {
 }
 
 const MainContainer: React.FC<IProps> = inject('store')(observer(({ store }) => {
-  const navigate = useNavigate();
+  const { accountDetailStore, sessionStore } = store;
   const location = useLocation();
+  const navigate = useNavigate();
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
+
   useEffect(() => {
     store.setNavigate(navigate);
+    sessionStore.init();
+    return () => {
+      sendMessage({
+        type: MESSAGE_TYPE.LOGOUT,
+      });
+    };
   }, []);
-
   useEffect(() => {
     return () => {
       sendMessage({
@@ -51,7 +59,7 @@ const MainContainer: React.FC<IProps> = inject('store')(observer(({ store }) => 
       });
     };
   }, []);
-  const [isInitialLoad, setIsInitialLoad] = useState(true);
+
   useEffect(() => {
     if (!isInitialLoad) {
       sendMessage({ type: MESSAGE_TYPE.REFRESH_SESSION_TIMER });
@@ -59,14 +67,6 @@ const MainContainer: React.FC<IProps> = inject('store')(observer(({ store }) => 
       setIsInitialLoad(false);
     }
   }, [location]);
-  const {
-    accountDetailStore,
-    sessionStore,
-  } = store;
-
-  useEffect(() => {
-    store?.sessionStore.init();
-  }, []);
 
   useEffect(() => {
     accountDetailStore.init();

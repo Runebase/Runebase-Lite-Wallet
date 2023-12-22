@@ -35,16 +35,11 @@ export default class LoginStore {
     this.app = app;
     addMessageListener(this.handleMessage);
     sendMessage({ type: MESSAGE_TYPE.HAS_ACCOUNTS });
-
-
     // Attempt to restore session
     sendMessage({ type: MESSAGE_TYPE.RESTORE_SESSION }, action((response: any) => {
       console.log('Received restore session response:', response);
-
       if (response === RESPONSE_TYPE.RESTORING_SESSION) {
-        runInAction(() => {
-          this.app?.navigate?.('/loading');
-        });
+        this.app?.navigate?.('/loading');
       }
     }));
   }
