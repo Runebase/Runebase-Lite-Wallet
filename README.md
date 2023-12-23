@@ -225,3 +225,69 @@ webpack --progress --config webpack.prod.config.js
 # Electron build dmg file
 npx electron-builder --mac -c electron-builder-config.js
 ```
+
+## Building for Iphone
+### Step 1: Install Xcode
+
+1. Download [Xcode 11](https://download.developer.apple.com/Developer_Tools/Xcode_11.7/Xcode_11.7.xip) for MacOS Catalina.
+2. Double-click on `xcode.xip` to expand the archive.
+
+move to correct location and install
+```bash
+sudo mv ~/Downloads/Xcode.app /Applications
+sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
+sudo xcode-select --install
+```
+Deployment Tools
+
+The ios-deploy tools allow you to launch iOS apps on an iOS Device from the command-line.
+
+Install ios-deploy via Homebrew by running:
+
+$ brew install ios-deploy
+
+### Install Correct Ruby version
+\curl -sSL https://get.rvm.io | bash -s stable
+
+rvm install ruby --latest
+rvm use 3.0.0
+
+CocoaPods
+
+The CocoaPods tools are needed to build iOS apps. A minimum version of 1.8.0 is required but the latest release is always recommended.
+
+To install CocoaPods, run the following from command-line terminal:
+
+$ sudo gem install rubygems-update -v 3.2.21
+$ sudo gem install cocoapods
+
+### Step 2: Build for iOS
+Run the following command to build the iOS version:
+```bash
+cordova build ios
+```
+
+### Step 3: Open in Xcode
+
+Open the Xcode project using the command:
+```bash
+open platforms/ios/Runebase\ Lite\ Wallet.xcworkspace
+```
+
+### Step 4: Run in Simulator
+Once Xcode is open, choose a simulator device and click the "Run" button to build and run your Cordova application in the iOS simulator.
+
+### Troubleshooting
+
+**Verify Simulator Installation:**
+1. Open Xcode and go to "Xcode" -> "Preferences" -> "Components."
+2. Ensure that the iOS simulator component is installed. If not, download it from this menu.
+
+
+### Compile error notes for Iphone
+- ran into a compilation build error mentioning cordova-plugin-qrscanner-androidx
+consider finding alternative solutions? try phonegap-plugin-barcodescanner (if it's a working plugin) which will require code to be updated.
+
+cordova plugin add phonegap-plugin-barcodescanner
+
+- after removal of cordova-plugin-qr-scanner-androidx (for testing purposes) when launching the application in iphone simulator just given me a white screen after app launch. no errors found in console
