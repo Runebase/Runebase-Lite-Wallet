@@ -2,6 +2,12 @@ import React from 'react';
 import { Select, MenuItem, FormControl, InputLabel, Typography } from '@mui/material';
 import { observer } from 'mobx-react';
 
+const rates: Record<string, string> = {
+  Fast: '0.8 RUNES/KB',
+  Normal: '0.5 RUNES/KB',
+  Slow: '0.4 RUNES/KB',
+};
+
 const TransactionSpeedField = observer(({ sendStore }: any) => (
   <FormControl
     fullWidth
@@ -16,7 +22,7 @@ const TransactionSpeedField = observer(({ sendStore }: any) => (
     >
       {sendStore.transactionSpeeds.map((transactionSpeed: string) => (
         <MenuItem key={transactionSpeed} value={transactionSpeed}>
-          <Typography>{transactionSpeed}</Typography>
+          <Typography>{rates[transactionSpeed]} ({transactionSpeed})</Typography>
         </MenuItem>
       ))}
     </Select>

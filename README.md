@@ -80,7 +80,7 @@ const contractAddress = '49a941c5259e4e6ef9ac4a2a6716c1717ce0ffb6';
 const data = 'd0821b0e0000000000000000000000000000000000000000000000000000000000000001';
 const runebaseAmt = 1; // optional. defaults to 0.
 const gasLimit = 200000; // optional. defaults to 200000.
-const gasPrice = 40; // optional. defaults to 40 (satoshi).
+const gasPrice = 4000; // optional. defaults to 4000 (satoshi).
 window.runebasechromeProvider.rawCall(
   'sendtocontract',
   [contractAddress, data, runebaseAmt, gasLimit, gasPrice],

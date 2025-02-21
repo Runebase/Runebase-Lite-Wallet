@@ -526,11 +526,11 @@ export default class AccountController extends IController {
     */
     try {
       const rates = {
-        [TRANSACTION_SPEED.FAST]: 500,
-        [TRANSACTION_SPEED.NORMAL]: 500,
-        [TRANSACTION_SPEED.SLOW]: 500,
+        [TRANSACTION_SPEED.FAST]: 80000,
+        [TRANSACTION_SPEED.NORMAL]: 50000,
+        [TRANSACTION_SPEED.SLOW]: 40000,
       };
-      const feeRate = rates[transactionSpeed]; // satoshi/byte; 500 satoshi/byte == .005 RUNEBASE/KB
+      const feeRate = rates[transactionSpeed]; // satoshi/byte; 50000 satoshi/byte == 0.5 RUNEBASE/KB
       if (!feeRate) {
         throw Error('feeRate not set');
       }

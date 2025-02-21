@@ -16,7 +16,7 @@ const INIT_VALUES = {
   signedPoD: undefined as PodReturnResult | undefined,
   errorMessage: undefined,
   gasLimitRecommendedAmount: 2500000,
-  gasPriceRecommendedAmount: 80,
+  gasPriceRecommendedAmount: 8000,
 };
 
 export default class DelegateStore {
