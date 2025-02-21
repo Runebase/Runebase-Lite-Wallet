@@ -51,6 +51,12 @@ version=$(jq -r .version package.json)
 # Bump version in static/manifest (adjust the path as needed)
 sed -i "s/\"version\": \".*\"/\"version\": \"$version\"/" static/manifest.json
 
+# Ensure cordova/www exists
+if [ ! -d "cordova/www" ]; then
+    echo "Error: cordova/www directory does not exist. Creating it now..."
+    mkdir -p cordova/www
+fi
+
 # Clean and prepare directories
 yarn clean
 mkdir -p dist
