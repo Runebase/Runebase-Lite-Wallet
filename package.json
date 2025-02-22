@@ -100,6 +100,7 @@
     "create-hash": "^1.2.0",
     "crypto-browserify": "^3.12.1",
     "deep-equal": "^2.2.3",
+    "dexie": "^4.0.11",
     "electron-progressbar": "^2.2.1",
     "electron-updater": "^6.3.9",
     "ethjs-abi": "^0.2.1",

@@ -22,8 +22,6 @@ export default class NetworkController extends IController {
     return NetworkController.NETWORKS[this.networkIndex].explorerUrl;
   }
   public get networkName(): string {
-    console.log('getting network name');
-    console.log(this.networkIndex);
     return NetworkController.NETWORKS[this.networkIndex].name;
   }
 
