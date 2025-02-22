@@ -110,7 +110,6 @@ export default class AccountController extends IController {
 
   public finishLogin = async () => {
     if (!this.hasAccounts) {
-      console.log('finished login');
       // New user. No created wallets yet. No need to validate.
       this.routeToAccountPage();
       return;
@@ -234,8 +233,6 @@ export default class AccountController extends IController {
       });
       return;
     }
-
-    console.log('importPrivateKey');
 
     await this.addAccountAndLogin(accountName, privateKeyHash, wallet);
   };

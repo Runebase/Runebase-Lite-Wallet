@@ -13,6 +13,7 @@ import OnInstallController from './onInstallController';
 import { API_TYPE, MESSAGE_TYPE } from '../../constants';
 import UtilsController from './utilsController';
 import { MessageCallback, sendMessage } from '../../popup/abstraction';
+import ElectrumController from './electrumController';
 
 interface ConnectListenerOptions {
   onMessage: MessageCallback;
@@ -31,6 +32,7 @@ export default class RunebaseChromeController {
   public session: SessionController;
   public onInstall: OnInstallController;
   public utils: UtilsController;
+  public electrum: ElectrumController;
 
   private initialized: Record<string, boolean> = {};
 
@@ -46,6 +48,7 @@ export default class RunebaseChromeController {
     this.session = new SessionController(this);
     this.onInstall = new OnInstallController(this);
     this.utils = new UtilsController(this);
+    this.electrum = new ElectrumController(this);
 
     if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.id) {
       chrome.runtime.onInstalled.addListener(async () => {
