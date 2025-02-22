@@ -47,6 +47,7 @@ module.exports = {
       'util': require.resolve('util/'),
       'buffer': require.resolve('buffer/'),
       'events': require.resolve('events/'),
+      'vm': require.resolve('vm-browserify'),
     },
   },
   module: {
@@ -108,6 +109,7 @@ module.exports = {
     }),
     new webpack.ProvidePlugin({
       process: 'process/browser',
+      Buffer: ['buffer', 'Buffer']
     }),
     new MiniCssExtractPlugin({
       filename: '[name].css',
