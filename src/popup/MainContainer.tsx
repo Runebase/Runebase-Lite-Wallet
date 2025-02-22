@@ -29,7 +29,7 @@ import AddDelegation from './pages/AddDelegation';
 import AddDelegationConfirm from './pages/AddDelegationConfirm';
 import RemoveDelegation from './pages/RemoveDelegation';
 import RemoveDelegationConfirm from './pages/RemoveDelegationConfirm';
-import { sendMessage } from './abstraction';
+import { isExtensionEnvironment, sendMessage } from './abstraction';
 import VerifyMnemonic from './pages/VerifyMnemonic';
 import BackupWallet from './pages/BackupWallet';
 
@@ -42,6 +42,8 @@ const MainContainer: React.FC<IProps> = inject('store')(observer(({ store }) => 
   const location = useLocation();
   const navigate = useNavigate();
   const [isInitialLoad, setIsInitialLoad] = useState(true);
+  const [isSidePanelOpen, setIsSidePanelOpen] = useState(false);
+  const isChromeExtension = isExtensionEnvironment();
 
   useEffect(() => {
     store.setNavigate(navigate);
@@ -78,8 +80,40 @@ const MainContainer: React.FC<IProps> = inject('store')(observer(({ store }) => 
     sessionStore.walletInfo
   ]);
 
+  useEffect(() => {
+    if (isChromeExtension) {
+      chrome.storage.local.get('viewMode', (data) => {
+        if (data.viewMode === 'sidePanel') {
+          setIsSidePanelOpen(true);
+        }
+      });
+    }    
+  }, []);
+
+  const toggleViewMode = () => {
+    if (isChromeExtension) {
+      const newMode = isSidePanelOpen ? 'popup' : 'sidePanel';
+      setIsSidePanelOpen(!isSidePanelOpen);    
+      chrome.storage.local.set({ viewMode: newMode }, () => {
+        if (newMode === 'sidePanel') {
+          chrome.runtime.sendMessage({ type: 'TOGGLE_SIDEPANEL' });
+          window.close();
+        } else {
+          chrome.runtime.sendMessage({ type: 'TOGGLE_POPUP' });
+        }
+      });
+    }   
+  };
+
   return (
     <div style={{ width: '100%', height: '100%' }}>
+      {isChromeExtension && (
+        <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '10px' }}>
+          <Button onClick={toggleViewMode}>
+            {isSidePanelOpen ? 'Switch to Popup' : 'Switch to Side Panel'}
+          </Button>
+        </div>
+      )}
       <Routes>
         <Route path="/loading" element={<Loading />} />
         <Route path="/login" element={<Login store={store} />} />

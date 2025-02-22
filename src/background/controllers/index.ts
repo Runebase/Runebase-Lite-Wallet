@@ -48,6 +48,16 @@ export default class RunebaseChromeController {
     this.utils = new UtilsController(this);
 
     if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.id) {
+      chrome.runtime.onInstalled.addListener(async () => {
+        chrome.storage.local.get('viewMode').then(data => {
+          if (data.viewMode === 'sidePanel') {
+            chrome.sidePanel.setOptions({ enabled: true, path: 'popup.html' });
+            chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true });
+          } else {
+            chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: false });
+          }
+        });        
+      });
       chrome.runtime.onMessage.addListener((msg) => {
         switch (msg.type) {
         case API_TYPE.OPEN_WALLET_EXTENSION:
@@ -64,6 +74,24 @@ export default class RunebaseChromeController {
             setSelfAsOpener: false, // Whether the new window should be opened with the current extension as the opener
             tabId: undefined, // The ID of the tab for which you want to adopt to the new window
             // Additional options as needed
+          });
+          break;
+        case API_TYPE.TOGGLE_SIDEPANEL: {
+          chrome.sidePanel.setOptions({ enabled: true, path: 'popup.html' });
+          chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true });
+          chrome.windows.getCurrent({ populate: true }, (window) => {
+            chrome.sidePanel.open({ windowId: window.id as number });              
+          }); 
+          chrome.storage.local.set({ viewMode: 'sidePanel' });
+          break;
+        }
+        case API_TYPE.TOGGLE_POPUP:
+          chrome.storage.local.set({ viewMode: 'popup' }, () => {
+            chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: false });
+            chrome.sidePanel.setOptions({ enabled: false });
+            chrome.windows.getCurrent({ populate: true }, (window) => {
+              chrome.sidePanel.open({ windowId: window.id as number });              
+            });  
           });
           break;
         }

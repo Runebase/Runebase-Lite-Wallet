@@ -54,7 +54,6 @@ export const isValidPrivateKey = (address?: string) => {
   }
 
   try {
-    console.log('isValidPrivateKey');
     const privateKey = validatePrivateKey(address);
     return privateKey;
   } catch (e) {
