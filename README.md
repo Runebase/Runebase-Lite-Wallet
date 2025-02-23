@@ -126,6 +126,16 @@ You can connect RunebaseChrome to regtest. You will need to set the following in
   ...
 }
 ```
+## Development
+
+### Development Seed Phrase (Optional)  
+For ease of import during development, you can add your seed phrase to a `.env` file.  
+
+1. Create a `.env` file in the root directory (if it doesn't already exist).  
+2. Add the following line:  `DEV_MNEMONIC="your seed phrase here"`
+3. Ensure this file is **never** committed to version control by adding `.env` to your `.gitignore`.
+
+By setting this, RunebaseChrome will automatically use the provided seed phrase for wallet initialization during development.
 
 ## Running Dev Version (NodeJs v18)
 ### Development Chrome

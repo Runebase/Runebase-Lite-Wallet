@@ -4,6 +4,8 @@ const path = require('path');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const ESLintPlugin = require('eslint-webpack-plugin');
+const dotenv = require('dotenv');
+dotenv.config({ path: path.resolve(__dirname, '.env') });
 
 const styleLoaders = [
   MiniCssExtractPlugin.loader,
@@ -121,6 +123,7 @@ module.exports = {
     }),
     new webpack.DefinePlugin({
       'process.env.APP_VERSION': JSON.stringify(require('./package.json').version),
+      'process.env.DEV_MNEMONIC': JSON.stringify(process.env.DEV_MNEMONIC || ''),
     }),
   ],
 };

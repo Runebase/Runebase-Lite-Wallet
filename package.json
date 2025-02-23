@@ -10,7 +10,7 @@
   "scripts": {
     "clean": "rm -rf dist",
     "start": "yarn clean && mkdir dist && ./scripts/create-empty-thunk.sh && webpack --progress --config webpack.dev.config.js --watch --devtool source-map & yarn css-types -w",
-    "dev": "webpack --progress --config webpack.dev.config.js --watch --devtool source-map & yarn css-types -w",
+    "dev": "export NODE_ENV=development && webpack --progress --config webpack.dev.config.js --watch --devtool source-map & yarn css-types -w",
     "release:patch": "./build.sh patch",
     "release:minor": "./build.sh minor",
     "release:major": "./build.sh major",
@@ -53,6 +53,7 @@
     "copy-webpack-plugin": "^11.0.0",
     "css-loader": "^6.8.1",
     "css-minimizer-webpack-plugin": "^5.0.1",
+    "dotenv": "^16.4.7",
     "electron": "^28.0.0",
     "electron-builder": "^24.9.1",
     "eslint": "^8.56.0",

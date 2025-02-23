@@ -41,7 +41,6 @@ export default class ImportStore {
 
   @computed public get mnemonicPageError(): boolean {
     const isMnemonicValid = this.mnemonic.length === 12 && this.mnemonic.every(word => word.length > 0);
-    console.log('isMnemonicValid: ', isMnemonicValid);
     return !isMnemonicValid || !!this.walletNameError || this.accountName.length < 1;
   }
 
@@ -74,26 +73,23 @@ export default class ImportStore {
   };
 
   @action public changeImportType = (type: string) => {
-    console.log('Import type changed:', type);
     this.importType = type;
   };
 
   @action public reset = () => {
-    console.log('Resetting import store');
     const tempImportType = this.importType;
-
-    // Reset all properties to their initial values
     Object.assign(this, INIT_VALUES);
-
-    // Set the mnemonic to initial values
     this.setMnemonic(Array.from({ length: 12 }, () => ''));
+
+    if (process.env.NODE_ENV === 'development' && process.env.DEV_MNEMONIC) {
+      this.setMnemonic(process.env.DEV_MNEMONIC.split(' '));
+    }
 
     this.importType = tempImportType;
   };
 
   @action public importPrivateKey = () => {
     if (!this.privateKeyPageError) {
-      console.log('Importing private key');
       this.app?.navigate?.('/loading');
       sendMessage({
         type: MESSAGE_TYPE.IMPORT_PRIVATE_KEY,
@@ -105,7 +101,6 @@ export default class ImportStore {
 
   @action public importSeedPhrase = () => {
     if (!this.mnemonicPageError) {
-      console.log('Importing seed phrase');
       this.app?.navigate?.('/loading');
       sendMessage({
         type: MESSAGE_TYPE.IMPORT_MNEMONIC,
@@ -127,7 +122,6 @@ export default class ImportStore {
 
   @action public setMnemonic = async (mnemonic: Array<string>) => {
     this.mnemonic = mnemonic;
-    console.log(this.mnemonic);
   };
 
 
