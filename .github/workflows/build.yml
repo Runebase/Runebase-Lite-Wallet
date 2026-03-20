@@ -19,7 +19,7 @@ jobs:
           node-version: 20
           cache: npm
 
-      - run: npm ci
+      - run: npm ci --legacy-peer-deps
 
       - name: Build webpack bundle
         run: |
@@ -67,7 +67,7 @@ jobs:
           node-version: 20
           cache: npm
 
-      - run: npm ci
+      - run: npm ci --legacy-peer-deps
 
       - uses: actions/download-artifact@v4
         with:
@@ -101,7 +101,7 @@ jobs:
           node-version: 20
           cache: npm
 
-      - run: npm ci
+      - run: npm ci --legacy-peer-deps
 
       - uses: actions/download-artifact@v4
         with:
@@ -140,7 +140,7 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      - run: npm ci
+      - run: npm ci --legacy-peer-deps
 
       - uses: actions/download-artifact@v4
         with:
@@ -181,7 +181,7 @@ jobs:
           node-version: 20
           cache: npm
 
-      - run: npm ci
+      - run: npm ci --legacy-peer-deps
 
       - uses: actions/download-artifact@v4
         with:
