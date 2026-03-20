@@ -94,7 +94,7 @@ export default class SessionController extends IController {
 
   private handleMessage = async (
     request: any,
-    // eslint-disable-next-line @typescript-eslint/naming-convention
+     
     _?: chrome.runtime.MessageSender,
     sendResponse?: (response: any) => void,
   ) => {

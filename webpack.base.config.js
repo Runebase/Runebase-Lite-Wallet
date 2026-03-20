@@ -113,10 +113,9 @@ module.exports = {
   // },
   plugins: [
     new ESLintPlugin({
-      overrideConfigFile: path.resolve(__dirname, '.eslintrc.js'),
+      overrideConfigFile: path.resolve(__dirname, 'eslint.config.mjs'),
       fix: true,
-      files: 'src/**/*.ts', // Adjust the glob pattern as needed
-      useEslintrc: true,
+      files: 'src/**/*.ts',
     }),
     new webpack.ProvidePlugin({
       process: 'process/browser',

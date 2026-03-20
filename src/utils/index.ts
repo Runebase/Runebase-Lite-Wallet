@@ -135,7 +135,7 @@ export const shortenTxid = (txid?: string) => {
 export const parseJsonOrFallback = (data: string): any => {
   try {
     return JSON.parse(data);
-  } catch (error) {
+  } catch (_error) {
     // If parsing fails, return the original data
     return data;
   }

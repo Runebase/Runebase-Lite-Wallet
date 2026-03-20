@@ -1,7 +1,7 @@
 import { each, findIndex, isEmpty } from 'lodash';
 import BigNumber from 'bignumber.js';
 import { RunebaseInfo } from 'runebasejs-wallet';
-// eslint-disable-next-line @typescript-eslint/naming-convention
+ 
 const { Rweb3 } = require('rweb3');
 
 import RunebaseChromeController from '.';
@@ -295,10 +295,10 @@ export default class TokenController extends IController {
     return `${STORAGE.ACCOUNT_TOKEN_LIST}-${this.main.account.loggedInAccount!.name}-${this.main.network.networkName}`;
   };
 
-  // eslint-disable-next-line @typescript-eslint/naming-convention
+   
   private handleMessage = (
     request: any,
-    // eslint-disable-next-line @typescript-eslint/naming-convention
+     
     _?: chrome.runtime.MessageSender,
     sendResponse?: (response: any) => void,
   ) => {

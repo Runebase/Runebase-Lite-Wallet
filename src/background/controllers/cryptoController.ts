@@ -61,7 +61,7 @@ export default class CryptoController extends IController {
         await setStorageValue(STORAGE.APP_SALT, Array.from(appSalt).join(','));
         console.log('appSalt set');
       }
-    } catch (err) {
+    } catch (_err) {
       throw new Error('Error generating appSalt');
     }
   };
@@ -72,7 +72,7 @@ export default class CryptoController extends IController {
 
       await setStorageValue(STORAGE.SECURITY_ALGORITHM, algorithm);
       console.log('securityAlgorithm set');
-    } catch (err) {
+    } catch (_err) {
       throw new Error('Error setting securityAlgorithm');
     }
   };

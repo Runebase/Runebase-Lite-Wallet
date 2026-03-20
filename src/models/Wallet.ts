@@ -34,7 +34,7 @@ export default class Wallet implements ISigner {
      * (This happens if the runebase api is down)
      */
     let timedOut = false;
-    // eslint-disable-next-line @typescript-eslint/naming-convention
+     
     const timeoutPromise = new Promise((_, reject) => {
       const wait = setTimeout(() => {
         clearTimeout(wait);

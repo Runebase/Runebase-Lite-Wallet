@@ -19,7 +19,7 @@ class ChromePortConnector implements PortConnector {
 // Web-compatible implementation
 class WebPortConnector implements PortConnector {
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+   
   connectToPort(_portName: string): any {
     // Provide a web-compatible implementation if needed
     // For example, you can use postMessage for communication

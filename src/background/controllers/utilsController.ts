@@ -132,7 +132,8 @@ export default class UtilsController extends IController {
   };
 
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/naming-convention
+   
+   
   private handleMessage = (request: any, _: chrome.runtime.MessageSender) => {
     const requestData = isExtensionEnvironment() ? request : request.data;
     try {

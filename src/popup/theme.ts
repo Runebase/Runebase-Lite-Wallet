@@ -1,4 +1,4 @@
-/* eslint-disable no-unused-vars */
+ 
 import { createTheme } from '@mui/material/styles';
 
 const px = (value: number): string => value.toString().concat('px');

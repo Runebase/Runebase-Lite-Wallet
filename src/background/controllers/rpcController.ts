@@ -152,7 +152,8 @@ export default class RPCController extends IController {
     this.sendRpcResponseToActiveTab(id, result, error);
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/naming-convention
+   
+   
   private handleMessage = (request: any, _: chrome.runtime.MessageSender) => {
     const requestData = isExtensionEnvironment() ? request : request.data;
     try {
