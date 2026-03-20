@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { observer, inject } from 'mobx-react';
 import { Typography, Button, Grid } from '@mui/material';
-import QRCode from 'qrcode.react';
+import { QRCodeCanvas as QRCode } from 'qrcode.react';
 
 import useStyles from './styles';
 import NavBar from '../../components/NavBar';
