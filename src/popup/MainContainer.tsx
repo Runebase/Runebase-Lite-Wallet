@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { observer, inject } from 'mobx-react';
-import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
+import { Routes, Route, useNavigate, useLocation } from 'react-router';
 import Dialog from '@mui/material/Dialog';
 import Button from '@mui/material/Button';
 import DialogTitle from '@mui/material/DialogTitle';

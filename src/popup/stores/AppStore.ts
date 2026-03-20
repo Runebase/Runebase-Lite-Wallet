@@ -12,7 +12,7 @@ import SendStore from './SendStore';
 import AddTokenStore from './AddTokenStore';
 import MainContainerStore from './MainContainerStore';
 import DelegateStore from './DelegateStore';
-import { NavigateFunction } from 'react-router-dom';
+import { NavigateFunction } from 'react-router';
 
 export default class AppStore {
   public navigate?: NavigateFunction;

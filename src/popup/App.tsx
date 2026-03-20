@@ -8,7 +8,7 @@ import {
 } from '@mui/material/styles';
 import MainContainer from './MainContainer';
 import { store } from './stores/AppStore';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter } from 'react-router';
 declare module '@mui/styles/defaultTheme' {
   interface DefaultTheme extends Theme {}
 }

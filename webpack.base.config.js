@@ -36,6 +36,7 @@ module.exports = {
   },
   resolve: {
     alias: {
+      'process/browser': require.resolve('process/browser.js'),
       'scryptsy/browser': 'scryptsy',
       'clsx': require.resolve('clsx'),
       'bignumber.js': path.resolve(__dirname, 'node_modules/bignumber.js/dist/bignumber.mjs'),

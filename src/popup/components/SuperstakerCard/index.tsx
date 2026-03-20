@@ -9,7 +9,7 @@ import DynamicFormIcon from '@mui/icons-material/DynamicForm';
 import moment from 'moment';
 import DelegateStore from '../../stores/DelegateStore';
 import { SuperStaker } from '../../../types';
-import { NavigateFunction } from 'react-router-dom';
+import { NavigateFunction } from 'react-router';
 
 interface SuperStakerCardProps {
   superstaker: SuperStaker;
