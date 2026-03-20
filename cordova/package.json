@@ -21,15 +21,15 @@
       "cordova-plugin-file": {
         "ANDROIDX_WEBKIT_VERSION": "1.4.0"
       },
-      "cordova-plugin-qrscanner": {},
+      "@rhinosw/cordova-plugin-barcode-qrscanner": {},
       "cordova-plugin-android-permissions": {}
     }
   },
   "devDependencies": {
+    "@rhinosw/cordova-plugin-barcode-qrscanner": "^3.0.6",
     "cordova-android": "^15.0.0",
     "cordova-ios": "^7.1.1",
     "cordova-plugin-android-permissions": "^1.1.5",
-    "cordova-plugin-file": "^8.1.3",
-    "cordova-plugin-qrscanner": "^3.0.1"
+    "cordova-plugin-file": "^8.1.3"
   }
 }

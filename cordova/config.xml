@@ -77,6 +77,6 @@
     <plugin name="cordova-plugin-file" spec="^8.1.3">
         <variable name="ANDROIDX_WEBKIT_VERSION" value="1.4.0" />
     </plugin>
-    <plugin name="cordova-plugin-qrscanner" spec="^3.0.1" />
+    <plugin name="@rhinosw/cordova-plugin-barcode-qrscanner" spec="^3.0.6" />
     <plugin name="cordova-plugin-android-permissions" spec="^1.1.5" />
 </widget>
