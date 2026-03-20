@@ -243,14 +243,40 @@ adb install cordova/platforms/android/app/build/outputs/apk/debug/app-debug.apk
 ### iOS (macOS only)
 
 #### Prerequisites
-- **macOS** with **Xcode** (latest version recommended)
-- **CocoaPods**: `sudo gem install cocoapods`
-- **ios-deploy** (for device deployment): `brew install ios-deploy`
-- **Apple Developer account** (required for deploying to physical devices; simulator is free)
 
-Install Xcode command line tools:
+1. **Install Homebrew** (Mac package manager):
 ```bash
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+```
+
+2. **Install Node.js**:
+```bash
+brew install node
+```
+
+3. **Install Xcode** from the Mac App Store (search "Xcode"). After installing, open it once to accept the license, then run:
+```bash
+sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
 xcode-select --install
+```
+
+4. **Install CocoaPods**:
+```bash
+sudo gem install cocoapods
+```
+
+5. **Install ios-deploy** (for deploying to physical devices):
+```bash
+brew install ios-deploy
+```
+
+6. **Apple Developer account** is required for deploying to physical devices (simulator is free)
+
+#### Setup
+```bash
+cd cordova
+npm install
+npx cordova platform add ios
 ```
 
 #### Build for iOS
@@ -348,5 +374,28 @@ The `build.sh` script automates version bumping, webpack build, Cordova Android 
 ```
 All compiled artifacts are copied to the `compiled_files/` directory.
 
-After pushing to GitHub, run the macOS build separately on a Mac (see above).
+After pushing to GitHub, the CI/CD pipeline will automatically build macOS and iOS artifacts (see below).
+
+## CI/CD (GitHub Actions)
+
+A GitHub Actions workflow (`.github/workflows/build.yml`) automatically builds **all platforms** on every push to `main`:
+
+| Job | Runner | Artifacts |
+|-----|--------|-----------|
+| Chrome Extension | Ubuntu | `.zip` |
+| Electron (Linux + Windows) | Ubuntu | `.AppImage`, `.deb`, `.exe` |
+| Electron (macOS) | macOS | `.dmg` |
+| Cordova Android | Ubuntu | `.apk`, `.aab` |
+| Cordova iOS | macOS | Xcode build output |
+
+### Downloading Build Artifacts
+1. Go to your repo's **Actions** tab on GitHub
+2. Click the latest workflow run
+3. Download artifacts from the **Artifacts** section at the bottom
+
+### Triggering a Build
+- **Automatic**: Builds on every push to `main`
+- **Manual**: Go to **Actions > Build All Platforms > Run workflow**
+
+> **Note**: iOS builds require code signing for device deployment. The CI builds an unsigned version suitable for simulator testing. For App Store submission, configure signing secrets in your GitHub repository settings.
 

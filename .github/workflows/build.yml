@@ -1,0 +1,209 @@
+name: Build All Platforms
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  # Build webpack bundle (shared by all platform jobs)
+  build-web:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - name: Build webpack bundle
+        run: |
+          npm run clean && mkdir dist
+          ./scripts/create-empty-thunk.sh
+          npx webpack --progress --config webpack.prod.config.js
+
+      - name: Upload dist artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: webpack-dist
+          path: dist/
+
+  # Chrome extension zip
+  build-chrome:
+    needs: build-web
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: webpack-dist
+          path: dist/
+
+      - name: Create Chrome extension zip
+        run: |
+          cd dist
+          zip -r ../Runebase-Chrome-Wallet.zip *
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: chrome-extension
+          path: Runebase-Chrome-Wallet.zip
+
+  # Electron - Linux & Windows
+  build-electron-linux-win:
+    needs: build-web
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: webpack-dist
+          path: dist/
+
+      - name: Build Electron (Linux + Windows)
+        run: npx electron-builder --linux --win -c electron-builder-config.js
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: electron-linux-win
+          path: |
+            dist-electron/*.AppImage
+            dist-electron/*.deb
+            dist-electron/*.exe
+            dist-electron/latest.yml
+            dist-electron/latest-linux.yml
+
+  # Electron - macOS
+  build-electron-mac:
+    needs: build-web
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: webpack-dist
+          path: dist/
+
+      - name: Build Electron (macOS)
+        run: npx electron-builder --mac -c electron-builder-config.js
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: electron-mac
+          path: |
+            dist-electron/*.dmg
+            dist-electron/*.zip
+
+  # Cordova - Android
+  build-android:
+    needs: build-web
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - run: npm ci
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: webpack-dist
+          path: dist/
+
+      - name: Copy dist to cordova/www
+        run: |
+          mkdir -p cordova/www
+          cp -R dist/* cordova/www/
+
+      - name: Build Android
+        working-directory: cordova
+        run: |
+          npm ci
+          npx cordova platform add android
+          npx cordova build android
+          npx cordova build android --release
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: android-apk
+          path: |
+            cordova/platforms/android/app/build/outputs/apk/debug/app-debug.apk
+            cordova/platforms/android/app/build/outputs/bundle/release/app-release.aab
+
+  # Cordova - iOS
+  build-ios:
+    needs: build-web
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: webpack-dist
+          path: dist/
+
+      - name: Copy dist to cordova/www
+        run: |
+          mkdir -p cordova/www
+          cp -R dist/* cordova/www/
+
+      - name: Install CocoaPods
+        run: sudo gem install cocoapods
+
+      - name: Build iOS
+        working-directory: cordova
+        run: |
+          npm ci
+          npx cordova platform add ios
+          npx cordova build ios --device --buildFlag="-allowProvisioningUpdates" || npx cordova build ios
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ios-build
+          path: cordova/platforms/ios/build/
