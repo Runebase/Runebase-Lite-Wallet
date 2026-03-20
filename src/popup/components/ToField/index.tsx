@@ -1,26 +1,28 @@
 import React, { useEffect } from 'react';
 import { ArrowDropDown } from '@mui/icons-material';
 import { FormControl, TextField, Typography, Button } from '@mui/material';
-import { observer } from 'mobx-react';
+import { useAppSelector, useAppDispatch } from '../../store/hooks';
+import { setReceiverAddress, selectReceiverFieldError } from '../../store/slices/sendSlice';
 import { isCordova } from '../../abstraction';
 
 interface ToFieldProps {
-  sendStore: any;
-  sessionStore: any;
   onEnterPress: () => void;
   scanning: boolean;
   startScan: () => void;
   stopScan: () => void;
 }
 
-const ToField: React.FC<ToFieldProps> = observer(({
-  sendStore,
-  sessionStore,
+const ToField: React.FC<ToFieldProps> = ({
   onEnterPress,
   scanning,
   startScan,
-  stopScan
+  stopScan,
 }) => {
+  const dispatch = useAppDispatch();
+  const receiverAddress = useAppSelector((state) => state.send.receiverAddress);
+  const receiverFieldError = useAppSelector(selectReceiverFieldError);
+  const walletAddress = useAppSelector((state) => state.session.walletInfo?.address);
+
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === 'Enter') {
       onEnterPress();
@@ -46,18 +48,18 @@ const ToField: React.FC<ToFieldProps> = observer(({
               label="To"
               type="text"
               multiline={false}
-              placeholder={sessionStore?.walletInfo?.address || ''}
-              value={sendStore.receiverAddress || ''}
+              placeholder={walletAddress || ''}
+              value={receiverAddress || ''}
               InputProps={{
                 endAdornment: <ArrowDropDown />,
                 readOnly: scanning,
               }}
-              onChange={(event) => sendStore.setReceiverAddress(event.target.value.replace(/^runebase:/i, ''))}
+              onChange={(event) => dispatch(setReceiverAddress(event.target.value.replace(/^runebase:/i, '')))}
               onKeyDown={handleKeyDown}
             />
-            {!!sendStore.receiverAddress && sendStore.receiverFieldError && (
+            {!!receiverAddress && receiverFieldError && (
               <Typography color="error" style={{ fontSize: '0.8rem', textAlign: 'left' }}>
-                {sendStore.receiverFieldError}
+                {receiverFieldError}
               </Typography>
             )}
           </FormControl>
@@ -92,6 +94,6 @@ const ToField: React.FC<ToFieldProps> = observer(({
       )}
     </>
   );
-});
+};
 
 export default ToField;

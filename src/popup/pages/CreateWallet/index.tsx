@@ -1,37 +1,49 @@
-import React, { ChangeEvent, useEffect } from 'react';
-import PropTypes from 'prop-types';
+import React, { useEffect, ChangeEvent } from 'react';
 import { Button, Divider } from '@mui/material';
-import { inject, observer } from 'mobx-react';
 import NavBar from '../../components/NavBar';
 import Logo from '../../components/Logo';
 import BorderTextField from '../../components/BorderTextField';
-import AppStore from '../../stores/AppStore';
+import { useAppSelector, useAppDispatch } from '../../store/hooks';
+import {
+  validateWalletName,
+  routeToSaveMnemonic,
+  routeToImportWallet,
+  resetCreateWallet,
+  selectWalletNameError,
+  selectCreateWalletError,
+  selectShowBackButton,
+} from '../../store/slices/createWalletSlice';
+import { setWalletName as setSaveMnemonicWalletName } from '../../store/slices/saveMnemonicSlice';
 import useStyles from './styles';
 
-interface IProps {
-  store: AppStore;
-}
-
-const CreateWallet: React.FC<IProps> = ({ store }) => {
+const CreateWallet: React.FC = () => {
   const { classes } = useStyles();
-  const { createWalletStore, saveMnemonicStore } = store;
+  const dispatch = useAppDispatch();
 
-  useEffect(() => {}, [createWalletStore]);
+  const walletNameTaken = useAppSelector((state) => state.createWallet.walletNameTaken);
+  const walletNameError = useAppSelector(selectWalletNameError);
+  const error = useAppSelector(selectCreateWalletError);
+  const showBackButton = useAppSelector(selectShowBackButton);
+
+  useEffect(() => {
+    dispatch(resetCreateWallet());
+  }, [dispatch]);
 
   const onWalletNameChange = (event: ChangeEvent<HTMLInputElement>) => {
-    createWalletStore.updateWalletName(event.target.value);
-    saveMnemonicStore.updateWalletName(event.target.value);
+    dispatch(validateWalletName(event.target.value));
+    dispatch(setSaveMnemonicWalletName(event.target.value));
   };
 
   const handleEnterPress = () => {
-    const { createWalletStore } = store;
-    createWalletStore.handleEnterPress();
+    if (!error) {
+      routeToSaveMnemonic();
+    }
   };
 
   return (
     <div className={classes.root}>
       <NavBar
-        hasBackButton={createWalletStore.showBackButton}
+        hasBackButton={showBackButton}
         // hasNetworkSelector
         title=""
       />
@@ -41,8 +53,8 @@ const CreateWallet: React.FC<IProps> = ({ store }) => {
           <BorderTextField
             className={classes.walletNameField}
             placeholder="Wallet name"
-            error={createWalletStore.walletNameTaken}
-            errorText={createWalletStore.walletNameError}
+            error={walletNameTaken}
+            errorText={walletNameError}
             onChange={onWalletNameChange}
             onEnterPress={handleEnterPress}
           />
@@ -52,8 +64,8 @@ const CreateWallet: React.FC<IProps> = ({ store }) => {
           fullWidth
           variant="contained"
           color="primary"
-          disabled={createWalletStore.error}
-          onClick={createWalletStore.routeToSaveMnemonic}
+          disabled={error}
+          onClick={() => routeToSaveMnemonic()}
         >
           Create Wallet
         </Button>
@@ -63,7 +75,7 @@ const CreateWallet: React.FC<IProps> = ({ store }) => {
           fullWidth
           variant="contained"
           color="primary"
-          onClick={createWalletStore.routeToImportWallet}
+          onClick={() => routeToImportWallet()}
         >
           Import Wallet
         </Button>
@@ -72,18 +84,4 @@ const CreateWallet: React.FC<IProps> = ({ store }) => {
   );
 };
 
-CreateWallet.propTypes = {
-  classes: PropTypes.shape({
-    root: PropTypes.string.isRequired,
-    contentContainer: PropTypes.string.isRequired,
-    fieldContainer: PropTypes.string.isRequired,
-    walletNameField: PropTypes.string.isRequired,
-    loginButton: PropTypes.string.isRequired,
-    selectionDividerContainer: PropTypes.string.isRequired,
-    selectionDivider: PropTypes.string.isRequired,
-    selectionDividerText: PropTypes.string.isRequired,
-    importButton: PropTypes.string.isRequired,
-  }),
-};
-
-export default inject('store')(observer(CreateWallet));
+export default CreateWallet;

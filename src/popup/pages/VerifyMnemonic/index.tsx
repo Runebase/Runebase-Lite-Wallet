@@ -1,25 +1,23 @@
 import React, { useState } from 'react';
 import { Typography, Button } from '@mui/material';
-import { inject, observer } from 'mobx-react';
 import cx from 'classnames';
 import NavBar from '../../components/NavBar';
-import AppStore from '../../stores/AppStore';
+import { useAppSelector, useAppDispatch } from '../../store/hooks';
+import { createWallet } from '../../store/slices/saveMnemonicSlice';
 import useStyles from './styles';
 import LibraryAddCheckIcon from '@mui/icons-material/LibraryAddCheck';
 import SeedPhraseInput from '../../components/SeedphraseInput';
 // const strings = require('../../localization/locales/en_US.json');
 
-interface IProps {
-  store: AppStore;
-}
-
-const VerifyMnemonic: React.FC<IProps> = ({ store }) => {
+const VerifyMnemonic: React.FC = () => {
   const { classes } = useStyles();
+  const dispatch = useAppDispatch();
   const [verificationPhrase, setVerificationPhrase] = useState(Array(12).fill(''));
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
+  const mnemonic = useAppSelector((state) => state.saveMnemonic.mnemonic);
+
   const isVerificationCorrect = () => {
-    const { mnemonic } = store.saveMnemonicStore;
     return verificationPhrase.join(' ') === mnemonic.join(' ');
   };
 
@@ -50,7 +48,7 @@ const VerifyMnemonic: React.FC<IProps> = ({ store }) => {
           startIcon={<LibraryAddCheckIcon />}
           onClick={() => {
             if (isVerificationCorrect()) {
-              store.saveMnemonicStore.createWallet();
+              dispatch(createWallet());
             } else {
               setErrorMessage('Invalid Seed Phrase');
             }
@@ -63,4 +61,4 @@ const VerifyMnemonic: React.FC<IProps> = ({ store }) => {
   );
 };
 
-export default inject('store')(observer(VerifyMnemonic));
+export default VerifyMnemonic;

@@ -1,8 +1,10 @@
 import React from 'react';
 import { FormControl, TextField, Typography } from '@mui/material';
-import { observer } from 'mobx-react';
+import { useAppSelector } from '../../store/hooks';
 
-const DisabledSuperstakerAddressField = observer(({ delegateStore }: any) => {
+const DisabledSuperstakerAddressField: React.FC = () => {
+  const selectedSuperstaker = useAppSelector((state) => state.delegate.selectedSuperstaker);
+
   return (
     <FormControl
       fullWidth
@@ -14,16 +16,16 @@ const DisabledSuperstakerAddressField = observer(({ delegateStore }: any) => {
         label="SuperStaker"
         type="text"
         multiline={false}
-        placeholder={delegateStore.selectedSuperstaker.address || ''}
-        value={delegateStore.selectedSuperstaker.address || ''}
+        placeholder={selectedSuperstaker?.address || ''}
+        value={selectedSuperstaker?.address || ''}
       />
-      {delegateStore.selectedSuperstaker && !delegateStore.selectedSuperstaker.address && (
+      {selectedSuperstaker && !selectedSuperstaker.address && (
         <Typography color="error" style={{ fontSize: '0.8rem', textAlign: 'left' }}>
           No Superstaker selected
         </Typography>
       )}
     </FormControl>
   );
-});
+};
 
 export default DisabledSuperstakerAddressField;

@@ -1,59 +1,60 @@
-import React from 'react';
-import { observer, inject } from 'mobx-react';
+import React, { useEffect } from 'react';
 import { Typography, Select, MenuItem } from '@mui/material';
-import { map } from 'lodash';
 
 import useStyles from './styles';
 import NavBar from '../../components/NavBar';
-import AppStore from '../../stores/AppStore';
-import { SessionLogoutInterval } from '../../../models/SessionLogoutInterval';
+import { useAppSelector, useAppDispatch } from '../../store/hooks';
+import {
+  initSettings,
+  changeSessionLogoutInterval,
+  SESSION_LOGOUT_INTERVALS,
+} from '../../store/slices/settingsSlice';
 
-interface IProps {
-  store: AppStore;
-}
+const Settings: React.FC = () => {
+  const { classes } = useStyles();
+  const dispatch = useAppDispatch();
+  const sessionLogoutInterval = useAppSelector((state) => state.settings.sessionLogoutInterval);
 
-const Settings: React.FC<IProps> = inject('store')(
-  observer(({ store }) => {
-    const { classes } = useStyles();
+  useEffect(() => {
+    dispatch(initSettings());
+  }, [dispatch]);
 
-    return (
-      <div className={classes.root}>
-        <NavBar hasBackButton title="Settings" />
-        <div className={classes.contentContainer}>
-          <div className={classes.fieldsContainer}>
-            <SliField classes={classes} store={store} />
-          </div>
+  return (
+    <div className={classes.root}>
+      <NavBar hasBackButton title="Settings" />
+      <div className={classes.contentContainer}>
+        <div className={classes.fieldsContainer}>
+          <SliField classes={classes} />
         </div>
       </div>
-    );
-  })
-);
-
-interface SliFieldProps {
-  classes: Record<string, string>;
-  store: { settingsStore: { sessionLogoutInterval: number;
-    changeSessionLogoutInterval: (value: number) => void; sliArray: SessionLogoutInterval[] } };
-}
-
-const SliField: React.FC<SliFieldProps> = observer(({ classes, store }) => (
-  <div className={classes.fieldContainer}>
-    <Heading name="Session Logout Interval" classes={classes} />
-    <div className={classes.fieldContentContainer}>
-      <Select
-        className={classes.select}
-        inputProps={{ name: 'sessionLogoutInterval', id: 'sessionLogoutInterval'}}
-        value={store.settingsStore.sessionLogoutInterval}
-        onChange={(event) => store.settingsStore.changeSessionLogoutInterval(Number(event.target.value))}
-      >
-        {map(store.settingsStore.sliArray, (sli: SessionLogoutInterval) => (
-          <MenuItem key={sli.interval} value={sli.interval}>
-            <Typography className={classes.selectTypography}>{sli.name}</Typography>
-          </MenuItem>
-        ))}
-      </Select>
     </div>
-  </div>
-));
+  );
+};
+
+const SliField: React.FC<{ classes: Record<string, string> }> = ({ classes }) => {
+  const dispatch = useAppDispatch();
+  const sessionLogoutInterval = useAppSelector((state) => state.settings.sessionLogoutInterval);
+
+  return (
+    <div className={classes.fieldContainer}>
+      <Heading name="Session Logout Interval" classes={classes} />
+      <div className={classes.fieldContentContainer}>
+        <Select
+          className={classes.select}
+          inputProps={{ name: 'sessionLogoutInterval', id: 'sessionLogoutInterval' }}
+          value={sessionLogoutInterval}
+          onChange={(event) => dispatch(changeSessionLogoutInterval(Number(event.target.value)))}
+        >
+          {SESSION_LOGOUT_INTERVALS.map((sli) => (
+            <MenuItem key={sli.interval} value={sli.interval}>
+              <Typography className={classes.selectTypography}>{sli.name}</Typography>
+            </MenuItem>
+          ))}
+        </Select>
+      </div>
+    </div>
+  );
+};
 
 interface HeadingProps {
   classes: Record<string, string>;

@@ -1,4 +1,3 @@
-// https://discordapp.com/users/217379915803131906 <- (how to link discord users)
 import React from 'react';
 import { Typography, Card, CardContent, CardActions, Button, Tooltip } from '@mui/material';
 import { RunebaseInfo } from 'runebasejs-wallet';
@@ -7,23 +6,33 @@ import AppRegistrationIcon from '@mui/icons-material/AppRegistration';
 import NotificationAddIcon from '@mui/icons-material/NotificationAdd';
 import DynamicFormIcon from '@mui/icons-material/DynamicForm';
 import moment from 'moment';
-import DelegateStore from '../../stores/DelegateStore';
 import { SuperStaker } from '../../../types';
-import { NavigateFunction } from 'react-router';
+import { useNavigate } from 'react-router';
+import { useAppDispatch } from '../../store/hooks';
+import { setSelectedSuperStaker } from '../../store/slices/delegateSlice';
 
 interface SuperStakerCardProps {
   superstaker: SuperStaker;
   delegationInfo: RunebaseInfo.IGetAddressDelegation | undefined;
-  navigate: NavigateFunction | undefined;
-  delegateStore: DelegateStore;
 }
 
 const SuperStakerCard: React.FC<SuperStakerCardProps> = ({
   superstaker,
   delegationInfo,
-  navigate,
-  delegateStore,
 }) => {
+  const navigate = useNavigate();
+  const dispatch = useAppDispatch();
+
+  const handleDelegate = () => {
+    dispatch(setSelectedSuperStaker(superstaker));
+    navigate('/add-delegation');
+  };
+
+  const handleDetails = () => {
+    dispatch(setSelectedSuperStaker(superstaker));
+    navigate('/superstaker-detail');
+  };
+
   return (
     <Card
       sx={{
@@ -78,9 +87,7 @@ const SuperStakerCard: React.FC<SuperStakerCardProps> = ({
           <Button
             variant="contained"
             color="secondary"
-            onClick={() => {
-              navigate?.('/remove-delegation');
-            }}
+            onClick={() => navigate('/remove-delegation')}
           >
             Undelegate
           </Button>
@@ -88,10 +95,7 @@ const SuperStakerCard: React.FC<SuperStakerCardProps> = ({
           <Button
             variant="contained"
             color="primary"
-            onClick={() => {
-              delegateStore.setSelectedSuperStaker(superstaker);
-              navigate?.('/add-delegation');
-            }}
+            onClick={handleDelegate}
           >
             Change Delegate
           </Button>
@@ -99,10 +103,7 @@ const SuperStakerCard: React.FC<SuperStakerCardProps> = ({
           <Button
             variant="contained"
             color="primary"
-            onClick={() => {
-              delegateStore.setSelectedSuperStaker(superstaker);
-              navigate?.('/add-delegation');
-            }}
+            onClick={handleDelegate}
           >
             Delegate
           </Button>
@@ -110,10 +111,7 @@ const SuperStakerCard: React.FC<SuperStakerCardProps> = ({
         <Button
           variant="contained"
           color="primary"
-          onClick={() => {
-            delegateStore.setSelectedSuperStaker(superstaker);
-            navigate?.('/superstaker-detail');
-          }}
+          onClick={handleDetails}
         >
           Details
         </Button>

@@ -1,5 +1,5 @@
 // Login.tsx
-import React, { useEffect, Fragment } from 'react';
+import React, { useEffect, useCallback, Fragment } from 'react';
 import {
   Typography,
   Button,
@@ -14,117 +14,147 @@ import {
   Box,
 } from '@mui/material';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
-import { observer, inject } from 'mobx-react';
 import PasswordInput from '../../components/PasswordInput';
 import Logo from '../../components/Logo';
-import AppStore from '../../stores/AppStore';
+import { useAppSelector, useAppDispatch } from '../../store/hooks';
+import {
+  setPassword,
+  setConfirmPassword,
+  setAlgorithm,
+  setInvalidPassword,
+  resetLoginForm,
+  refreshHasAccounts,
+  attemptSessionRestore,
+  selectMatchError,
+  selectLoginError,
+} from '../../store/slices/loginSlice';
+import { MESSAGE_TYPE } from '../../../constants';
+import { sendMessage } from '../../abstraction';
+import { getNavigateFunction } from '../../store/messageMiddleware';
 import useStyles from './styles';
-interface IProps {
-  store: AppStore;
-}
 
-const Login: React.FC<IProps> = inject('store')(
-  observer(({ store }) => {
-    const { classes } = useStyles();
-    const { loginStore } = store;
-    const { hasAccounts, matchError, error } = loginStore;
+const Login: React.FC = () => {
+  const { classes } = useStyles();
+  const dispatch = useAppDispatch();
 
-    useEffect(() => {
-      loginStore.init();
-    }, [loginStore]);
-    useEffect(() => { }, [hasAccounts]);
+  const hasAccounts = useAppSelector((state) => state.login.hasAccounts);
+  const password = useAppSelector((state) => state.login.password);
+  const algorithm = useAppSelector((state) => state.login.algorithm);
+  const invalidPassword = useAppSelector((state) => state.login.invalidPassword);
+  const matchError = useAppSelector(selectMatchError);
+  const error = useAppSelector(selectLoginError);
 
-    return (
-      <div className={classes.root}>
-        <Logo />
-        <div className={classes.fieldContainer}>
-          <Box
-            sx={{
-              mb: 1,
-            }}
-          >
-            <PasswordInput
-              autoFocus={true}
-              placeholder="Password"
-              onChange={(e) => loginStore.setPassword(e.target.value)}
-              onEnterPress={loginStore.login}
-            />
-          </Box>
-          {!hasAccounts && (
-            <Fragment>
-              <Box
-                sx={{
-                  mb: 1,
-                }}
-              >
-                <PasswordInput
-                  placeholder="Confirm password"
-                  error={!!matchError}
-                  errorText={matchError}
-                  onChange={(e) => loginStore.setConfirmPassword(e.target.value)}
-                  onEnterPress={loginStore.login}
-                />
-              </Box>
-              <Box
-                sx={{
-                  mb: 1,
-                }}
-              >
-                <FormControl fullWidth>
-                  <InputLabel id="security-algo-select-label">Security Algorithm</InputLabel>
-                  <Select
-                    labelId="security-algo-select-label"
-                    id="security-algo-select"
-                    value={loginStore.algorithm}
-                    label="Security Algorithm"
-                    onChange={(e: SelectChangeEvent) => (loginStore.algorithm = e.target.value)}
-                  >
-                    <MenuItem value={'PBKDF2'}>PBKDF2 (Fast, less secure)</MenuItem>
-                    <MenuItem value={'Scrypt'}>Scrypt (Slow, more secure)</MenuItem>
-                  </Select>
-                </FormControl>
-              </Box>
-              <Typography className={classes.masterPwNote}>
-                This will serve as your master password and will be saved when you create or import your first wallet.
-              </Typography>
-            </Fragment>
-          )}
-        </div>
-        <Button
+  useEffect(() => {
+    refreshHasAccounts();
+    attemptSessionRestore();
+  }, []);
+
+  useEffect(() => {}, [hasAccounts]);
+
+  const handleLogin = useCallback(() => {
+    if (error) return;
+    console.log('handleLogin: sending LOGIN with password length:', password.length, 'algorithm:', algorithm);
+    const navigate = getNavigateFunction();
+    navigate?.('/loading');
+    sendMessage({
+      type: MESSAGE_TYPE.LOGIN,
+      password,
+      algorithm,
+    });
+    dispatch(resetLoginForm());
+  }, [error, password, algorithm, dispatch]);
+
+  return (
+    <div className={classes.root}>
+      <Logo />
+      <div className={classes.fieldContainer}>
+        <Box
           sx={{
-            mt: 1,
-          }}
-          className={classes.loginButton}
-          fullWidth
-          variant="contained"
-          color="primary"
-          disabled={error}
-          onClick={() => {
-            loginStore.login();
+            mb: 1,
           }}
         >
-          Login
-        </Button>
-        <ErrorDialog {...{ store }} />
+          <PasswordInput
+            autoFocus={true}
+            placeholder="Password"
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => dispatch(setPassword(e.target.value))}
+            onEnterPress={handleLogin}
+          />
+        </Box>
+        {!hasAccounts && (
+          <Fragment>
+            <Box
+              sx={{
+                mb: 1,
+              }}
+            >
+              <PasswordInput
+                placeholder="Confirm password"
+                error={!!matchError}
+                errorText={matchError}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => dispatch(setConfirmPassword(e.target.value))}
+                onEnterPress={handleLogin}
+              />
+            </Box>
+            <Box
+              sx={{
+                mb: 1,
+              }}
+            >
+              <FormControl fullWidth>
+                <InputLabel id="security-algo-select-label">Security Algorithm</InputLabel>
+                <Select
+                  labelId="security-algo-select-label"
+                  id="security-algo-select"
+                  value={algorithm}
+                  label="Security Algorithm"
+                  onChange={(e: SelectChangeEvent) => dispatch(setAlgorithm(e.target.value))}
+                >
+                  <MenuItem value={'PBKDF2'}>PBKDF2 (Fast, less secure)</MenuItem>
+                  <MenuItem value={'Scrypt'}>Scrypt (Slow, more secure)</MenuItem>
+                </Select>
+              </FormControl>
+            </Box>
+            <Typography className={classes.masterPwNote}>
+              This will serve as your master password and will be saved when you create or import your first wallet.
+            </Typography>
+          </Fragment>
+        )}
       </div>
-    );
-  })
-);
+      <Button
+        sx={{
+          mt: 1,
+        }}
+        className={classes.loginButton}
+        fullWidth
+        variant="contained"
+        color="primary"
+        disabled={error}
+        onClick={handleLogin}
+      >
+        Login
+      </Button>
+      <ErrorDialog />
+    </div>
+  );
+};
 
-const ErrorDialog: React.FC<{ store: { loginStore: any } }> = observer(({ store }) => {
+const ErrorDialog: React.FC = () => {
+  const dispatch = useAppDispatch();
+  const invalidPassword = useAppSelector((state) => state.login.invalidPassword);
+
   return (
-    <Dialog open={!!store.loginStore.invalidPassword} onClose={() => (store.loginStore.invalidPassword = undefined)}>
+    <Dialog open={!!invalidPassword} onClose={() => dispatch(setInvalidPassword(undefined))}>
       <DialogTitle>Invalid Password</DialogTitle>
       <DialogContent>
         <DialogContentText>You have entered an invalid password. Please try again.</DialogContentText>
       </DialogContent>
       <DialogActions>
-        <Button onClick={() => (store.loginStore.invalidPassword = undefined)} color="primary">
+        <Button onClick={() => dispatch(setInvalidPassword(undefined))} color="primary">
           Close
         </Button>
       </DialogActions>
     </Dialog>
   );
-});
+};
 
 export default Login;

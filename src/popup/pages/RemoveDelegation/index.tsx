@@ -1,62 +1,54 @@
-import React, { useEffect } from 'react';
-import { observer, inject } from 'mobx-react';
+import React from 'react';
 import useStyles from './styles';
 import NavBar from '../../components/NavBar';
-import AppStore from '../../stores/AppStore';
 import GasLimitField from '../../components/GasLimitField';
 import GasPriceField from '../../components/GasPriceField';
 import { Button } from '@mui/material';
 import { Send as SendIcon } from '@mui/icons-material';
 import { handleEnterPress } from '../../../utils';
+import { useAppSelector, useAppDispatch } from '../../store/hooks';
+import {
+  routeToRemoveDelegationConfirm,
+  selectDelegateButtonDisabled,
+} from '../../store/slices/delegateSlice';
 
-interface IProps {
-  store: AppStore;
-}
+const RemoveDelegation: React.FC = () => {
+  const { classes } = useStyles();
+  const dispatch = useAppDispatch();
+  const loggedInAccountName = useAppSelector((state) => state.session.loggedInAccountName);
+  const walletInfo = useAppSelector((state) => state.session.walletInfo);
+  const buttonDisabled = useAppSelector(selectDelegateButtonDisabled);
 
-const RemoveDelegation: React.FC<IProps> = inject('store')(
-  observer(({ store }) => {
-    const { classes } = useStyles();
-    const { sessionStore, delegateStore } = store;
-    const { loggedInAccountName, walletInfo } = sessionStore;
-    if (!loggedInAccountName || !walletInfo) return null;
+  if (!loggedInAccountName || !walletInfo) return null;
 
-    useEffect(() => { }, []);
+  const onEnterPress = (event: React.KeyboardEvent) => {
+    handleEnterPress(event, () => {
+      if (!buttonDisabled) {
+        routeToRemoveDelegationConfirm();
+      }
+    });
+  };
 
-    const onEnterPress = (event: React.KeyboardEvent) => {
-      handleEnterPress(event, () => {
-        if (!delegateStore.buttonDisabled) {
-          store.navigate?.('/remove-delegation-confirm');
-        }
-      });
-    };
-
-
-    return (
-      <div className={classes.root}>
-        <NavBar hasBackButton title="Remove Delegation" />
-        <div className={classes.contentContainer}>
-          <GasLimitField onEnterPress={onEnterPress} sendStore={delegateStore} />
-          <GasPriceField onEnterPress={onEnterPress} sendStore={delegateStore} />
-          <RemoveDelegationButton delegateStore={delegateStore} classes={classes} />
-        </div>
+  return (
+    <div className={classes.root}>
+      <NavBar hasBackButton title="Remove Delegation" />
+      <div className={classes.contentContainer}>
+        <GasLimitField source="delegate" onEnterPress={onEnterPress} />
+        <GasPriceField source="delegate" onEnterPress={onEnterPress} />
+        <Button
+          fullWidth
+          variant="contained"
+          color="primary"
+          size="large"
+          disabled={buttonDisabled}
+          onClick={() => routeToRemoveDelegationConfirm()}
+          endIcon={<SendIcon />}
+        >
+          Remove Delegation
+        </Button>
       </div>
-    );
-  })
-);
-
-const RemoveDelegationButton = observer(({ delegateStore }: any) => (
-  <Button
-    fullWidth
-    variant="contained"
-    color="primary"
-    size="large"
-    disabled={delegateStore.buttonDisabled}
-    onClick={delegateStore.routeToRemoveDelegationConfirm}
-    endIcon={<SendIcon />}
-  >
-    Remove Delegation
-  </Button>
-));
-
+    </div>
+  );
+};
 
 export default RemoveDelegation;

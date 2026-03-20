@@ -240,13 +240,17 @@ jobs:
         run: |
           npm ci
           cordova platform add cordova-ios@^7.1.1 --save
-          cordova build ios || true
+          cordova build ios --emulator
+
+      - name: Zip iOS simulator build
+        run: |
+          cd cordova/platforms/ios/build/emulator/
+          zip -r "$GITHUB_WORKSPACE/Runebase-Lite-Wallet-ios-simulator.zip" *.app
 
       - uses: actions/upload-artifact@v4
         with:
           name: ios-build
-          path: cordova/platforms/ios/build/
-          if-no-files-found: warn
+          path: Runebase-Lite-Wallet-ios-simulator.zip
 
   # Create GitHub Release (only on version tags)
   release:
@@ -285,6 +289,9 @@ jobs:
           # Android
           find artifacts/android-apk -name "app-debug.apk" -exec cp {} "release/Runebase-Lite-Wallet-v${VERSION}-debug.apk" \;
           find artifacts/android-apk -name "app-release.aab" -exec cp {} "release/Runebase-Lite-Wallet-v${VERSION}-release.aab" \;
+
+          # iOS simulator
+          find artifacts/ios-build -name "*.zip" -exec cp {} "release/Runebase-Lite-Wallet-v${VERSION}-ios-simulator.zip" \;
 
           echo "=== Release files ==="
           ls -la release/

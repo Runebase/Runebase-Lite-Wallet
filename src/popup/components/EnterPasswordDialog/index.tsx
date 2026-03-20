@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { observer, inject } from 'mobx-react';
 import {
   Button,
   DialogContentText,
@@ -15,106 +14,113 @@ import { useTheme } from '@mui/material/styles';
 import IconButton from '@mui/material/IconButton';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
-import AppStore from '../../stores/AppStore';
+import { useAppSelector, useAppDispatch } from '../../store/hooks';
+import { setPassword, setInvalidPassword } from '../../store/slices/loginSlice';
+import { sendMessage } from '../../abstraction';
+import { getNavigateFunction } from '../../store/messageMiddleware';
+import { MESSAGE_TYPE } from '../../../constants';
 
 interface IProps {
-  store?: AppStore;
   MessageType: string;
-  open: boolean; // New prop for controlling the dialog's open state
-  onClose: () => void; // New prop for handling the dialog's close event
+  open: boolean;
+  onClose: () => void;
 }
 
-const EnterPasswordDialog: React.FC<IProps> = inject('store')(
-  observer(({
-    store,
-    MessageType = '',
-    open, onClose
-  }) => {
-    const [showPassword, setShowPassword] = useState(false);
+const EnterPasswordDialog: React.FC<IProps> = ({
+  MessageType = '',
+  open,
+  onClose,
+}) => {
+  const [showPassword, setShowPassword] = useState(false);
+  const dispatch = useAppDispatch();
 
-    const theme = useTheme();
-    const fullScreen = useMediaQuery(theme.breakpoints.down('md'));
+  const theme = useTheme();
+  const fullScreen = useMediaQuery(theme.breakpoints.down('md'));
 
-    const loginStore = store?.loginStore;
+  const password = useAppSelector((state) => state.login.password);
+  const algorithm = useAppSelector((state) => state.login.algorithm);
+  const invalidPassword = useAppSelector((state) => state.login.invalidPassword);
 
-    const handleClose = () => {
-      onClose(); // Notify the parent component that the dialog should be closed
-    };
+  const handleClose = () => {
+    onClose();
+  };
 
-    const loginFunction = () => {
-      loginStore?.loginRequest(MessageType);
-      onClose(); // Close the dialog after login
-    };
+  const loginFunction = () => {
+    console.log(`Attempting loginRequest with MESSAGE_TYPE.${MessageType}`);
+    if (MessageType === MESSAGE_TYPE.REQUEST_BACKUP_WALLET_INFO) {
+      const navigate = getNavigateFunction();
+      navigate?.('/backup-wallet');
+    }
+    sendMessage({
+      type: MessageType,
+      password,
+      algorithm,
+    });
+    dispatch(setPassword(''));
+    onClose();
+  };
 
-    const handleTogglePasswordVisibility = () => {
-      setShowPassword((prevShowPassword) => !prevShowPassword);
-    };
+  const handleTogglePasswordVisibility = () => {
+    setShowPassword((prevShowPassword) => !prevShowPassword);
+  };
 
-    return (
-      <>
-        <Dialog
-          fullScreen={fullScreen}
-          open={open} // Controlled externally
-          onClose={handleClose}
-          aria-labelledby="responsive-dialog-title"
-          maxWidth="xs" // Set maxWidth to 'xs' or 'sm' as needed
-          style={{ overflowY: 'hidden' }} // Set overflowY to 'hidden'
-        >
-          <DialogTitle id="responsive-dialog-title">
-            Please enter your master password
-          </DialogTitle>
-          <DialogContent>
-            <TextField
-              autoFocus
-              margin="dense"
-              id="password"
-              label="Password"
-              type={showPassword ? 'text' : 'password'}
-              fullWidth
-              value={loginStore?.password || ''}
-              onChange={(event) => loginStore?.setPassword(event.target.value)}
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton onClick={handleTogglePasswordVisibility}>
-                      {showPassword ? <VisibilityOff /> : <Visibility />}
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              }}
-            />
-          </DialogContent>
-          <DialogActions>
-            <Button autoFocus onClick={handleClose}>
-              Cancel
-            </Button>
-            <Button onClick={loginFunction} autoFocus>
-              Submit
-            </Button>
-          </DialogActions>
-        </Dialog>
-        {loginStore && <ErrorDialog loginStore={loginStore} />}
-      </>
-    );
-  })
-);
-
-const ErrorDialog: React.FC<{
-  loginStore: any;
-}> = observer(({ loginStore }) => {
   return (
-    <Dialog open={!!loginStore.invalidPassword} onClose={() => (loginStore.invalidPassword = undefined)}>
-      <DialogTitle>Invalid Password</DialogTitle>
-      <DialogContent>
-        <DialogContentText>You have entered an invalid password. Please try again.</DialogContentText>
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={() => (loginStore.invalidPassword = undefined)} color="primary">
-          Close
-        </Button>
-      </DialogActions>
-    </Dialog>
+    <>
+      <Dialog
+        fullScreen={fullScreen}
+        open={open}
+        onClose={handleClose}
+        aria-labelledby="responsive-dialog-title"
+        maxWidth="xs"
+        style={{ overflowY: 'hidden' }}
+      >
+        <DialogTitle id="responsive-dialog-title">
+          Please enter your master password
+        </DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            margin="dense"
+            id="password"
+            label="Password"
+            type={showPassword ? 'text' : 'password'}
+            fullWidth
+            value={password || ''}
+            onChange={(event) => dispatch(setPassword(event.target.value))}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton onClick={handleTogglePasswordVisibility}>
+                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button autoFocus onClick={handleClose}>
+            Cancel
+          </Button>
+          <Button onClick={loginFunction} autoFocus>
+            Submit
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={!!invalidPassword} onClose={() => dispatch(setInvalidPassword(undefined))}>
+        <DialogTitle>Invalid Password</DialogTitle>
+        <DialogContent>
+          <DialogContentText>You have entered an invalid password. Please try again.</DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => dispatch(setInvalidPassword(undefined))} color="primary">
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </>
   );
-});
+};
 
 export default EnterPasswordDialog;

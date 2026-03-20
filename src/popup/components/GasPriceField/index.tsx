@@ -1,11 +1,41 @@
 import React from 'react';
 import { Button, TextField, Typography } from '@mui/material';
-import { observer } from 'mobx-react';
+import { useAppSelector, useAppDispatch } from '../../store/hooks';
+import {
+  setGasPrice as setSendGasPrice,
+  selectGasPriceFieldError as selectSendGasPriceFieldError,
+  GAS_PRICE_RECOMMENDED,
+} from '../../store/slices/sendSlice';
+import {
+  setGasPrice as setDelegateGasPrice,
+  selectGasPriceFieldError as selectDelegateGasPriceFieldError,
+  DELEGATION_GAS_PRICE_RECOMMENDED,
+} from '../../store/slices/delegateSlice';
 
-const GasPriceField = observer(({ sendStore, onEnterPress }: any) => {
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === 'Enter') {
-      onEnterPress();
+interface GasPriceFieldProps {
+  source?: 'send' | 'delegate';
+  onEnterPress?: (event: React.KeyboardEvent) => void;
+}
+
+const GasPriceField: React.FC<GasPriceFieldProps> = ({
+  source = 'send',
+  onEnterPress,
+}) => {
+  const dispatch = useAppDispatch();
+
+  const gasPrice = useAppSelector((state) =>
+    source === 'delegate' ? state.delegate.gasPrice : state.send.gasPrice
+  );
+  const gasPriceFieldError = useAppSelector((state) =>
+    source === 'delegate' ? selectDelegateGasPriceFieldError(state) : selectSendGasPriceFieldError(state)
+  );
+  const recommendedAmount = source === 'delegate' ? DELEGATION_GAS_PRICE_RECOMMENDED : GAS_PRICE_RECOMMENDED;
+
+  const handleChange = (value: number) => {
+    if (source === 'delegate') {
+      dispatch(setDelegateGasPrice(value));
+    } else {
+      dispatch(setSendGasPrice(value));
     }
   };
 
@@ -15,7 +45,7 @@ const GasPriceField = observer(({ sendStore, onEnterPress }: any) => {
         style={{ alignSelf: 'flex-end', margin: '0 0 8px 0' }}
         variant="contained"
         color="primary"
-        onClick={() => (sendStore.gasPrice = sendStore.gasPriceRecommendedAmount)}
+        onClick={() => handleChange(recommendedAmount)}
       >
         Set Recommended GasPrice
       </Button>
@@ -24,8 +54,8 @@ const GasPriceField = observer(({ sendStore, onEnterPress }: any) => {
         fullWidth
         type="number"
         multiline={false}
-        placeholder={sendStore.gasPriceRecommendedAmount.toString()}
-        value={sendStore.gasPrice.toString()}
+        placeholder={recommendedAmount.toString()}
+        value={gasPrice.toString()}
         InputProps={{
           endAdornment: (
             <Typography style={{ fontSize: '0.8rem' }}>
@@ -33,16 +63,16 @@ const GasPriceField = observer(({ sendStore, onEnterPress }: any) => {
             </Typography>
           ),
         }}
-        onChange={(event) => sendStore.setGasPrice(Number(event.target.value))}
-        onKeyDown={handleKeyDown}
+        onChange={(event) => handleChange(Number(event.target.value))}
+        onKeyDown={(event) => onEnterPress?.(event)}
       />
-      {sendStore.gasPriceFieldError && (
+      {gasPriceFieldError && (
         <Typography color="error" style={{ fontSize: '0.8rem', textAlign: 'left' }}>
-          {sendStore.gasPriceFieldError}
+          {gasPriceFieldError}
         </Typography>
       )}
     </div>
   );
-});
+};
 
 export default GasPriceField;

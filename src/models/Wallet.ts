@@ -1,4 +1,3 @@
-import { action, makeObservable } from 'mobx';
 import {
   Wallet as RunebaseWallet,
   RunebaseInfo,
@@ -19,22 +18,17 @@ export default class Wallet implements ISigner {
   public maxRunebaseSend?: number;
 
   constructor(rjsWallet: RunebaseWallet) {
-    makeObservable(this);
     this.rjsWallet = rjsWallet;
     this.rpcProvider = new WalletRPCProvider(this.rjsWallet);
   }
 
-  @action public updateInfo = async () => {
+  public updateInfo = async () => {
     if (!this.rjsWallet) {
       console.error('Cannot updateInfo without rjsWallet instance.');
     }
 
-    /**
-     * We add a timeout promise to handle if rjsWallet hangs when executing getWalletInfo.
-     * (This happens if the runebase api is down)
-     */
     let timedOut = false;
-     
+
     const timeoutPromise = new Promise((_, reject) => {
       const wait = setTimeout(() => {
         clearTimeout(wait);
@@ -49,14 +43,13 @@ export default class Wallet implements ISigner {
     try {
       newInfo = await Promise.race(promises);
 
-      // if they are not equal, then the balance has changed
       if (!timedOut && !deepEqual(this.info, newInfo)) {
         this.info = newInfo;
-        console.log('Wallet info updated:', this.info); // Added logging
+        console.log('Wallet info updated:', this.info);
         return true;
       }
     } catch (e) {
-      console.error('Error updating wallet info:', e); // Added logging
+      console.error('Error updating wallet info:', e);
       throw Error(e as any);
     }
 
@@ -76,14 +69,12 @@ export default class Wallet implements ISigner {
     }
   };
 
-  // @param amount: (unit - whole RUNEBASE)
   public send = async (to: string, amount: number, options: ISendTxOptions): Promise<RunebaseInfo.ISendRawTxResult> => {
     if (!this.rjsWallet) {
       throw Error('Cannot send without wallet.');
     }
 
-    // convert amount units from whole RUNEBASE => SATOSHI RUNEBASE
-    console.log('Sending tokens:', to, amount, options); // Added logging
+    console.log('Sending tokens:', to, amount, options);
     return await this.rjsWallet!.send(to, amount * 1e8, { feeRate: options.feeRate });
   };
 
@@ -95,7 +86,7 @@ export default class Wallet implements ISigner {
       throw Error('Requires first two arguments: contractAddress and data.');
     }
 
-    console.log('Sending transaction:', args); // Added logging
+    console.log('Sending transaction:', args);
     return await this.rpcProvider!.rawCall(RPC_METHOD.SEND_TO_CONTRACT, args);
   };
 
@@ -104,28 +95,21 @@ export default class Wallet implements ISigner {
       throw Error('Cannot calculate max send amount without wallet or this.info.');
     }
     try {
-      console.log('Calculating max Runebase send amount...'); // Added logging
+      console.log('Calculating max Runebase send amount...');
       this.maxRunebaseSend = await this.rjsWallet.sendEstimateMaxValue(this.maxRunebaseSendToAddress(networkName));
-      console.log('Max Runebase send amount calculated:', this.maxRunebaseSend); // Added logging
+      console.log('Max Runebase send amount calculated:', this.maxRunebaseSend);
       return this.maxRunebaseSend;
     } catch (error) {
-      console.error('Error calculating max Runebase send amount:', error); // Added logging
+      console.error('Error calculating max Runebase send amount:', error);
       throw error;
     }
   };
 
-  /**
-   * We just need to pass a valid sendTo address belonging to that network for the
-   * runebasejs-wallet library to calculate the maxRunebaseSend amount.  It does not matter what
-   * the specific address is, as that does not affect the value of the
-   * maxRunebaseSend amount
-   */
   private maxRunebaseSendToAddress = (networkName: string) => {
     return networkName === NETWORK_NAMES.MAINNET ?
       'RasfBnAjGidRrwmbve42Uacrp3sXFFkzaj' : '5ZiLJ5LuCyhLTmwF2MYjVrc82gCFuJuocB';
   };
 
-  // Inside the Wallet class
   public getBlockchainInfo = async (): Promise<RunebaseInfo.IGetBlockchainInfo> => {
     if (!this.rjsWallet) {
       throw Error('Cannot get blockchain info without wallet.');

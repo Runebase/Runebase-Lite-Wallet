@@ -1,11 +1,41 @@
 import React from 'react';
-import { observer } from 'mobx-react';
 import { Button, FormControl, TextField, Typography } from '@mui/material';
+import { useAppSelector, useAppDispatch } from '../../store/hooks';
+import {
+  setGasLimit as setSendGasLimit,
+  selectGasLimitFieldError as selectSendGasLimitFieldError,
+  GAS_LIMIT_RECOMMENDED,
+} from '../../store/slices/sendSlice';
+import {
+  setGasLimit as setDelegateGasLimit,
+  selectGasLimitFieldError as selectDelegateGasLimitFieldError,
+  DELEGATION_GAS_LIMIT_RECOMMENDED,
+} from '../../store/slices/delegateSlice';
 
-const GasLimitField = observer(({ sendStore, onEnterPress }: any) => {
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === 'Enter') {
-      onEnterPress();
+interface GasLimitFieldProps {
+  source?: 'send' | 'delegate';
+  onEnterPress?: (event: React.KeyboardEvent) => void;
+}
+
+const GasLimitField: React.FC<GasLimitFieldProps> = ({
+  source = 'send',
+  onEnterPress,
+}) => {
+  const dispatch = useAppDispatch();
+
+  const gasLimit = useAppSelector((state) =>
+    source === 'delegate' ? state.delegate.gasLimit : state.send.gasLimit
+  );
+  const gasLimitFieldError = useAppSelector((state) =>
+    source === 'delegate' ? selectDelegateGasLimitFieldError(state) : selectSendGasLimitFieldError(state)
+  );
+  const recommendedAmount = source === 'delegate' ? DELEGATION_GAS_LIMIT_RECOMMENDED : GAS_LIMIT_RECOMMENDED;
+
+  const handleChange = (value: number) => {
+    if (source === 'delegate') {
+      dispatch(setDelegateGasLimit(value));
+    } else {
+      dispatch(setSendGasLimit(value));
     }
   };
 
@@ -18,7 +48,7 @@ const GasLimitField = observer(({ sendStore, onEnterPress }: any) => {
         style={{ alignSelf: 'flex-end', margin: '0 0 8px 0' }}
         color="primary"
         variant="contained"
-        onClick={() => sendStore.setGasLimit(sendStore.gasLimitRecommendedAmount)}
+        onClick={() => handleChange(recommendedAmount)}
       >
         Set Recommended GasLimit
       </Button>
@@ -27,23 +57,23 @@ const GasLimitField = observer(({ sendStore, onEnterPress }: any) => {
         type="number"
         multiline={false}
         label="Gas Limit"
-        placeholder={sendStore.gasLimitRecommendedAmount.toString()}
-        value={sendStore.gasLimit}
+        placeholder={recommendedAmount.toString()}
+        value={gasLimit}
         InputProps={{
           endAdornment: (
             <Typography style={{ fontSize: '0.8rem' }}>GAS</Typography>
           ),
         }}
-        onChange={(event) => sendStore.setGasLimit(Number(event.target.value))}
-        onKeyDown={handleKeyDown}
+        onChange={(event) => handleChange(Number(event.target.value))}
+        onKeyDown={(event) => onEnterPress?.(event)}
       />
-      {sendStore.gasLimitFieldError && (
+      {gasLimitFieldError && (
         <Typography color="error" style={{ fontSize: '0.8rem', textAlign: 'left' }}>
-          {sendStore.gasLimitFieldError}
+          {gasLimitFieldError}
         </Typography>
       )}
     </FormControl>
   );
-});
+};
 
 export default GasLimitField;

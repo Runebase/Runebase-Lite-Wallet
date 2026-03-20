@@ -1,5 +1,4 @@
-import React, { Fragment, FC, useState } from 'react';
-import { inject, observer } from 'mobx-react';
+import React, { Fragment, FC, useState, useRef } from 'react';
 import {
   Typography,
   Menu,
@@ -15,14 +14,21 @@ import {
 } from '@mui/icons-material';
 import { ArrowBack, Settings } from '@mui/icons-material';
 import cx from 'classnames';
+import { useNavigate } from 'react-router';
 import DropDownMenu from '../DropDownMenu';
-import AppStore from '../../stores/AppStore';
+import { useAppSelector, useAppDispatch } from '../../store/hooks';
+import {
+  changeNetwork,
+  routeToSettings,
+  routeToManageTokens,
+  logout,
+} from '../../store/slices/navBarSlice';
 import QryNetwork from '../../../models/QryNetwork';
 import useStyles from './styles';
 import EnterPasswordDialog from '../EnterPasswordDialog';
 import { MESSAGE_TYPE } from '../../../constants';
+
 interface IProps {
-  store?: AppStore;
   hasBackButton?: boolean;
   hasSettingsButton?: boolean;
   hasNetworkSelector?: boolean;
@@ -30,26 +36,25 @@ interface IProps {
   title: string;
 }
 
-const NavBar: FC<IProps> = inject('store')(observer((props: IProps) => {
+const NavBar: FC<IProps> = ({
+  hasBackButton,
+  hasSettingsButton,
+  hasNetworkSelector,
+  isDarkTheme,
+  title,
+}) => {
   const { classes } = useStyles();
-  const {
-    hasBackButton,
-    hasSettingsButton,
-    hasNetworkSelector,
-    isDarkTheme,
-    title,
-    store: { navBarStore, sessionStore },
-  }: any = props;
+  const networks = useAppSelector((state) => state.session.networks);
+  const networkIndex = useAppSelector((state) => state.session.networkIndex);
 
   return (
     <div className={classes.root}>
       <div className={classes.leftButtonsContainer}>
-        {hasBackButton && <BackButton classes={classes} isDarkTheme={isDarkTheme} store={props.store} />}
+        {hasBackButton && <BackButton classes={classes} isDarkTheme={isDarkTheme} />}
         {hasSettingsButton && (
           <SettingsButton
             classes={classes}
             isDarkTheme={isDarkTheme}
-            store={props.store}
             title={title}
           />
         )}
@@ -59,30 +64,34 @@ const NavBar: FC<IProps> = inject('store')(observer((props: IProps) => {
       </div>
       {hasNetworkSelector && (
         <DropDownMenu
-          onSelect={navBarStore.changeNetwork}
-          selections={sessionStore.networks.map((net: QryNetwork) => net.name)}
-          selectedIndex={sessionStore.networkIndex}
+          onSelect={(index: number) => changeNetwork(index)}
+          selections={networks.map((net: QryNetwork) => net.name)}
+          selectedIndex={networkIndex}
         />
       )}
     </div>
   );
-}));
+};
 
 interface ISubProps {
   classes: Record<string, string>;
   isDarkTheme?: boolean;
-  store?: AppStore;
   title?: string;
 }
 
-const BackButton: FC<ISubProps> = ({ classes, isDarkTheme, store: { navigate } }: any) => (
-  <IconButton
-    onClick={() => navigate?.(-1)}
-    className={classes.backIconButton}
-    size="large">
-    <ArrowBack className={cx(classes.backButton, isDarkTheme ? 'white' : '')} />
-  </IconButton>
-);
+const BackButton: FC<ISubProps> = ({ classes, isDarkTheme }) => {
+  const navigate = useNavigate();
+  return (
+    <IconButton
+      onClick={() => navigate(-1)}
+      className={classes.backIconButton}
+      size="large"
+    >
+      <ArrowBack className={cx(classes.backButton, isDarkTheme ? 'white' : '')} />
+    </IconButton>
+  );
+};
+
 interface BackupWalletMenuItemProps {
   onClick: React.MouseEventHandler<HTMLLIElement>;
 }
@@ -95,20 +104,41 @@ const BackupWalletMenuItem: React.FC<BackupWalletMenuItemProps> = ({ onClick }) 
   </MenuItem>
 );
 
-const SettingsButton: FC<ISubProps> = observer(({ classes, store, isDarkTheme }) => {
-  const navBarStore = store?.navBarStore;
-  if (!navBarStore) return null;
+const SettingsButton: FC<ISubProps> = ({ classes, isDarkTheme }) => {
+  const [menuAnchor, setMenuAnchor] = useState<HTMLElement | null>(null);
   const [isBackupWalletDialogOpen, setBackupWalletDialogOpen] = useState(false);
   const handleOpenBackupWalletDialog = () => setBackupWalletDialogOpen(true);
   const handleCloseBackupWalletDialog = () => setBackupWalletDialogOpen(false);
 
+  const handleCloseMenu = () => setMenuAnchor(null);
+
+  const handleRouteToManageTokens = () => {
+    handleCloseMenu();
+    routeToManageTokens();
+  };
+
+  const handleRouteToSettings = () => {
+    handleCloseMenu();
+    routeToSettings();
+  };
+
+  const handleLogout = () => {
+    handleCloseMenu();
+    logout();
+  };
+
+  const handleBackupWallet = () => {
+    handleCloseMenu();
+    handleOpenBackupWalletDialog();
+  };
+
   return (
     <Fragment>
       <IconButton
-        aria-owns={navBarStore.settingsMenuAnchor ? 'settingsMenu' : undefined}
+        aria-owns={menuAnchor ? 'settingsMenu' : undefined}
         aria-haspopup="true"
         color="primary"
-        onClick={(e) => navBarStore.settingsMenuAnchor = e.currentTarget}
+        onClick={(e) => setMenuAnchor(e.currentTarget)}
         className={classes.settingsIconButton}
         size="large"
       >
@@ -116,24 +146,24 @@ const SettingsButton: FC<ISubProps> = observer(({ classes, store, isDarkTheme })
       </IconButton>
       <Menu
         id="settingsMenu"
-        anchorEl={navBarStore.settingsMenuAnchor}
-        open={Boolean(navBarStore.settingsMenuAnchor)}
-        onClose={() => navBarStore.settingsMenuAnchor = undefined}
+        anchorEl={menuAnchor}
+        open={Boolean(menuAnchor)}
+        onClose={handleCloseMenu}
       >
-        <MenuItem onClick={navBarStore.routeToManageTokens}>
+        <MenuItem onClick={handleRouteToManageTokens}>
           <ListItemIcon>
             <Toll />
           </ListItemIcon>
           Manage Tokens
         </MenuItem>
-        <BackupWalletMenuItem onClick={handleOpenBackupWalletDialog} />
-        <MenuItem onClick={navBarStore.routeToSettings}>
+        <BackupWalletMenuItem onClick={handleBackupWallet} />
+        <MenuItem onClick={handleRouteToSettings}>
           <ListItemIcon>
             <SettingsIcon />
           </ListItemIcon>
           Settings
         </MenuItem>
-        <MenuItem onClick={navBarStore.logout}>
+        <MenuItem onClick={handleLogout}>
           <ListItemIcon>
             <AccountCircle />
           </ListItemIcon>
@@ -148,6 +178,6 @@ const SettingsButton: FC<ISubProps> = observer(({ classes, store, isDarkTheme })
       />
     </Fragment>
   );
-});
+};
 
 export default NavBar;

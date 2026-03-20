@@ -1,34 +1,19 @@
-// BackupWallet.js
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Typography, Paper, Button, Snackbar } from '@mui/material';
-import { inject, observer } from 'mobx-react';
+
 import NavBar from '../../components/NavBar';
-import AppStore from '../../stores/AppStore';
 import useStyles from './styles';
 import Loading from '../../components/Loading';
+import { useAppSelector } from '../../store/hooks';
 
-interface IProps {
-  store: AppStore;
-}
-
-const BackupWallet: React.FC<IProps> = ({ store }) => {
+const BackupWallet: React.FC = () => {
   const { classes } = useStyles();
-  const { walletBackupInfo } = store.sessionStore;
+  const walletBackupInfo = useAppSelector((state) => state.session.walletBackupInfo);
   const [isCopySnackbarOpen, setIsCopySnackbarOpen] = useState(false);
 
-  useEffect(() => {}, [
-    walletBackupInfo,
-    walletBackupInfo.address,
-  ]);
-
   const handleCopyClick = () => {
-    // Copy to clipboard
     navigator.clipboard.writeText(walletBackupInfo.privateKey);
-
-    // Show the "Copy complete" snackbar
     setIsCopySnackbarOpen(true);
-
-    // Close the snackbar after 2 seconds
     setTimeout(() => {
       setIsCopySnackbarOpen(false);
     }, 2000);
@@ -74,7 +59,6 @@ const BackupWallet: React.FC<IProps> = ({ store }) => {
       </div>
     );
   }
-
 };
 
-export default inject('store')(observer(BackupWallet));
+export default BackupWallet;

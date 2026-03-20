@@ -1,18 +1,15 @@
-import { observable, computed, makeObservable } from 'mobx';
-
 export default class Transaction {
-  @observable public id?: string;
-  @observable public timestamp?: string;
-  @observable public confirmations: number = 0;
-  @observable public amount: number = 0;
-  @observable public qrc20TokenTransfers: Qrc20TokenTransfer[] = [];
+  public id?: string;
+  public timestamp?: string;
+  public confirmations: number = 0;
+  public amount: number = 0;
+  public qrc20TokenTransfers: Qrc20TokenTransfer[] = [];
 
-  @computed public get pending() {
+  public get pending() {
     return !this.confirmations;
   }
 
   constructor(attributes: TransactionAttributes = {}) {
-    makeObservable(this);
     Object.assign(this, attributes);
 
     if (attributes.qrc20TokenTransfers) {
@@ -32,17 +29,16 @@ interface TransactionAttributes {
 }
 
 export class Qrc20TokenTransfer {
-  @observable public address?: string;
-  @observable public addressHex?: string;
-  @observable public name?: string;
-  @observable public symbol?: string;
-  @observable public decimals?: number;
-  @observable public from?: string;
-  @observable public to?: string;
-  @observable public value?: string;
+  public address?: string;
+  public addressHex?: string;
+  public name?: string;
+  public symbol?: string;
+  public decimals?: number;
+  public from?: string;
+  public to?: string;
+  public value?: string;
 
   constructor(attributes: Qrc20TokenTransferAttributes = {}) {
-    makeObservable(this);
     Object.assign(this, attributes);
   }
 }

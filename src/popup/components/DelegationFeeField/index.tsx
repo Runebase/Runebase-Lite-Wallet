@@ -1,10 +1,23 @@
 import React from 'react';
-import { observer } from 'mobx-react';
 import { Button, FormControl, TextField, Typography } from '@mui/material';
+import { useAppSelector, useAppDispatch } from '../../store/hooks';
+import {
+  setDelegationFee,
+  selectDelegationFeeFieldError,
+  DELEGATION_FEE_RECOMMENDED,
+} from '../../store/slices/delegateSlice';
 
-const DelegationFeeField = observer(({ delegateStore, onEnterPress }: any) => {
+interface DelegationFeeFieldProps {
+  onEnterPress?: () => void;
+}
+
+const DelegationFeeField: React.FC<DelegationFeeFieldProps> = ({ onEnterPress }) => {
+  const dispatch = useAppDispatch();
+  const delegationFee = useAppSelector((state) => state.delegate.delegationFee);
+  const delegationFeeFieldError = useAppSelector(selectDelegationFeeFieldError);
+
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === 'Enter') {
+    if (event.key === 'Enter' && onEnterPress) {
       onEnterPress();
     }
   };
@@ -18,7 +31,7 @@ const DelegationFeeField = observer(({ delegateStore, onEnterPress }: any) => {
         style={{ alignSelf: 'flex-end', margin: '0 0 8px 0' }}
         color="primary"
         variant="contained"
-        onClick={() => delegateStore?.setDelegationFee(delegateStore?.delegationFeeRecommendedAmount)}
+        onClick={() => dispatch(setDelegationFee(DELEGATION_FEE_RECOMMENDED))}
       >
         Set Recommended Fee
       </Button>
@@ -27,19 +40,19 @@ const DelegationFeeField = observer(({ delegateStore, onEnterPress }: any) => {
         type="number"
         multiline={false}
         label="Fee"
-        placeholder={delegateStore?.delegationFeeRecommendedAmount.toString()}
-        value={delegateStore?.delegationFee}
+        placeholder={DELEGATION_FEE_RECOMMENDED.toString()}
+        value={delegationFee}
         InputProps={{
           endAdornment: (
             <Typography style={{ fontSize: '0.8rem' }}>%</Typography>
           ),
         }}
-        onChange={(event) => delegateStore?.setDelegationFee(Number(event.target.value))}
+        onChange={(event) => dispatch(setDelegationFee(Number(event.target.value)))}
         onKeyDown={handleKeyDown}
       />
-      {delegateStore?.delegationFeeFieldError && (
+      {delegationFeeFieldError && (
         <Typography color="error" style={{ fontSize: '0.8rem', textAlign: 'left' }}>
-          {delegateStore?.delegationFeeFieldError}
+          {delegationFeeFieldError}
         </Typography>
       )}
       <Typography variant="body2" style={{ color: 'orange', fontSize: '0.9rem' }}>
@@ -49,7 +62,6 @@ const DelegationFeeField = observer(({ delegateStore, onEnterPress }: any) => {
       </Typography>
     </FormControl>
   );
-});
-
+};
 
 export default DelegationFeeField;

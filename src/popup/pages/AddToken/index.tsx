@@ -1,26 +1,40 @@
 import React, { useEffect } from 'react';
 import { Typography, TextField, Button } from '@mui/material';
-import { inject, observer } from 'mobx-react';
 import cx from 'classnames';
+
 import NavBar from '../../components/NavBar';
-import AppStore from '../../stores/AppStore';
 import { handleEnterPress } from '../../../utils';
 import useStyles from './styles';
+import { useAppSelector, useAppDispatch } from '../../store/hooks';
+import {
+  validateContractAddress,
+  addToken,
+  selectContractAddressFieldError,
+  selectTokenAlreadyInListError,
+  selectAddTokenButtonDisabled,
+  resetAddToken,
+} from '../../store/slices/addTokenSlice';
 
-interface IProps {
-  store: AppStore;
-}
-
-const AddToken: React.FC<IProps> = ({ store }) => {
+const AddToken: React.FC = () => {
   const { classes } = useStyles();
-  const { addTokenStore } = store;
-  useEffect(() => { store.addTokenStore.init(); }, [addTokenStore]);
-  useEffect(() => { }, [addTokenStore.contractAddress]);
+  const dispatch = useAppDispatch();
+
+  const contractAddress = useAppSelector((state) => state.addToken.contractAddress);
+  const name = useAppSelector((state) => state.addToken.name);
+  const symbol = useAppSelector((state) => state.addToken.symbol);
+  const decimals = useAppSelector((state) => state.addToken.decimals);
+  const contractAddressFieldError = useAppSelector(selectContractAddressFieldError);
+  const tokenAlreadyInListError = useAppSelector(selectTokenAlreadyInListError);
+  const buttonDisabled = useAppSelector(selectAddTokenButtonDisabled);
+
+  useEffect(() => {
+    dispatch(resetAddToken());
+  }, [dispatch]);
 
   const onEnterPress = (event: any) => {
     handleEnterPress(event, () => {
-      if (!store.addTokenStore.buttonDisabled) {
-        store.addTokenStore.addToken();
+      if (!buttonDisabled) {
+        dispatch(addToken());
       }
     });
   };
@@ -30,19 +44,19 @@ const AddToken: React.FC<IProps> = ({ store }) => {
       <NavBar hasBackButton title="Add Token" />
       <div className={classes.contentContainer}>
         <div className={classes.fieldsContainer}>
-          <ContractAddressField onEnterPress={onEnterPress} {...{ classes, store }} />
-          {store.addTokenStore.name && (
+          <ContractAddressField onEnterPress={onEnterPress} classes={classes} />
+          {name && (
             <div>
-              <DetailField fieldName={'Token Name'} value={store.addTokenStore.name} {...{ classes }} />
-              <DetailField fieldName={'Token Symbol'} value={store.addTokenStore.symbol} {...{ classes }} />
-              <DetailField fieldName={'Decimals'} value={store.addTokenStore.decimals} {...{ classes }} />
+              <DetailField fieldName={'Token Name'} value={name} classes={classes} />
+              <DetailField fieldName={'Token Symbol'} value={symbol} classes={classes} />
+              <DetailField fieldName={'Decimals'} value={decimals} classes={classes} />
             </div>
           )}
         </div>
-        {!!store.addTokenStore.tokenAlreadyInListError && (
-          <Typography className={classes.errorText}>{store.addTokenStore.tokenAlreadyInListError}</Typography>
+        {!!tokenAlreadyInListError && (
+          <Typography className={classes.errorText}>{tokenAlreadyInListError}</Typography>
         )}
-        <AddButton {...{ classes, store }} />
+        <AddButton classes={classes} />
       </div>
     </div>
   );
@@ -50,7 +64,7 @@ const AddToken: React.FC<IProps> = ({ store }) => {
 
 const Heading: React.FC<{
   classes: Record<string, string>;
-  name: string
+  name: string;
 }> = ({
   classes,
   name
@@ -60,36 +74,39 @@ const Heading: React.FC<{
 
 const ContractAddressField: React.FC<{
   classes: Record<string, string>;
-  store: { addTokenStore: any };
-  onEnterPress: (event: any) => void
+  onEnterPress: (event: any) => void;
 }> = ({
   classes,
-  store: { addTokenStore },
   onEnterPress,
-}) => (
-  <div className={classes.fieldContainer}>
-    <Heading name="Contract Address" classes={classes} />
-    <div className={classes.fieldContentContainer}>
-      <TextField
-        fullWidth
-        type="text"
-        multiline={false}
-        value={addTokenStore.contractAddress || ''}
-        onChange={(event) => addTokenStore.setContractAddress(event.target.value)}
-        onKeyPress={onEnterPress}
-      />
-    </div>
-    {addTokenStore.contractAddressFieldError && (
-      <Typography className={classes.errorText}>{addTokenStore.contractAddressFieldError}</Typography>
-    )}
-  </div>
-);
+}) => {
+  const dispatch = useAppDispatch();
+  const contractAddress = useAppSelector((state) => state.addToken.contractAddress);
+  const contractAddressFieldError = useAppSelector(selectContractAddressFieldError);
 
+  return (
+    <div className={classes.fieldContainer}>
+      <Heading name="Contract Address" classes={classes} />
+      <div className={classes.fieldContentContainer}>
+        <TextField
+          fullWidth
+          type="text"
+          multiline={false}
+          value={contractAddress || ''}
+          onChange={(event) => dispatch(validateContractAddress(event.target.value))}
+          onKeyPress={onEnterPress}
+        />
+      </div>
+      {contractAddressFieldError && (
+        <Typography className={classes.errorText}>{contractAddressFieldError}</Typography>
+      )}
+    </div>
+  );
+};
 
 const DetailField: React.FC<{
   classes: Record<string, string>;
   fieldName: string;
-  value: string | number | undefined
+  value: string | number | undefined;
 }> = ({
   classes,
   fieldName,
@@ -107,23 +124,24 @@ const DetailField: React.FC<{
 
 const AddButton: React.FC<{
   classes: Record<string, string>;
-  store: {
-    addTokenStore: any
-  }
 }> = ({
   classes,
-  store
-}) => (
-  <Button
-    className={classes.addButton}
-    fullWidth
-    variant="contained"
-    color="primary"
-    disabled={store.addTokenStore.buttonDisabled}
-    onClick={store.addTokenStore.addToken}
-  >
-    Add
-  </Button>
-);
+}) => {
+  const dispatch = useAppDispatch();
+  const buttonDisabled = useAppSelector(selectAddTokenButtonDisabled);
 
-export default inject('store')(observer(AddToken));
+  return (
+    <Button
+      className={classes.addButton}
+      fullWidth
+      variant="contained"
+      color="primary"
+      disabled={buttonDisabled}
+      onClick={() => dispatch(addToken())}
+    >
+      Add
+    </Button>
+  );
+};
+
+export default AddToken;

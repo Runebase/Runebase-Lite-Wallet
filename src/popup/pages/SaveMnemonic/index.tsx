@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { Typography, Button } from '@mui/material';
-import { inject, observer } from 'mobx-react';
 import cx from 'classnames';
 import NavBar from '../../components/NavBar';
-import AppStore from '../../stores/AppStore';
+import { useAppSelector, useAppDispatch } from '../../store/hooks';
+import { generateNewMnemonic, setWalletName, saveToFile } from '../../store/slices/saveMnemonicSlice';
+import { getNavigateFunction } from '../../store/messageMiddleware';
 import useStyles from './styles';
 import WarningIcon from '@mui/icons-material/Warning';
 import SaveIcon from '@mui/icons-material/Save';
@@ -11,18 +12,19 @@ import FactCheckIcon from '@mui/icons-material/FactCheck';
 import SeedPhraseInput from '../../components/SeedphraseInput';
 const strings = require('../../localization/locales/en_US.json');
 
-interface IProps {
-  store: AppStore;
-}
-
-const SaveMnemonic: React.FC<IProps> = ({ store }) => {
+const SaveMnemonic: React.FC = () => {
   const { classes } = useStyles();
+  const dispatch = useAppDispatch();
   const [isCordova, setIsCordova] = useState<boolean>(false);
+
+  const mnemonic = useAppSelector((state) => state.saveMnemonic.mnemonic);
+  const createWalletName = useAppSelector((state) => state.createWallet.walletName);
+
   useEffect(() => {
     setIsCordova(typeof window.cordova !== 'undefined');
-    store.saveMnemonicStore.generateMnemonic();
-  }, [store.saveMnemonicStore]);
-  const { mnemonic } = store.saveMnemonicStore;
+    dispatch(generateNewMnemonic());
+    dispatch(setWalletName(createWalletName));
+  }, [dispatch, createWalletName]);
 
   return (
     <div className={classes.root}>
@@ -49,7 +51,10 @@ const SaveMnemonic: React.FC<IProps> = ({ store }) => {
           fullWidth
           variant="contained"
           color="primary"
-          onClick={() => store.navigate?.('/verify-mnemonic')}
+          onClick={() => {
+            const navigate = getNavigateFunction();
+            navigate?.('/verify-mnemonic');
+          }}
           startIcon={<FactCheckIcon />}
         >
           Verify Seed Phrase
@@ -65,7 +70,7 @@ const SaveMnemonic: React.FC<IProps> = ({ store }) => {
               fullWidth
               variant="contained"
               color="secondary"
-              onClick={() => store.saveMnemonicStore.saveToFile()}
+              onClick={() => dispatch(saveToFile())}
               startIcon={<SaveIcon />}
             >
               Save Seed Phrase to File
@@ -76,4 +81,4 @@ const SaveMnemonic: React.FC<IProps> = ({ store }) => {
   );
 };
 
-export default inject('store')(observer(SaveMnemonic));
+export default SaveMnemonic;

@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { observer, inject } from 'mobx-react';
 import { Routes, Route, useNavigate, useLocation } from 'react-router';
 import Dialog from '@mui/material/Dialog';
 import Button from '@mui/material/Button';
@@ -19,9 +18,6 @@ import Send from './pages/Send';
 import Receive from './pages/Receive';
 import SendConfirm from './pages/SendConfirm';
 import AddToken from './pages/AddToken';
-import AppStore from './stores/AppStore';
-import { MESSAGE_TYPE } from '../constants';
-import MainContainerStore from './stores/MainContainerStore';
 import ManageTokens from './pages/ManageTokens';
 import Delegate from './pages/Delegate';
 import SuperstakerDetail from './pages/SuperstakerDetail';
@@ -29,36 +25,43 @@ import AddDelegation from './pages/AddDelegation';
 import AddDelegationConfirm from './pages/AddDelegationConfirm';
 import RemoveDelegation from './pages/RemoveDelegation';
 import RemoveDelegationConfirm from './pages/RemoveDelegationConfirm';
-import { isExtensionEnvironment, sendMessage } from './abstraction';
 import VerifyMnemonic from './pages/VerifyMnemonic';
 import BackupWallet from './pages/BackupWallet';
+import { MESSAGE_TYPE } from '../constants';
+import { isExtensionEnvironment, sendMessage } from './abstraction';
+import { setNavigateFunction, setLocationRef } from './store/messageMiddleware';
+import { useAppSelector, useAppDispatch } from './store/hooks';
+import { initSession, initWalletBackupInfo } from './store/slices/sessionSlice';
+import { initAccountDetail, deinitAccountDetail } from './store/slices/accountDetailSlice';
+import { clearUnexpectedError } from './store/slices/mainContainerSlice';
 
-interface IProps {
-  store: AppStore;
-}
-
-const MainContainer: React.FC<IProps> = inject('store')(observer(({ store }) => {
-  const { accountDetailStore, sessionStore } = store;
+const MainContainer: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const dispatch = useAppDispatch();
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [isSidePanelOpen, setIsSidePanelOpen] = useState(false);
   const isChromeExtension = isExtensionEnvironment();
 
+  // Update location ref synchronously on every render so the middleware
+  // always knows the current path (avoids useEffect timing issues).
+  setLocationRef(location);
+
+  const walletInfo = useAppSelector((state) => state.session.walletInfo);
+  const unexpectedError = useAppSelector((state) => state.mainContainer.unexpectedError);
+
   useEffect(() => {
-    store.setNavigate(navigate);
-    sessionStore.init();
+    setNavigateFunction(navigate);
+    initSession();
+    dispatch(initWalletBackupInfo());
     return () => {
-      sendMessage({
-        type: MESSAGE_TYPE.LOGOUT,
-      });
+      sendMessage({ type: MESSAGE_TYPE.LOGOUT });
     };
   }, []);
+
   useEffect(() => {
     return () => {
-      sendMessage({
-        type: MESSAGE_TYPE.LOGOUT,
-      });
+      sendMessage({ type: MESSAGE_TYPE.LOGOUT });
     };
   }, []);
 
@@ -71,14 +74,11 @@ const MainContainer: React.FC<IProps> = inject('store')(observer(({ store }) => 
   }, [location]);
 
   useEffect(() => {
-    accountDetailStore.init();
+    initAccountDetail();
     return () => {
-      accountDetailStore.deinit();
+      deinitAccountDetail();
     };
-  }, [
-    accountDetailStore,
-    sessionStore.walletInfo
-  ]);
+  }, [walletInfo]);
 
   useEffect(() => {
     if (isChromeExtension) {
@@ -87,13 +87,13 @@ const MainContainer: React.FC<IProps> = inject('store')(observer(({ store }) => 
           setIsSidePanelOpen(true);
         }
       });
-    }    
+    }
   }, []);
 
   const toggleViewMode = () => {
     if (isChromeExtension) {
       const newMode = isSidePanelOpen ? 'popup' : 'sidePanel';
-      setIsSidePanelOpen(!isSidePanelOpen);    
+      setIsSidePanelOpen(!isSidePanelOpen);
       chrome.storage.local.set({ viewMode: newMode }, () => {
         if (newMode === 'sidePanel') {
           chrome.runtime.sendMessage({ type: 'TOGGLE_SIDEPANEL' });
@@ -102,7 +102,7 @@ const MainContainer: React.FC<IProps> = inject('store')(observer(({ store }) => 
           chrome.runtime.sendMessage({ type: 'TOGGLE_POPUP' });
         }
       });
-    }   
+    }
   };
 
   return (
@@ -116,51 +116,52 @@ const MainContainer: React.FC<IProps> = inject('store')(observer(({ store }) => 
       )}
       <Routes>
         <Route path="/loading" element={<Loading />} />
-        <Route path="/login" element={<Login store={store} />} />
-        <Route path="/account-login" element={<AccountLogin store={store} />} />
-        <Route path="/create-wallet" element={<CreateWallet store={store} />} />
-        <Route path="/account-detail" element={<AccountDetail store={store} />} />
-        <Route path="/save-mnemonic" element={<SaveMnemonic store={store} />} />
-        <Route path="/verify-mnemonic" element={<VerifyMnemonic store={store} />} />
-        <Route path="/import-wallet" element={<ImportWallet store={store} />} />
-        <Route path="/settings" element={<Settings store={store} />} />
-        <Route path="/send" element={<Send store={store} />} />
-        <Route path="/send-confirm" element={<SendConfirm store={store} />} />
-        <Route path="/receive" element={<Receive store={store} />} />
-        <Route path="/delegate" element={<Delegate store={store} />} />
-        <Route path="/superstaker-detail" element={<SuperstakerDetail store={store} />} />
-        <Route path="/add-delegation" element={<AddDelegation store={store} />} />
-        <Route path="/add-delegation-confirm" element={<AddDelegationConfirm store={store} />} />
-        <Route path="/remove-delegation" element={<RemoveDelegation store={store} />} />
-        <Route path="/remove-delegation-confirm" element={<RemoveDelegationConfirm store={store} />} />
-        <Route path="/manage-tokens" element={<ManageTokens store={store} />} />
-        <Route path="/add-token" element={<AddToken store={store} />} />
-        <Route path="/backup-wallet" element={<BackupWallet store={store} />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/account-login" element={<AccountLogin />} />
+        <Route path="/create-wallet" element={<CreateWallet />} />
+        <Route path="/account-detail" element={<AccountDetail />} />
+        <Route path="/save-mnemonic" element={<SaveMnemonic />} />
+        <Route path="/verify-mnemonic" element={<VerifyMnemonic />} />
+        <Route path="/import-wallet" element={<ImportWallet />} />
+        <Route path="/settings" element={<Settings />} />
+        <Route path="/send" element={<Send />} />
+        <Route path="/send-confirm" element={<SendConfirm />} />
+        <Route path="/receive" element={<Receive />} />
+        <Route path="/delegate" element={<Delegate />} />
+        <Route path="/superstaker-detail" element={<SuperstakerDetail />} />
+        <Route path="/add-delegation" element={<AddDelegation />} />
+        <Route path="/add-delegation-confirm" element={<AddDelegationConfirm />} />
+        <Route path="/remove-delegation" element={<RemoveDelegation />} />
+        <Route path="/remove-delegation-confirm" element={<RemoveDelegationConfirm />} />
+        <Route path="/manage-tokens" element={<ManageTokens />} />
+        <Route path="/add-token" element={<AddToken />} />
+        <Route path="/backup-wallet" element={<BackupWallet />} />
       </Routes>
-      <UnexpectedErrorDialog mainContainerStore={store.mainContainerStore} />
+      <UnexpectedErrorDialog
+        unexpectedError={unexpectedError}
+        onClose={() => dispatch(clearUnexpectedError())}
+      />
     </div>
   );
-}));
+};
 
 interface UnexpectedErrorDialogProps {
-  mainContainerStore: MainContainerStore; // Replace with the appropriate type for your store
+  unexpectedError?: string;
+  onClose: () => void;
 }
 
-const UnexpectedErrorDialog: React.FC<UnexpectedErrorDialogProps> = observer(({ mainContainerStore }) => (
-  <Dialog
-    open={!!mainContainerStore.unexpectedError}
-    onClose={() => mainContainerStore.unexpectedError = undefined}
-  >
+const UnexpectedErrorDialog: React.FC<UnexpectedErrorDialogProps> = ({ unexpectedError, onClose }) => (
+  <Dialog open={!!unexpectedError} onClose={onClose}>
     <DialogTitle>Unexpected Error</DialogTitle>
     <DialogContent>
-      <DialogContentText>{mainContainerStore.unexpectedError}</DialogContentText>
+      <DialogContentText>{unexpectedError}</DialogContentText>
     </DialogContent>
     <DialogActions>
-      <Button onClick={() => mainContainerStore.unexpectedError = undefined} color="primary">
+      <Button onClick={onClose} color="primary">
         Close
       </Button>
     </DialogActions>
   </Dialog>
-));
+);
 
 export default MainContainer;

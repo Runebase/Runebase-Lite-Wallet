@@ -1,0 +1,155 @@
+// delegateSlice.ts
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { MESSAGE_TYPE } from '../../../constants';
+import { isValidDelegationFee, isValidGasLimit, isValidGasPrice } from '../../../utils';
+import { sendMessage } from '../../abstraction';
+import { getNavigateFunction } from '../messageMiddleware';
+import type { RootState } from '../index';
+
+interface DelegateState {
+  superstakers?: any[];
+  selectedSuperstaker?: any;
+  selectedSuperstakerDelegations?: any;
+  delegationFee: number;
+  signedPoD?: any;
+  errorMessage?: string;
+  gasLimit: number;
+  gasPrice: number;
+}
+
+const DELEGATION_GAS_LIMIT_DEFAULT = 2500000;
+const DELEGATION_GAS_PRICE_DEFAULT = 8000;
+
+const initialState: DelegateState = {
+  superstakers: undefined,
+  selectedSuperstaker: undefined,
+  selectedSuperstakerDelegations: undefined,
+  delegationFee: 10,
+  signedPoD: undefined,
+  errorMessage: undefined,
+  gasLimit: DELEGATION_GAS_LIMIT_DEFAULT,
+  gasPrice: DELEGATION_GAS_PRICE_DEFAULT,
+};
+
+const delegateSlice = createSlice({
+  name: 'delegate',
+  initialState,
+  reducers: {
+    setSuperStakers: (state, action: PayloadAction<any[]>) => {
+      state.superstakers = action.payload;
+    },
+    setSelectedSuperStaker: (state, action: PayloadAction<any>) => {
+      state.selectedSuperstaker = action.payload;
+    },
+    setSuperStakerDelegations: (state, action: PayloadAction<any>) => {
+      state.selectedSuperstakerDelegations = action.payload;
+      console.log(action.payload);
+    },
+    setDelegationFee: (state, action: PayloadAction<number>) => {
+      state.delegationFee = action.payload;
+    },
+    setSignedPoD: (state, action: PayloadAction<any>) => {
+      state.signedPoD = action.payload;
+    },
+    setDelegateErrorMessage: (state, action: PayloadAction<string | undefined>) => {
+      state.errorMessage = action.payload;
+    },
+    setGasLimit: (state, action: PayloadAction<number>) => {
+      state.gasLimit = action.payload;
+    },
+    setGasPrice: (state, action: PayloadAction<number>) => {
+      state.gasPrice = action.payload;
+    },
+  },
+});
+
+// Selectors
+export const selectGasLimitFieldError = (state: RootState): string | undefined =>
+  isValidGasLimit(state.delegate.gasLimit) ? undefined : 'Not a valid gas limit';
+
+export const selectGasPriceFieldError = (state: RootState): string | undefined =>
+  isValidGasPrice(state.delegate.gasPrice) ? undefined : 'Not a valid gas price';
+
+export const selectDelegationFeeFieldError = (state: RootState): string | undefined =>
+  isValidDelegationFee(state.delegate.delegationFee) ? undefined : 'Not a valid delegation fee';
+
+export const selectDelegateButtonDisabled = (state: RootState): boolean =>
+  !state.delegate.delegationFee || !!selectDelegationFeeFieldError(state);
+
+// Side-effect actions
+export const getSuperstakers = () => {
+  sendMessage({ type: MESSAGE_TYPE.GET_SUPERSTAKERS }, () => {});
+};
+
+export const getSuperstaker = (address: string) => {
+  sendMessage({ type: MESSAGE_TYPE.GET_SUPERSTAKER, address }, () => {});
+};
+
+export const getSelectedSuperstakerDelegations = () => (dispatch: any, getState: any) => {
+  const state: RootState = getState();
+  const { selectedSuperstaker } = state.delegate;
+  if (selectedSuperstaker) {
+    sendMessage({
+      type: MESSAGE_TYPE.GET_SUPERSTAKER_DELEGATIONS,
+      address: selectedSuperstaker.address,
+    }, () => {});
+  }
+};
+
+export const routeToAddDelegationConfirm = () => (dispatch: any, getState: any) => {
+  const state: RootState = getState();
+  const { selectedSuperstaker } = state.delegate;
+  if (selectedSuperstaker) {
+    sendMessage({
+      type: MESSAGE_TYPE.SIGN_POD,
+      superStakerAddress: selectedSuperstaker.address,
+    }, () => {});
+    const navigate = getNavigateFunction();
+    navigate?.('/add-delegation-confirm');
+  }
+};
+
+export const routeToRemoveDelegationConfirm = () => {
+  const navigate = getNavigateFunction();
+  navigate?.('/remove-delegation-confirm');
+};
+
+export const sendDelegationConfirm = () => (dispatch: any, getState: any) => {
+  const state: RootState = getState();
+  const { signedPoD, delegationFee, gasLimit, gasPrice } = state.delegate;
+  const stringifiedSignedPoD = JSON.stringify(signedPoD);
+  sendMessage({
+    type: MESSAGE_TYPE.SEND_DELEGATION_CONFIRM,
+    signedPoD: stringifiedSignedPoD,
+    fee: delegationFee,
+    gasLimit: Number(gasLimit),
+    gasPrice: Number(gasPrice * 1e-8),
+  }, () => {});
+};
+
+export const sendRemoveDelegationConfirm = () => (dispatch: any, getState: any) => {
+  const state: RootState = getState();
+  const { gasLimit, gasPrice } = state.delegate;
+  sendMessage({
+    type: MESSAGE_TYPE.SEND_REMOVE_DELEGATION_CONFIRM,
+    gasLimit: Number(gasLimit),
+    gasPrice: Number(gasPrice * 1e-8),
+  }, () => {});
+};
+
+export const DELEGATION_FEE_RECOMMENDED = 10;
+export const DELEGATION_GAS_LIMIT_RECOMMENDED = DELEGATION_GAS_LIMIT_DEFAULT;
+export const DELEGATION_GAS_PRICE_RECOMMENDED = DELEGATION_GAS_PRICE_DEFAULT;
+
+export const {
+  setSuperStakers,
+  setSelectedSuperStaker,
+  setSuperStakerDelegations,
+  setDelegationFee,
+  setSignedPoD,
+  setDelegateErrorMessage,
+  setGasLimit,
+  setGasPrice,
+} = delegateSlice.actions;
+
+export default delegateSlice.reducer;

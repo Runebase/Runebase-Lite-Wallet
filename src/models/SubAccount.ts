@@ -1,19 +1,15 @@
-import { observable, action, makeObservable } from 'mobx';
 import { findIndex } from 'lodash';
-
 import Permission from './Permission';
 
 export default class SubAccount {
-  @observable public name: string;
-  @observable public permissions: Permission[] = [];
+  public name: string;
+  public permissions: Permission[] = [];
 
   constructor(name: string, permissions: Permission[]) {
-    makeObservable(this);
     this.name = name;
     this.permissions = permissions;
   }
 
-  @action
   public changePermission(permissionName: string, allowed: boolean) {
     const permission = new Permission(permissionName, allowed);
     const index = findIndex(this.permissions, { name: permissionName });

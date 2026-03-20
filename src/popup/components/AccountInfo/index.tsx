@@ -1,9 +1,11 @@
-import React, { useState, useEffect, Fragment } from 'react';
+import React, { Fragment } from 'react';
 import { RunebaseInfo } from 'runebasejs-wallet';
-import { observer, inject } from 'mobx-react';
 import { Typography, Button, Box, Divider, Grid } from '@mui/material';
 import { KeyboardArrowRight } from '@mui/icons-material';
-import AppStore from '../../stores/AppStore';
+import { useNavigate } from 'react-router';
+import { useAppSelector, useAppDispatch } from '../../store/hooks';
+import { selectRunebaseBalanceUSD } from '../../store/slices/sessionSlice';
+import { getSuperstaker } from '../../store/slices/delegateSlice';
 import useStyles from './styles';
 import SendIcon from '@mui/icons-material/Send';
 import CallReceivedIcon from '@mui/icons-material/CallReceived';
@@ -15,34 +17,18 @@ import ElectricBoltIcon from '@mui/icons-material/ElectricBolt';
 import { getImageUrl } from '../../abstraction';
 
 interface IProps {
-  store?: AppStore;
   hasRightArrow?: boolean;
 }
 
-const AccountInfo: React.FC<IProps> = ({ hasRightArrow, store }) => {
+const AccountInfo: React.FC<IProps> = ({ hasRightArrow }) => {
   const { classes } = useStyles();
-  const [loggedInAccountName, setLoggedInAccountName] = useState<string | null>(null);
-  const [info, setInfo] = useState<any | null>(null);
-  const [runebaseBalanceUSD, setRunebaseBalanceUSD] = useState<string | undefined>(undefined);
-  // const [networkBalAnnotation, setNetworkBalAnnotation] = useState<string | null>(null);
+  const navigate = useNavigate();
 
-  useEffect(() => {
-    console.log('walletInfo: ', store?.sessionStore.walletInfo);
-    console.log('useEffect - store:', store);
-    setLoggedInAccountName(store?.sessionStore.loggedInAccountName || null);
-    setInfo(store?.sessionStore.walletInfo || null);
-    setRunebaseBalanceUSD(store?.sessionStore.runebaseBalanceUSD);
-    // setNetworkBalAnnotation(store?.sessionStore.networkBalAnnotation || null);
-  }, [
-    store?.sessionStore.loggedInAccountName,
-    store?.sessionStore.runebaseBalanceUSD,
-    store?.sessionStore.walletInfo,
-    store?.accountDetailStore.verifiedTokens,
-    store?.sessionStore.blockchainInfo,
-    store?.accountDetailStore.transactions,
-    store?.sessionStore.walletInfo?.qrc20Balances,
-    store?.sessionStore.delegationInfo?.staker
-  ]);
+  const loggedInAccountName = useAppSelector((state) => state.session.loggedInAccountName);
+  const walletInfo = useAppSelector((state) => state.session.walletInfo);
+  const delegationInfo = useAppSelector((state) => state.session.delegationInfo);
+  const runebaseBalanceUSD = useAppSelector(selectRunebaseBalanceUSD);
+  const verifiedTokens = useAppSelector((state) => state.accountDetail.verifiedTokens);
 
   const handleClick = (id: string, event: React.MouseEvent<HTMLElement>) => {
     event.stopPropagation();
@@ -59,15 +45,15 @@ const AccountInfo: React.FC<IProps> = ({ hasRightArrow, store }) => {
     const location = locations[id];
 
     if (location) {
-      store?.navigate?.(location);
+      navigate(location);
     }
   };
 
-  if (!loggedInAccountName || !info) {
+  if (!loggedInAccountName || !walletInfo) {
     return null;
   }
 
-  console.log('Rendering AccountInfo:', info);
+  console.log('Rendering AccountInfo:', walletInfo);
 
   return (
     <div className={classes.root}>
@@ -80,7 +66,7 @@ const AccountInfo: React.FC<IProps> = ({ hasRightArrow, store }) => {
         {loggedInAccountName}
       </Typography>
       {
-        store?.sessionStore.delegationInfo?.staker && (
+        delegationInfo?.staker && (
           <Typography
             variant="subtitle2"
             gutterBottom
@@ -89,13 +75,13 @@ const AccountInfo: React.FC<IProps> = ({ hasRightArrow, store }) => {
             <ElectricBoltIcon style={{ marginRight: '5px', color: '#FFD700' }} />
             <span
               style={{
-                color: 'blue', // Set the text color to blue to mimic a hyperlink
-                textDecoration: 'none', // Add an underline
-                cursor: 'pointer', // Change the cursor to a pointer to indicate interactivity
-                transition: 'text-decoration 0.3s ease', // Add a smooth transition effect
+                color: 'blue',
+                textDecoration: 'none',
+                cursor: 'pointer',
+                transition: 'text-decoration 0.3s ease',
               }}
               onClick={() => {
-                store?.delegateStore.getSuperstaker(store?.sessionStore.delegationInfo?.staker || '');
+                getSuperstaker(delegationInfo?.staker || '');
               }}
               onMouseEnter={(event) => (event.currentTarget.style.textDecoration = 'underline')}
               onMouseLeave={(event) => (event.currentTarget.style.textDecoration = 'none')}
@@ -111,7 +97,7 @@ const AccountInfo: React.FC<IProps> = ({ hasRightArrow, store }) => {
         style={{ display: 'flex', alignItems: 'center' }}
       >
         <StarIcon style={{ marginRight: '5px' }} />
-        #{info.ranking}
+        #{walletInfo.ranking}
       </Typography>
       <Typography
         variant="subtitle2"
@@ -119,7 +105,7 @@ const AccountInfo: React.FC<IProps> = ({ hasRightArrow, store }) => {
         style={{ display: 'flex', alignItems: 'center' }}
       >
         <CallReceivedIcon />
-        {info.address}
+        {walletInfo.address}
       </Typography>
       <Divider />
       <Box className={classes.amountContainer}>
@@ -131,17 +117,17 @@ const AccountInfo: React.FC<IProps> = ({ hasRightArrow, store }) => {
           src={getImageUrl('images/runes.png')}
           alt={'Runes'}
         />
-        <Typography className={classes.tokenAmount}>{info.balance / 1e8}</Typography>
+        <Typography className={classes.tokenAmount}>{walletInfo.balance / 1e8}</Typography>
         <Typography className={classes.token}>RUNES</Typography>
         {hasRightArrow && <KeyboardArrowRight className={classes.rightArrow} />}
         <Typography className={classes.balanceUSD}>{`${runebaseBalanceUSD}`}</Typography>
       </Box>
 
-      {info.qrc20Balances.map((
+      {walletInfo.qrc20Balances.map((
         token: RunebaseInfo.IRrc20Balance,
         index: number
       ) => {
-        const isVerifiedToken = store?.accountDetailStore.verifiedTokens.find(x => x.address === token.address);
+        const isVerifiedToken = verifiedTokens.find((x: any) => x.address === token.address);
         const tokenLogoSrc = TOKEN_IMAGES[token.address];
         if (isVerifiedToken) {
           return (
@@ -232,7 +218,7 @@ const AccountInfo: React.FC<IProps> = ({ hasRightArrow, store }) => {
             style={{ display: 'flex', alignItems: 'center' }}
           >
             <ReceiptLongIcon style={{ marginRight: '5px' }} />
-            {info.transactionCount}
+            {walletInfo.transactionCount}
           </Typography>
         </Grid>
       </Grid>
@@ -240,5 +226,4 @@ const AccountInfo: React.FC<IProps> = ({ hasRightArrow, store }) => {
   );
 };
 
-export default inject('store')(observer(AccountInfo));
-
+export default AccountInfo;
