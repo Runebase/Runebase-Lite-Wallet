@@ -189,8 +189,10 @@ jobs:
         run: |
           npm ci
           cordova platform add cordova-android@^15.0.0 --save
-          # Fix deprecated compile() -> implementation() in QR scanner plugin gradle only
+          # Fix deprecated compile() -> implementation() in QR scanner plugin gradle
           sed -i "s/\bcompile\b/implementation/g" platforms/android/cordova-plugin-qrscanner/*.gradle
+          # Fix android.support.v4 -> AndroidX in QR scanner plugin
+          find platforms/android/app/src -name "*.java" -exec sed -i 's/android\.support\.v4\.app\.ActivityCompat/androidx.core.app.ActivityCompat/g' {} +
           cordova build android
           cordova build android --release
 
