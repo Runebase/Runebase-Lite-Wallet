@@ -218,20 +218,53 @@ npm install -g cordova-res
 cordova-res
 ```
 
-## Building for MacOS
-After Bumping version, pushing to github and building release for all the other platforms.
-Go on a MacOS to compile dmg.
+## Electron Desktop Builds
 
+All Electron builds require the webpack production bundle to be built first:
 ```bash
-# Run the script to create an empty thunk (assuming it doesn't need special permissions)
+# Clean and prepare
+npm run clean && mkdir dist
+
+# Create empty thunk files
 ./scripts/create-empty-thunk.sh
 
-# Build the application with Webpack
-webpack --progress --config webpack.prod.config.js
+# Build the production bundle
+npx webpack --progress --config webpack.prod.config.js
+```
 
-# Electron build dmg file
+### Building for Windows
+```bash
+npx electron-builder --win -c electron-builder-config.js
+```
+Outputs NSIS installer (`.exe`) and portable (`.exe`) to `dist-electron/`.
+
+### Building for Linux
+```bash
+npx electron-builder --linux -c electron-builder-config.js
+```
+Outputs `.deb` and `.AppImage` to `dist-electron/`.
+
+### Building for Windows + Linux (combined)
+```bash
+npx electron-builder --win --linux -c electron-builder-config.js
+```
+
+### Building for macOS
+Must be run on a macOS machine.
+```bash
 npx electron-builder --mac -c electron-builder-config.js
 ```
+Outputs `.dmg` to `dist-electron/`.
+
+### Full Release Build (all platforms except macOS)
+The `build.sh` script automates version bumping, webpack build, Cordova Android build, Electron Windows/Linux builds, and Chrome extension packaging:
+```bash
+# patch, minor, or major
+./build.sh patch
+```
+All compiled artifacts are copied to the `compiled_files/` directory.
+
+After pushing to GitHub, run the macOS build separately on a Mac (see above).
 
 ## Building for Iphone
 ### Step 1: Install Xcode

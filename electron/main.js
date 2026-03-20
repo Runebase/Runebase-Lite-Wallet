@@ -17,11 +17,7 @@ function createWindow() {
     height: 600,
     webPreferences: {
       nodeIntegration: false,
-      contextIsolation: false,
-      enableRemoteModule: false,
-      contentSecurityPolicy: {
-        scriptSrc: ["'self'", "'unsafe-inline'", 'https://github.com/'],
-      },
+      contextIsolation: true,
     },
   });
 
