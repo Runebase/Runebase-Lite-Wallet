@@ -188,7 +188,7 @@ jobs:
         working-directory: cordova
         run: |
           npm ci
-          cordova platform add android
+          cordova prepare android
           cordova build android
           cordova build android --release
 
@@ -234,7 +234,7 @@ jobs:
         working-directory: cordova
         run: |
           npm ci
-          cordova platform add ios
+          cordova prepare ios
           cordova build ios || true
 
       - uses: actions/upload-artifact@v4
