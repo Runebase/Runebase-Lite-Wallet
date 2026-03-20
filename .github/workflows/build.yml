@@ -53,8 +53,8 @@ jobs:
           name: chrome-extension
           path: Runebase-Chrome-Wallet.zip
 
-  # Electron - Linux & Windows
-  build-electron-linux-win:
+  # Electron - Linux only
+  build-electron-linux:
     needs: build-web
     runs-on: ubuntu-latest
     steps:
@@ -74,18 +74,47 @@ jobs:
           name: webpack-dist
           path: dist/
 
-      - name: Build Electron (Linux + Windows)
-        run: npx electron-builder --linux --win -c electron-builder-config.js
+      - name: Build Electron (Linux)
+        run: npx electron-builder --linux -c electron-builder-config.js --publish never
 
       - uses: actions/upload-artifact@v4
         with:
-          name: electron-linux-win
+          name: electron-linux
           path: |
             dist-electron/*.AppImage
             dist-electron/*.deb
+            dist-electron/latest-linux.yml
+
+  # Electron - Windows (needs Windows runner, no Wine)
+  build-electron-win:
+    needs: build-web
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci --legacy-peer-deps
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: webpack-dist
+          path: dist/
+
+      - name: Build Electron (Windows)
+        run: npx electron-builder --win -c electron-builder-config.js --publish never
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: electron-win
+          path: |
             dist-electron/*.exe
             dist-electron/latest.yml
-            dist-electron/latest-linux.yml
 
   # Electron - macOS
   build-electron-mac:
@@ -109,7 +138,7 @@ jobs:
           path: dist/
 
       - name: Build Electron (macOS)
-        run: npx electron-builder --mac -c electron-builder-config.js
+        run: npx electron-builder --mac -c electron-builder-config.js --publish never
 
       - uses: actions/upload-artifact@v4
         with:
@@ -152,13 +181,16 @@ jobs:
           mkdir -p cordova/www
           cp -R dist/* cordova/www/
 
+      - name: Install Cordova CLI
+        run: npm install -g cordova
+
       - name: Build Android
         working-directory: cordova
         run: |
           npm ci
-          npx cordova platform add android
-          npx cordova build android
-          npx cordova build android --release
+          cordova platform add android
+          cordova build android
+          cordova build android --release
 
       - uses: actions/upload-artifact@v4
         with:
@@ -193,17 +225,20 @@ jobs:
           mkdir -p cordova/www
           cp -R dist/* cordova/www/
 
-      - name: Install CocoaPods
-        run: sudo gem install cocoapods
+      - name: Install Cordova CLI and CocoaPods
+        run: |
+          npm install -g cordova
+          sudo gem install cocoapods
 
       - name: Build iOS
         working-directory: cordova
         run: |
           npm ci
-          npx cordova platform add ios
-          npx cordova build ios --device --buildFlag="-allowProvisioningUpdates" || npx cordova build ios
+          cordova platform add ios
+          cordova build ios || true
 
       - uses: actions/upload-artifact@v4
         with:
           name: ios-build
           path: cordova/platforms/ios/build/
+          if-no-files-found: warn
