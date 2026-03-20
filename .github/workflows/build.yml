@@ -265,23 +265,28 @@ jobs:
           mkdir -p release
           VERSION=${GITHUB_REF#refs/tags/v}
 
+          # Debug: show artifact structure
+          echo "=== Artifact structure ==="
+          find artifacts/ -type f | head -50
+
           # Chrome extension
-          cp artifacts/chrome-extension/Runebase-Chrome-Wallet.zip "release/Runebase-Chrome-Wallet-v${VERSION}.zip"
+          find artifacts/chrome-extension -name "*.zip" -exec cp {} "release/Runebase-Chrome-Wallet-v${VERSION}.zip" \;
 
           # Electron Linux
-          cp artifacts/electron-linux/dist-electron/*.AppImage "release/" 2>/dev/null || true
-          cp artifacts/electron-linux/dist-electron/*.deb "release/" 2>/dev/null || true
+          find artifacts/electron-linux -name "*.AppImage" -exec cp {} "release/" \;
+          find artifacts/electron-linux -name "*.deb" -exec cp {} "release/" \;
 
           # Electron Windows
-          cp artifacts/electron-win/dist-electron/*.exe "release/" 2>/dev/null || true
+          find artifacts/electron-win -name "*.exe" -exec cp {} "release/" \;
 
           # Electron macOS
-          cp artifacts/electron-mac/dist-electron/*.dmg "release/" 2>/dev/null || true
+          find artifacts/electron-mac -name "*.dmg" -exec cp {} "release/" \;
 
           # Android
-          cp artifacts/android-apk/cordova/platforms/android/app/build/outputs/apk/debug/app-debug.apk "release/Runebase-Lite-Wallet-v${VERSION}-debug.apk" 2>/dev/null || true
-          cp artifacts/android-apk/cordova/platforms/android/app/build/outputs/bundle/release/app-release.aab "release/Runebase-Lite-Wallet-v${VERSION}-release.aab" 2>/dev/null || true
+          find artifacts/android-apk -name "app-debug.apk" -exec cp {} "release/Runebase-Lite-Wallet-v${VERSION}-debug.apk" \;
+          find artifacts/android-apk -name "app-release.aab" -exec cp {} "release/Runebase-Lite-Wallet-v${VERSION}-release.aab" \;
 
+          echo "=== Release files ==="
           ls -la release/
 
       - name: Create GitHub Release
