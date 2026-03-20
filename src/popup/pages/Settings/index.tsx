@@ -14,7 +14,7 @@ interface IProps {
 
 const Settings: React.FC<IProps> = inject('store')(
   observer(({ store }) => {
-    const classes = useStyles();
+    const { classes } = useStyles();
 
     return (
       <div className={classes.root}>
@@ -61,7 +61,7 @@ interface HeadingProps {
 }
 
 const Heading: React.FC<HeadingProps> = ({ name }) => {
-  const classes = useStyles();
+  const { classes } = useStyles();
   return (
     <Typography className={classes.fieldHeading}>{name}</Typography>
   );

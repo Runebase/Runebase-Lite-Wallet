@@ -25,7 +25,7 @@ interface IProps {
 
 const Login: React.FC<IProps> = inject('store')(
   observer(({ store }) => {
-    const classes = useStyles();
+    const { classes } = useStyles();
     const { loginStore } = store;
     const { hasAccounts, matchError, error } = loginStore;
 

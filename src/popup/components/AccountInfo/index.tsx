@@ -20,7 +20,7 @@ interface IProps {
 }
 
 const AccountInfo: React.FC<IProps> = ({ hasRightArrow, store }) => {
-  const classes = useStyles();
+  const { classes } = useStyles();
   const [loggedInAccountName, setLoggedInAccountName] = useState<string | null>(null);
   const [info, setInfo] = useState<any | null>(null);
   const [runebaseBalanceUSD, setRunebaseBalanceUSD] = useState<string | undefined>(undefined);

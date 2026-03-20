@@ -13,7 +13,7 @@ interface IProps {
 const AccountLogin: React.FC<IProps> = inject('store')(
   observer(({ store }) => {
     const { accountLoginStore } = store;
-    const classes = useStyles();
+    const { classes } = useStyles();
     useEffect(() => {
       accountLoginStore.getAccounts(true);
     }, [accountLoginStore]);

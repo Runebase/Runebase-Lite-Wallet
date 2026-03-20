@@ -16,7 +16,7 @@ interface IProps {
 }
 
 const SaveMnemonic: React.FC<IProps> = ({ store }) => {
-  const classes = useStyles();
+  const { classes } = useStyles();
   const [isCordova, setIsCordova] = useState<boolean>(false);
   useEffect(() => {
     setIsCordova(typeof window.cordova !== 'undefined');

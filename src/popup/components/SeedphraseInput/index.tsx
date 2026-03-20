@@ -11,7 +11,7 @@ const SeedPhraseInput: React.FC<any> = ({
   disabled
 }) => {
   const theme = useTheme();
-  const classes = useStyles();
+  const { classes } = useStyles();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
   const isLargeScreen = useMediaQuery(theme.breakpoints.up('lg'));
 
@@ -46,7 +46,7 @@ const SeedPhraseInput: React.FC<any> = ({
     return (
       <Grid container className={classes.mnemonicTilesContainer}>
         {phrase && phrase.map((word: string, index: number) => (
-          <Grid item xs={12 / wordsPerRow} key={index} className={classes.mnemonicTile}>
+          <Grid size={12 / wordsPerRow} key={index} className={classes.mnemonicTile}>
             <div className={classes.tileContainer}>
               <TextField
                 type={focusedInput === index || disabled ? 'text' : 'password'}

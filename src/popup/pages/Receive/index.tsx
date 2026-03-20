@@ -13,7 +13,7 @@ interface IProps {
 
 const Receive: React.FC<IProps> = inject('store')(
   observer(({ store }) => {
-    const classes = useStyles();
+    const { classes } = useStyles();
     const { loggedInAccountName, walletInfo } = store.sessionStore;
     if (!loggedInAccountName || !walletInfo) {
       return null;

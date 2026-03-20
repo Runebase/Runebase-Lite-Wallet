@@ -105,46 +105,16 @@ export interface IInpageAccountWrapper {
   statusChangeReason: RUNEBASECHROME_ACCOUNT_CHANGE;
 }
 
-declare module '@mui/material/styles/createTypography' {
-  interface Typography {
-    fontSizeMedium?: React.CSSProperties['fontSize'];
-    fontSizeSmall?: React.CSSProperties['fontSize'];
-    fontSizeLarge?: React.CSSProperties['fontSize'];
-    fontSizeExtraSmall?: React.CSSProperties['fontSize'];
-    lineHeight?: React.CSSProperties['lineHeight'];
-    lineHeightSmall?: React.CSSProperties['lineHeight'];
-    lineHeightMedium?: React.CSSProperties['lineHeight'];
-    lineHeightLarge?: React.CSSProperties['lineHeight'];
-    fontWeight?: React.CSSProperties['fontWeight'];
-    // Add other properties as needed
-  }
-}
-
-
-declare module '@mui/material/styles/createPalette' {
-  interface Palette {
-    gradientPurple: {
-      main: string,
-    },
-    gray: {
-      main: string,
-    },
-    orange: {
-      main: string,
-    },
-    // Add other custom color properties
-  }
-}
-
-declare module '@mui/material/styles/createMuiTheme' {
-  interface DeprecatedThemeOptions {
+/* MUI v7 theme augmentation for custom properties */
+declare module '@mui/material/styles' {
+  interface Theme {
     color: {
       gray: string;
       orange: string;
       red: string;
       gradientPurple: string;
     };
-    padding?: {
+    padding: {
       halfUnit: string;
       unit: string;
       xs: string;
@@ -154,31 +124,31 @@ declare module '@mui/material/styles/createMuiTheme' {
       xl: string;
       custom: (multiplier: number) => string;
     };
-    font?: {
+    font: {
       xs: string;
       sm: string;
       md: string;
       lg: string;
       xl: string;
     };
-    fontWeight?: {
+    fontWeight: {
       bold: string;
     };
-    lineHeight?: {
+    lineHeight: {
       xs: string;
       sm: string;
       md: string;
       lg: string;
       xl: string;
     };
-    border?: {
+    border: {
       root: string;
       radius: string;
     };
-    icon?: {
+    icon: {
       size: string;
     };
-    button?: {
+    button: {
       sm: {
         height: string;
         radius: string;
@@ -189,5 +159,27 @@ declare module '@mui/material/styles/createMuiTheme' {
       };
     };
   }
-}
+  interface ThemeOptions {
+    color?: Theme['color'];
+    padding?: Theme['padding'];
+    font?: Theme['font'];
+    fontWeight?: Theme['fontWeight'];
+    lineHeight?: Theme['lineHeight'];
+    border?: Theme['border'];
+    icon?: Theme['icon'];
+    button?: Theme['button'];
+  }
 
+  interface TypographyVariants {
+    fontSizeMedium?: React.CSSProperties['fontSize'];
+    fontSizeSmall?: React.CSSProperties['fontSize'];
+    fontSizeLarge?: React.CSSProperties['fontSize'];
+    fontSizeExtraSmall?: React.CSSProperties['fontSize'];
+  }
+  interface TypographyVariantsOptions {
+    fontSizeMedium?: React.CSSProperties['fontSize'];
+    fontSizeSmall?: React.CSSProperties['fontSize'];
+    fontSizeLarge?: React.CSSProperties['fontSize'];
+    fontSizeExtraSmall?: React.CSSProperties['fontSize'];
+  }
+}

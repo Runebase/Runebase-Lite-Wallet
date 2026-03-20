@@ -4,7 +4,7 @@ import cx from 'classnames';
 import useStyles from './styles';
 
 const Loading = () => {
-  const classes = useStyles();
+  const { classes } = useStyles();
 
   return (
     <div className={cx(classes.root, 'loading')}>

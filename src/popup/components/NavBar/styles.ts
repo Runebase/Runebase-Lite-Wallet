@@ -1,51 +1,39 @@
-import { Theme } from '@mui/material/styles';
-import createStyles from '@mui/styles/createStyles';
-//import { FontWeightProperty } from 'csstype';
+import { makeStyles } from 'tss-react/mui';
 
-
-const styles = (theme: Theme) => createStyles({
+const useStyles = makeStyles()((theme) => ({
   root: {
-    margin: theme.spacing(2), // Use spacing instead of pixel value
-    flexDirection: 'row',
+    margin: theme.spacing(2),
+    flexDirection: 'row' as const,
     display: 'flex',
   },
   leftButtonsContainer: {
-    marginRight: theme.spacing(1), // Use spacing instead of pixel value
+    marginRight: theme.spacing(1),
     cursor: 'pointer',
   },
   backIconButton: {
-    width: theme.spacing(4), // Use spacing instead of pixel value
-    height: theme.spacing(4), // Use spacing instead of pixel value
+    width: theme.spacing(4),
+    height: theme.spacing(4),
   },
   backButton: {
-    //fontSize: theme.typography.fontSize, // Use typography instead of md
-    '&.white': {
-      //color: theme.palette.secondary.main,
-    },
+    '&.white': {},
   },
   settingsIconButton: {
-    width: theme.spacing(4), // Use spacing instead of pixel value
-    height: theme.spacing(4), // Use spacing instead of pixel value
+    width: theme.spacing(4),
+    height: theme.spacing(4),
   },
   settingsButton: {
-    fontSize: theme.typography.fontSizeLarge, // Use typography instead of 18
-    '&.white': {
-      // color: theme.palette.secondary.main,
-    },
+    fontSize: theme.typography.fontSizeLarge,
+    '&.white': {},
   },
   locationContainer: {
-    height: theme.spacing(4), // Use spacing instead of pixel value
+    height: theme.spacing(4),
     display: 'flex',
     alignItems: 'center',
     flex: 1,
   },
   locationText: {
-    //fontSize: theme.typography.fontSize, // Use typography instead of md
-    //fontWeight: theme.typography.fontWeightBold as FontWeightProperty, // Use typography for font weight
-    '&.white': {
-      //color: theme.palette.secondary.main,
-    },
+    '&.white': {},
   },
-});
+}));
 
-export default styles;
+export default useStyles;

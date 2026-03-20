@@ -1,12 +1,10 @@
-import { Theme } from '@mui/material/styles';
+import { makeStyles } from 'tss-react/mui';
 
-import createStyles from '@mui/styles/createStyles';
-
-const styles = (theme: Theme) => createStyles({
+const useStyles = makeStyles()((theme) => ({
   container: {
     flex: 1,
     display: 'flex',
-    flexDirection: 'column',
+    flexDirection: 'column' as const,
   },
   textField: {
     marginTop: theme.spacing(1),
@@ -17,6 +15,6 @@ const styles = (theme: Theme) => createStyles({
     color: theme.palette.error.main,
     marginTop: theme.spacing(1),
   },
-});
+}));
 
-export default styles;
+export default useStyles;

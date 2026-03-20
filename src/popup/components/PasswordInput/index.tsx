@@ -26,7 +26,7 @@ const PasswordTextField: FC<PasswordTextFieldProps> = ({
   onChange,
   onEnterPress,
 }: PasswordTextFieldProps) => {
-  const classes = useStyles();
+  const { classes } = useStyles();
 
   return (
     <div className={cx(classes.container, classNames)}>

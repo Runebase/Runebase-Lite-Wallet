@@ -14,7 +14,7 @@ interface IProps {
 }
 
 const VerifyMnemonic: React.FC<IProps> = ({ store }) => {
-  const classes = useStyles();
+  const { classes } = useStyles();
   const [verificationPhrase, setVerificationPhrase] = useState(Array(12).fill(''));
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 

@@ -13,7 +13,7 @@ interface IProps {
 }
 
 const CreateWallet: React.FC<IProps> = ({ store }) => {
-  const classes = useStyles();
+  const { classes } = useStyles();
   const { createWalletStore, saveMnemonicStore } = store;
 
   useEffect(() => {}, [createWalletStore]);

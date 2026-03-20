@@ -21,7 +21,7 @@ interface IProps {
 const Send: React.FC<IProps> = inject('store')(
   observer(({ store }) => {
     const { sendStore, sessionStore } = store;
-    const classes = useStyles();
+    const { classes } = useStyles();
     const [scanning, setScanning] = useState(false);
 
     useEffect(() => {

@@ -12,7 +12,7 @@ interface IProps {
 }
 
 const AddToken: React.FC<IProps> = ({ store }) => {
-  const classes = useStyles();
+  const { classes } = useStyles();
   const { addTokenStore } = store;
   useEffect(() => { store.addTokenStore.init(); }, [addTokenStore]);
   useEffect(() => { }, [addTokenStore.contractAddress]);

@@ -1,6 +1,6 @@
-import { makeStyles } from '@mui/styles';
+import { makeStyles } from 'tss-react/mui';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles()((theme) => ({
   root: {
     paddingLeft: theme.spacing(2), // Use spacing instead of padding
     paddingRight: theme.spacing(2), // Use spacing instead of padding

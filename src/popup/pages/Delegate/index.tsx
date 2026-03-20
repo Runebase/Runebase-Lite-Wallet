@@ -12,7 +12,7 @@ interface IProps {
 
 const Delegate: React.FC<IProps> = inject('store')(
   observer(({ store }) => {
-    const classes = useStyles();
+    const { classes } = useStyles();
     const { sessionStore, delegateStore } = store;
     const { loggedInAccountName, walletInfo, delegationInfo } = sessionStore;
     if (!loggedInAccountName || !walletInfo) return null;

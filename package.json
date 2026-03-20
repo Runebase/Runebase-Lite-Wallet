@@ -74,10 +74,9 @@
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
-    "@mui/icons-material": "^5.18.0",
-    "@mui/material": "^5.18.0",
-    "@mui/styles": "^5.18.0",
-    "@mui/system": "^5.18.0",
+    "@mui/icons-material": "^7.3.9",
+    "@mui/material": "^7.3.9",
+    "@mui/system": "^7.3.9",
     "@types/bip39": "^3.0.4",
     "@types/deep-equal": "^1.0.1",
     "@types/har-format": "^1.2.16",
@@ -120,6 +119,7 @@
     "stream-browserify": "^3.0.0",
     "stream-http": "^3.2.0",
     "subworkers": "^1.0.1",
+    "tss-react": "^4.9.20",
     "url": "^0.11.4",
     "wif": "^4.0.0"
   },

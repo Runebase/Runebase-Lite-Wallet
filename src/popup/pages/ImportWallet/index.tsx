@@ -27,7 +27,7 @@ interface IProps {
 
 const ImportWallet: React.FC<IProps> = ({ store }) => {
   const { importStore } = store;
-  const classes = useStyles();
+  const { classes } = useStyles();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   useEffect(() => { importStore.reset(); }, []);
 

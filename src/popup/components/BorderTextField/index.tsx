@@ -1,14 +1,12 @@
 import React from 'react';
 import { TextField, Typography } from '@mui/material';
-import withStyles from '@mui/styles/withStyles';
 import cx from 'classnames';
 
-import styles from './styles';
+import useStyles from './styles';
 import { handleEnterPress } from '../../../utils';
 
 const BorderTextField: React.FC<any> = ({
   label,
-  classes,
   classNames,
   placeholder,
   error,
@@ -16,6 +14,7 @@ const BorderTextField: React.FC<any> = ({
   onChange,
   onEnterPress,
 }: any) => {
+  const { classes } = useStyles();
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       handleEnterPress(e, onEnterPress);
@@ -40,4 +39,4 @@ const BorderTextField: React.FC<any> = ({
   );
 };
 
-export default withStyles(styles)(BorderTextField);
+export default BorderTextField;

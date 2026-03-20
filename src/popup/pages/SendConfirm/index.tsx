@@ -14,7 +14,7 @@ interface IProps {
 
 const SendConfirm: React.FC<IProps> = inject('store')(
   observer(({ store }) => {
-    const classes = useStyles();
+    const { classes } = useStyles();
     const { SENDING, SENT } = SEND_STATE;
     const { sendStore } = store;
     const {

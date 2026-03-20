@@ -13,17 +13,15 @@ import {
   Settings as SettingsIcon,
   AccountCircle,
 } from '@mui/icons-material';
-import withStyles from '@mui/styles/withStyles';
 import { ArrowBack, Settings } from '@mui/icons-material';
 import cx from 'classnames';
 import DropDownMenu from '../DropDownMenu';
 import AppStore from '../../stores/AppStore';
 import QryNetwork from '../../../models/QryNetwork';
-import styles from './styles';
+import useStyles from './styles';
 import EnterPasswordDialog from '../EnterPasswordDialog';
 import { MESSAGE_TYPE } from '../../../constants';
 interface IProps {
-  classes: Record<string, string>;
   store?: AppStore;
   hasBackButton?: boolean;
   hasSettingsButton?: boolean;
@@ -33,8 +31,8 @@ interface IProps {
 }
 
 const NavBar: FC<IProps> = inject('store')(observer((props: IProps) => {
+  const { classes } = useStyles();
   const {
-    classes,
     hasBackButton,
     hasSettingsButton,
     hasNetworkSelector,
@@ -46,8 +44,15 @@ const NavBar: FC<IProps> = inject('store')(observer((props: IProps) => {
   return (
     <div className={classes.root}>
       <div className={classes.leftButtonsContainer}>
-        {hasBackButton && <BackButton {...props} />}
-        {hasSettingsButton && <SettingsButton {...props} />}
+        {hasBackButton && <BackButton classes={classes} isDarkTheme={isDarkTheme} store={props.store} />}
+        {hasSettingsButton && (
+          <SettingsButton
+            classes={classes}
+            isDarkTheme={isDarkTheme}
+            store={props.store}
+            title={title}
+          />
+        )}
       </div>
       <div className={classes.locationContainer}>
         <Typography className={cx(classes.locationText, isDarkTheme ? 'white' : '')}>{title}</Typography>
@@ -63,7 +68,14 @@ const NavBar: FC<IProps> = inject('store')(observer((props: IProps) => {
   );
 }));
 
-const BackButton: FC<IProps> = ({ classes, isDarkTheme, store: { navigate } }: any) => (
+interface ISubProps {
+  classes: Record<string, string>;
+  isDarkTheme?: boolean;
+  store?: AppStore;
+  title?: string;
+}
+
+const BackButton: FC<ISubProps> = ({ classes, isDarkTheme, store: { navigate } }: any) => (
   <IconButton
     onClick={() => navigate?.(-1)}
     className={classes.backIconButton}
@@ -72,7 +84,7 @@ const BackButton: FC<IProps> = ({ classes, isDarkTheme, store: { navigate } }: a
   </IconButton>
 );
 interface BackupWalletMenuItemProps {
-  onClick: React.MouseEventHandler<HTMLLIElement>; // Change the type here
+  onClick: React.MouseEventHandler<HTMLLIElement>;
 }
 const BackupWalletMenuItem: React.FC<BackupWalletMenuItemProps> = ({ onClick }) => (
   <MenuItem onClick={onClick}>
@@ -83,7 +95,7 @@ const BackupWalletMenuItem: React.FC<BackupWalletMenuItemProps> = ({ onClick }) 
   </MenuItem>
 );
 
-const SettingsButton: FC<IProps> = observer(({ classes, store, isDarkTheme }) => {
+const SettingsButton: FC<ISubProps> = observer(({ classes, store, isDarkTheme }) => {
   const navBarStore = store?.navBarStore;
   if (!navBarStore) return null;
   const [isBackupWalletDialogOpen, setBackupWalletDialogOpen] = useState(false);
@@ -138,4 +150,4 @@ const SettingsButton: FC<IProps> = observer(({ classes, store, isDarkTheme }) =>
   );
 });
 
-export default withStyles(styles)(NavBar);
+export default NavBar;

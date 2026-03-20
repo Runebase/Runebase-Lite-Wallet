@@ -1,4 +1,4 @@
- 
+
 import { createTheme } from '@mui/material/styles';
 
 const px = (value: number): string => value.toString().concat('px');
@@ -84,7 +84,6 @@ const theme = createTheme({
     text: {
       primary: textColorPrimary,
       secondary: textColorSecondary,
-      hint: textColorSecondary,
     },
     divider: borderColor,
   },
@@ -95,39 +94,47 @@ const theme = createTheme({
     fontSize: 14,
   },
 
-  /* Material component overrides */
-  overrides: {
+  /* Material component overrides (MUI v7 format) */
+  components: {
     MuiCardContent: {
-      root: {
-        padding: '0px !important',
+      styleOverrides: {
+        root: {
+          padding: '0px !important',
+        },
       },
     },
     MuiButton: {
-      root: {
-        padding: spacingXs,
-        fontWeight: fontWeightBold,
-        borderRadius: buttonRadiusSm,
+      styleOverrides: {
+        root: {
+          padding: spacingXs,
+          fontWeight: fontWeightBold,
+          borderRadius: buttonRadiusSm,
+        },
       },
     },
     MuiInput: {
-      root: {
-        fontFamily: fontMontserrat,
-        fontSize: fontSizeMd,
+      styleOverrides: {
+        root: {
+          fontFamily: fontMontserrat,
+          fontSize: fontSizeMd,
+        },
       },
     },
     MuiSelect: {
-      select: {
-        padding: 0,
+      styleOverrides: {
+        select: {
+          padding: 0,
+        },
       },
     },
     MuiTab: {
-      root: {
-        padding: 0,
-      },
-      label: {
-        fontFamily: fontMontserrat,
-        fontSize: fontSizeSm,
-        fontWeight: fontWeightBold,
+      styleOverrides: {
+        root: {
+          padding: 0,
+          fontFamily: fontMontserrat,
+          fontSize: fontSizeSm,
+          fontWeight: fontWeightBold,
+        },
       },
     },
   },

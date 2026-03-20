@@ -14,7 +14,7 @@ interface IProps {
 
 const ManageTokens: React.FC<IProps> = inject('store')(
   observer(({ store }) => {
-    const classes = useStyles();
+    const { classes } = useStyles();
     const { sessionStore, loginStore, accountDetailStore } = store;
 
     useEffect(() => {

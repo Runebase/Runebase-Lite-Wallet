@@ -5,7 +5,7 @@ import { extensionInfoProvider, getImageUrl } from '../../abstraction';
 
 // Usage example
 const Logo: FC = () => {
-  const classes = useStyles();
+  const { classes } = useStyles();
 
   return (
     <div className={classes.logoContainer}>

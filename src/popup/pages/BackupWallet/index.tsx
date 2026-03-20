@@ -12,7 +12,7 @@ interface IProps {
 }
 
 const BackupWallet: React.FC<IProps> = ({ store }) => {
-  const classes = useStyles();
+  const { classes } = useStyles();
   const { walletBackupInfo } = store.sessionStore;
   const [isCopySnackbarOpen, setIsCopySnackbarOpen] = useState(false);
 

@@ -26,7 +26,7 @@ interface IProps {
 }
 
 const AccountDetail: React.FC<IProps> = ({ store }) => {
-  const classes = useStyles();
+  const { classes } = useStyles();
   const { accountDetailStore, sessionStore, loginStore } = store;
   const { loggedInAccountName, walletInfo, blockchainInfo } = sessionStore;
   const messagesEndRef = useRef<HTMLDivElement | null>(null);

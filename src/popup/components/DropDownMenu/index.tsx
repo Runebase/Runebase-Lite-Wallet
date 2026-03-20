@@ -14,7 +14,7 @@ const DropDownMenu: React.FC<IProps> = ({
   selectedIndex,
   onSelect,
 }) => {
-  const classes = useStyles();
+  const { classes } = useStyles();
   const [anchorEl, setAnchorEl] = useState<any>(null);
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
