@@ -1,0 +1,8 @@
+// Append ".dev" to debug builds so they install alongside the production app
+android {
+    buildTypes {
+        debug {
+            applicationIdSuffix ".dev"
+        }
+    }
+}

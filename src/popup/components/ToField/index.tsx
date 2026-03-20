@@ -52,7 +52,7 @@ const ToField: React.FC<ToFieldProps> = observer(({
                 endAdornment: <ArrowDropDown />,
                 readOnly: scanning,
               }}
-              onChange={(event) => sendStore.setReceiverAddress(event.target.value)}
+              onChange={(event) => sendStore.setReceiverAddress(event.target.value.replace(/^runebase:/i, ''))}
               onKeyDown={handleKeyDown}
             />
             {!!sendStore.receiverAddress && sendStore.receiverFieldError && (

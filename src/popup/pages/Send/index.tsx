@@ -49,7 +49,8 @@ const Send: React.FC<IProps> = inject('store')(
       if (err) {
         console.error(err);
       } else {
-        sendStore.setReceiverAddress(text);
+        const address = text.replace(/^runebase:/i, '');
+        sendStore.setReceiverAddress(address);
       }
       stopScan();
     };

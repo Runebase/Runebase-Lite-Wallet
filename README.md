@@ -163,60 +163,144 @@ You can connect RunebaseChrome to regtest. You will need to set the following in
 1. Navigate to dist folder
 2. start http server `http-server -c-1`
 
-## Cordova Smartphone Builds
-### Step 1: Install Cordova
+## Cordova Mobile Builds (Android & iOS)
+
+### Shared Prerequisites
+Build the webpack bundle first (from project root):
 ```bash
-npm install cordova -g
+npm run clean && mkdir dist
+./scripts/create-empty-thunk.sh
+npx webpack --progress --config webpack.prod.config.js
+cp -R dist/* cordova/www
 ```
 
-### Step 2: Add platforms
+### Setup
 ```bash
-cordova platform add android
-cordova platform add ios
+cd cordova
+npm install
+npx cordova platform add android
+npx cordova platform add ios    # macOS only
 ```
-Add other platforms as needed
+Plugins (`cordova-plugin-file`, `cordova-plugin-qrscanner`, `cordova-plugin-android-permissions`) are automatically installed from `config.xml`.
 
-### Step 3: Install plugins
-```bash
-cordova plugin add cordova-plugin-android-permissions
-cordova plugin add cordova-plugin-file
-cordova plugin add cordova-plugin-splashscreen
-cordova plugin add cordova-plugin-camera
-```
-Add other plugins as needed
-
-### Step 4: Build the project
-```bash
-cordova build android
-cordova build ios
-```
-
-### Step 5: Run on emulator or device
-```bash
-cordova run android
-cordova run ios
-```
-Run on other platforms as needed
-
-### Emulator android studio
-```bash
-cd /home/bago/runebasechromewallet2/cordova/platforms/android/app/build/outputs/apk/debug/
-adb install app-debug.apk
-```
-
-### trouble-shooting
-```bash
-sdkmanager "build-tools;33.0.2"
-```
-
-### Updating icons & splash scress
+### Updating Icons & Splash Screens
 ```bash
 # Install cordova-res globally if you haven't already
 npm install -g cordova-res
 
-# Run cordova-res in the cordova directory to generate icons and splash screens
+# Run in the cordova directory to generate icons and splash screens
+cd cordova
 cordova-res
 ```
+
+#### Regenerate after updating sources
+```bash
+cd cordova
+cordova-res ios --copy
+cordova-res android --copy
+```
+The `--copy` flag puts generated files directly into the platform directories.
+
+---
+
+### Android
+
+#### Prerequisites
+- Android SDK Platform 36 and Build Tools 36.0.0 (required by cordova-android 15)
+- Install via Android Studio: **Settings > Languages & Frameworks > Android SDK > SDK Tools**
+- Or via command line:
+```bash
+$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "build-tools;36.0.0" "platforms;android-36"
+```
+
+#### Build Debug APK
+```bash
+cd cordova
+npx cordova build android
+```
+Output: `cordova/platforms/android/app/build/outputs/apk/debug/app-debug.apk`
+
+#### Build Release AAB
+Requires a `build.json` in the cordova directory (see `build.json.example` for template):
+```bash
+cd cordova
+npx cordova build android --release --buildConfig=build.json
+```
+Output: `cordova/platforms/android/app/build/outputs/bundle/release/app-release.aab`
+
+#### Run on Emulator or Device
+```bash
+cd cordova
+npx cordova run android
+```
+Or install a debug APK manually:
+```bash
+adb install cordova/platforms/android/app/build/outputs/apk/debug/app-debug.apk
+```
+
+---
+
+### iOS (macOS only)
+
+#### Prerequisites
+- **macOS** with **Xcode** (latest version recommended)
+- **CocoaPods**: `sudo gem install cocoapods`
+- **ios-deploy** (for device deployment): `brew install ios-deploy`
+- **Apple Developer account** (required for deploying to physical devices; simulator is free)
+
+Install Xcode command line tools:
+```bash
+xcode-select --install
+```
+
+#### Build for iOS
+```bash
+cd cordova
+npx cordova build ios
+```
+
+#### Open in Xcode
+```bash
+open cordova/platforms/ios/Runebase\ Lite\ Wallet.xcworkspace
+```
+Choose a simulator or connected device, then click **Run**.
+
+#### Run on Simulator
+```bash
+cd cordova
+npx cordova run ios --target="iPhone-16-Pro"
+```
+
+#### Run on Physical Device
+```bash
+cd cordova
+npx cordova run ios --device
+```
+Requires a valid signing identity configured in Xcode (**Signing & Capabilities** tab).
+
+#### Build Release IPA
+```bash
+cd cordova
+npx cordova build ios --release --device --buildConfig=build.json
+```
+The `build.json` should include your iOS signing configuration:
+```json
+{
+  "ios": {
+    "release": {
+      "codeSignIdentity": "Apple Distribution",
+      "developmentTeam": "YOUR_TEAM_ID",
+      "packageType": "app-store",
+      "provisioningProfile": "YOUR_PROVISIONING_PROFILE_UUID"
+    }
+  }
+}
+```
+
+#### Troubleshooting
+- **White screen on launch**: Ensure `cordova-plugin-qrscanner` is installed. The app requires this plugin to be present — removing it causes the JS to fail silently.
+- **Simulator not found**: Open Xcode > **Settings > Platforms** and install the iOS simulator runtime.
+- **Signing errors**: Ensure your Apple Developer Team ID is set in Xcode under **Signing & Capabilities**.
 
 ## Electron Desktop Builds
 
@@ -266,68 +350,3 @@ All compiled artifacts are copied to the `compiled_files/` directory.
 
 After pushing to GitHub, run the macOS build separately on a Mac (see above).
 
-## Building for Iphone
-### Step 1: Install Xcode
-
-1. Download [Xcode 11](https://download.developer.apple.com/Developer_Tools/Xcode_11.7/Xcode_11.7.xip) for MacOS Catalina.
-2. Double-click on `xcode.xip` to expand the archive.
-
-move to correct location and install
-```bash
-sudo mv ~/Downloads/Xcode.app /Applications
-sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
-sudo xcode-select --install
-```
-Deployment Tools
-
-The ios-deploy tools allow you to launch iOS apps on an iOS Device from the command-line.
-
-Install ios-deploy via Homebrew by running:
-
-$ brew install ios-deploy
-
-### Install Correct Ruby version
-\curl -sSL https://get.rvm.io | bash -s stable
-
-rvm install ruby --latest
-rvm use 3.0.0
-
-CocoaPods
-
-The CocoaPods tools are needed to build iOS apps. A minimum version of 1.8.0 is required but the latest release is always recommended.
-
-To install CocoaPods, run the following from command-line terminal:
-
-$ sudo gem install rubygems-update -v 3.2.21
-$ sudo gem install cocoapods
-
-### Step 2: Build for iOS
-Run the following command to build the iOS version:
-```bash
-cordova build ios
-```
-
-### Step 3: Open in Xcode
-
-Open the Xcode project using the command:
-```bash
-open platforms/ios/Runebase\ Lite\ Wallet.xcworkspace
-```
-
-### Step 4: Run in Simulator
-Once Xcode is open, choose a simulator device and click the "Run" button to build and run your Cordova application in the iOS simulator.
-
-### Troubleshooting
-
-**Verify Simulator Installation:**
-1. Open Xcode and go to "Xcode" -> "Preferences" -> "Components."
-2. Ensure that the iOS simulator component is installed. If not, download it from this menu.
-
-
-### Compile error notes for Iphone
-- ran into a compilation build error mentioning cordova-plugin-qrscanner-androidx
-consider finding alternative solutions? try phonegap-plugin-barcodescanner (if it's a working plugin) which will require code to be updated.
-
-cordova plugin add phonegap-plugin-barcodescanner
-
-- after removal of cordova-plugin-qr-scanner-androidx (for testing purposes) when launching the application in iphone simulator just given me a white screen after app launch. no errors found in console
