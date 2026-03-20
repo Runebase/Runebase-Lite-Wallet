@@ -11,6 +11,8 @@
     "clean": "rm -rf dist",
     "start": "yarn clean && mkdir dist && ./scripts/create-empty-thunk.sh && webpack --progress --config webpack.dev.config.js --watch --devtool source-map & yarn css-types -w",
     "dev": "webpack --progress --config webpack.dev.config.js --watch --devtool source-map & yarn css-types -w",
+    "dev:browser": "mkdir -p dist && ./scripts/create-empty-thunk.sh && webpack serve --progress --config webpack.dev-browser.config.js",
+    "dev:ext": "yarn clean && mkdir -p dist && ./scripts/create-empty-thunk.sh && webpack --progress --config webpack.dev.config.js --watch --devtool source-map & yarn css-types -w & web-ext run --source-dir dist --target=chromium --start-url about:debugging",
     "release:patch": "./build.sh patch",
     "release:minor": "./build.sh minor",
     "release:major": "./build.sh major",
@@ -57,6 +59,7 @@
     "electron-builder": "^24.9.1",
     "eslint": "^8.56.0",
     "eslint-webpack-plugin": "^4.2.0",
+    "html-webpack-plugin": "^5.6.6",
     "husky": "^8.0.3",
     "lint-staged": "^15.4.3",
     "mini-css-extract-plugin": "^2.9.2",
@@ -70,7 +73,8 @@
     "vm-browserify": "^1.1.2",
     "web-ext-types": "^3.2.1",
     "webpack": "^5.98.0",
-    "webpack-cli": "^5.1.4"
+    "webpack-cli": "^5.1.4",
+    "webpack-dev-server": "^5.2.3"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",

@@ -1,0 +1,93 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Confirm Transaction</title>
+    <link rel="stylesheet" href="./css/sign-tx.css" />
+    <script type="text/javascript" src="./js/sign-tx.js"></script>
+  </head>
+  <body>
+    <!-- From -->
+    <div class="field-container bottom-16">
+      <h5 class="heading bottom-16">From</h5>
+      <span id="from-field" class="address"></span>
+    </div>
+      
+    <!-- To -->
+    <div class="field-container bottom-32">
+      <h5 class="heading bottom-16">To</h5>
+      <span id="to-field" class="address"></span>
+    </div>
+
+    <!-- Amount -->
+    <div class="field-container bottom-32">
+      <div class="row">
+        <div class="center">
+          <h5 class="heading center">Amount</h5>
+        </div>
+        <div class="amount-container">
+          <span id="amount-field" class="amount"></span>
+        </div>
+        <div class="center">
+          <span class="unit center">RUNEBASE</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Gas Limit -->
+    <div class="field-container bottom-32">
+      <div class="row">
+        <div class="center">
+          <h5 class="heading center">Gas Limit</h5>
+        </div>
+        <div class="amount-container">
+          <span id="gas-limit-field" class="amount"></span>
+        </div>
+        <div class="center">
+          <span class="unit center">GAS</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Gas Price -->
+    <div class="field-container bottom-32">
+      <div class="row">
+        <div class="center">
+          <h5 class="heading center">Gas Price</h5>
+        </div>
+        <div class="amount-container">
+          <span id="gas-price-field" class="amount"></span>
+        </div>
+        <div class="center">
+          <span class="unit center">RUNEBASE</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Max Tx Fee -->
+    <div class="field-container bottom-32">
+      <div class="row">
+        <div class="center">
+          <h5 class="heading center">Max Transaction Fee</h5>
+        </div>
+        <div class="amount-container">
+          <span id="max-tx-fee-field" class="amount"></span>
+        </div>
+        <div class="center">
+          <span class="unit center">RUNEBASE</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Raw Tx -->
+    <h5 class="heading bottom-8">Raw Transaction</h5>
+    <div class="transaction-container bottom-32">
+      <span id="raw-tx-field" class="raw-tx"></span>
+    </div>
+    
+    <!-- Buttons -->
+    <div class="row">
+      <button id="button-cancel" class="button button-white">Cancel</button>
+      <button id="button-confirm" class="button button-blue left-16">Confirm</button>
+    </div>
+  </body>
+</html>

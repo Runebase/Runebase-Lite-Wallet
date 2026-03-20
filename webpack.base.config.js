@@ -13,7 +13,12 @@ const styleLoaders = [
       importLoaders: 1,
     },
   },
-  'sass-loader',
+  {
+    loader: 'sass-loader',
+    options: {
+      api: 'modern',
+    },
+  },
 ];
 
 module.exports = {
@@ -34,6 +39,12 @@ module.exports = {
       'scryptsy/browser': 'scryptsy',
       'clsx': require.resolve('clsx'),
       'bignumber.js': require.resolve('bignumber.js'),
+      // Fix @floating-ui ESM/CJS interop warnings from @mui/base
+      '@floating-ui/react-dom': path.resolve(__dirname, 'node_modules/@floating-ui/react-dom/dist/floating-ui.react-dom.esm.js'),
+      '@floating-ui/dom': path.resolve(__dirname, 'node_modules/@floating-ui/dom/dist/floating-ui.dom.esm.js'),
+      '@floating-ui/core': path.resolve(__dirname, 'node_modules/@floating-ui/core/dist/floating-ui.core.esm.js'),
+      '@floating-ui/utils/dom': path.resolve(__dirname, 'node_modules/@floating-ui/utils/dom/dist/floating-ui.utils.dom.esm.js'),
+      '@floating-ui/utils': path.resolve(__dirname, 'node_modules/@floating-ui/utils/dist/floating-ui.utils.esm.js'),
     },
     extensions: ['.ts', '.tsx', '.js', '.jsx', '.json'],
     fallback: {
