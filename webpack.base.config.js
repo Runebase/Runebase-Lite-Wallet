@@ -38,7 +38,7 @@ module.exports = {
     alias: {
       'scryptsy/browser': 'scryptsy',
       'clsx': require.resolve('clsx'),
-      'bignumber.js': require.resolve('bignumber.js'),
+      'bignumber.js': path.resolve(__dirname, 'node_modules/bignumber.js/dist/bignumber.mjs'),
       // Fix @floating-ui ESM/CJS interop warnings from @mui/base
       '@floating-ui/react-dom': path.resolve(__dirname, 'node_modules/@floating-ui/react-dom/dist/floating-ui.react-dom.esm.js'),
       '@floating-ui/dom': path.resolve(__dirname, 'node_modules/@floating-ui/dom/dist/floating-ui.dom.esm.js'),
@@ -96,7 +96,7 @@ module.exports = {
           },
           {
             type: 'asset/resource',
-            exclude: [/\.js$/, /\.html$/, /\.json$/],
+            exclude: [/\.m?[jc]?js$/, /\.html$/, /\.json$/],
             generator: {
               filename: 'static/[name].[hash:8][ext]',
             },

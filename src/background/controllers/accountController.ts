@@ -540,7 +540,7 @@ export default class AccountController extends IController {
         id: transaction.txid,
         timestamp: moment().format('MM-DD-YYYY, HH:mm'), // Use current timestamp for the new transaction
         confirmations: 0, // Transaction is not confirmed initially
-        amount: new BigNumber(amount).times(1e8).dp(0).toNumber(),
+        amount: new BigNumber(amount ?? 0).times(1e8).dp(0).toNumber(),
       });
       this.main.transaction.addTransaction(newTransaction);
       sendMessage({
@@ -614,7 +614,7 @@ export default class AccountController extends IController {
       id: result && result.txid ? result.txid : undefined,
       timestamp: moment().format('MM-DD-YYYY, HH:mm'),
       confirmations: 0,
-      amount: new BigNumber(gasLimit).times(new BigNumber(gasPrice).times(1e8)).dp(0).toNumber(),
+      amount: new BigNumber(gasLimit ?? 0).times(new BigNumber(gasPrice ?? 0).times(1e8)).dp(0).toNumber(),
       qrc20TokenTransfers: []
     });
     this.main.transaction.addTransaction(newTransaction);
@@ -657,7 +657,7 @@ export default class AccountController extends IController {
       id: result && result.txid ? result.txid : undefined,
       timestamp: moment().format('MM-DD-YYYY, HH:mm'),
       confirmations: 0,
-      amount: new BigNumber(gasLimit).times(new BigNumber(gasPrice).times(1e8)).dp(0).toNumber(),
+      amount: new BigNumber(gasLimit ?? 0).times(new BigNumber(gasPrice ?? 0).times(1e8)).dp(0).toNumber(),
       qrc20TokenTransfers: []
     });
     this.main.transaction.addTransaction(newTransaction);

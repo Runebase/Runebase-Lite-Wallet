@@ -218,7 +218,7 @@ export default class TokenController extends IController {
       console.log('amount: ', amount);
       console.log(token);
       // bn.js does not handle decimals well (Ex: BN(1.2) => 1 not 1.2) so we use BigNumber
-      const bnAmount = new BigNumber(amount).times(new BigNumber(10 ** token.decimals));
+      const bnAmount = new BigNumber(amount ?? 0).times(new BigNumber(10 ** token.decimals));
       const data = rweb3.encoder.constructData(rrc223TokenABI, 'transfer', [receiverAddress, bnAmount]);
       const args = [token.address, data, null, gasLimit, gasPrice];
 
@@ -229,12 +229,12 @@ export default class TokenController extends IController {
       const { error, result } = response as { error: any, result: RunebaseInfo.ISendRawTxResult };
 
       console.log('sendRRCToken result: ', result);
-      console.log(`sendRRCToken result: gaslimit: ${gasLimit} gasPrice: ${gasPrice} = (${new BigNumber(gasLimit).times(new BigNumber(gasPrice).times(1e8)).dp(0).toNumber()})`);
+      console.log(`sendRRCToken result: gaslimit: ${gasLimit} gasPrice: ${gasPrice} = (${new BigNumber(gasLimit ?? 0).times(new BigNumber(gasPrice ?? 0).times(1e8)).dp(0).toNumber()})`);
       const newTransaction = new Transaction({
         id: result && result.txid ? result.txid : undefined,
         timestamp: moment().format('MM-DD-YYYY, HH:mm'),
         confirmations: 0,
-        amount: new BigNumber(gasLimit).times(new BigNumber(gasPrice).times(1e8)).dp(0).toNumber(),
+        amount: new BigNumber(gasLimit ?? 0).times(new BigNumber(gasPrice ?? 0).times(1e8)).dp(0).toNumber(),
         qrc20TokenTransfers: [
           {
             address: token.address,

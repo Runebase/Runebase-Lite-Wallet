@@ -41,8 +41,8 @@ const AddDelegationConfirm: React.FC<IProps> = inject('store')(
             {renderItem('Delegator', signedPoD.delegatorAddress)}
             {renderItem('SuperStaker Fee', `${delegationFee}%`)}
             {renderItem('Gas Limit', gasLimit)}
-            {renderItem('Gas Cost', `${new BigNumber(gasPrice).dividedBy(1e8).toFixed(8)} RUNES`)}
-            {renderItem('Gas Amount', `${new BigNumber(gasPrice).times(gasLimit).dividedBy(1e8).dp(8).toNumber()} RUNES`)}
+            {renderItem('Gas Cost', `${new BigNumber(gasPrice ?? 0).dividedBy(1e8).toFixed(8)} RUNES`)}
+            {renderItem('Gas Amount', `${new BigNumber(gasPrice ?? 0).times(gasLimit ?? 0).dividedBy(1e8).dp(8).toNumber()} RUNES`)}
             {renderItem('PoD', signedPoD.podMessage)}
             {errorMessage && <Typography style={{ color: 'red' }}>{errorMessage}</Typography>}
             <ConfirmDelegationButton delegateStore={delegateStore} />

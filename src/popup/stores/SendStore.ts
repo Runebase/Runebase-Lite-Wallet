@@ -97,7 +97,7 @@ export default class SendStore {
         const newToken = new RRCToken(name, symbol, Number(decimals), address);
         const isTokenVerified = this.verifiedTokens.find(x => x.address === newToken.address);
         if (isTokenVerified) {
-          newToken.balance = new BigNumber(balance).dividedBy(`1e${decimals}`).toNumber();
+          newToken.balance = new BigNumber(balance ?? 0).dividedBy(`1e${decimals}`).toNumber();
           this.tokens.push(newToken);
         } else {
           // TODO: Make a visible unverified token balance list

@@ -27,8 +27,8 @@ const RemoveDelegationConfirm: React.FC<IProps> = inject('store')(
         <NavBar hasBackButton title="Remove Delegation Confirm" />
         <Paper className={classes.contentContainer} elevation={3} style={{ padding: '8px' }}>
           {renderItem('Gas Limit', gasLimit)}
-          {renderItem('Gas Cost', `${new BigNumber(gasPrice).dividedBy(1e8).toFixed(8)} RUNES`)}
-          {renderItem('Gas Amount', `${new BigNumber(gasPrice).times(gasLimit).dividedBy(1e8).dp(8).toNumber()} RUNES`)}
+          {renderItem('Gas Cost', `${new BigNumber(gasPrice ?? 0).dividedBy(1e8).toFixed(8)} RUNES`)}
+          {renderItem('Gas Amount', `${new BigNumber(gasPrice ?? 0).times(gasLimit ?? 0).dividedBy(1e8).dp(8).toNumber()} RUNES`)}
           {errorMessage && <Typography style={{ color: 'red' }}>{errorMessage}</Typography>}
           <ConfirmRemoveDelegationButton delegateStore={delegateStore} />
         </Paper>
