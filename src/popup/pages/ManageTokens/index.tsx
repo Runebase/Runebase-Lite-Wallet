@@ -1,9 +1,15 @@
 import React, { useEffect } from 'react';
-import { Typography, Button, Divider } from '@mui/material';
+import {
+  Typography,
+  Button,
+  Divider,
+  Box,
+  Stack,
+} from '@mui/material';
 import { isUndefined } from 'lodash';
 
 import useStyles from './styles';
-import NavBar from '../../components/NavBar';
+import PageLayout from '../../components/PageLayout';
 import { useAppSelector, useAppDispatch } from '../../store/hooks';
 import {
   initAccountDetail,
@@ -13,12 +19,11 @@ import {
   setEditTokenMode,
 } from '../../store/slices/accountDetailSlice';
 import RRCToken from '../../../models/RRCToken';
+import { TOKEN_IMAGES } from '../../../constants';
+import { getImageUrl } from '../../abstraction';
 
 const ManageTokens: React.FC = () => {
   const { classes } = useStyles();
-  const _dispatch = useAppDispatch();
-  const _verifiedTokens = useAppSelector((state) => state.accountDetail.verifiedTokens);
-  const _editTokenMode = useAppSelector((state) => state.accountDetail.editTokenMode);
 
   useEffect(() => {
     initAccountDetail();
@@ -28,12 +33,9 @@ const ManageTokens: React.FC = () => {
   }, []);
 
   return (
-    <div className={classes.root}>
-      <NavBar hasBackButton title="Manage Tokens" />
-      <div className={classes.contentContainer}>
-        <TokenList classes={classes} />
-      </div>
-    </div>
+    <PageLayout hasBackButton title="Manage Tokens">
+      <TokenList classes={classes} />
+    </PageLayout>
   );
 };
 
@@ -44,36 +46,75 @@ const TokenList: React.FC<{ classes: Record<string, string> }> = ({ classes }) =
 
   return (
     <div>
-      {verifiedTokens
-      && verifiedTokens.map(({ name, symbol, balance, address }: RRCToken) => (
-        <div
-          key={symbol}
-          onClick={() => editTokenMode && removeToken(address)}
-        >
-          {editTokenMode && (
-            <Button className={classes.tokenDeleteButton} id="removeTokenButton">
-              <img src="images/ic_delete.svg" alt="Delete Token" />
-            </Button>
-          )}
-          <div className={classes.tokenInfoContainer}>
-            <Typography className={classes.tokenName}>{name}</Typography>
-            <AmountInfo
-              classes={classes}
-              amount={balance}
-              token={symbol}
-              convertedValue={0}
-            />
-          </div>
-          <div style={{ float: 'left', width: '100%' }}>
-            <Typography variant="caption">{address}</Typography>
-          </div>
-          <Divider variant="fullWidth" style={{ border: '1px solid #e0e0e0' }} />
-        </div>
-      ))}
+      {verifiedTokens && verifiedTokens.length > 0 ? (
+        verifiedTokens.map(({ name, symbol, balance, address }: RRCToken) => {
+          const tokenLogoSrc = TOKEN_IMAGES[address];
+          return (
+            <div
+              key={symbol}
+              onClick={() => editTokenMode && removeToken(address)}
+            >
+              <Box sx={{ display: 'flex', alignItems: 'center', py: 1, px: 1, gap: 1.5 }}>
+                {editTokenMode && (
+                  <Button
+                    className={classes.tokenDeleteButton}
+                    id="removeTokenButton"
+                    color="error"
+                    size="small"
+                    sx={{ minWidth: 0, minHeight: 0, p: 0.5 }}
+                  >
+                    <img src="images/ic_delete.svg" alt="Delete Token" />
+                  </Button>
+                )}
+                {tokenLogoSrc ? (
+                  <Box
+                    component="img"
+                    src={getImageUrl(tokenLogoSrc)}
+                    alt={symbol}
+                    sx={{ width: 32, height: 32 }}
+                  />
+                ) : (
+                  <Box
+                    sx={{
+                      width: 32,
+                      height: 32,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      bgcolor: 'primary.light',
+                      color: 'primary.contrastText',
+                      borderRadius: 0.5,
+                      fontSize: 14,
+                      fontWeight: 'bold',
+                    }}
+                  >
+                    {symbol?.[0]}
+                  </Box>
+                )}
+                <Box sx={{ flex: 1 }}>
+                  <Typography variant="body2" fontWeight="bold">{name}</Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    {isUndefined(balance) ? '...' : balance} {symbol}
+                  </Typography>
+                </Box>
+              </Box>
+              <Typography variant="caption" color="text.secondary" sx={{ pl: 1, display: 'block' }}>
+                {address}
+              </Typography>
+              <Divider />
+            </div>
+          );
+        })
+      ) : (
+        <Box sx={{ p: 4, textAlign: 'center' }}>
+          <Typography color="text.secondary" variant="body2">
+            No custom tokens added yet
+          </Typography>
+        </Box>
+      )}
 
-      <div className={`${classes.bottomButtonWrap} ${classes.listItem}`}>
+      <Stack direction="row" justifyContent="space-between" sx={{ p: 1.5 }}>
         <Button
-          className={classes.bottomButton}
           id="editTokenButton"
           color="primary"
           size="small"
@@ -82,7 +123,6 @@ const TokenList: React.FC<{ classes: Record<string, string> }> = ({ classes }) =
           {editTokenMode ? 'Done' : 'Edit'}
         </Button>
         <Button
-          className={classes.bottomButton}
           id="addTokenButton"
           color="primary"
           size="small"
@@ -90,41 +130,9 @@ const TokenList: React.FC<{ classes: Record<string, string> }> = ({ classes }) =
         >
           Add Token
         </Button>
-      </div>
+      </Stack>
     </div>
   );
 };
-
-const AmountInfo: React.FC<{
-  classes: Record<string, string>;
-  amount: number | undefined;
-  token: string;
-  convertedValue?: number;
-}> = ({
-  classes,
-  amount,
-  token,
-  convertedValue
-}) => (
-  <div>
-    <div className={classes.tokenContainer}>
-      <Typography className={classes.tokenAmount}>
-        {isUndefined(amount) ? '...' : amount}
-      </Typography>
-      <div className={classes.tokenTypeContainer}>
-        <Typography className={classes.tokenType}>{token}</Typography>
-      </div>
-    </div>
-    {convertedValue !== undefined && (
-      <>
-      </>
-      /*
-      <div className={classes.conversionContainer}>
-        <Typography className={classes.tokenType}>{`= ${convertedValue} RUNES`}</Typography>
-      </div>
-      */
-    ) }
-  </div>
-);
 
 export default ManageTokens;

@@ -1,8 +1,15 @@
 import React from 'react';
-import { Button, Typography, Paper, Divider } from '@mui/material';
+import {
+  Button,
+  Typography,
+  Paper,
+  Divider,
+  Box,
+  CircularProgress,
+  Stack,
+} from '@mui/material';
 import { Send as SendIcon } from '@mui/icons-material';
-import useStyles from './styles';
-import NavBar from '../../components/NavBar';
+import PageLayout from '../../components/PageLayout';
 import BigNumber from 'bignumber.js';
 import { useAppSelector, useAppDispatch } from '../../store/hooks';
 import {
@@ -11,7 +18,6 @@ import {
 } from '../../store/slices/delegateSlice';
 
 const AddDelegationConfirm: React.FC = () => {
-  const { classes } = useStyles();
   const dispatch = useAppDispatch();
   const loggedInAccountName = useAppSelector((state) => state.session.loggedInAccountName);
   const walletInfo = useAppSelector((state) => state.session.walletInfo);
@@ -19,66 +25,92 @@ const AddDelegationConfirm: React.FC = () => {
   const delegationFee = useAppSelector((state) => state.delegate.delegationFee);
   const signedPoD = useAppSelector((state) => state.delegate.signedPoD);
   const errorMessage = useAppSelector((state) => state.delegate.errorMessage);
+  const isSubmitting = useAppSelector((state) => state.delegate.isSubmitting);
   const gasLimit = useAppSelector((state) => state.delegate.gasLimit);
   const gasPrice = useAppSelector((state) => state.delegate.gasPrice);
   const buttonDisabled = useAppSelector(selectDelegateButtonDisabled);
 
-  if (!loggedInAccountName || !walletInfo || !selectedSuperstaker) return null;
-
-  function renderItem(title: string, message: string | number) {
+  if (!loggedInAccountName || !walletInfo || !selectedSuperstaker) {
     return (
-      <div style={{ display: 'flex', flexDirection: 'column' }}>
-        <Typography variant="body1" style={{ wordBreak: 'break-all' }}>
-          <strong style={{ textDecoration: 'underline' }}>{title}</strong>
-        </Typography>
-        <Typography variant="caption" style={{ wordBreak: 'break-all' }}>
-          {message}
-        </Typography>
-        <Divider style={{ margin: '8px 0' }} />
-      </div>
+      <PageLayout hasBackButton title="Confirm Delegation">
+        <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+          <CircularProgress />
+        </Box>
+      </PageLayout>
     );
   }
 
   if (!signedPoD) {
     return (
-      <div className={classes.root}>
-        <NavBar hasBackButton title="Add Delegation Confirm" />
-        <Paper className={classes.contentContainer} elevation={3}>
-          <Typography variant="body1" style={{ padding: '16px' }}>
-            Loading...
+      <PageLayout hasBackButton title="Confirm Delegation">
+        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', py: 4, gap: 2 }}>
+          <CircularProgress />
+          <Typography variant="body2" color="text.secondary">
+            Signing proof of delegation...
           </Typography>
-        </Paper>
-      </div>
+        </Box>
+      </PageLayout>
     );
   }
 
   return (
-    <div className={classes.root}>
-      <NavBar hasBackButton title="Add Delegation Confirm" />
-      <Paper className={classes.contentContainer} elevation={3} style={{ padding: '8px' }}>
-        {renderItem('SuperStaker', signedPoD.superStakerAddress)}
-        {renderItem('Delegator', signedPoD.delegatorAddress)}
-        {renderItem('SuperStaker Fee', `${delegationFee}%`)}
-        {renderItem('Gas Limit', gasLimit)}
-        {renderItem('Gas Cost', `${new BigNumber(gasPrice ?? 0).dividedBy(1e8).toFixed(8)} RUNES`)}
-        {renderItem('Gas Amount', `${new BigNumber(gasPrice ?? 0).times(gasLimit ?? 0).dividedBy(1e8).dp(8).toNumber()} RUNES`)}
-        {renderItem('PoD', signedPoD.podMessage)}
-        {errorMessage && <Typography style={{ color: 'red' }}>{errorMessage}</Typography>}
+    <PageLayout hasBackButton title="Confirm Delegation">
+      <Paper variant="outlined" sx={{ p: 2 }}>
+        <Stack spacing={0} divider={<Divider />}>
+          <ConfirmItem label="SuperStaker" value={signedPoD.superStakerAddress} />
+          <ConfirmItem label="Delegator" value={signedPoD.delegatorAddress} />
+          <ConfirmItem label="Fee" value={`${delegationFee}%`} />
+          <ConfirmItem label="Gas Limit" value={String(gasLimit)} />
+          <ConfirmItem
+            label="Gas Cost"
+            value={`${new BigNumber(gasPrice ?? 0).dividedBy(1e8).toFixed(8)} RUNES`}
+          />
+          <ConfirmItem
+            label="Gas Amount"
+            value={`${new BigNumber(gasPrice ?? 0).times(gasLimit ?? 0).dividedBy(1e8).dp(8).toNumber()} RUNES`}
+          />
+          <ConfirmItem label="PoD" value={signedPoD.podMessage} />
+        </Stack>
+
+        {errorMessage && (
+          <Typography color="error" variant="body2" sx={{ mt: 1.5 }}>
+            {errorMessage}
+          </Typography>
+        )}
+
         <Button
           fullWidth
           variant="contained"
           color="primary"
           size="large"
-          disabled={buttonDisabled}
+          disabled={buttonDisabled || isSubmitting}
           onClick={() => dispatch(sendDelegationConfirm())}
-          endIcon={<SendIcon />}
-          style={{ marginTop: '16px' }}
+          startIcon={isSubmitting ? <CircularProgress size={20} color="inherit" /> : <SendIcon />}
+          sx={{ mt: 2 }}
         >
-          Confirm Delegation
+          {isSubmitting ? 'Confirming...' : 'Confirm Delegation'}
         </Button>
       </Paper>
-    </div>
+    </PageLayout>
   );
 };
+
+/** Confirmation detail row */
+const ConfirmItem: React.FC<{ label: string; value: string }> = ({ label, value }) => (
+  <Box sx={{ py: 1.5 }}>
+    <Typography variant="caption" color="text.secondary" fontWeight="bold">
+      {label}
+    </Typography>
+    <Typography
+      variant="body2"
+      sx={{
+        wordBreak: 'break-word',
+        mt: 0.25,
+      }}
+    >
+      {value}
+    </Typography>
+  </Box>
+);
 
 export default AddDelegationConfirm;

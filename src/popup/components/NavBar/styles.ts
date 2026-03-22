@@ -1,47 +1,50 @@
 import { makeStyles } from 'tss-react/mui';
 
 const useStyles = makeStyles()((theme) => ({
-  root: {
-    margin: theme.spacing(2),
-    flexDirection: 'row' as const,
-    display: 'flex',
+  appBar: {
+    borderBottom: `1px solid ${theme.palette.divider}`,
+  },
+  toolbar: {
+    padding: `0 ${theme.spacing(1)}`,
+    minHeight: 48,
+    position: 'relative',
   },
   leftButtonsContainer: {
-    marginRight: theme.spacing(1),
-    cursor: 'pointer',
-  },
-  backIconButton: {
-    width: theme.spacing(4),
-    height: theme.spacing(4),
-  },
-  backButton: {
-    '&.white': {},
-  },
-  settingsIconButton: {
-    width: theme.spacing(4),
-    height: theme.spacing(4),
-  },
-  settingsButton: {
-    fontSize: theme.typography.fontSizeLarge,
-    '&.white': {},
-  },
-  locationContainer: {
-    height: theme.spacing(4),
     display: 'flex',
     alignItems: 'center',
-    flex: 1,
+    zIndex: 1,
   },
   locationText: {
-    '&.white': {},
+    position: 'absolute',
+    left: '50%',
+    transform: 'translateX(-50%)',
+    fontWeight: theme.typography.fontWeightBold,
+    textAlign: 'center',
+    maxWidth: '60%',
+    pointerEvents: 'none',
   },
   rightContainer: {
     display: 'flex',
     alignItems: 'center',
     gap: theme.spacing(0.5),
+    marginLeft: 'auto',
+    zIndex: 1,
+  },
+  connectionIndicator: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: theme.spacing(0.5),
+    cursor: 'pointer',
   },
   connectionDot: {
-    fontSize: 12,
-    cursor: 'pointer',
+    fontSize: 14,
+  },
+  connectionLabel: {
+    display: 'none',
+    fontSize: theme.typography.caption.fontSize,
+    [theme.breakpoints.up('sm')]: {
+      display: 'inline',
+    },
   },
 }));
 

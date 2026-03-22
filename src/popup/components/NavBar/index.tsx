@@ -1,211 +1,143 @@
-import React, { Fragment, FC, useState } from 'react';
+import React, { FC, useState } from 'react';
 import {
   Typography,
-  Menu,
-  MenuItem,
   IconButton,
-  ListItemIcon,
   Tooltip,
+  AppBar,
+  Toolbar,
 } from '@mui/material';
 import {
-  Toll,
-  Backup,
-  Settings as SettingsIcon,
-  AccountCircle,
   FiberManualRecord,
+  ViewSidebar,
 } from '@mui/icons-material';
-import { ArrowBack, Settings } from '@mui/icons-material';
-import cx from 'classnames';
+import { ArrowBack } from '@mui/icons-material';
 import { useNavigate } from 'react-router';
-import DropDownMenu from '../DropDownMenu';
 import { useAppSelector } from '../../store/hooks';
-import {
-  changeNetwork,
-  routeToSettings,
-  routeToManageTokens,
-  logout,
-} from '../../store/slices/navBarSlice';
 import { selectElectrumXStatus } from '../../store/slices/sessionSlice';
-import QryNetwork from '../../../models/QryNetwork';
 import useStyles from './styles';
-import EnterPasswordDialog from '../EnterPasswordDialog';
-import { MESSAGE_TYPE } from '../../../constants';
+import { isExtensionEnvironment } from '../../abstraction';
 
 interface IProps {
   hasBackButton?: boolean;
-  hasSettingsButton?: boolean;
-  hasNetworkSelector?: boolean;
   isDarkTheme?: boolean;
   title: string;
 }
 
-const CONNECTION_COLORS: Record<string, string> = {
-  connected: '#4caf50',
-  connecting: '#ff9800',
-  reconnecting: '#ff9800',
-  disconnected: '#f44336',
+const CONNECTION_LABELS: Record<string, string> = {
+  connected: 'Online',
+  connecting: 'Connecting',
+  reconnecting: 'Reconnecting',
+  disconnected: 'Offline',
 };
 
-const CONNECTION_LABELS: Record<string, string> = {
-  connected: 'Connected',
-  connecting: 'Connecting...',
-  reconnecting: 'Reconnecting...',
-  disconnected: 'Disconnected',
+const getConnectionColor = (state: string): 'success' | 'warning' | 'error' | 'disabled' => {
+  switch (state) {
+  case 'connected': return 'success';
+  case 'connecting':
+  case 'reconnecting': return 'warning';
+  case 'disconnected': return 'error';
+  default: return 'disabled';
+  }
 };
 
 const NavBar: FC<IProps> = ({
   hasBackButton,
-  hasSettingsButton,
-  hasNetworkSelector,
   isDarkTheme,
   title,
 }) => {
   const { classes } = useStyles();
-  const networks = useAppSelector((state) => state.session.networks);
-  const networkIndex = useAppSelector((state) => state.session.networkIndex);
   const electrumxStatus = useAppSelector(selectElectrumXStatus);
+  const isChromeExtension = isExtensionEnvironment();
 
   return (
-    <div className={classes.root}>
-      <div className={classes.leftButtonsContainer}>
-        {hasBackButton && <BackButton classes={classes} isDarkTheme={isDarkTheme} />}
-        {hasSettingsButton && (
-          <SettingsButton
-            classes={classes}
-            isDarkTheme={isDarkTheme}
-            title={title}
-          />
-        )}
-      </div>
-      <div className={classes.locationContainer}>
-        <Typography className={cx(classes.locationText, isDarkTheme ? 'white' : '')}>{title}</Typography>
-      </div>
-      {hasNetworkSelector && (
+    <AppBar
+      position="static"
+      color="transparent"
+      elevation={0}
+      className={classes.appBar}
+    >
+      <Toolbar variant="dense" className={classes.toolbar} disableGutters>
+        <div className={classes.leftButtonsContainer}>
+          {hasBackButton && <BackButton isDarkTheme={isDarkTheme} />}
+        </div>
+        <Typography
+          className={classes.locationText}
+          variant="subtitle1"
+          component="h1"
+          noWrap
+        >
+          {title}
+        </Typography>
         <div className={classes.rightContainer}>
           <Tooltip
             title={`${CONNECTION_LABELS[electrumxStatus.state] || 'Unknown'}${electrumxStatus.serverLabel ? ` - ${electrumxStatus.serverLabel}` : ''}`}
             placement="bottom"
           >
-            <FiberManualRecord
-              className={classes.connectionDot}
-              style={{ color: CONNECTION_COLORS[electrumxStatus.state] || '#9e9e9e' }}
-            />
+            <span className={classes.connectionIndicator}>
+              <FiberManualRecord
+                className={classes.connectionDot}
+                color={getConnectionColor(electrumxStatus.state)}
+              />
+              <Typography variant="caption" className={classes.connectionLabel}>
+                {CONNECTION_LABELS[electrumxStatus.state] || 'Unknown'}
+              </Typography>
+            </span>
           </Tooltip>
-          <DropDownMenu
-            onSelect={(index: number) => changeNetwork(index)}
-            selections={networks.map((net: QryNetwork) => net.name)}
-            selectedIndex={networkIndex}
-          />
+          {isChromeExtension && <SidePanelToggle />}
         </div>
-      )}
-    </div>
+      </Toolbar>
+    </AppBar>
   );
 };
 
 interface ISubProps {
-  classes: Record<string, string>;
   isDarkTheme?: boolean;
-  title?: string;
 }
 
-const BackButton: FC<ISubProps> = ({ classes, isDarkTheme }) => {
+const BackButton: FC<ISubProps> = ({ isDarkTheme }) => {
   const navigate = useNavigate();
   return (
     <IconButton
       onClick={() => navigate(-1)}
-      className={classes.backIconButton}
-      size="large"
+      aria-label="Go back"
+      size="medium"
+      color={isDarkTheme ? 'inherit' : 'default'}
     >
-      <ArrowBack className={cx(classes.backButton, isDarkTheme ? 'white' : '')} />
+      <ArrowBack />
     </IconButton>
   );
 };
 
-interface BackupWalletMenuItemProps {
-  onClick: React.MouseEventHandler<HTMLLIElement>;
-}
-const BackupWalletMenuItem: React.FC<BackupWalletMenuItemProps> = ({ onClick }) => (
-  <MenuItem onClick={onClick}>
-    <ListItemIcon>
-      <Backup />
-    </ListItemIcon>
-    Backup Wallet
-  </MenuItem>
-);
+const SidePanelToggle: FC = () => {
+  const [isSidePanelOpen, setIsSidePanelOpen] = useState(false);
 
-const SettingsButton: FC<ISubProps> = ({ classes, isDarkTheme }) => {
-  const [menuAnchor, setMenuAnchor] = useState<HTMLElement | null>(null);
-  const [isBackupWalletDialogOpen, setBackupWalletDialogOpen] = useState(false);
-  const handleOpenBackupWalletDialog = () => setBackupWalletDialogOpen(true);
-  const handleCloseBackupWalletDialog = () => setBackupWalletDialogOpen(false);
+  React.useEffect(() => {
+    chrome.storage.local.get('viewMode', (data) => {
+      if (data.viewMode === 'sidePanel') {
+        setIsSidePanelOpen(true);
+      }
+    });
+  }, []);
 
-  const handleCloseMenu = () => setMenuAnchor(null);
-
-  const handleRouteToManageTokens = () => {
-    handleCloseMenu();
-    routeToManageTokens();
-  };
-
-  const handleRouteToSettings = () => {
-    handleCloseMenu();
-    routeToSettings();
-  };
-
-  const handleLogout = () => {
-    handleCloseMenu();
-    logout();
-  };
-
-  const handleBackupWallet = () => {
-    handleCloseMenu();
-    handleOpenBackupWalletDialog();
+  const toggleViewMode = () => {
+    const newMode = isSidePanelOpen ? 'popup' : 'sidePanel';
+    setIsSidePanelOpen(!isSidePanelOpen);
+    chrome.storage.local.set({ viewMode: newMode }, () => {
+      if (newMode === 'sidePanel') {
+        chrome.runtime.sendMessage({ type: 'TOGGLE_SIDEPANEL' });
+        window.close();
+      } else {
+        chrome.runtime.sendMessage({ type: 'TOGGLE_POPUP' });
+      }
+    });
   };
 
   return (
-    <Fragment>
-      <IconButton
-        aria-owns={menuAnchor ? 'settingsMenu' : undefined}
-        aria-haspopup="true"
-        color="primary"
-        onClick={(e) => setMenuAnchor(e.currentTarget)}
-        className={classes.settingsIconButton}
-        size="large"
-      >
-        <Settings className={cx(classes.settingsButton, isDarkTheme ? 'white' : '')} />
+    <Tooltip title={isSidePanelOpen ? 'Switch to Popup' : 'Switch to Side Panel'}>
+      <IconButton size="small" onClick={toggleViewMode} color="primary">
+        <ViewSidebar fontSize="small" />
       </IconButton>
-      <Menu
-        id="settingsMenu"
-        anchorEl={menuAnchor}
-        open={Boolean(menuAnchor)}
-        onClose={handleCloseMenu}
-      >
-        <MenuItem onClick={handleRouteToManageTokens}>
-          <ListItemIcon>
-            <Toll />
-          </ListItemIcon>
-          Manage Tokens
-        </MenuItem>
-        <BackupWalletMenuItem onClick={handleBackupWallet} />
-        <MenuItem onClick={handleRouteToSettings}>
-          <ListItemIcon>
-            <SettingsIcon />
-          </ListItemIcon>
-          Settings
-        </MenuItem>
-        <MenuItem onClick={handleLogout}>
-          <ListItemIcon>
-            <AccountCircle />
-          </ListItemIcon>
-          Change Account
-        </MenuItem>
-      </Menu>
-
-      <EnterPasswordDialog
-        open={isBackupWalletDialogOpen}
-        onClose={handleCloseBackupWalletDialog}
-        MessageType={MESSAGE_TYPE.REQUEST_BACKUP_WALLET_INFO}
-      />
-    </Fragment>
+    </Tooltip>
   );
 };
 

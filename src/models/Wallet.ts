@@ -3,7 +3,7 @@ import secp256k1 from 'secp256k1';
 import { Buffer } from 'buffer';
 
 import { ISigner } from '../types';
-import { NETWORK_NAMES } from '../constants';
+import { NETWORK_NAMES, DELEGATION_CONTRACT_ADDRESS } from '../constants';
 import {
   WalletKeyPair,
   buildPaymentTx,
@@ -88,8 +88,6 @@ export default class Wallet implements ISigner {
 
     if (balanceChanged) {
       this.info = newInfo;
-      console.log('Wallet info updated:', this.info);
-
       // Fetch ranking and transaction count from explorer (non-blocking)
       if (explorerApiUrl) {
         this.fetchExplorerInfo(explorerApiUrl).catch((err) => {
@@ -122,17 +120,75 @@ export default class Wallet implements ISigner {
   };
 
   /**
-   * Fetch UTXOs from ElectrumX
+   * Fetch UTXOs from ElectrumX with proper confirmation depth and coinbase detection.
+   *
+   * ElectrumX's listunspent only returns block height, not confirmation count or
+   * coinbase status. We calculate real confirmations from the current block height
+   * and fetch transaction details for young UTXOs to detect coinstake outputs
+   * which require 2000 confirmations to mature on Runebase.
+   *
+   * Coinstake detection: On QTUM/Runebase, coinstake transactions always have
+   * vout[0].value === 0 (an empty marker output). This distinguishes them from
+   * regular transactions.
    */
-  public getUtxos = async (electrumx: ElectrumXManager): Promise<UtxoInput[]> => {
+  public getUtxos = async (electrumx: ElectrumXManager, currentHeight?: number): Promise<UtxoInput[]> => {
     const rawUtxos: ElectrumXUtxo[] = await electrumx.listUnspent(this.scripthash);
-    this.cachedUtxos = rawUtxos.map((u) => ({
+
+    // Get current block height if not provided
+    let height = currentHeight;
+    if (!height) {
+      try {
+        const headerInfo = await electrumx.subscribeHeaders(() => {});
+        height = headerInfo.height;
+      } catch {
+        height = 0;
+      }
+    }
+
+    const COINBASE_MATURITY = 2000;
+
+    // Map raw UTXOs with real confirmation depth
+    const mapped = rawUtxos.map((u) => ({
       hash: u.tx_hash,
       pos: u.tx_pos,
       value: u.value,
-      confirmations: u.height > 0 ? 1 : 0, // ElectrumX doesn't give exact confirmations in listunspent
-      isStake: false, // Will be determined by checking tx details if needed
+      height: u.height,
+      confirmations: (u.height > 0 && height) ? (height - u.height + 1) : 0,
+      isStake: false,
     }));
+
+    // For UTXOs below coinstake maturity, check if they're from coinstake transactions
+    const youngUtxos = mapped.filter((u) => u.confirmations > 0 && u.confirmations < COINBASE_MATURITY);
+    if (youngUtxos.length > 0) {
+      // Batch-fetch unique transactions (a tx may have multiple UTXOs)
+      const uniqueTxids = [...new Set(youngUtxos.map((u) => u.hash))];
+      const txResults = await Promise.allSettled(
+        uniqueTxids.map((txid) => electrumx.getTransaction(txid, true)),
+      );
+
+      const coinstakeTxids = new Set<string>();
+      txResults.forEach((result, idx) => {
+        if (result.status === 'fulfilled' && typeof result.value !== 'string') {
+          const tx = result.value as ElectrumXTransaction;
+          // Coinstake detection for QTUM/Runebase:
+          // Coinstake transactions always have vout[0] with value 0 (empty marker output).
+          // Regular transactions never have a zero-value first output.
+          const firstVout = tx.vout?.[0];
+          if (firstVout && firstVout.value === 0) {
+            coinstakeTxids.add(uniqueTxids[idx]);
+          }
+        }
+      });
+
+      // Mark coinstake UTXOs
+      for (const utxo of mapped) {
+        if (coinstakeTxids.has(utxo.hash)) {
+          utxo.isStake = true;
+        }
+      }
+    }
+
+    this.cachedUtxos = mapped.map(({ height: _h, ...rest }) => rest);
     return this.cachedUtxos;
   };
 
@@ -369,7 +425,6 @@ export default class Wallet implements ISigner {
     onChanged: () => void,
   ): Promise<void> => {
     await electrumx.subscribeScripthash(this.scripthash, () => {
-      console.log('ElectrumX: scripthash notification for', this.wallet.address);
       onChanged();
     });
   };
@@ -384,7 +439,6 @@ export default class Wallet implements ISigner {
   ): Promise<number> => {
     const header = await electrumx.subscribeHeaders((params: unknown[]) => {
       const notification = params[0] as { height: number };
-      console.log('ElectrumX: new block', notification.height);
       onNewBlock(notification.height);
     });
     return header.height;
@@ -403,8 +457,28 @@ export default class Wallet implements ISigner {
     // Transfer(address,address,uint256) event topic
     const transferTopic = 'ddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef';
     await electrumx.subscribeContractEvent(hash160, contractAddress, transferTopic, () => {
-      console.log('ElectrumX: token event for', contractAddress);
       onTransfer();
+    });
+  };
+
+  /**
+   * Subscribe to delegation contract events (AddDelegation / RemoveDelegation).
+   * Uses the delegate's hash160 as the address filter on the delegation precompile.
+   */
+  public subscribeDelegationEvents = async (
+    electrumx: ElectrumXManager,
+    onDelegationChanged: () => void,
+  ): Promise<void> => {
+    const hash160 = addressToHash160(this.wallet.address);
+    // AddDelegation(address indexed _staker, address indexed _delegate, uint8 fee, uint256 blockHeight, bytes PoD)
+    const addDelegationTopic = 'a23803f3b2b56e71f2921c22b23c32ef596a439dbe03f7250e6b58a30eb910b5';
+    await electrumx.subscribeContractEvent(hash160, DELEGATION_CONTRACT_ADDRESS, addDelegationTopic, () => {
+      onDelegationChanged();
+    });
+    // RemoveDelegation(address indexed _staker, address indexed _delegate)
+    const removeDelegationTopic = '4a2e37ae4307e59e127e9222e978e2bb42a13bc8b6df3e2c40abb7b835980e55';
+    await electrumx.subscribeContractEvent(hash160, DELEGATION_CONTRACT_ADDRESS, removeDelegationTopic, () => {
+      onDelegationChanged();
     });
   };
 

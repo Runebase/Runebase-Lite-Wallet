@@ -1,10 +1,11 @@
 import React from 'react';
 import { Provider } from 'react-redux';
-import { ThemeProvider } from '@mui/material/styles';
+import { CssBaseline } from '@mui/material';
 import MainContainer from './MainContainer';
 import store from './store';
 import { MemoryRouter } from 'react-router';
-import theme from './theme';
+import { ColorModeProvider } from './ColorModeContext';
+import SnackbarProvider from './components/SnackbarProvider';
 
 interface IProps {
   port: chrome.runtime.Port;
@@ -13,11 +14,14 @@ interface IProps {
 const App: React.FC<IProps> = () => {
   return (
     <Provider store={store}>
-      <ThemeProvider theme={theme}>
-        <MemoryRouter initialEntries={['/login']}>
-          <MainContainer />
-        </MemoryRouter>
-      </ThemeProvider>
+      <ColorModeProvider>
+        <CssBaseline />
+        <SnackbarProvider>
+          <MemoryRouter initialEntries={['/login']}>
+            <MainContainer />
+          </MemoryRouter>
+        </SnackbarProvider>
+      </ColorModeProvider>
     </Provider>
   );
 };

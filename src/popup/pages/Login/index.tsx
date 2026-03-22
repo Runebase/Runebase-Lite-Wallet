@@ -1,4 +1,3 @@
-// Login.tsx
 import React, { useEffect, useCallback, Fragment } from 'react';
 import {
   Typography,
@@ -12,6 +11,9 @@ import {
   MenuItem,
   FormControl,
   Box,
+  CircularProgress,
+  Stack,
+  LinearProgress,
 } from '@mui/material';
 import Select, { SelectChangeEvent } from '@mui/material/Select';
 import PasswordInput from '../../components/PasswordInput';
@@ -22,6 +24,7 @@ import {
   setConfirmPassword,
   setAlgorithm,
   setInvalidPassword,
+  setIsLoggingIn,
   resetLoginForm,
   refreshHasAccounts,
   attemptSessionRestore,
@@ -33,6 +36,41 @@ import { sendMessage } from '../../abstraction';
 import { getNavigateFunction } from '../../store/messageMiddleware';
 import useStyles from './styles';
 
+const getPasswordStrength = (password: string): { score: number; label: string; color: 'error' | 'warning' | 'info' | 'success' } => {
+  if (!password) return { score: 0, label: '', color: 'error' };
+  let score = 0;
+  if (password.length >= 8) score++;
+  if (password.length >= 12) score++;
+  if (/[a-z]/.test(password) && /[A-Z]/.test(password)) score++;
+  if (/\d/.test(password)) score++;
+  if (/[^a-zA-Z0-9]/.test(password)) score++;
+
+  if (score <= 1) return { score: 20, label: 'Weak', color: 'error' };
+  if (score <= 2) return { score: 40, label: 'Fair', color: 'warning' };
+  if (score <= 3) return { score: 60, label: 'Good', color: 'info' };
+  if (score <= 4) return { score: 80, label: 'Strong', color: 'success' };
+  return { score: 100, label: 'Very Strong', color: 'success' };
+};
+
+const PasswordStrengthBar: React.FC<{ password: string }> = ({ password }) => {
+  const strength = getPasswordStrength(password);
+  if (!password) return null;
+
+  return (
+    <Box sx={{ width: '100%' }}>
+      <LinearProgress
+        variant="determinate"
+        value={strength.score}
+        color={strength.color}
+        sx={{ height: 4, borderRadius: 2 }}
+      />
+      <Typography variant="caption" color={`${strength.color}.main`} sx={{ mt: 0.25, display: 'block' }}>
+        {strength.label}
+      </Typography>
+    </Box>
+  );
+};
+
 const Login: React.FC = () => {
   const { classes } = useStyles();
   const dispatch = useAppDispatch();
@@ -40,8 +78,7 @@ const Login: React.FC = () => {
   const hasAccounts = useAppSelector((state) => state.login.hasAccounts);
   const password = useAppSelector((state) => state.login.password);
   const algorithm = useAppSelector((state) => state.login.algorithm);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const invalidPassword = useAppSelector((state) => state.login.invalidPassword);
+  const isLoggingIn = useAppSelector((state) => state.login.isLoggingIn);
   const matchError = useAppSelector(selectMatchError);
   const error = useAppSelector(selectLoginError);
 
@@ -50,11 +87,9 @@ const Login: React.FC = () => {
     attemptSessionRestore();
   }, []);
 
-  useEffect(() => {}, [hasAccounts]);
-
   const handleLogin = useCallback(() => {
     if (error) return;
-    console.log('handleLogin: sending LOGIN with password length:', password.length, 'algorithm:', algorithm);
+    dispatch(setIsLoggingIn(true));
     const navigate = getNavigateFunction();
     navigate?.('/loading');
     sendMessage({
@@ -66,28 +101,19 @@ const Login: React.FC = () => {
   }, [error, password, algorithm, dispatch]);
 
   return (
-    <div className={classes.root}>
-      <Logo />
-      <div className={classes.fieldContainer}>
-        <Box
-          sx={{
-            mb: 1,
-          }}
-        >
+    <Box className={classes.root}>
+      <Box className={classes.centerGroup}>
+        <Logo />
+        <Stack spacing={1.5} sx={{ mt: 1.5, width: '100%' }}>
           <PasswordInput
             autoFocus={true}
             placeholder="Password"
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => dispatch(setPassword(e.target.value))}
             onEnterPress={handleLogin}
           />
-        </Box>
-        {!hasAccounts && (
-          <Fragment>
-            <Box
-              sx={{
-                mb: 1,
-              }}
-            >
+          {!hasAccounts && (
+            <Fragment>
+              <PasswordStrengthBar password={password} />
               <PasswordInput
                 placeholder="Confirm password"
                 error={!!matchError}
@@ -95,12 +121,6 @@ const Login: React.FC = () => {
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => dispatch(setConfirmPassword(e.target.value))}
                 onEnterPress={handleLogin}
               />
-            </Box>
-            <Box
-              sx={{
-                mb: 1,
-              }}
-            >
               <FormControl fullWidth>
                 <InputLabel id="security-algo-select-label">Security Algorithm</InputLabel>
                 <Select
@@ -114,28 +134,26 @@ const Login: React.FC = () => {
                   <MenuItem value={'Scrypt'}>Scrypt (Slow, more secure)</MenuItem>
                 </Select>
               </FormControl>
-            </Box>
-            <Typography className={classes.masterPwNote}>
-              This will serve as your master password and will be saved when you create or import your first wallet.
-            </Typography>
-          </Fragment>
-        )}
-      </div>
-      <Button
-        sx={{
-          mt: 1,
-        }}
-        className={classes.loginButton}
-        fullWidth
-        variant="contained"
-        color="primary"
-        disabled={error}
-        onClick={handleLogin}
-      >
-        Login
-      </Button>
+              <Typography variant="caption" color="text.secondary">
+                This will serve as your master password and will be saved when you create or import your first wallet.
+              </Typography>
+            </Fragment>
+          )}
+          <Button
+            fullWidth
+            variant="contained"
+            color="primary"
+            size="large"
+            disabled={error || isLoggingIn}
+            onClick={handleLogin}
+            startIcon={isLoggingIn ? <CircularProgress size={20} color="inherit" aria-label="Logging in" /> : undefined}
+          >
+            {isLoggingIn ? 'Logging in...' : 'Login'}
+          </Button>
+        </Stack>
+      </Box>
       <ErrorDialog />
-    </div>
+    </Box>
   );
 };
 

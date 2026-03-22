@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, TextField, Typography } from '@mui/material';
+import { Button, FormControl, TextField, Typography } from '@mui/material';
 import { useAppSelector, useAppDispatch } from '../../store/hooks';
 import { setAmount, selectAmountFieldError, selectMaxAmount } from '../../store/slices/sendSlice';
 
@@ -21,12 +21,13 @@ const AmountField: React.FC<AmountFieldProps> = ({ onEnterPress }) => {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', margin: '0 0 8px 0' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '8px' }}>
-        <Typography style={{ fontSize: '0.8rem' }}>available: {maxAmount}</Typography>
+    <FormControl fullWidth>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 8 }}>
+        <Typography variant="caption">available: {maxAmount}</Typography>
         <Button
           color="primary"
           variant="contained"
+          size="small"
           onClick={() => {
             if (maxAmount !== undefined) {
               dispatch(setAmount(String(maxAmount)));
@@ -57,11 +58,11 @@ const AmountField: React.FC<AmountFieldProps> = ({ onEnterPress }) => {
         onKeyDown={handleKeyDown}
       />
       {amount !== '' && amountFieldError && (
-        <Typography color="error" style={{ fontSize: '0.8rem', textAlign: 'left' }}>
+        <Typography color="error" variant="caption" sx={{ textAlign: 'left', mt: 0.5 }}>
           {amountFieldError}
         </Typography>
       )}
-    </div>
+    </FormControl>
   );
 };
 

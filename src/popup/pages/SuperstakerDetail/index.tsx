@@ -1,7 +1,15 @@
 import React, { useEffect } from 'react';
-import useStyles from './styles';
-import NavBar from '../../components/NavBar';
-import { Button, Card, CardActions, CardContent, Tooltip, Typography, Divider } from '@mui/material';
+import PageLayout from '../../components/PageLayout';
+import {
+  Button,
+  Typography,
+  Divider,
+  Box,
+  CircularProgress,
+  Stack,
+  Paper,
+  Chip,
+} from '@mui/material';
 import SportsScoreIcon from '@mui/icons-material/SportsScore';
 import AppRegistrationIcon from '@mui/icons-material/AppRegistration';
 import NotificationAddIcon from '@mui/icons-material/NotificationAdd';
@@ -12,7 +20,6 @@ import { getSelectedSuperstakerDelegations } from '../../store/slices/delegateSl
 import { getNavigateFunction } from '../../store/messageMiddleware';
 
 const SuperstakerDetail: React.FC = () => {
-  const { classes } = useStyles();
   const dispatch = useAppDispatch();
   const loggedInAccountName = useAppSelector((state) => state.session.loggedInAccountName);
   const walletInfo = useAppSelector((state) => state.session.walletInfo);
@@ -24,136 +31,218 @@ const SuperstakerDetail: React.FC = () => {
     dispatch(getSelectedSuperstakerDelegations());
   }, []);
 
-  if (!loggedInAccountName || !walletInfo) return null;
+  if (!loggedInAccountName || !walletInfo) {
+    return (
+      <PageLayout hasBackButton title="Super Staker Detail">
+        <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+          <CircularProgress />
+        </Box>
+      </PageLayout>
+    );
+  }
 
   const navigate = getNavigateFunction();
 
-  return (
-    <div className={classes.root}>
-      <NavBar hasBackButton title="Super Staker Detail" />
-      <Card sx={{ margin: '10px', minWidth: 275, backgroundColor: '#f7f7f7', border: '1px solid #e0e0e0' }}>
-        <CardContent>
-          <Tooltip title="SuperStaker Wallet Address">
-            <Typography sx={{ fontSize: 14, fontWeight: 'bold', color: '#333333' }} gutterBottom>
-              {selectedSuperstaker?.address}
-            </Typography>
-          </Tooltip>
-          <Tooltip title="SuperStaker Registration Date">
-            <Typography sx={{ mb: 0.5, display: 'flex', alignItems: 'center', color: '#555555' }}>
-              <AppRegistrationIcon sx={{ color: '#2196f3', marginRight: 0.5 }} />{' '}
-              {moment(selectedSuperstaker?.firstRegisteredOn).format('YYYY-MM-DD HH:mm:ss')}
-            </Typography>
-          </Tooltip>
-          <Tooltip title="Total Blocks Produced Since Registration">
-            <Typography sx={{ mb: 0.5, display: 'flex', alignItems: 'center', color: '#555555' }}>
-              <DynamicFormIcon sx={{ color: '#4caf50', marginRight: 0.5 }} /> {selectedSuperstaker?.totalBlocksProduced}
-            </Typography>
-          </Tooltip>
-          <Tooltip title="Last Block Produced Date">
-            <Typography sx={{ mb: 0.5, display: 'flex', alignItems: 'center', color: '#555555' }}>
-              <NotificationAddIcon sx={{ color: '#ff9800', marginRight: 0.5 }} />{' '}
-              {moment(selectedSuperstaker?.lastProducedBlock).format('YYYY-MM-DD HH:mm:ss')}
-            </Typography>
-          </Tooltip>
-          <Typography sx={{ mb: 0.5, display: 'flex', alignItems: 'center', color: '#555555' }}>
-            <Tooltip title="SuperStaker Score">
-              <>
-                <SportsScoreIcon sx={{ color: '#e91e63', marginRight: 0.5 }} />
-                {selectedSuperstaker?.score}
-              </>
-            </Tooltip>
-            /
-            <Tooltip title="Cycles Participated">
-              <>{selectedSuperstaker?.cycles}</>
-            </Tooltip>
+  // Guard: redirect if no superstaker selected
+  if (!selectedSuperstaker) {
+    return (
+      <PageLayout hasBackButton title="Super Staker Detail">
+        <Box sx={{ p: 4, textAlign: 'center' }}>
+          <Typography color="text.secondary" variant="body2">
+            No superstaker selected.
           </Typography>
-          <Tooltip title="Personal Note from the SuperStaker">
-            <Typography variant="body2" sx={{ color: '#777777' }}>
-              {selectedSuperstaker?.note}
-            </Typography>
-          </Tooltip>
-          <CardActions sx={{ margin: '0px', paddingLeft: '0px', paddingRight: '0px' }}>
-            {delegationInfo && delegationInfo.staker === selectedSuperstaker?.address ? (
-              <Button
-                variant="contained"
-                color="secondary"
-                onClick={() => {
-                  navigate?.('/remove-delegation');
-                }}
-              >
-                Undelegate
-              </Button>
-            ) : delegationInfo && delegationInfo.staker !== '' ? (
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={() => {
-                  navigate?.('/add-delegation');
-                }}
-              >
-                Change Delegate
-              </Button>
-            ) : (
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={() => {
-                  navigate?.('/add-delegation');
-                }}
-              >
-                Delegate
-              </Button>
-            )}
-          </CardActions>
-          <Divider sx={{ margin: '10px 0' }} />
-          {selectedSuperstakerDelegations?.map((delegation: any, index: number) => (
-            <div key={index}>
-              <Tooltip title={`Delegate ${index + 1} Details`}>
-                <Typography variant="subtitle1" sx={{ mb: 0.5, color: '#333333' }}>
-                  Delegation <strong>#{index + 1}</strong>
-                </Typography>
-              </Tooltip>
-              <Tooltip title={`Delegate ${index + 1} Wallet Address`}>
-                <Typography sx={{ fontSize: 12, mb: 0.5, color: '#555555', wordWrap: 'break-word' }}>
-                  Delegate: <strong>{delegation.delegate}</strong>
-                </Typography>
-              </Tooltip>
-              <Tooltip title={`Staker ${index + 1} Wallet Address`}>
-                <Typography sx={{ fontSize: 12, mb: 0.5, color: '#555555', wordWrap: 'break-word' }}>
-                  Staker: <strong></strong>{delegation.staker}
-                </Typography>
-              </Tooltip>
-              <Tooltip title={`Fee for Delegate ${index + 1}`}>
-                <Typography sx={{ fontSize: 12, mb: 0.5, color: '#555555' }}>
-                  Fee: <strong>{delegation.fee}%</strong>
-                </Typography>
-              </Tooltip>
-              <Tooltip title={`Block Height for Delegate ${index + 1}`}>
-                <Typography sx={{ fontSize: 12, mb: 0.5, color: '#555555' }}>
-                  Block Height: <strong>{delegation.blockHeight}</strong>
-                </Typography>
-              </Tooltip>
-              <Tooltip title={`Proof of Delegation for Delegate ${index + 1}`}>
-                <Typography
-                  sx={{
-                    fontSize: 12,
-                    mb: 0.5,
-                    color: '#555555',
-                    wordWrap: 'break-word',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                  }}
-                >
-                  PoD: <strong>{delegation.PoD}</strong>
-                </Typography>
-              </Tooltip>
-              <Divider sx={{ margin: '10px 0' }} />
-            </div>
-          ))}
-        </CardContent>
-      </Card>
-    </div>
+          <Button
+            variant="contained"
+            color="primary"
+            sx={{ mt: 2 }}
+            onClick={() => navigate?.('/delegate')}
+          >
+            Back to Staking
+          </Button>
+        </Box>
+      </PageLayout>
+    );
+  }
+
+  return (
+    <PageLayout hasBackButton title="Super Staker Detail">
+      {/* Superstaker Info Card */}
+      <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
+        {/* Address */}
+        <Typography
+          variant="subtitle2"
+          fontWeight="bold"
+          sx={{
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+            mb: 1.5,
+          }}
+        >
+          {selectedSuperstaker.address}
+        </Typography>
+
+        {/* Stats */}
+        <Stack spacing={0.75}>
+          <InfoRow
+            icon={<AppRegistrationIcon sx={{ fontSize: 18 }} color="info" />}
+            label="Registered"
+            value={moment(selectedSuperstaker.firstRegisteredOn).format('YYYY-MM-DD HH:mm')}
+          />
+          <InfoRow
+            icon={<DynamicFormIcon sx={{ fontSize: 18 }} color="success" />}
+            label="Blocks Produced"
+            value={String(selectedSuperstaker.totalBlocksProduced)}
+          />
+          <InfoRow
+            icon={<NotificationAddIcon sx={{ fontSize: 18 }} color="warning" />}
+            label="Last Block"
+            value={moment(selectedSuperstaker.lastProducedBlock).format('YYYY-MM-DD HH:mm')}
+          />
+          <InfoRow
+            icon={<SportsScoreIcon sx={{ fontSize: 18 }} color="error" />}
+            label="Score / Cycles"
+            value={`${selectedSuperstaker.score} / ${selectedSuperstaker.cycles}`}
+          />
+        </Stack>
+
+        {/* Note */}
+        {selectedSuperstaker.note && (
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            sx={{ mt: 1.5, fontStyle: 'italic' }}
+          >
+            {selectedSuperstaker.note}
+          </Typography>
+        )}
+
+        {/* Action Button */}
+        <Box sx={{ mt: 2 }}>
+          {delegationInfo && delegationInfo.staker === selectedSuperstaker.address ? (
+            <Button
+              fullWidth
+              variant="contained"
+              color="secondary"
+              onClick={() => navigate?.('/remove-delegation')}
+            >
+              Undelegate
+            </Button>
+          ) : delegationInfo && delegationInfo.staker !== '' ? (
+            <Button
+              fullWidth
+              variant="contained"
+              color="primary"
+              onClick={() => navigate?.('/add-delegation')}
+            >
+              Change Delegate
+            </Button>
+          ) : (
+            <Button
+              fullWidth
+              variant="contained"
+              color="primary"
+              onClick={() => navigate?.('/add-delegation')}
+            >
+              Delegate
+            </Button>
+          )}
+        </Box>
+      </Paper>
+
+      {/* Delegations Section */}
+      <Paper variant="outlined" sx={{ p: 2 }}>
+        <Typography variant="subtitle2" fontWeight="bold" sx={{ mb: 1.5 }}>
+          Delegations
+        </Typography>
+
+        {selectedSuperstakerDelegations === undefined ? (
+          <Box sx={{ display: 'flex', justifyContent: 'center', py: 3 }}>
+            <CircularProgress size={24} />
+          </Box>
+        ) : selectedSuperstakerDelegations.length === 0 ? (
+          <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', py: 2 }}>
+            No delegations yet
+          </Typography>
+        ) : (
+          <Stack spacing={0} divider={<Divider />}>
+            {selectedSuperstakerDelegations.map((delegation: any, index: number) => (
+              <Box key={index} sx={{ py: 1.5 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                  <Chip
+                    label={`#${index + 1}`}
+                    size="small"
+                    color="primary"
+                    variant="outlined"
+                    sx={{ minWidth: 36, fontWeight: 'bold' }}
+                  />
+                  <Chip
+                    label={`Fee: ${delegation.fee}%`}
+                    size="small"
+                    variant="outlined"
+                  />
+                  <Chip
+                    label={`Block ${delegation.blockHeight}`}
+                    size="small"
+                    variant="outlined"
+                  />
+                </Box>
+                <DetailRow label="Delegate" value={delegation.delegate} truncate />
+                <DetailRow label="Staker" value={delegation.staker} truncate />
+                <DetailRow label="PoD" value={delegation.PoD} truncate />
+              </Box>
+            ))}
+          </Stack>
+        )}
+      </Paper>
+    </PageLayout>
   );
 };
+
+/** Labeled info row with icon for the superstaker stats */
+const InfoRow: React.FC<{
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+}> = ({ icon, label, value }) => (
+  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75 }}>
+    {icon}
+    <Typography variant="body2" color="text.secondary" sx={{ minWidth: 100, flexShrink: 0 }}>
+      {label}
+    </Typography>
+    <Typography variant="body2" sx={{ fontWeight: 500 }}>
+      {value}
+    </Typography>
+  </Box>
+);
+
+/** Key-value row for delegation details with optional truncation */
+const DetailRow: React.FC<{
+  label: string;
+  value: string;
+  truncate?: boolean;
+}> = ({ label, value, truncate }) => (
+  <Box sx={{ display: 'flex', gap: 1, mb: 0.5, minWidth: 0 }}>
+    <Typography variant="caption" color="text.secondary" sx={{ flexShrink: 0, minWidth: 52 }}>
+      {label}:
+    </Typography>
+    <Typography
+      variant="caption"
+      sx={{
+        fontWeight: 500,
+        ...(truncate
+          ? {
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+            minWidth: 0,
+          }
+          : { wordBreak: 'break-word' }),
+      }}
+    >
+      {value}
+    </Typography>
+  </Box>
+);
 
 export default SuperstakerDetail;

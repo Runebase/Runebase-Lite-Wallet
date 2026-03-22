@@ -1,6 +1,11 @@
-// PasswordTextField.tsx
-import React, { FC } from 'react';
-import { TextField, Typography } from '@mui/material';
+import React, { FC, useState } from 'react';
+import {
+  TextField,
+  Typography,
+  InputAdornment,
+  IconButton,
+} from '@mui/material';
+import { Visibility, VisibilityOff } from '@mui/icons-material';
 import cx from 'classnames';
 import { handleEnterPress } from '../../../utils';
 import useStyles from './styles';
@@ -27,22 +32,34 @@ const PasswordTextField: FC<PasswordTextFieldProps> = ({
   onEnterPress,
 }: PasswordTextFieldProps) => {
   const { classes } = useStyles();
+  const [showPassword, setShowPassword] = useState(false);
 
   return (
     <div className={cx(classes.container, classNames)}>
       <TextField
-        // className={classes.textField}
         required
         autoFocus={autoFocus}
-        type="password"
+        type={showPassword ? 'text' : 'password'}
         placeholder={placeholder}
         helperText={helperText}
         error={error}
-        InputProps={{
-          // classes: { input: classes.input },
-        }}
+        aria-label={placeholder || 'Password'}
         onChange={onChange}
         onKeyPress={(e) => handleEnterPress(e, onEnterPress)}
+        InputProps={{
+          endAdornment: (
+            <InputAdornment position="end">
+              <IconButton
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+                onClick={() => setShowPassword(!showPassword)}
+                edge="end"
+                size="small"
+              >
+                {showPassword ? <VisibilityOff /> : <Visibility />}
+              </IconButton>
+            </InputAdornment>
+          ),
+        }}
       />
       {error && errorText && (
         <Typography className={classes.errorText}>{errorText}</Typography>

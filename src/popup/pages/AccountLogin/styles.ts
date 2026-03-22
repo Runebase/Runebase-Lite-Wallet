@@ -18,7 +18,7 @@ const useStyles = makeStyles()((theme) => ({
   selectAcctText: {
     fontSize: theme.typography.fontSize, // Use typography instead of font
     fontWeight: theme.typography.fontWeightBold, // Use typography instead of fontWeight
-    color: theme.palette.secondary.main,
+    color: theme.palette.text.secondary,
     marginBottom: theme.spacing(1), // Use spacing instead of padding
   },
   accountSelect: {

@@ -27,7 +27,6 @@ const createWalletSlice = createSlice({
       state.walletNameTaken = action.payload;
     },
     resetCreateWallet: () => {
-      console.log('Resetting CreateWalletStore');
       return initialState;
     },
   },
@@ -48,24 +47,20 @@ export const selectShowBackButton = (state: RootState): boolean =>
 // Side-effect actions
 export const validateWalletName = (name: string) => (dispatch: any) => {
   dispatch(createWalletSlice.actions.setWalletName(name));
-  console.log(`Wallet name changed: ${name}`);
   sendMessage(
     { type: MESSAGE_TYPE.VALIDATE_WALLET_NAME, name },
     (response: any) => {
-      console.log(`Wallet name taken: ${response}`);
       dispatch(createWalletSlice.actions.setWalletNameTaken(response));
     },
   );
 };
 
 export const routeToSaveMnemonic = () => {
-  console.log('Routing to SaveMnemonic');
   const navigate = getNavigateFunction();
   navigate?.('/save-mnemonic');
 };
 
 export const routeToImportWallet = () => {
-  console.log('Routing to ImportWallet');
   const navigate = getNavigateFunction();
   navigate?.('/import-wallet');
 };

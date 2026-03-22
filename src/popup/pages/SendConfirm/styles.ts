@@ -7,83 +7,46 @@ const useStyles = makeStyles()((theme) => ({
     flexDirection: 'column',
   },
   contentContainer: {
-    margin: theme.spacing(2), // Use spacing instead of padding
+    padding: theme.spacing(2),
+    flex: 1,
     display: 'flex',
     flexDirection: 'column',
-    flex: 1,
-  },
-  inputContainer: {
-    flex: 1,
-  },
-  addressFieldsContainer: {
-    marginBottom: theme.spacing(8), // Use spacing instead of custom
   },
   fieldContainer: {
-    width: '100%',
-    borderBottom: '1px solid black',
-    '&.row': {
-      display: 'flex',
-      flexDirection: 'row',
-    },
-    '&.marginSmall': {
-      marginBottom: theme.spacing(2), // Use spacing instead of md
-    },
-    '&.marginBig': {
-      marginBottom: theme.spacing(8), // Use spacing instead of custom
-    },
-  },
-  labelContainer: {
-    display: 'flex',
-    alignItems: 'center',
+    marginBottom: theme.spacing(0.5),
   },
   fieldLabel: {
-    //color: theme.palette.text.primary,
-    fontSize: theme.typography.fontSizeSmall, // Use typography instead of sm
-    //fontWeight: theme.typography.fontWeightBold as FontWeightProperty, // Use typography instead of fontWeight
-    '&.address': {
-      lineHeight: theme.typography.lineHeightSmall, // Use typography instead of lineHeight
-      marginBottom: theme.spacing(2), // Use spacing instead of md
-    },
-    '&.cost': {
-      lineHeight: theme.typography.lineHeightMedium, // Use typography instead of lineHeight
-    },
+    fontSize: theme.typography.caption.fontSize,
   },
   addressValue: {
-    fontSize: theme.typography.fontSizeSmall, // Use typography instead of sm
-    //color: theme.palette.text.primary,
-    lineHeight: theme.typography.lineHeightLarge, // Use typography instead of lineHeight
+    fontSize: theme.typography.body2.fontSize,
+    fontWeight: theme.typography.fontWeightMedium,
+  },
+  costFieldContainer: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   amountContainer: {
-    flex: 1,
     display: 'flex',
-    justifyContent: 'flex-end',
-    alignItems: 'center',
+    alignItems: 'baseline',
+    gap: theme.spacing(0.5),
   },
   fieldValue: {
-    fontSize: theme.typography.fontSizeLarge, // Use typography instead of lg
-    //color: theme.palette.text.primary,
-    lineHeight: theme.typography.lineHeightLarge, // Use typography instead of lineHeight
-  },
-  unitContainer: {
-    display: 'flex',
-    alignItems: 'center',
+    fontSize: theme.typography.body1.fontSize,
+    fontWeight: theme.typography.fontWeightBold,
   },
   fieldUnit: {
-    fontSize: theme.typography.fontSizeSmall, // Use typography instead of sm
-    textTransform: 'uppercase',
-    //color: theme.palette.text.secondary,
-    marginLeft: theme.spacing(1), // Use spacing instead of unit
+    fontSize: theme.typography.caption.fontSize,
+    color: theme.palette.text.secondary,
   },
   errorMessage: {
-    fontSize: theme.typography.fontSizeSmall, // Use typography instead of sm
-    //fontWeight: theme.typography.fontWeightBold as FontWeightProperty, // Use typography instead of fontWeight
-    //color: theme.palette.error.main, // Use error color from the palette
-    alignSelf: 'center',
-    marginBottom: theme.spacing(1), // Use spacing instead of unit
+    color: theme.palette.error.main,
+    fontSize: theme.typography.caption.fontSize,
+    marginBottom: theme.spacing(1),
   },
   sendButton: {
-    height: theme.spacing(8), // Adjust to your desired value using spacing
-    borderRadius: theme.shape.borderRadius, // Use shape instead of border
+    marginTop: 'auto',
   },
 }));
 

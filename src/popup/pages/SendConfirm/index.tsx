@@ -1,12 +1,13 @@
 import React from 'react';
-import { Typography, Button } from '@mui/material';
-import cx from 'classnames';
+import { Typography, Button, CircularProgress, Stack, Paper, Box, Alert, IconButton } from '@mui/material';
+import { ContentCopy } from '@mui/icons-material';
 
 import useStyles from './styles';
 import { SEND_STATE } from '../../../constants';
-import NavBar from '../../components/NavBar';
+import PageLayout from '../../components/PageLayout';
 import { useAppSelector, useAppDispatch } from '../../store/hooks';
 import { executeSend, selectMaxTxFee } from '../../store/slices/sendSlice';
+import { useSnackbar } from '../../components/SnackbarProvider';
 
 const SendConfirm: React.FC = () => {
   const { classes } = useStyles();
@@ -24,39 +25,70 @@ const SendConfirm: React.FC = () => {
   const sendState = useAppSelector((state) => state.send.sendState);
   const errorMessage = useAppSelector((state) => state.send.errorMessage);
 
+  const isSending = sendState === SENDING;
+  const isSent = sendState === SENT;
+
   return (
-    <div className={classes.root}>
-      <NavBar hasBackButton title="Confirm" />
-      <div className={classes.contentContainer}>
-        <div className={classes.inputContainer}>
-          <div className={classes.addressFieldsContainer}>
-            <AddressField fieldName={'From'} address={senderAddress} classes={classes} />
-            <AddressField fieldName={'To'} address={receiverAddress} classes={classes} />
-          </div>
-          <CostField fieldName={'Amount'} amount={amount} unit={token!.symbol} classes={classes} />
+    <PageLayout hasBackButton title="Confirm">
+      {/* Hero amount */}
+      <Paper
+        variant="outlined"
+        sx={{
+          p: 2,
+          mb: 2,
+          textAlign: 'center',
+          bgcolor: 'action.hover',
+          borderRadius: 2,
+        }}
+      >
+        <Typography variant="overline" color="text.secondary">
+            You are sending
+        </Typography>
+        <Typography variant="h4" fontWeight="bold" sx={{ my: 0.5 }}>
+          {amount}
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          {token!.symbol}
+        </Typography>
+      </Paper>
+
+      <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
+        <Stack spacing={1.5}>
+          <AddressField fieldName="From" address={senderAddress} classes={classes} />
+          <AddressField fieldName="To" address={receiverAddress} classes={classes} />
+        </Stack>
+      </Paper>
+
+      <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
+        <Stack spacing={1}>
           {token && token.symbol === 'RUNES' ? (
-            <CostField fieldName={'Transaction Speed'} amount={transactionSpeed} unit={''} classes={classes} />
+            <CostField fieldName="Transaction Speed" amount={transactionSpeed} unit="" classes={classes} />
           ) : (
-            <div>
-              <CostField fieldName={'Gas Limit'} amount={gasLimit} unit={'GAS'} classes={classes} />
-              <CostField fieldName={'Gas Price'} amount={gasPrice} unit={'SATOSHI/GAS'} classes={classes} />
-              <CostField fieldName={'Max Transaction Fee'} amount={maxTxFee} unit={'RUNES'} classes={classes} />
-            </div>
+            <>
+              <CostField fieldName="Gas Limit" amount={gasLimit} unit="GAS" classes={classes} />
+              <CostField fieldName="Gas Price" amount={gasPrice} unit="SATOSHI/GAS" classes={classes} />
+              <CostField fieldName="Max Transaction Fee" amount={maxTxFee} unit="RUNES" classes={classes} />
+            </>
           )}
-        </div>
-        {errorMessage && <Typography className={classes.errorMessage}>{errorMessage}</Typography>}
-        <Button
-          className={classes.sendButton}
-          fullWidth
-          disabled={[SENDING, SENT].includes(sendState)}
-          variant="contained"
-          color="primary"
-          onClick={() => dispatch(executeSend())}
-        >
-          {sendState}
-        </Button>
-      </div>
-    </div>
+        </Stack>
+      </Paper>
+
+      {errorMessage && (
+        <Alert severity="error" sx={{ mb: 2 }}>{errorMessage}</Alert>
+      )}
+      <Button
+        className={classes.sendButton}
+        fullWidth
+        disabled={isSending || isSent}
+        variant="contained"
+        color="primary"
+        size="large"
+        onClick={() => dispatch(executeSend())}
+        startIcon={isSending ? <CircularProgress size={20} color="inherit" aria-label="Sending transaction" /> : undefined}
+      >
+        {sendState}
+      </Button>
+    </PageLayout>
   );
 };
 
@@ -66,12 +98,45 @@ interface AddressFieldProps {
   address?: string;
 }
 
-const AddressField: React.FC<AddressFieldProps> = ({ classes, fieldName, address }) => (
-  <div className={cx(classes.fieldContainer, 'marginSmall')}>
-    <Typography className={cx(classes.fieldLabel, 'address')}>{fieldName}</Typography>
-    <Typography className={classes.addressValue}>{address}</Typography>
-  </div>
-);
+const AddressField: React.FC<AddressFieldProps> = ({ classes, fieldName, address }) => {
+  const { showSnackbar } = useSnackbar();
+
+  const handleCopy = () => {
+    if (address) {
+      navigator.clipboard.writeText(address);
+      showSnackbar(`${fieldName} address copied`);
+    }
+  };
+
+  return (
+    <div className={classes.fieldContainer}>
+      <Typography variant="caption" color="text.secondary">
+        {fieldName}
+      </Typography>
+      <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 0.5 }}>
+        <Box
+          component="code"
+          onClick={handleCopy}
+          sx={{
+            fontSize: 'body2.fontSize',
+            fontWeight: 'fontWeightMedium',
+            fontFamily: 'Roboto Mono, monospace',
+            wordBreak: 'break-all',
+            display: 'block',
+            cursor: 'pointer',
+            flex: 1,
+            '&:hover': { color: 'primary.main' },
+          }}
+        >
+          {address}
+        </Box>
+        <IconButton size="small" onClick={handleCopy} aria-label={`Copy ${fieldName} address`} sx={{ mt: -0.5 }}>
+          <ContentCopy sx={{ fontSize: 14 }} />
+        </IconButton>
+      </Box>
+    </div>
+  );
+};
 
 interface CostFieldProps {
   classes: Record<string, string>;
@@ -81,15 +146,11 @@ interface CostFieldProps {
 }
 
 const CostField: React.FC<CostFieldProps> = ({ classes, fieldName, amount, unit }) => (
-  <div className={cx(classes.fieldContainer, 'row', 'marginBig')}>
-    <div className={classes.labelContainer}>
-      <Typography className={cx(classes.fieldLabel, 'cost')}>{fieldName}</Typography>
-    </div>
+  <div className={classes.costFieldContainer}>
+    <Typography variant="caption" color="text.secondary">{fieldName}</Typography>
     <div className={classes.amountContainer}>
       <Typography className={classes.fieldValue}>{amount}</Typography>
-    </div>
-    <div className={classes.unitContainer}>
-      <Typography className={classes.fieldUnit}>{unit}</Typography>
+      {unit && <Typography className={classes.fieldUnit}>{unit}</Typography>}
     </div>
   </div>
 );

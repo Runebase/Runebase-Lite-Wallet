@@ -14,10 +14,7 @@ const TransactionSpeedField: React.FC = () => {
   const transactionSpeed = useAppSelector((state) => state.send.transactionSpeed);
 
   return (
-    <FormControl
-      fullWidth
-      sx={{marginBottom: '8px'}}
-    >
+    <FormControl fullWidth>
       <InputLabel id="transaction-speed-label">Transaction Speed</InputLabel>
       <Select
         labelId="transaction-speed-label"

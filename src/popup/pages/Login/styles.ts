@@ -5,19 +5,14 @@ const useStyles = makeStyles()((theme) => ({
     height: '100%',
     display: 'flex',
     flexDirection: 'column',
-    margin: theme.spacing(2), // Use spacing instead of padding
+    padding: theme.spacing(2),
   },
-  fieldContainer: {
+  centerGroup: {
+    flex: 1,
     display: 'flex',
     flexDirection: 'column',
-  },
-  masterPwNote: {
-    fontSize: theme.typography.fontSizeSmall, // Use typography instead of font
-    // color: theme.palette.gradientPurple,
-  },
-  loginButton: {
-    height: theme.spacing(8), // Adjust to your desired value using spacing
-    borderRadius: theme.spacing(2), // Adjust to your desired value using spacing
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 }));
 

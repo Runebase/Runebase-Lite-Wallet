@@ -31,6 +31,7 @@ interface SendState {
   gasPrice: number;
   sendState: string;
   errorMessage?: string;
+  isInitializing: boolean;
 }
 
 const initialState: SendState = {
@@ -46,6 +47,7 @@ const initialState: SendState = {
   gasPrice: Config.TRANSACTION.DEFAULT_GAS_PRICE,
   sendState: SEND_STATE.INITIAL,
   errorMessage: undefined,
+  isInitializing: true,
 };
 
 const sendSlice = createSlice({
@@ -54,6 +56,7 @@ const sendSlice = createSlice({
   reducers: {
     setTokens: (state, action: PayloadAction<RRCTokenData[]>) => {
       state.tokens = action.payload;
+      state.isInitializing = false;
     },
     setVerifiedTokens: (state, action: PayloadAction<RRCTokenData[]>) => {
       state.verifiedTokens = action.payload;
@@ -94,10 +97,8 @@ const sendSlice = createSlice({
       state.errorMessage = action.payload;
     },
     changeToken: (state, action: PayloadAction<string>) => {
-      console.log('tokenSymbol: ', action.payload);
       const token = find(state.tokens, { symbol: action.payload });
       if (token) {
-        console.log('Changing token to:', token);
         state.token = token;
       }
     },
@@ -139,13 +140,10 @@ export const selectMaxAmount = (state: RootState): number | undefined => {
   const { token, maxRunebaseSend } = state.send;
   if (token) {
     if (token.symbol === 'RUNES') {
-      console.log('Calculating max RUNES amount:', maxRunebaseSend);
       return maxRunebaseSend;
     }
-    console.log('Calculating max token amount:', token.balance);
     return token.balance;
   }
-  console.log('No token selected. Returning undefined.');
   return undefined;
 };
 
@@ -205,7 +203,6 @@ export const executeSend = () => (dispatch: any, getState: any) => {
   dispatch(sendSlice.actions.setSendState(SEND_STATE.SENDING));
 
   if (token.symbol === 'RUNES') {
-    console.log('Sending RUNES:', { receiverAddress, amount: Number(amount), transactionSpeed });
     sendMessage({
       type: MESSAGE_TYPE.SEND_TOKENS,
       receiverAddress,
@@ -213,13 +210,6 @@ export const executeSend = () => (dispatch: any, getState: any) => {
       transactionSpeed,
     });
   } else {
-    console.log('Sending RRC tokens:', {
-      receiverAddress,
-      amount: Number(amount),
-      token,
-      gasLimit: Number(gasLimit),
-      gasPrice: Number(gasPrice),
-    });
     sendMessage({
       type: MESSAGE_TYPE.SEND_RRC_TOKENS,
       receiverAddress,

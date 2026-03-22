@@ -4,7 +4,7 @@ import { MESSAGE_TYPE, STORAGE, NETWORK_NAMES } from '../../constants';
 import QryNetwork from '../../models/QryNetwork';
 import { mainnet, testnet, regtest } from '../../services/wallet/networks';
 import { ElectrumXManager } from '../../services/electrumx';
-import { addMessageListener, getStorageValue, isExtensionEnvironment, sendMessage, setStorageValue } from '../../popup/abstraction';
+import { addMessageListener, isExtensionEnvironment, sendMessage, setStorageValue } from '../../popup/abstraction';
 
 export default class NetworkController extends IController {
   public static NETWORKS: QryNetwork[] = [
@@ -24,6 +24,7 @@ export default class NetworkController extends IController {
   ];
 
   public electrumx?: ElectrumXManager;
+  private connectPromise: Promise<ElectrumXManager> | null = null;
 
   public get isMainNet(): boolean {
     return this.networkIndex === 0;
@@ -49,27 +50,46 @@ export default class NetworkController extends IController {
 
     addMessageListener(this.handleMessage);
 
-    const key = STORAGE.NETWORK_INDEX;
-    getStorageValue(key).then((networkIndex) => {
-      console.log('getting network index from store:', networkIndex);
-      if (networkIndex) {
-        console.log('FOUND NETWORKINDEX IN LOCAL STORE: ', networkIndex);
-        this.networkIndex = networkIndex;
-        sendMessage({
-          type: MESSAGE_TYPE.CHANGE_NETWORK_SUCCESS,
-          networkIndex: this.networkIndex,
-        });
-      }
-      this.initFinished();
-    });
+    // Always default to mainnet (network selector is currently disabled)
+    this.networkIndex = 0;
+    setStorageValue(STORAGE.NETWORK_INDEX, 0);
+    this.initFinished();
 
   }
 
   /**
    * Connect to ElectrumX servers for the current network.
-   * Call this after network is selected or changed.
+   * Reuses an existing connection if already connected/connecting.
+   * Pass force=true to tear down and reconnect (e.g. after network change).
    */
-  public connectElectrumX = async (): Promise<ElectrumXManager> => {
+  public connectElectrumX = async (
+    force = false,
+  ): Promise<ElectrumXManager> => {
+    // Reuse existing connection if alive or in progress
+    if (
+      !force
+      && this.electrumx
+      && (this.electrumx.state === 'connected'
+        || this.electrumx.state === 'connecting'
+        || this.electrumx.state === 'reconnecting')
+    ) {
+      return this.electrumx;
+    }
+
+    // If a connection attempt is already in flight, share it
+    if (this.connectPromise) {
+      return this.connectPromise;
+    }
+
+    this.connectPromise = this.doConnectElectrumX();
+    try {
+      return await this.connectPromise;
+    } finally {
+      this.connectPromise = null;
+    }
+  };
+
+  private doConnectElectrumX = async (): Promise<ElectrumXManager> => {
     // Disconnect existing if any
     if (this.electrumx) {
       await this.electrumx.disconnect();
@@ -85,8 +105,8 @@ export default class NetworkController extends IController {
       console.warn(`ElectrumX: Disconnected: ${reason}`);
       this.broadcastElectrumXStatus();
     };
-    this.electrumx.onError = (error: Error) => {
-      console.error('ElectrumX error:', error);
+    this.electrumx.onError = () => {
+      // Errors are handled by connect/failover logic — suppress noise
     };
     this.electrumx.onServerChanged = () => {
       this.broadcastElectrumXStatus();
@@ -101,14 +121,19 @@ export default class NetworkController extends IController {
    */
   public switchElectrumXServer = async (serverIndex: number) => {
     if (!this.electrumx) return;
-    await this.electrumx.switchServer(serverIndex);
-    this.broadcastElectrumXStatus();
+    try {
+      await this.electrumx.switchServer(serverIndex);
+    } finally {
+      // Always broadcast status so the UI reflects the current state
+      // (whether we connected to the new server or fell back to the old one)
+      this.broadcastElectrumXStatus();
+    }
   };
 
   /**
    * Build and send the current ElectrumX status to the popup.
    */
-  private broadcastElectrumXStatus = (messageType: string = MESSAGE_TYPE.ELECTRUMX_STATUS_CHANGED) => {
+  public broadcastElectrumXStatus = (messageType: string = MESSAGE_TYPE.ELECTRUMX_STATUS_CHANGED) => {
     const status = this.getElectrumXStatus();
     sendMessage({ type: messageType, electrumxStatus: status });
   };
@@ -136,12 +161,10 @@ export default class NetworkController extends IController {
   * @param networkIndex The index of the network to change to.
   */
   public changeNetwork = async (networkIndex: number) => {
-    console.log('CHANGING NETWORK TO ID:' , networkIndex);
     if (this.networkIndex !== networkIndex) {
       this.networkIndex = networkIndex;
 
       await setStorageValue(STORAGE.NETWORK_INDEX, networkIndex);
-      console.log('networkIndex changed', networkIndex);
 
       sendMessage({
         type: MESSAGE_TYPE.CHANGE_NETWORK_SUCCESS,
@@ -152,14 +175,15 @@ export default class NetworkController extends IController {
     }
   };
 
-  private handleMessage = (request: any, _?: chrome.runtime.MessageSender, sendResponse?: (response: any) => void) => {
+  private handleMessage = async (
+    request: any, _?: chrome.runtime.MessageSender, sendResponse?: (response: any) => void,
+  ) => {
     const inExtensionEnvironment = isExtensionEnvironment();
     const requestData = inExtensionEnvironment ? request : request.data;
     try {
-      console.log('network received request handleMessage: ', requestData);
       switch (requestData.type) {
       case MESSAGE_TYPE.CHANGE_NETWORK:
-        this.changeNetwork(requestData.networkIndex);
+        await this.changeNetwork(requestData.networkIndex);
         break;
       case MESSAGE_TYPE.GET_NETWORKS:
         sendMessage({
@@ -177,7 +201,7 @@ export default class NetworkController extends IController {
         this.broadcastElectrumXStatus(MESSAGE_TYPE.GET_ELECTRUMX_STATUS_RETURN);
         break;
       case MESSAGE_TYPE.SWITCH_ELECTRUMX_SERVER:
-        this.switchElectrumXServer(requestData.serverIndex);
+        await this.switchElectrumXServer(requestData.serverIndex);
         break;
       case MESSAGE_TYPE.GET_NETWORK_EXPLORER_URL:
         sendResponse && sendResponse(this.explorerUrl);
@@ -195,7 +219,6 @@ export default class NetworkController extends IController {
         break;
       }
     } catch (err) {
-      console.error(err);
       this.main.displayErrorOnPopup(err as any);
     }
   };

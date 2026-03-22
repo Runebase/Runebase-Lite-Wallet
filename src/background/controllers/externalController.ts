@@ -77,8 +77,8 @@ export default class ExternalController extends IController {
           runebaseUSD,
         }, () => {});
       }
-    } catch (err) {
-      console.log(err);
+    } catch (_err) {
+      // price fetch failed silently
     }
   };
 
@@ -90,8 +90,8 @@ export default class ExternalController extends IController {
         type: MESSAGE_TYPE.GET_SUPERSTAKERS_RETURN,
         superstakers: jsonObj.result as SuperStakerArray,
       }, () => {});
-    } catch (err) {
-      console.log(err);
+    } catch (_err) {
+      // superstakers fetch failed silently
     }
   };
 
@@ -105,8 +105,8 @@ export default class ExternalController extends IController {
         type: MESSAGE_TYPE.GET_SUPERSTAKER_RETURN,
         superstaker: jsonObj.result as SuperStaker,
       }, () => {});
-    } catch (err) {
-      console.log(err);
+    } catch (_err) {
+      // superstaker fetch failed silently
     }
   };
 
@@ -126,7 +126,6 @@ export default class ExternalController extends IController {
         break;
       }
     } catch (err) {
-      console.error(err);
       this.main.displayErrorOnPopup(err as any);
     }
   };

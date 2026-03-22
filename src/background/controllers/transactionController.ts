@@ -31,7 +31,6 @@ export default class TransactionController extends IController {
   public addTransaction = (transaction: Transaction) => {
     this.transactions.unshift(transaction);
     this.totalTransactions += 1;
-    console.log('new transactions after adding: ', this.transactions);
     this.sendTransactionsMessage();
   };
 
@@ -311,7 +310,6 @@ export default class TransactionController extends IController {
         break;
       }
     } catch (err) {
-      console.error(err);
       this.main.displayErrorOnPopup(err as any);
     }
   };

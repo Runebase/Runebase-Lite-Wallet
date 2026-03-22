@@ -48,7 +48,6 @@ function handleInpageMessage(event: MessageEvent) {
 
   switch (message.type) {
   case API_TYPE.SIGN_POD_EXTERNAL_RESPONSE:
-    console.log(`SIGN_POD_RESPONSE INPAGE: ${message.payload.result}`);
     return message.payload.result;
     // break;
   case API_TYPE.SIGN_TX_URL_RESOLVED:
@@ -64,15 +63,12 @@ function handleInpageMessage(event: MessageEvent) {
     runebasechrome.account = accountWrapper.account;
     if (accountWrapper.error) {
       throw accountWrapper.error;
-    } else {
-      console.log('window.runebasechrome.account has been updated,\n Reason:', accountWrapper.statusChangeReason);
     }
     break;
   case API_TYPE.PORT_DISCONNECTED:
     handlePortDisconnected();
     break;
   default:
-    console.log(message);
     throw Error(`Inpage processing invalid type: ${message}`);
   }
 }

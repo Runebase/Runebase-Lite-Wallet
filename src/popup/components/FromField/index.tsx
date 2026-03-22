@@ -8,10 +8,7 @@ const FromField: React.FC = () => {
   const loggedInAccountName = useAppSelector((state) => state.session.loggedInAccountName);
 
   return (
-    <FormControl
-      fullWidth
-      sx={{marginBottom: '8px'}}
-    >
+    <FormControl fullWidth>
       <InputLabel id="from-label">From</InputLabel>
       <Select
         labelId="from-label"

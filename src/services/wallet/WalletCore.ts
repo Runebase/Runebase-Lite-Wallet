@@ -45,7 +45,7 @@ export interface ContractCallOpts {
 
 const DEFAULT_GAS_LIMIT = 250000;
 const DEFAULT_GAS_PRICE = 40;
-const STAKE_MATURITY = 2000;
+const STAKE_MATURITY = 2000; // Coinbase/coinstake maturity on Runebase (4x speed adjustment)
 
 /**
  * Create a wallet from a BIP39 mnemonic

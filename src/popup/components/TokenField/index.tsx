@@ -11,7 +11,7 @@ const TokenField: React.FC = () => {
   const tokens = useAppSelector((state) => state.send.tokens);
 
   return (
-    <FormControl fullWidth sx={{ marginBottom: '8px' }}>
+    <FormControl fullWidth>
       <InputLabel id="token-label">Token</InputLabel>
       <Select
         labelId="token-label"
@@ -20,13 +20,14 @@ const TokenField: React.FC = () => {
         onChange={(event) => dispatch(changeToken(event.target.value as string))}
       >
         {tokens.map((t: RRCToken) => (
-          <MenuItem key={t.symbol} value={t.symbol} sx={{ display: 'flex', alignItems: 'center' }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', height: '24px' }}>
+          <MenuItem key={t.symbol} value={t.symbol}>
+            <Box sx={{ display: 'flex', alignItems: 'center', height: 24 }}>
               {TOKEN_IMAGES[t.address] && (
-                <img
+                <Box
+                  component="img"
                   src={TOKEN_IMAGES[t.address]}
                   alt={t.symbol}
-                  style={{ marginRight: '8px', height: '24px', width: '24px', objectFit: 'contain' }}
+                  sx={{ mr: 1, height: 24, width: 24, objectFit: 'contain' }}
                 />
               )}
               <Typography>{t.symbol}</Typography>

@@ -1,51 +1,31 @@
 import { makeStyles } from 'tss-react/mui';
 
 const useStyles = makeStyles()((theme) => ({
-  root: {
-    paddingLeft: theme.spacing(2), // Use spacing instead of padding
-    paddingRight: theme.spacing(2), // Use spacing instead of padding
-  },
   amountContainer: {
     width: '100%',
     flexDirection: 'row',
-    display: 'inline-flex',
+    display: 'flex',
+    alignItems: 'center',
+    gap: theme.spacing(1),
+    minHeight: 44,
   },
   tokenAmount: {
-    fontSize: theme.typography.h6.fontSize, // Adjust the font size based on your design
-    fontWeight: theme.typography.fontWeightBold, // Use typography properties
-    // color: theme.palette.secondary.main,
-    marginLeft: theme.spacing(1), // Use spacing instead of padding
-    marginRight: theme.spacing(1), // Use spacing instead of padding
+    fontSize: theme.typography.h6.fontSize,
+    fontWeight: theme.typography.fontWeightBold,
   },
   token: {
-    fontSize: theme.typography.body1.fontSize, // Adjust the font size based on your design
-    // color: theme.palette.secondary.main,
+    fontSize: theme.typography.body1.fontSize,
     flex: 1,
     alignSelf: 'flex-end',
-    marginBottom: theme.spacing(0.5), // Use spacing instead of padding
-  },
-  rightArrow: {
-    fontSize: 22,
-    // color: theme.palette.secondary.main,
-    alignSelf: 'center',
+    marginBottom: theme.spacing(0.5),
   },
   balanceUSD: {
-    fontSize: theme.typography.body1.fontSize, // Adjust the font size based on your design
-    // color: theme.palette.secondary.main,
-    // marginBottom: theme.spacing(1), // Use spacing instead of padding
-  },
-  actionButtonsContainer: {
-    display: 'flex',
-    justifyContent: 'flex-end',
+    fontSize: theme.typography.body2.fontSize,
+    color: theme.palette.text.secondary,
   },
   actionButton: {
-    padding: `${theme.spacing(1)} ${theme.spacing(2)}`, // Use spacing instead of padding
-    marginRight: theme.spacing(1), // Use spacing instead of padding
-    fontSize: theme.typography.body1.fontSize, // Adjust the font size based on your design
+    fontSize: theme.typography.body2.fontSize,
   },
-  tokenContainer: {
-    marginLeft: '24px',
-  }
 }));
 
 export default useStyles;

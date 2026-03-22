@@ -111,6 +111,7 @@ declare module '@mui/material/styles' {
       gray: string;
       orange: string;
       red: string;
+      gold: string;
       gradientPurple: string;
     };
     padding: {

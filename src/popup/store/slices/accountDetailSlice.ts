@@ -16,6 +16,8 @@ interface AccountDetailState {
   hasMore: boolean;
   shouldScrollToBottom: boolean;
   editTokenMode: boolean;
+  isLoading: boolean;
+  isLoadingMore: boolean;
 }
 
 const initialState: AccountDetailState = {
@@ -28,6 +30,8 @@ const initialState: AccountDetailState = {
   hasMore: false,
   shouldScrollToBottom: false,
   editTokenMode: false,
+  isLoading: true,
+  isLoadingMore: false,
 };
 
 const accountDetailSlice = createSlice({
@@ -39,12 +43,15 @@ const accountDetailSlice = createSlice({
     },
     setTransactions: (state, action: PayloadAction<any[]>) => {
       state.transactions = action.payload;
+      state.isLoading = false;
+      state.isLoadingMore = false;
     },
     setSelectedTransaction: (state, action: PayloadAction<any | null>) => {
       state.selectedTransaction = action.payload;
     },
     setTokenTransfers: (state, action: PayloadAction<any[]>) => {
       state.tokenTransfers = action.payload;
+      state.isLoading = false;
     },
     setTokens: (state, action: PayloadAction<any[]>) => {
       state.tokens = action.payload;
@@ -61,14 +68,20 @@ const accountDetailSlice = createSlice({
     setEditTokenMode: (state, action: PayloadAction<boolean>) => {
       state.editTokenMode = action.payload;
     },
+    setIsLoading: (state, action: PayloadAction<boolean>) => {
+      state.isLoading = action.payload;
+    },
+    setIsLoadingMore: (state, action: PayloadAction<boolean>) => {
+      state.isLoadingMore = action.payload;
+    },
   },
 });
 
 // Side-effect actions
 export const initAccountDetail = () => {
-  console.log('INIT_ACCOUNT_DETAILS_STORE');
   sendMessage({ type: MESSAGE_TYPE.START_TX_POLLING });
   sendMessage({ type: MESSAGE_TYPE.GET_RRC_TOKEN_LIST });
+  sendMessage({ type: MESSAGE_TYPE.GET_DELEGATION_INFO });
 };
 
 export const deinitAccountDetail = () => {
@@ -101,6 +114,8 @@ export const {
   setHasMore,
   setShouldScrollToBottom,
   setEditTokenMode,
+  setIsLoading,
+  setIsLoadingMore,
 } = accountDetailSlice.actions;
 
 export default accountDetailSlice.reducer;

@@ -28,8 +28,6 @@ export default class RPCController extends IController {
       const { DEFAULT_AMOUNT, DEFAULT_GAS_LIMIT, DEFAULT_GAS_PRICE } = Config.TRANSACTION;
       const [address, data, amount, gasLimit, gasPrice] = args;
 
-      console.log('Sending to contract. Args:', args);
-
       const newArgs = [
         address,
         data,
@@ -38,13 +36,8 @@ export default class RPCController extends IController {
         gasPrice || DEFAULT_GAS_PRICE,
       ];
 
-      console.log('Sending transaction. New Args:', newArgs);
-
       result = await wallet.sendTransaction(newArgs, electrumx) as ISendRawTxResult;
-
-      console.log('Transaction result:', result);
     } catch (err) {
-      console.error(err);
       error = (err as Error).message;
     }
 
@@ -62,15 +55,10 @@ export default class RPCController extends IController {
         throw Error('Requires first two arguments: contractAddress and data.');
       }
 
-      console.log('Calling contract. Args:', args);
-
       const [contractAddress, data] = args;
       result = await wallet.callContract(contractAddress, data, electrumx) as IContractCall;
-
-      console.log('Contract call result:', result);
     } catch (err) {
       error = (err as Error).message;
-      console.error(error);
     }
 
     return { id, result, error };
@@ -109,8 +97,6 @@ export default class RPCController extends IController {
       const wallet = this.getWallet();
       const electrumx = this.getElectrumX();
 
-      console.log('External raw call. Method:', method, 'Args:', args);
-
       if (method === RPC_METHOD.CALL_CONTRACT) {
         const [contractAddress, data] = args;
         result = await wallet.callContract(contractAddress, data, electrumx);
@@ -120,11 +106,8 @@ export default class RPCController extends IController {
         throw Error(`Unsupported RPC method: ${method}`);
       }
 
-      console.log('External raw call result:', result);
     } catch (e) {
-      console.log(e);
       error = (e as Error).message;
-      console.error(error);
     }
 
     this.sendRpcResponseToActiveTab(id, result, error);
@@ -157,7 +140,6 @@ export default class RPCController extends IController {
         break;
       }
     } catch (err) {
-      console.error(err);
       this.main.displayErrorOnPopup(err as any);
     }
   };

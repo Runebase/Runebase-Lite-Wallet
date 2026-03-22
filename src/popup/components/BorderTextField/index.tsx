@@ -8,6 +8,7 @@ import { handleEnterPress } from '../../../utils';
 const BorderTextField: React.FC<any> = ({
   label,
   classNames,
+  className,
   placeholder,
   error,
   errorText,
@@ -22,15 +23,18 @@ const BorderTextField: React.FC<any> = ({
   };
 
   return (
-    <div className={cx(classes.container, classNames)}>
+    <div className={cx(classes.container, classNames, className)}>
       <TextField
         className={classes.textField}
         label={label}
         required
+        fullWidth
         type="text"
         placeholder={placeholder}
+        error={!!error}
         onChange={onChange}
         onKeyDown={handleKeyDown}
+        aria-label={label || placeholder}
       />
       {error && errorText && (
         <Typography className={classes.errorText}>{errorText}</Typography>

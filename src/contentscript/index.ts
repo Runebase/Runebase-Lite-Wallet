@@ -131,8 +131,6 @@ function forwardInpageAccountRequest() {
 }
 
 function handleOpenWalletExtension(payload: any) {
-  console.log('Handling OPEN_WALLET_EXTENSION');
-
   // Send a message to the background script to open the wallet extension
   chrome.runtime.sendMessage({ type: API_TYPE.OPEN_WALLET_EXTENSION, payload });
 }
@@ -164,8 +162,6 @@ function handleInPageMessage(event: MessageEvent) {
 
 // Handle messages sent from bg script -> content script(here) -> inpage
 function handleBackgroundScriptMessage(message: any) {
-  console.log('MESSAGE RECEIVED FROM BACKGROUND SCRIPT');
-  console.log(message);
   switch (message.type) {
   case MESSAGE_TYPE.EXTERNAL_RPC_CALL_RETURN:
     postWindowMessage<IRPCCallResponse>(TARGET_NAME.INPAGE, {
@@ -180,8 +176,6 @@ function handleBackgroundScriptMessage(message: any) {
     });
     break;
   case MESSAGE_TYPE.SAVE_SEED_TO_FILE_RETURN:
-    console.log('SAVE_SEED_TO_FILE_RETURN');
-    console.log(message);
     postWindowMessage<IRPCCallResponse>(TARGET_NAME.INPAGE, {
       type: API_TYPE.SAVE_SEED_TO_FILE_RESPONSE,
       payload: message,

@@ -5,16 +5,18 @@ import {
   Button,
   Chip,
   Box,
+  Stack,
 } from '@mui/material';
 import {
   OpenInNew,
   ContentCopy,
 } from '@mui/icons-material';
-import NavBar from '../../components/NavBar';
+import PageLayout from '../../components/PageLayout';
 import { useAppSelector } from '../../store/hooks';
 import useStyles from './styles';
 import { MESSAGE_TYPE } from '../../../constants';
 import { sendMessage, openUrlInNewTab, TabOpener } from '../../abstraction';
+import { useSnackbar } from '../../components/SnackbarProvider';
 
 const formatAmount = (satoshi: number): string => {
   const coins = satoshi / 1e8;
@@ -34,16 +36,16 @@ class BrowserTabOpener implements TabOpener {
 
 const TransactionDetail: React.FC = () => {
   const { classes } = useStyles();
+  const { showSnackbar } = useSnackbar();
   const tx = useAppSelector((state) => state.accountDetail.selectedTransaction);
 
   if (!tx) {
     return (
-      <div className={classes.root}>
-        <NavBar hasBackButton title="Transaction" />
-        <div className={classes.contentContainer}>
-          <Typography>No transaction selected</Typography>
-        </div>
-      </div>
+      <PageLayout hasBackButton title="Transaction">
+        <Box sx={{ p: 3, textAlign: 'center' }}>
+          <Typography color="text.secondary">No transaction selected</Typography>
+        </Box>
+      </PageLayout>
     );
   }
 
@@ -65,13 +67,13 @@ const TransactionDetail: React.FC = () => {
   const handleCopyTxid = () => {
     if (tx.id) {
       navigator.clipboard.writeText(tx.id);
+      showSnackbar('Transaction ID copied');
     }
   };
 
   return (
-    <div className={classes.root}>
-      <NavBar hasBackButton title="Transaction" />
-      <div className={classes.contentContainer}>
+    <PageLayout hasBackButton title="Transaction">
+      <Stack spacing={0} sx={{ p: 2 }}>
         {/* Status */}
         <div className={classes.section}>
           <Typography className={classes.label}>Status</Typography>
@@ -95,7 +97,7 @@ const TransactionDetail: React.FC = () => {
         <Divider />
 
         {/* Amount */}
-        <div className={classes.section} style={{ marginTop: 16 }}>
+        <div className={classes.sectionAfterDivider}>
           <Typography className={classes.label}>Amount</Typography>
           <Typography
             variant="h5"
@@ -120,7 +122,7 @@ const TransactionDetail: React.FC = () => {
         <Divider />
 
         {/* Date */}
-        <div className={classes.section} style={{ marginTop: 16 }}>
+        <div className={classes.sectionAfterDivider}>
           <Typography className={classes.label}>Date</Typography>
           <Typography className={classes.value}>
             {tx.timestamp || 'Unknown'}
@@ -130,7 +132,7 @@ const TransactionDetail: React.FC = () => {
         <Divider />
 
         {/* Transaction ID */}
-        <div className={classes.section} style={{ marginTop: 16 }}>
+        <div className={classes.sectionAfterDivider}>
           <Typography className={classes.label}>Transaction ID</Typography>
           <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1 }}>
             <Typography
@@ -151,7 +153,7 @@ const TransactionDetail: React.FC = () => {
         {tx.qrc20TokenTransfers && tx.qrc20TokenTransfers.length > 0 && (
           <>
             <Divider />
-            <div className={classes.section} style={{ marginTop: 16 }}>
+            <div className={classes.sectionAfterDivider}>
               <Typography className={classes.label}>Token Transfers</Typography>
               {tx.qrc20TokenTransfers.map((transfer: any, i: number) => (
                 <Box key={i} sx={{ mb: 1 }}>
@@ -161,7 +163,7 @@ const TransactionDetail: React.FC = () => {
                       : `${transfer.value} ${transfer.symbol}`
                     }
                   </Typography>
-                  <Typography className={classes.feeText}>
+                  <Typography className={classes.feeText} sx={{ wordBreak: 'break-all' }}>
                     {transfer.from} → {transfer.to}
                   </Typography>
                 </Box>
@@ -178,11 +180,12 @@ const TransactionDetail: React.FC = () => {
           startIcon={<OpenInNew />}
           onClick={handleViewExplorer}
           fullWidth
+          sx={{ mt: 2 }}
         >
           View on Explorer
         </Button>
-      </div>
-    </div>
+      </Stack>
+    </PageLayout>
   );
 };
 

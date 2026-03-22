@@ -93,7 +93,6 @@ export default class TokenController extends IController {
         console.warn(`Failed to subscribe to token events for ${token.symbol}:`, err);
       }
     }
-    console.log(`Subscribed to transfer events for ${this.tokens.length} tokens`);
   };
 
   private getBalances = () => {
@@ -122,7 +121,6 @@ export default class TokenController extends IController {
     );
 
     if (error) {
-      console.error(error);
       return;
     }
 
@@ -201,8 +199,7 @@ export default class TokenController extends IController {
           isValid: false,
         };
       }
-    } catch (err) {
-      console.error(err);
+    } catch (_err) {
       msg = {
         type: MESSAGE_TYPE.RRC_TOKEN_DETAILS_RETURN,
         isValid: false,
@@ -220,7 +217,6 @@ export default class TokenController extends IController {
     gasPrice: number
   ) => {
     try {
-      console.log('sendRRCToken:', { amount, token: token.symbol });
       const bnAmount = new BigNumber(amount ?? 0)
         .times(new BigNumber(10 ** token.decimals))
         .dp(0);
@@ -230,8 +226,6 @@ export default class TokenController extends IController {
         [receiverAddress, bnAmount.toString(10)],
       );
       const args = [token.address, data, null, gasLimit, gasPrice];
-
-      console.log('Sending RRCToken with args:', args);
 
       const requestId = generateRequestId();
       const response = await this.main.rpc.sendToContract(requestId, args);
@@ -268,7 +262,6 @@ export default class TokenController extends IController {
         return;
       }
 
-      console.log('RRCToken sent successfully!');
       sendMessage({
         type: MESSAGE_TYPE.SEND_TOKENS_SUCCESS,
       }, () => {});
@@ -356,7 +349,6 @@ export default class TokenController extends IController {
         break;
       }
     } catch (err) {
-      console.error(err);
       this.main.displayErrorOnPopup(err as any);
     }
   };

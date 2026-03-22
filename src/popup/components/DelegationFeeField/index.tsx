@@ -23,14 +23,12 @@ const DelegationFeeField: React.FC<DelegationFeeFieldProps> = ({ onEnterPress })
   };
 
   return (
-    <FormControl
-      fullWidth
-      sx={{marginBottom: '8px'}}
-    >
+    <FormControl fullWidth>
       <Button
-        style={{ alignSelf: 'flex-end', margin: '0 0 8px 0' }}
+        sx={{ alignSelf: 'flex-end', mb: 1 }}
         color="primary"
         variant="contained"
+        size="small"
         onClick={() => dispatch(setDelegationFee(DELEGATION_FEE_RECOMMENDED))}
       >
         Set Recommended Fee
@@ -44,18 +42,18 @@ const DelegationFeeField: React.FC<DelegationFeeFieldProps> = ({ onEnterPress })
         value={delegationFee}
         InputProps={{
           endAdornment: (
-            <Typography style={{ fontSize: '0.8rem' }}>%</Typography>
+            <Typography variant="caption">%</Typography>
           ),
         }}
         onChange={(event) => dispatch(setDelegationFee(Number(event.target.value)))}
         onKeyDown={handleKeyDown}
       />
       {delegationFeeFieldError && (
-        <Typography color="error" style={{ fontSize: '0.8rem', textAlign: 'left' }}>
+        <Typography color="error" variant="caption" sx={{ textAlign: 'left', mt: 0.5 }}>
           {delegationFeeFieldError}
         </Typography>
       )}
-      <Typography variant="body2" style={{ color: 'orange', fontSize: '0.9rem' }}>
+      <Typography variant="body2" color="warning.main" sx={{ mt: 1 }}>
         Caution: Ensure to establish the minimum fee as agreed with the super-staker.
         {' '}
         Setting a fee that is too low will result in the rejection of your delegated UTXOs.

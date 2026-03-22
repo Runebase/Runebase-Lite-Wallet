@@ -17,6 +17,11 @@ export interface ElectrumXStatus {
   servers: Array<{ host: string; port: number; protocol: string; label?: string }>;
 }
 
+export interface PendingDelegationAction {
+  type: 'add' | 'remove' | 'change';
+  stakerAddress: string;
+}
+
 interface SessionState {
   networkIndex: number;
   networks: any[];
@@ -24,6 +29,7 @@ interface SessionState {
   walletInfo?: any;
   blockchainInfo?: any;
   delegationInfo?: any;
+  pendingDelegationAction?: PendingDelegationAction;
   runebaseUSD?: number;
   walletBackupInfo: WalletBackupInfo;
   electrumxStatus: ElectrumXStatus;
@@ -84,10 +90,14 @@ const sessionSlice = createSlice({
     },
     setBlockchainInfo: (state, action: PayloadAction<any>) => {
       state.blockchainInfo = action.payload;
-      console.log('sessionSlice.blockchainInfo: ', action.payload);
     },
     setDelegationInfo: (state, action: PayloadAction<any>) => {
       state.delegationInfo = action.payload;
+      // Clear pending state when real delegation info arrives from chain
+      state.pendingDelegationAction = undefined;
+    },
+    setPendingDelegationAction: (state, action: PayloadAction<PendingDelegationAction | undefined>) => {
+      state.pendingDelegationAction = action.payload;
     },
     setRunebaseUSD: (state, action: PayloadAction<number>) => {
       state.runebaseUSD = action.payload;
@@ -121,6 +131,7 @@ export const {
   setWalletInfo,
   setBlockchainInfo,
   setDelegationInfo,
+  setPendingDelegationAction,
   setRunebaseUSD,
   setWalletBackupInfo,
   initWalletBackupInfo,

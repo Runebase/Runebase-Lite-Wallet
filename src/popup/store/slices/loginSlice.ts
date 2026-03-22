@@ -12,6 +12,7 @@ interface LoginState {
   confirmPassword: string;
   invalidPassword?: boolean;
   algorithm: string;
+  isLoggingIn: boolean;
 }
 
 const initialState: LoginState = {
@@ -20,6 +21,7 @@ const initialState: LoginState = {
   confirmPassword: '',
   invalidPassword: undefined,
   algorithm: 'PBKDF2',
+  isLoggingIn: false,
 };
 
 const loginSlice = createSlice({
@@ -40,9 +42,12 @@ const loginSlice = createSlice({
     },
     setInvalidPassword: (state, action: PayloadAction<boolean | undefined>) => {
       state.invalidPassword = action.payload;
+      state.isLoggingIn = false;
+    },
+    setIsLoggingIn: (state, action: PayloadAction<boolean>) => {
+      state.isLoggingIn = action.payload;
     },
     resetLoginForm: (state) => {
-      console.log('LoginSlice init method called');
       state.password = initialState.password;
       state.confirmPassword = initialState.confirmPassword;
     },
@@ -78,7 +83,6 @@ export const attemptSessionRestore = () => {
 
   sendMessage({ type: MESSAGE_TYPE.HAS_ACCOUNTS });
   sendMessage({ type: MESSAGE_TYPE.RESTORE_SESSION }, (response: any) => {
-    console.log('Received restore session response:', response);
     if (response === RESPONSE_TYPE.RESTORING_SESSION) {
       const navigate = getNavigateFunction();
       navigate?.('/loading');
@@ -92,6 +96,7 @@ export const {
   setConfirmPassword,
   setAlgorithm,
   setInvalidPassword,
+  setIsLoggingIn,
   resetLoginForm,
 } = loginSlice.actions;
 

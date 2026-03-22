@@ -14,6 +14,7 @@ interface AddTokenState {
   symbol: string;
   decimals?: number;
   getRRCTokenDetailsFailed: boolean;
+  isValidating: boolean;
 }
 
 const initialState: AddTokenState = {
@@ -22,6 +23,7 @@ const initialState: AddTokenState = {
   symbol: '',
   decimals: undefined,
   getRRCTokenDetailsFailed: false,
+  isValidating: false,
 };
 
 const addTokenSlice = createSlice({
@@ -40,9 +42,14 @@ const addTokenSlice = createSlice({
       state.name = action.payload.name;
       state.symbol = action.payload.symbol;
       state.decimals = action.payload.decimals;
+      state.isValidating = false;
     },
     setGetRRCTokenDetailsFailed: (state, action: PayloadAction<boolean>) => {
       state.getRRCTokenDetailsFailed = action.payload;
+      state.isValidating = false;
+    },
+    setIsValidating: (state, action: PayloadAction<boolean>) => {
+      state.isValidating = action.payload;
     },
     resetAddToken: () => initialState,
   },
@@ -73,11 +80,10 @@ export const selectAddTokenButtonDisabled = (state: RootState): boolean => {
 // Side-effect actions
 export const validateContractAddress = (address: string) => (dispatch: any) => {
   dispatch(addTokenSlice.actions.setContractAddress(address));
-  console.log('Contract address changed:', address);
 
   // If valid, fetch token details
   if (address && isValidContractAddressLength(address)) {
-    console.log('Fetching RRC token details for:', address);
+    dispatch(addTokenSlice.actions.setIsValidating(true));
     sendMessage({
       type: MESSAGE_TYPE.GET_RRC_TOKEN_DETAILS,
       contractAddress: address,
@@ -88,7 +94,6 @@ export const validateContractAddress = (address: string) => (dispatch: any) => {
 export const addToken = () => (dispatch: any, getState: any) => {
   const state: RootState = getState();
   const { contractAddress, name, symbol, decimals } = state.addToken;
-  console.log('Adding token:', { contractAddress, name, symbol, decimals });
   sendMessage({
     type: MESSAGE_TYPE.ADD_TOKEN,
     contractAddress,
@@ -106,6 +111,7 @@ export const {
   setContractAddress,
   setRRCTokenDetails,
   setGetRRCTokenDetailsFailed,
+  setIsValidating,
   resetAddToken,
 } = addTokenSlice.actions;
 

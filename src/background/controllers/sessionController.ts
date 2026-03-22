@@ -62,17 +62,17 @@ export default class SessionController extends IController {
     // If port is reconnected (user reopened the popup), clear sessionTimeout
     const inExtensionEnvironment = isExtensionEnvironment();
     if (inExtensionEnvironment) {
-      console.log('onPopupOpened clearTimeout');
       clearTimeout(this.sessionTimeout);
     }
   };
 
   /*
-  * Actions taken when the popup is closed..
+  * Actions taken when the popup is closed.
+  * Stop ALL polling — no point sending data to a closed popup.
+  * Polling restarts when the user logs in on next popup open.
   */
   private onPopupClosed = () => {
-    console.log('onPopupClosed');
-    this.clearAllIntervalsExceptAccount();
+    this.clearAllIntervals();
 
     // Logout from bgp after interval
     this.setSessionTimeOut();
@@ -84,7 +84,6 @@ export default class SessionController extends IController {
         this.sessionTimeout = setTimeout(() => {
           this.clearSession();
           this.main.crypto.resetPasswordHash();
-          console.log('Session cleared!');
         },  this.sessionLogoutInterval);
       }
     } catch (error) {
@@ -119,8 +118,21 @@ export default class SessionController extends IController {
             type: MESSAGE_TYPE.RESTORING_SESSION_RETURN,
             restoreSession: RESPONSE_TYPE.RESTORING_SESSION,
           });
-          const isSessionRestore = true;
-          this.main.account.onAccountLoggedIn(isSessionRestore);
+          this.main.network.broadcastElectrumXStatus();
+          // Only restart polling if ElectrumX is connected.
+          // If it dropped while closed, show disconnected status and
+          // let the user re-login which triggers a fresh connection.
+          if (
+            this.main.network.electrumx
+            && this.main.network.electrumx.state === 'connected'
+          ) {
+            this.main.account.startPolling();
+            this.main.token.startPolling();
+            this.main.external.startPolling();
+          }
+          sendMessage({
+            type: MESSAGE_TYPE.ACCOUNT_LOGIN_SUCCESS,
+          });
         } else if (this.main.crypto.hasValidPasswordHash()) {
           sendMessage({
             type: MESSAGE_TYPE.RESTORING_SESSION_RETURN,
@@ -148,7 +160,6 @@ export default class SessionController extends IController {
         break;
       }
     } catch (err) {
-      console.error(err);
       this.main.displayErrorOnPopup(err as any);
     }
   };

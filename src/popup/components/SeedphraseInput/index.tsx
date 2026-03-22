@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { TextField, Grid, InputAdornment, useTheme, useMediaQuery, Typography } from '@mui/material';
-import WarningIcon from '@mui/icons-material/Warning';
+import { TextField, Grid, InputAdornment, useTheme, useMediaQuery, Alert } from '@mui/material';
 import useStyles from './styles';
 
 const SeedPhraseInput: React.FC<any> = ({
@@ -15,13 +14,12 @@ const SeedPhraseInput: React.FC<any> = ({
   const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
   const isLargeScreen = useMediaQuery(theme.breakpoints.up('lg'));
 
-  // State to keep track of selected inputs and focused state
   const [focusedInput, setFocusedInput] = useState<number | null>(null);
 
   const handlePhraseChange = (index: number, value: string) => {
     const updatedPhrase = [...phrase];
     updatedPhrase[index] = value.toLowerCase();
-    setPhrase(updatedPhrase); // Call the action directly
+    setPhrase(updatedPhrase);
     setError(null);
   };
 
@@ -41,8 +39,6 @@ const SeedPhraseInput: React.FC<any> = ({
     } else if (isLargeScreen) {
       wordsPerRow = 4;
     }
-    console.log('Phrase: ', phrase);
-
     return (
       <Grid container className={classes.mnemonicTilesContainer}>
         {phrase && phrase.map((word: string, index: number) => (
@@ -57,6 +53,7 @@ const SeedPhraseInput: React.FC<any> = ({
                 variant="outlined"
                 fullWidth
                 disabled={disabled}
+                aria-label={`Seed word ${index + 1}`}
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start" className={classes.tileNumber}>
@@ -81,10 +78,9 @@ const SeedPhraseInput: React.FC<any> = ({
     <>
       {renderMnemonicTiles()}
       {error && (
-        <Typography className={classes.warningText}>
-          <WarningIcon className={classes.warningIcon} />
+        <Alert severity="warning" sx={{ mt: 1 }}>
           {error}
-        </Typography>
+        </Alert>
       )}
     </>
   );

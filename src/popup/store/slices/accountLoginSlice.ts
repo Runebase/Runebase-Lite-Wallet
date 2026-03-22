@@ -8,12 +8,14 @@ interface AccountLoginState {
   selectedWalletName: string;
   accounts: any[];
   validatesNetwork: boolean;
+  isLoading: boolean;
 }
 
 const initialState: AccountLoginState = {
   selectedWalletName: '',
   accounts: [],
   validatesNetwork: false,
+  isLoading: true,
 };
 
 const accountLoginSlice = createSlice({
@@ -25,8 +27,8 @@ const accountLoginSlice = createSlice({
     },
     setAccounts: (state, action: PayloadAction<any[]>) => {
       state.accounts = action.payload;
+      state.isLoading = false;
       if (!isEmpty(action.payload)) {
-        console.log('Received accounts:', action.payload);
         state.selectedWalletName = action.payload[0].name;
       }
     },
@@ -34,7 +36,6 @@ const accountLoginSlice = createSlice({
       state.validatesNetwork = action.payload;
     },
     resetAccountLogin: (state) => {
-      console.log('Resetting account login store');
       state.selectedWalletName = initialState.selectedWalletName;
       state.validatesNetwork = initialState.validatesNetwork;
     },
@@ -49,7 +50,6 @@ export const getAccounts = (validatesNetwork: boolean = false) => (dispatch: any
 
 export const loginAccount = () => (dispatch: any, getState: any) => {
   const { accountLogin } = getState();
-  console.log('Logging in account:', accountLogin.selectedWalletName);
   const navigate = getNavigateFunction();
   navigate?.('/loading');
   sendMessage({
@@ -59,7 +59,6 @@ export const loginAccount = () => (dispatch: any, getState: any) => {
 };
 
 export const routeToCreateWallet = () => {
-  console.log('Routing to create wallet');
   const navigate = getNavigateFunction();
   navigate?.('/create-wallet');
 };

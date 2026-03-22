@@ -7,7 +7,8 @@ const useStyles = makeStyles()((theme) => ({
     flexDirection: 'column',
   },
   errorText: {
-    fontSize: theme.typography.fontSizeSmall,
+    fontSize: theme.typography.caption.fontSize,
+    color: theme.palette.error.main,
     marginTop: theme.spacing(1),
   },
 }));

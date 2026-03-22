@@ -1,25 +1,30 @@
 import React from 'react';
-import useStyles from './styles';
-import NavBar from '../../components/NavBar';
+import PageLayout from '../../components/PageLayout';
 import GasLimitField from '../../components/GasLimitField';
 import GasPriceField from '../../components/GasPriceField';
-import { Button } from '@mui/material';
+import { Button, Box, CircularProgress, Stack } from '@mui/material';
 import { Send as SendIcon } from '@mui/icons-material';
 import { handleEnterPress } from '../../../utils';
-import { useAppSelector, useAppDispatch } from '../../store/hooks';
+import { useAppSelector } from '../../store/hooks';
 import {
   routeToRemoveDelegationConfirm,
   selectDelegateButtonDisabled,
 } from '../../store/slices/delegateSlice';
 
 const RemoveDelegation: React.FC = () => {
-  const { classes } = useStyles();
-  const _dispatch = useAppDispatch();
   const loggedInAccountName = useAppSelector((state) => state.session.loggedInAccountName);
   const walletInfo = useAppSelector((state) => state.session.walletInfo);
   const buttonDisabled = useAppSelector(selectDelegateButtonDisabled);
 
-  if (!loggedInAccountName || !walletInfo) return null;
+  if (!loggedInAccountName || !walletInfo) {
+    return (
+      <PageLayout hasBackButton title="Remove Delegation">
+        <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+          <CircularProgress />
+        </Box>
+      </PageLayout>
+    );
+  }
 
   const onEnterPress = (event: React.KeyboardEvent) => {
     handleEnterPress(event, () => {
@@ -30,9 +35,8 @@ const RemoveDelegation: React.FC = () => {
   };
 
   return (
-    <div className={classes.root}>
-      <NavBar hasBackButton title="Remove Delegation" />
-      <div className={classes.contentContainer}>
+    <PageLayout hasBackButton title="Remove Delegation">
+      <Stack spacing={2}>
         <GasLimitField source="delegate" onEnterPress={onEnterPress} />
         <GasPriceField source="delegate" onEnterPress={onEnterPress} />
         <Button
@@ -46,8 +50,8 @@ const RemoveDelegation: React.FC = () => {
         >
           Remove Delegation
         </Button>
-      </div>
-    </div>
+      </Stack>
+    </PageLayout>
   );
 };
 

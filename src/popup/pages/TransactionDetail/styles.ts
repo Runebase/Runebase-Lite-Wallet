@@ -15,6 +15,10 @@ const useStyles = makeStyles()((theme) => ({
   section: {
     marginBottom: theme.spacing(2),
   },
+  sectionAfterDivider: {
+    marginBottom: theme.spacing(2),
+    marginTop: theme.spacing(2),
+  },
   label: {
     fontSize: theme.typography.caption.fontSize,
     color: theme.palette.text.secondary,
@@ -26,11 +30,11 @@ const useStyles = makeStyles()((theme) => ({
     wordBreak: 'break-all',
   },
   amountPositive: {
-    color: '#4caf50',
+    color: theme.palette.success.main,
     fontWeight: 'bold',
   },
   amountNegative: {
-    color: '#f44336',
+    color: theme.palette.error.main,
     fontWeight: 'bold',
   },
   feeText: {
@@ -38,7 +42,7 @@ const useStyles = makeStyles()((theme) => ({
     color: theme.palette.text.secondary,
   },
   txidText: {
-    fontSize: '0.75rem',
+    fontSize: theme.typography.caption.fontSize,
     wordBreak: 'break-all',
     cursor: 'pointer',
     '&:hover': {

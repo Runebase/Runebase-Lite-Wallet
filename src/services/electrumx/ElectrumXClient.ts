@@ -84,9 +84,7 @@ export default class ElectrumXClient {
           const error = new Error(`WebSocket error connecting to ${this.serverLabel}`);
           this._state = 'failed';
           this.onError?.(error);
-          if (this._state !== 'connected') {
-            reject(error);
-          }
+          reject(error);
         };
 
         this.ws.onmessage = (event) => {

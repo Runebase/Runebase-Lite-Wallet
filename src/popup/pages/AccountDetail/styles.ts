@@ -1,108 +1,67 @@
 import { makeStyles } from 'tss-react/mui';
 
 const useStyles = makeStyles()((theme) => ({
-  root: {
-    height: '100%',
-    display: 'flex',
-    flexDirection: 'column',
-  },
-  contentContainer: {
-    flex: 1,
-    display: 'flex',
-    flexDirection: 'column',
-  },
-  accountDetailPaper: {
-    // background: theme.palette.gradientPurple.main, // Use palette instead of color
-    borderRadius: 0,
-  },
-  tabsPaper: {
-    borderRadius: 0,
-  },
   tab: {
     flex: 1,
   },
-  list: {
-    flex: 1,
-    padding: `0 ${theme.spacing(2)}`, // Use spacing instead of md
-    overflowX: 'hidden',
-    overflowY: 'auto',
-  },
   listItem: {
     width: '100%',
-    padding: `${theme.spacing(2)} 0`, // Use spacing instead of md
-    cursor: 'pointer',
-    display: 'inline-flex',
+    padding: `${theme.spacing(1.5)} 0`,
+    display: 'flex',
+    minHeight: 64,
+    gap: theme.spacing(1),
   },
   txInfoContainer: {
     flex: 1,
+    minWidth: 0,
   },
   txState: {
-    fontSize: theme.typography.caption.fontSize, // Use typography instead of sm
+    fontSize: theme.typography.body2.fontSize,
     textTransform: 'uppercase',
-    marginBottom: theme.spacing(1), // Use spacing instead of unit
-    '&.pending': {
-      // color: theme.palette.orange.main, // Use palette instead of color
-    },
+    fontWeight: theme.typography.fontWeightBold,
+    lineHeight: 1.3,
   },
   txId: {
-    fontSize: theme.typography.body2.fontSize, // Use typography instead of lg
-    // color: theme.palette.text.primary,
+    fontSize: theme.typography.caption.fontSize,
+    color: theme.palette.text.secondary,
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+    fontFamily: 'Roboto Mono, monospace',
   },
   txTime: {
-    fontSize: theme.typography.body2.fontSize, // Use typography instead of md
-    // color: theme.palette.text.secondary,
+    fontSize: theme.typography.body2.fontSize,
+    lineHeight: 1.3,
   },
-  arrowRight: {
-    fontSize: theme.typography.fontSize, // Use typography instead of icon size
-    // color: theme.palette.gray.main, // Use palette instead of color
-    marginLeft: theme.spacing(1), // Use spacing instead of xs
-  },
-  tokenInfoContainer: {
-    width: '100%',
+  directionIcon: {
     display: 'flex',
-    justifyContent: 'center',
     alignItems: 'center',
-  },
-  tokenName: {
-    flex: 1,
-    // fontSize: theme.typography.fontSizeLarge, // Use typography instead of lg
-    // color: theme.palette.text.primary,
+    justifyContent: 'center',
+    width: 28,
+    height: 28,
+    borderRadius: '50%',
+    backgroundColor: theme.palette.action.hover,
+    flexShrink: 0,
+    alignSelf: 'center',
   },
   tokenContainer: {
     display: 'inline-flex',
+    alignItems: 'center',
+    gap: theme.spacing(0.5),
+    flexWrap: 'wrap',
+    justifyContent: 'flex-end',
   },
   tokenAmount: {
-    fontSize: theme.typography.body1.fontSize, // Use typography instead of lg
-    // color: theme.palette.text.primary,
-    marginRight: theme.spacing(1), // Use spacing instead of unit
+    fontSize: theme.typography.body2.fontSize,
+    fontWeight: theme.typography.fontWeightBold,
   },
   tokenTypeContainer: {
     display: 'flex',
-    justifyContent: 'center',
     alignItems: 'center',
+    gap: theme.spacing(0.5),
   },
   tokenType: {
-    fontSize: theme.typography.caption.fontSize, // Use typography instead of xs
-    // color: theme.palette.text.secondary,
-  },
-  tokenDeleteButton: {
-    minHeight: '0px',
-    minWidth: '0px',
-    flex: 'none',
-  },
-  bottomButtonWrap: {
-    flexDirection: 'row',
-    display: 'flex',
-    justifyContent: 'space-between',
-    padding: `${theme.spacing(2)} 0px`, // Use spacing instead of md
-    '&.center': {
-      justifyContent: 'center',
-    },
-  },
-  bottomButton: {
-    minWidth: 0,
-    minHeight: 0,
-    padding: `0px ${theme.spacing(1)}`, // Use spacing instead of unit
+    fontSize: theme.typography.caption.fontSize,
   },
 }));
 

@@ -1,6 +1,14 @@
 import React, { useEffect } from 'react';
-import { Select, MenuItem, Typography, Button, Divider } from '@mui/material';
-import NavBar from '../../components/NavBar';
+import {
+  Select,
+  MenuItem,
+  Typography,
+  Button,
+  Divider,
+  Skeleton,
+  Stack,
+} from '@mui/material';
+import PageLayout from '../../components/PageLayout';
 import { useAppSelector, useAppDispatch } from '../../store/hooks';
 import {
   getAccounts,
@@ -16,35 +24,36 @@ const AccountLogin: React.FC = () => {
 
   const selectedWalletName = useAppSelector((state) => state.accountLogin.selectedWalletName);
   const accounts = useAppSelector((state) => state.accountLogin.accounts);
+  const isLoading = useAppSelector((state) => state.accountLogin.isLoading);
 
   useEffect(() => {
     dispatch(getAccounts(true));
   }, [dispatch]);
 
   return (
-    <div className={classes.root}>
-      <NavBar
-        // hasNetworkSelector
-        isDarkTheme
-        title="Account Login"
-      />
+    <PageLayout title="Account Login">
       <div className={classes.accountContainer}>
         <Typography className={classes.selectAcctText}>Select account</Typography>
-        <Select
-          className={classes.accountSelect}
-          name="accounts"
-          value={selectedWalletName}
-          onChange={(e) => {
-            console.log('Selected account:', e.target.value);
-            dispatch(setSelectedWalletName(e.target.value as string));
-          }}
-        >
-          {accounts.map((acct: any, index: number) => (
-            <MenuItem key={index} value={acct.name}>
-              {acct.name}
-            </MenuItem>
-          ))}
-        </Select>
+        {isLoading ? (
+          <Stack spacing={1}>
+            <Skeleton variant="rounded" height={44} />
+          </Stack>
+        ) : (
+          <Select
+            className={classes.accountSelect}
+            name="accounts"
+            value={selectedWalletName}
+            onChange={(e) => {
+              dispatch(setSelectedWalletName(e.target.value as string));
+            }}
+          >
+            {accounts.map((acct: any, index: number) => (
+              <MenuItem key={index} value={acct.name}>
+                {acct.name}
+              </MenuItem>
+            ))}
+          </Select>
+        )}
       </div>
       <div className={classes.loginContainer}>
         <Button
@@ -52,28 +61,23 @@ const AccountLogin: React.FC = () => {
           fullWidth
           variant="contained"
           color="primary"
-          onClick={() => {
-            console.log('Attempting to login...');
-            dispatch(loginAccount());
-          }}
+          disabled={isLoading || !selectedWalletName}
+          onClick={() => dispatch(loginAccount())}
         >
           Login
         </Button>
-        <Divider sx={{margin: '20px'}}>Or</Divider>
+        <Divider sx={{ my: 2.5, mx: 2.5 }}>Or</Divider>
         <Button
           className={classes.loginButton}
           fullWidth
           variant="contained"
           color="primary"
-          onClick={() => {
-            console.log('Calling routeToCreateWallet');
-            routeToCreateWallet();
-          }}
+          onClick={() => routeToCreateWallet()}
         >
           Create New Wallet
         </Button>
       </div>
-    </div>
+    </PageLayout>
   );
 };
 

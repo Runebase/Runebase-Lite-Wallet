@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
-  Typography,
   TextField,
   Button,
   Dialog,
@@ -12,15 +11,17 @@ import {
   MenuItem,
   FormControl,
   InputLabel,
+  Alert,
+  Collapse,
+  Stack,
 } from '@mui/material';
-import NavBar from '../../components/NavBar';
+import PageLayout from '../../components/PageLayout';
 import BorderTextField from '../../components/BorderTextField';
 import { useAppSelector, useAppDispatch } from '../../store/hooks';
 import {
   validateImportWalletName,
   importPrivateKey,
   importSeedPhrase,
-  // cancelImport,
   setImportType,
   setPrivateKey,
   setMnemonic,
@@ -51,122 +52,106 @@ const ImportWallet: React.FC = () => {
   const privateKeyPageError = useAppSelector(selectPrivateKeyPageError);
   const mnemonicPageError = useAppSelector(selectMnemonicPageError);
 
-  useEffect(() => { dispatch(resetImport()); }, [dispatch]);
+  // Only reset form on first visit, not when navigating back from an error
+  // (which would wipe the user's inputs)
+  const hasInitialized = useRef(false);
+  useEffect(() => {
+    if (!hasInitialized.current) {
+      hasInitialized.current = true;
+      const hasExistingData = _accountName || privateKey
+        || mnemonic.some((word: string) => word.length > 0);
+      if (!hasExistingData) {
+        dispatch(resetImport());
+      }
+    }
+  }, [dispatch]);
+
+  const handleImport = () => {
+    if (importType === IMPORT_TYPE.PRIVATE_KEY) {
+      dispatch(importPrivateKey());
+    }
+    if (importType === IMPORT_TYPE.MNEMONIC) {
+      dispatch(importSeedPhrase());
+    }
+  };
 
   return (
-    <div className={classes.root}>
-      <NavBar
-        // hasNetworkSelector
-        hasBackButton
-        title="Import Wallet"
-      />
+    <PageLayout hasBackButton title="Import Wallet">
       <div className={classes.contentContainer}>
-        <div className={classes.inputContainer}>
-          <div className={classes.fieldContainer}>
-            <TypeField classes={classes} />
-            {importType === IMPORT_TYPE.PRIVATE_KEY && (
-              <TextField
-                label="Private Key"
-                autoFocus
-                required
-                multiline
-                rows={2}
-                type="text"
-                placeholder={`Enter your ${importType} here to import your wallet.`}
-                onChange={(e) => dispatch(setPrivateKey(e.target.value))}
-                InputProps={{
-                  classes: { input: classes.mnemonicPrKeyFieldInput },
-                }}
-              />
-            )
-            }
-            {importType === IMPORT_TYPE.MNEMONIC && (
-              <SeedPhraseInput
-                phrase={mnemonic}
-                setPhrase={(phrase: string[]) => dispatch(setMnemonic(phrase))}
-                error={errorMessage}
-                setError={setErrorMessage}
-                disabled={false}
-              />
-            )
-            }
-            {!!privateKey && privateKeyError && (
-              <Typography className={classes.errorText}>
-                {privateKeyError}
-              </Typography>
-            )}
-            <BorderTextField
-              label="Wallet Name"
-              placeholder="Wallet name"
-              error={walletNameTaken}
-              errorText={walletNameError}
-              onChange={(e: any) => dispatch(validateImportWalletName(e.target.value))}
-              onEnterPress={() => {
-                if (importType === IMPORT_TYPE.PRIVATE_KEY) {
-                  dispatch(importPrivateKey());
-                }
-                if (importType === IMPORT_TYPE.MNEMONIC) {
-                  dispatch(importSeedPhrase());
-                }
-              }}
+        <Stack spacing={2} sx={{ flex: 1 }}>
+          <FormControl fullWidth>
+            <InputLabel id="select-type-label">Select Type</InputLabel>
+            <Select
+              labelId="select-type-label"
+              label="Select Type"
+              value={importType}
+              onChange={(event) => dispatch(setImportType(event.target.value))}
+              aria-label="Select import type"
+            >
+              <MenuItem value={IMPORT_TYPE.MNEMONIC}>Seed Phrase</MenuItem>
+              <MenuItem value={IMPORT_TYPE.PRIVATE_KEY}>Private Key</MenuItem>
+            </Select>
+          </FormControl>
+
+          <Collapse in={importType === IMPORT_TYPE.PRIVATE_KEY}>
+            <TextField
+              label="Private Key"
+              autoFocus
+              required
+              multiline
+              rows={3}
+              fullWidth
+              type="text"
+              placeholder="Enter your private key here"
+              onChange={(e) => dispatch(setPrivateKey(e.target.value))}
+              aria-label="Enter private key"
             />
-          </div>
-        </div>
-        <div>
-          <Button
-            className={classes.importButton}
-            fullWidth
-            variant="contained"
-            color="primary"
-            onClick={() => {
-              if (importType === IMPORT_TYPE.PRIVATE_KEY) {
-                dispatch(importPrivateKey());
-              }
-              if (importType === IMPORT_TYPE.MNEMONIC) {
-                dispatch(importSeedPhrase());
-              }
-            }}
-            disabled={
-              importType === IMPORT_TYPE.PRIVATE_KEY
-                ? privateKeyPageError
-                : importType === IMPORT_TYPE.MNEMONIC
-                  ? mnemonicPageError
-                  : false
-            }
-          >
-            Import
-          </Button>
-        </div>
+          </Collapse>
+
+          <Collapse in={importType === IMPORT_TYPE.MNEMONIC}>
+            <SeedPhraseInput
+              phrase={mnemonic}
+              setPhrase={(phrase: string[]) => dispatch(setMnemonic(phrase))}
+              error={errorMessage}
+              setError={setErrorMessage}
+              disabled={false}
+            />
+          </Collapse>
+
+          {!!privateKey && privateKeyError && (
+            <Alert severity="error">{privateKeyError}</Alert>
+          )}
+
+          <BorderTextField
+            label="Wallet Name"
+            placeholder="Wallet name"
+            error={walletNameTaken}
+            errorText={walletNameError}
+            onChange={(e: any) => dispatch(validateImportWalletName(e.target.value))}
+            onEnterPress={handleImport}
+          />
+        </Stack>
+
+        <Button
+          fullWidth
+          variant="contained"
+          color="primary"
+          size="large"
+          onClick={handleImport}
+          disabled={
+            importType === IMPORT_TYPE.PRIVATE_KEY
+              ? privateKeyPageError
+              : importType === IMPORT_TYPE.MNEMONIC
+                ? mnemonicPageError
+                : false
+          }
+          sx={{ mt: 2 }}
+        >
+          Import
+        </Button>
       </div>
       <ErrorDialog />
-    </div>
-  );
-};
-
-const TypeField: React.FC<{ classes: any }> = ({ classes }) => {
-  const dispatch = useAppDispatch();
-  const importType = useAppSelector((state) => state.import.importType);
-
-  return (
-    <div className={classes.fieldContainer}>
-      <FormControl fullWidth>
-        <InputLabel id="select-type-label">Select Type</InputLabel>
-        <Select
-          labelId="select-type-label"
-          label="Select Type"
-          className={classes.typeSelect}
-          value={importType}
-          onChange={(event) => dispatch(setImportType(event.target.value))}
-        >
-          <MenuItem value={IMPORT_TYPE.MNEMONIC}>
-            <Typography className={classes.menuItemTypography}>Seed Phrase</Typography>
-          </MenuItem>
-          <MenuItem value={IMPORT_TYPE.PRIVATE_KEY}>
-            <Typography className={classes.menuItemTypography}>Private Key</Typography>
-          </MenuItem>
-        </Select>
-      </FormControl>
-    </div>
+    </PageLayout>
   );
 };
 

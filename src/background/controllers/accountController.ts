@@ -27,6 +27,25 @@ import {
 import { IBlockchainInfo, ISendRawTxResult } from '../../services/wallet/types';
 globalThis.Buffer = Buffer;
 
+/**
+ * Convert raw blockchain error messages into user-friendly descriptions.
+ */
+function formatTxError(raw: string): string {
+  if (raw.includes('premature-spend-of-coinbase') || raw.includes('bad-txns-premature-spend')) {
+    return 'Your available balance consists of immature staking rewards that cannot be spent yet. Please wait for them to mature (~2000 confirmations) before delegating.';
+  }
+  if (raw.includes('insufficient') || raw.includes('Insufficient')) {
+    return 'Insufficient funds to cover the gas cost of this transaction.';
+  }
+  if (raw.includes('Missing inputs') || raw.includes('missing-inputs')) {
+    return 'Transaction inputs are no longer available. Please try again.';
+  }
+  if (raw.includes('txn-mempool-conflict')) {
+    return 'A conflicting transaction is already pending. Please wait for it to confirm.';
+  }
+  return raw;
+}
+
 const INIT_VALUES = {
   mainnetAccounts: [],
   testnetAccounts: [],
@@ -34,6 +53,8 @@ const INIT_VALUES = {
   loggedInAccount: undefined,
   getWalletInfoInterval: undefined,
   getBlockchainInfoInterval: undefined,
+  getDelegationInfoInterval: undefined,
+  delegationConfirmPollInterval: undefined,
   blockchainInfo: undefined,
 };
 
@@ -41,6 +62,9 @@ export default class AccountController extends IController {
   private static SCRYPT_PARAMS_PRIV_KEY: any = { N: 8192, r: 8, p: 1 };
   private static GET_WALLET_INFO_INTERVAL_MS: number = 30000;
   private static GET_BLOCKCHAIN_INFO_INTERVAL_MS: number = 120000;
+  private static GET_DELEGATION_INFO_INTERVAL_MS: number = 120000;
+  private static DELEGATION_CONFIRM_POLL_MS: number = 15000;
+  private static DELEGATION_CONFIRM_POLL_MAX: number = 8;
 
   public get accounts(): Account[] {
     if (this.main.network.networkName === NETWORK_NAMES.MAINNET) {
@@ -62,6 +86,9 @@ export default class AccountController extends IController {
   private regtestAccounts: Account[] = INIT_VALUES.regtestAccounts;
   private getWalletInfoInterval?: any = INIT_VALUES.getWalletInfoInterval;
   private getBlockchainInfoInterval?: any = INIT_VALUES.getBlockchainInfoInterval;
+  private getDelegationInfoInterval?: any = INIT_VALUES.getDelegationInfoInterval;
+  private delegationConfirmPollInterval?: any = INIT_VALUES.delegationConfirmPollInterval;
+  private delegationConfirmPollCount: number = 0;
 
   constructor(main: RunebaseChromeController) {
     super('account', main);
@@ -99,13 +126,12 @@ export default class AccountController extends IController {
     password: string,
     algorithm: string,
   ) => {
-    this.main.crypto.generateAppSaltIfNecessary();
-    this.main.crypto.derivePasswordHash(password, algorithm, true);
+    await this.main.crypto.generateAppSaltIfNecessary();
+    await this.main.crypto.derivePasswordHash(password, algorithm, true);
   };
 
   public finishLogin = async () => {
     if (!this.hasAccounts) {
-      console.log('finished login');
       this.routeToAccountPage();
       return;
     }
@@ -209,8 +235,6 @@ export default class AccountController extends IController {
       return;
     }
 
-    console.log('importPrivateKey');
-
     await this.addAccountAndLogin(accountName, privateKeyHash, walletKeyPair);
   };
 
@@ -234,7 +258,6 @@ export default class AccountController extends IController {
   };
 
   public loginAccount = async (accountName: string) => {
-    console.warn('Logging in!');
     const account = find(this.accounts, { name: accountName });
     this.loggedInAccount = cloneDeep(account);
 
@@ -244,11 +267,9 @@ export default class AccountController extends IController {
     }
 
     try {
-      console.log('Attempting to recover wallet from private key hash');
       const walletKeyPair = this.recoverFromPrivateKeyHash(this.loggedInAccount.privateKeyHash);
       this.loggedInAccount.wallet = new Wallet(walletKeyPair);
 
-      console.log('Login successful. Performing actions after login...');
       await this.onAccountLoggedIn();
     } catch (err) {
       console.error('Error during login:', err);
@@ -269,15 +290,21 @@ export default class AccountController extends IController {
         type: MESSAGE_TYPE.LOGIN_SUCCESS_NO_ACCOUNTS,
       });
     } else {
-      console.log('LOGIN_SUCCESS_WITH_ACCOUNTS');
       sendMessage({
         type: MESSAGE_TYPE.LOGIN_SUCCESS_WITH_ACCOUNTS,
       });
     }
   };
 
-  public onAccountLoggedIn = async (isSessionRestore = false) => {
-    // Connect to ElectrumX when logging in
+  public onAccountLoggedIn = async () => {
+    // Clean up any existing polling/subscriptions before reinitializing
+    // (handles switching accounts or importing a 2nd wallet without logout)
+    this.stopPolling();
+    this.main.token.stopPolling();
+    this.main.external.stopPolling();
+
+    // connectElectrumX() is safe to call repeatedly — it reuses an
+    // existing connection if one is already alive or in progress.
     await this.main.network.connectElectrumX();
 
     this.main.token.initTokenList();
@@ -290,9 +317,7 @@ export default class AccountController extends IController {
     await this.main.token.startPolling();
     await this.main.external.startPolling();
 
-    if (!isSessionRestore) {
-      this.main.inpageAccount.sendInpageAccountAllPorts(RUNEBASECHROME_ACCOUNT_CHANGE.LOGIN);
-    }
+    this.main.inpageAccount.sendInpageAccountAllPorts(RUNEBASECHROME_ACCOUNT_CHANGE.LOGIN);
     sendMessage({
       type: MESSAGE_TYPE.ACCOUNT_LOGIN_SUCCESS,
     });
@@ -307,6 +332,11 @@ export default class AccountController extends IController {
       clearInterval(this.getBlockchainInfoInterval);
       this.getBlockchainInfoInterval = undefined;
     }
+    if (this.getDelegationInfoInterval) {
+      clearInterval(this.getDelegationInfoInterval);
+      this.getDelegationInfoInterval = undefined;
+    }
+    this.stopDelegationConfirmPoll();
   };
 
   /**
@@ -336,9 +366,13 @@ export default class AccountController extends IController {
       // Subscribe to token transfer events for each tracked token
       await this.main.token.setupTokenSubscriptions();
 
-      console.log('ElectrumX subscriptions active — polling demoted to fallback');
-    } catch (err) {
-      console.warn('ElectrumX subscriptions failed, relying on polling:', err);
+      // Subscribe to delegation contract events (AddDelegation / RemoveDelegation)
+      await wallet.subscribeDelegationEvents(electrumx, () => {
+        this.getDelegationInfo();
+      });
+
+    } catch (_err) {
+      // subscriptions failed, relying on polling
     }
   };
 
@@ -376,14 +410,11 @@ export default class AccountController extends IController {
     }
 
     try {
-      console.log('Attempting to recover wallet from private key hash');
       this.recoverFromPrivateKeyHash(account.privateKeyHash);
-      console.log('Password validation successful');
       return true;
-    } catch (err) {
-      console.error('Error validating password:', err);
+    } catch (_err) {
+      // password validation failed
     }
-    console.log('Password validation failed');
     return false;
   };
 
@@ -495,6 +526,66 @@ export default class AccountController extends IController {
   };
 
   /**
+   * Check whether the wallet has enough mature UTXOs to pay for a delegation tx.
+   * Returns maturity info so the UI can show progress toward spendability.
+   */
+  private getDelegationReadiness = async () => {
+    if (!this.loggedInAccount || !this.loggedInAccount.wallet) {
+      return;
+    }
+
+    const electrumx = this.getElectrumX();
+    const STAKE_MATURITY = 2000;
+    const DELEGATION_GAS_COST = 2500000 * 8000; // gasLimit * gasPrice in satoshis
+
+    try {
+      const currentHeight = this.blockchainInfo?.height || 0;
+      const utxos = await this.loggedInAccount.wallet.getUtxos(electrumx, currentHeight);
+
+      let matureBalance = 0;
+      let immatureBalance = 0;
+      let nearestMatureHeight: number | undefined;
+
+      for (const utxo of utxos) {
+        if (utxo.isStake && utxo.confirmations < STAKE_MATURITY) {
+          immatureBalance += utxo.value;
+          // Calculate when this UTXO will mature
+          // utxo.confirmations = currentHeight - utxoHeight + 1
+          // maturesAt = utxoHeight + STAKE_MATURITY = currentHeight - confirmations + 1 + STAKE_MATURITY
+          const maturesAtHeight = currentHeight - utxo.confirmations + 1 + STAKE_MATURITY;
+          if (!nearestMatureHeight || maturesAtHeight < nearestMatureHeight) {
+            nearestMatureHeight = maturesAtHeight;
+          }
+        } else {
+          matureBalance += utxo.value;
+        }
+      }
+
+      const canDelegate = matureBalance >= DELEGATION_GAS_COST;
+      const blocksUntilMature = nearestMatureHeight && currentHeight
+        ? Math.max(0, nearestMatureHeight - currentHeight)
+        : undefined;
+
+      sendMessage({
+        type: MESSAGE_TYPE.GET_DELEGATION_READINESS_RETURN,
+        readiness: {
+          canDelegate,
+          matureBalance,
+          immatureBalance,
+          blocksUntilMature,
+          currentHeight,
+        },
+      });
+    } catch (err) {
+      console.error('Error checking delegation readiness:', err);
+      sendMessage({
+        type: MESSAGE_TYPE.GET_DELEGATION_READINESS_RETURN,
+        readiness: { canDelegate: true, matureBalance: 0, immatureBalance: 0 },
+      });
+    }
+  };
+
+  /**
    * Query superstaker delegations by fetching AddDelegation event history
    * and decoding each event's data from the transaction receipt.
    *
@@ -583,10 +674,8 @@ export default class AccountController extends IController {
               PoD: podData,
             });
           }
-        } catch (err) {
-          console.warn(
-            `Failed to decode delegation event ${event.tx_hash}:`, err,
-          );
+        } catch (_err) {
+          // failed to decode delegation event
         }
       }
 
@@ -610,7 +699,6 @@ export default class AccountController extends IController {
     }
     const electrumx = this.getElectrumX();
     const blockchainInfo = await this.loggedInAccount.wallet.getBlockchainInfo(electrumx);
-    console.log('getblockchainInfo: ', blockchainInfo);
     if (blockchainInfo) {
       this.blockchainInfo = blockchainInfo;
       sendMessage({
@@ -620,7 +708,7 @@ export default class AccountController extends IController {
     }
   };
 
-  private startPolling = async () => {
+  public startPolling = async () => {
     if (!this.getWalletInfoInterval) {
       this.getWalletInfoInterval = setInterval(() => {
         this.getWalletInfo();
@@ -630,6 +718,35 @@ export default class AccountController extends IController {
       this.getBlockchainInfoInterval = setInterval(() => {
         this.getBlockchainInfo();
       }, AccountController.GET_BLOCKCHAIN_INFO_INTERVAL_MS);
+    }
+    if (!this.getDelegationInfoInterval) {
+      this.getDelegationInfoInterval = setInterval(() => {
+        this.getDelegationInfo();
+      }, AccountController.GET_DELEGATION_INFO_INTERVAL_MS);
+    }
+  };
+
+  /**
+   * Start a short-lived rapid poll after a delegation tx is broadcast.
+   * Polls getDelegationInfo every 15s up to 8 times to catch the on-chain confirmation.
+   */
+  private startDelegationConfirmPoll = () => {
+    this.stopDelegationConfirmPoll();
+    this.delegationConfirmPollCount = 0;
+    this.delegationConfirmPollInterval = setInterval(() => {
+      this.delegationConfirmPollCount++;
+      this.getDelegationInfo();
+      if (this.delegationConfirmPollCount >= AccountController.DELEGATION_CONFIRM_POLL_MAX) {
+        this.stopDelegationConfirmPoll();
+      }
+    }, AccountController.DELEGATION_CONFIRM_POLL_MS);
+  };
+
+  private stopDelegationConfirmPoll = () => {
+    if (this.delegationConfirmPollInterval) {
+      clearInterval(this.delegationConfirmPollInterval);
+      this.delegationConfirmPollInterval = undefined;
+      this.delegationConfirmPollCount = 0;
     }
   };
 
@@ -738,15 +855,17 @@ export default class AccountController extends IController {
       console.error('Error sendDelegationConfirm:', error);
       sendMessage({
         type: MESSAGE_TYPE.SEND_DELEGATION_CONFIRM_FAILURE,
-        error,
+        error: { ...error, message: formatTxError(error.message || String(error)) },
       });
       return;
     }
 
-    console.log('sendDelegationConfirm sent successfully!');
     sendMessage({
       type: MESSAGE_TYPE.SEND_DELEGATION_CONFIRM_SUCCESS,
     });
+    // Refresh delegation info immediately and start rapid polling to catch confirmation
+    this.getDelegationInfo();
+    this.startDelegationConfirmPoll();
   };
 
   private sendRemoveDelegationConfirm = async (
@@ -781,15 +900,17 @@ export default class AccountController extends IController {
       console.error('Error sendRemoveDelegationConfirm:', error);
       sendMessage({
         type: MESSAGE_TYPE.SEND_REMOVE_DELEGATION_CONFIRM_FAILURE,
-        error,
+        error: { ...error, message: formatTxError(error.message || String(error)) },
       });
       return;
     }
 
-    console.log('sendRemoveDelegationConfirm sent successfully!');
     sendMessage({
       type: MESSAGE_TYPE.SEND_REMOVE_DELEGATION_CONFIRM_SUCCESS,
     });
+    // Refresh delegation info immediately and start rapid polling to catch confirmation
+    this.getDelegationInfo();
+    this.startDelegationConfirmPoll();
   };
 
   private handleMessage = async (
@@ -803,34 +924,28 @@ export default class AccountController extends IController {
     try {
       switch (requestData.type) {
       case MESSAGE_TYPE.LOGIN:
-        this.login(requestData.password, requestData.algorithm);
+        await this.login(requestData.password, requestData.algorithm);
         break;
       case MESSAGE_TYPE.REQUEST_BACKUP_WALLET_INFO: {
-        this.requestWalletBackupInfo(requestData.password, requestData.algorithm);
+        await this.requestWalletBackupInfo(requestData.password, requestData.algorithm);
         break;
       }
       case MESSAGE_TYPE.IMPORT_MNEMONIC:
-        console.log(`Importing mnemonic: ${requestData.accountName}, ${requestData.mnemonicPrivateKey}`);
         await this.importMnemonic(requestData.accountName, requestData.mnemonicPrivateKey);
         break;
       case MESSAGE_TYPE.IMPORT_PRIVATE_KEY:
-        console.log(`Importing private key: ${requestData.accountName}, ${requestData.mnemonicPrivateKey}`);
         await this.importPrivateKey(requestData.accountName, requestData.mnemonicPrivateKey);
         break;
       case MESSAGE_TYPE.SAVE_TO_FILE:
-        console.log(`Saving to file: ${requestData.accountName}, ${requestData.mnemonicPrivateKey}`);
         this.saveToFile(requestData.accountName, requestData.mnemonicPrivateKey);
         break;
       case MESSAGE_TYPE.ACCOUNT_LOGIN:
-        console.log(`Logging into account: ${requestData.selectedWalletName}`);
         await this.loginAccount(requestData.selectedWalletName);
         break;
       case MESSAGE_TYPE.SEND_TOKENS:
-        console.log(`Sending tokens: ${requestData.receiverAddress}, Amount: ${requestData.amount}, Speed: ${requestData.transactionSpeed}`);
         this.sendTokens(requestData.receiverAddress, requestData.amount, requestData.transactionSpeed);
         break;
       case MESSAGE_TYPE.SEND_DELEGATION_CONFIRM:
-        console.log(`sendDelegationConfirm: ${JSON.stringify(request)}`);
         this.sendDelegationConfirm(
           parseJsonOrFallback(requestData.signedPoD),
           requestData.fee,
@@ -839,31 +954,24 @@ export default class AccountController extends IController {
         );
         break;
       case MESSAGE_TYPE.SEND_REMOVE_DELEGATION_CONFIRM:
-        console.log(`sendRemoveDelegationConfirm: ${JSON.stringify(request)}`);
         this.sendRemoveDelegationConfirm(requestData.gasLimit, requestData.gasPrice);
         break;
       case MESSAGE_TYPE.LOGOUT:
-        console.log('Logging out');
         this.logoutAccount();
         break;
       case MESSAGE_TYPE.HAS_ACCOUNTS:
-        console.log('Checking if accounts exist');
-        console.log(this.accounts);
         sendMessage({
           type: MESSAGE_TYPE.HAS_ACCOUNTS_RETURN,
           hasAccounts: this.hasAccounts,
         });
         break;
       case MESSAGE_TYPE.GET_ACCOUNTS:
-        console.log('Getting accounts');
-        console.log(this.accounts);
         sendMessage({
           type: MESSAGE_TYPE.GET_ACCOUNTS_RETURN,
           accounts: this.accounts,
         });
         break;
       case MESSAGE_TYPE.GET_LOGGED_IN_ACCOUNT:
-        console.log('Getting logged-in account');
         if (isExtensionEnvironment()) {
           sendResponse?.(this.loggedInAccount && this.loggedInAccount.wallet && this.loggedInAccount.wallet.info
             ? { name: this.loggedInAccount.name, address: this.loggedInAccount!.wallet!.info!.address }
@@ -871,21 +979,18 @@ export default class AccountController extends IController {
         }
         break;
       case MESSAGE_TYPE.GET_LOGGED_IN_ACCOUNT_NAME:
-        console.log('Getting logged-in account name');
         sendMessage({
           type: MESSAGE_TYPE.GET_LOGGED_IN_ACCOUNT_NAME_RETURN,
           accountName: this.loggedInAccount ? this.loggedInAccount.name : undefined,
         });
         break;
       case MESSAGE_TYPE.GET_BLOCKCHAIN_INFO:
-        console.log('Getting blockchain info');
         sendMessage({
           type: MESSAGE_TYPE.GET_BLOCKCHAIN_INFO_RETURN,
           blockchainInfo: this.blockchainInfo ? this.blockchainInfo : undefined,
         });
         break;
       case MESSAGE_TYPE.GET_WALLET_INFO:
-        console.log('Getting wallet info');
         sendMessage({
           type: MESSAGE_TYPE.GET_WALLET_INFO_RETURN,
           info: this.loggedInAccount && this.loggedInAccount.wallet
@@ -893,14 +998,20 @@ export default class AccountController extends IController {
         });
         break;
       case MESSAGE_TYPE.GET_DELEGATION_INFO:
-        console.log('Getting wallet delegation info');
-        this.getDelegationInfo();
+        // Return cached delegation info to avoid ElectrumX calls on
+        // every popup open. Fresh data is fetched by polling intervals.
+        sendMessage({
+          type: MESSAGE_TYPE.GET_DELEGATION_INFO_RETURN,
+          delegationInfo: this.loggedInAccount?.wallet?.delegationInfo ?? null,
+        });
+        break;
+      case MESSAGE_TYPE.GET_DELEGATION_READINESS:
+        this.getDelegationReadiness();
         break;
       case MESSAGE_TYPE.GET_SUPERSTAKER_DELEGATIONS:
         this.getSuperstakerDelegations(requestData.address);
         break;
       case MESSAGE_TYPE.GET_RUNEBASE_USD:
-        console.log('Getting RUNEBASE to USD conversion');
         sendMessage({
           type: MESSAGE_TYPE.GET_RUNEBASE_USD_RETURN,
           runebaseUSD: this.loggedInAccount && this.loggedInAccount.wallet
@@ -908,7 +1019,6 @@ export default class AccountController extends IController {
         });
         break;
       case MESSAGE_TYPE.VALIDATE_WALLET_NAME:
-        console.log(`Validating wallet name: ${requestData.name}`);
         if (inExtensionEnvironment) {
           sendResponse?.(this.isWalletNameTaken(requestData.name));
         } else {
@@ -920,14 +1030,12 @@ export default class AccountController extends IController {
         }
         break;
       case MESSAGE_TYPE.GET_MAX_RUNEBASE_SEND:
-        console.log('Getting max RUNEBASE send amount');
         this.updateAndSendMaxRunebaseAmountToPopup();
         break;
       default:
         break;
       }
     } catch (err) {
-      console.error(err);
       this.main.displayErrorOnPopup(err as any);
     }
   };

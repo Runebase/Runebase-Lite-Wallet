@@ -59,7 +59,6 @@ export default class CryptoController extends IController {
         const appSalt: Uint8Array = crypto.getRandomValues(new Uint8Array(16)) as Uint8Array;
         this.appSalt = appSalt;
         await setStorageValue(STORAGE.APP_SALT, Array.from(appSalt).join(','));
-        console.log('appSalt set');
       }
     } catch (_err) {
       throw new Error('Error generating appSalt');
@@ -71,7 +70,6 @@ export default class CryptoController extends IController {
       this.securityAlgorithm = algorithm;
 
       await setStorageValue(STORAGE.SECURITY_ALGORITHM, algorithm);
-      console.log('securityAlgorithm set');
     } catch (_err) {
       throw new Error('Error setting securityAlgorithm');
     }
@@ -87,16 +85,13 @@ export default class CryptoController extends IController {
       throw Error('appSalt should not be empty');
     }
     let pickSecurityAlgorithm;
-    console.log('this.securityAlgorithm:', this.securityAlgorithm);
     if (this.securityAlgorithm) {
       pickSecurityAlgorithm = this.securityAlgorithm;
     } else {
       this.setMasterAccountSecurityAlgo(algorithm);
       pickSecurityAlgorithm = algorithm;
     }
-    console.log('picked algorithm:', pickSecurityAlgorithm);
     if (pickSecurityAlgorithm === 'PBKDF2') {
-      console.log('execute PBKDF2');
       const pbkdf2Async = () => new Promise<string>((resolve, reject) => {
         pbkdf2(
           password,
@@ -116,7 +111,6 @@ export default class CryptoController extends IController {
 
       try {
         this.passwordHash = await pbkdf2Async();
-        console.log('needs to finish login route? ', needsFinishLoginCallback);
         needsFinishLoginCallback && this.main.account.finishLogin();
       } catch (error) {
         throw new Error(error as any);
@@ -125,7 +119,6 @@ export default class CryptoController extends IController {
 
     if (pickSecurityAlgorithm === 'Scrypt') {
       try {
-        console.log('Calculating scrypt...');
         const derivedKey = scrypt(
           password,
           Buffer.from(this.appSalt),

@@ -40,14 +40,12 @@ const GasLimitField: React.FC<GasLimitFieldProps> = ({
   };
 
   return (
-    <FormControl
-      fullWidth
-      sx={{marginBottom: '8px'}}
-    >
+    <FormControl fullWidth>
       <Button
-        style={{ alignSelf: 'flex-end', margin: '0 0 8px 0' }}
+        sx={{ alignSelf: 'flex-end', mb: 1 }}
         color="primary"
         variant="contained"
+        size="small"
         onClick={() => handleChange(recommendedAmount)}
       >
         Set Recommended GasLimit
@@ -61,14 +59,14 @@ const GasLimitField: React.FC<GasLimitFieldProps> = ({
         value={gasLimit}
         InputProps={{
           endAdornment: (
-            <Typography style={{ fontSize: '0.8rem' }}>GAS</Typography>
+            <Typography variant="caption">GAS</Typography>
           ),
         }}
         onChange={(event) => handleChange(Number(event.target.value))}
         onKeyDown={(event) => onEnterPress?.(event)}
       />
       {gasLimitFieldError && (
-        <Typography color="error" style={{ fontSize: '0.8rem', textAlign: 'left' }}>
+        <Typography color="error" variant="caption" sx={{ textAlign: 'left', mt: 0.5 }}>
           {gasLimitFieldError}
         </Typography>
       )}

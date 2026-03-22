@@ -42,7 +42,7 @@ const ToField: React.FC<ToFieldProps> = ({
     <>
       {
         !scanning && (
-          <FormControl fullWidth sx={{ marginBottom: '8px', position: 'relative' }}>
+          <FormControl fullWidth>
             <TextField
               fullWidth
               label="To"
@@ -58,7 +58,7 @@ const ToField: React.FC<ToFieldProps> = ({
               onKeyDown={handleKeyDown}
             />
             {!!receiverAddress && receiverFieldError && (
-              <Typography color="error" style={{ fontSize: '0.8rem', textAlign: 'left' }}>
+              <Typography color="error" variant="caption" sx={{ textAlign: 'left', mt: 0.5 }}>
                 {receiverFieldError}
               </Typography>
             )}
@@ -73,9 +73,7 @@ const ToField: React.FC<ToFieldProps> = ({
             onClick={startScan}
             disabled={scanning}
             fullWidth
-            sx={{
-              marginBottom: '10px'
-            }}
+            sx={{ mb: 1 }}
           >
             {scanning ? 'Scanning...' : 'Scan QR'}
           </Button>
@@ -84,7 +82,7 @@ const ToField: React.FC<ToFieldProps> = ({
             <Button
               variant="contained"
               color="secondary"
-              style={{ position: 'fixed', bottom: 0, left: 0, width: '100%' }}
+              sx={{ position: 'fixed', bottom: 0, left: 0, width: '100%' }}
               onClick={stopScan}
             >
               Stop Scan

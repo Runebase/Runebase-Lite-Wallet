@@ -46,7 +46,6 @@ const EnterPasswordDialog: React.FC<IProps> = ({
   };
 
   const loginFunction = () => {
-    console.log(`Attempting loginRequest with MESSAGE_TYPE.${MessageType}`);
     if (MessageType === MESSAGE_TYPE.REQUEST_BACKUP_WALLET_INFO) {
       const navigate = getNavigateFunction();
       navigate?.('/backup-wallet');

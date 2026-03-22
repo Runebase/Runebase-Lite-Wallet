@@ -1,18 +1,28 @@
 import React from 'react';
-import { Typography } from '@mui/material';
-import cx from 'classnames';
-import useStyles from './styles';
+import { Box, LinearProgress, Typography } from '@mui/material';
+import Logo from '../Logo';
 
 const Loading = () => {
-  const { classes } = useStyles();
-
   return (
-    <div className={cx(classes.root, 'loading')}>
-      <div className={classes.container}>
-        <Typography className={classes.text}>Loading...</Typography>
-        <div className={classes.anim9}></div>
-      </div>
-    </div>
+    <Box
+      sx={{
+        width: '100%',
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
+        gap: 2,
+      }}
+    >
+      <Logo />
+      <Box sx={{ width: '60%', maxWidth: 200 }}>
+        <LinearProgress color="primary" />
+      </Box>
+      <Typography variant="body2" color="text.secondary">
+        Loading...
+      </Typography>
+    </Box>
   );
 };
 

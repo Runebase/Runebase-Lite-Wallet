@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Typography, Paper, Button, Snackbar } from '@mui/material';
 
-import NavBar from '../../components/NavBar';
+import PageLayout from '../../components/PageLayout';
 import useStyles from './styles';
 import Loading from '../../components/Loading';
 import { useAppSelector } from '../../store/hooks';
@@ -27,8 +27,7 @@ const BackupWallet: React.FC = () => {
     return <Loading />;
   } else {
     return (
-      <div className={classes.root}>
-        <NavBar hasBackButton title={''} />
+      <PageLayout hasBackButton title="">
         <Paper className={classes.topContainer}>
           <Typography variant="h6" className={classes.walletCreatedHeader}>
             Backup Wallet
@@ -56,7 +55,7 @@ const BackupWallet: React.FC = () => {
           onClose={handleSnackbarClose}
           message="Copy Complete"
         />
-      </div>
+      </PageLayout>
     );
   }
 };

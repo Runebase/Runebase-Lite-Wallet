@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, TextField, Typography } from '@mui/material';
+import { Button, FormControl, TextField, Typography } from '@mui/material';
 import { useAppSelector, useAppDispatch } from '../../store/hooks';
 import {
   setGasPrice as setSendGasPrice,
@@ -40,11 +40,12 @@ const GasPriceField: React.FC<GasPriceFieldProps> = ({
   };
 
   return (
-    <div style={{ margin: '0 0 8px 0', display: 'flex', flexDirection: 'column' }}>
+    <FormControl fullWidth>
       <Button
-        style={{ alignSelf: 'flex-end', margin: '0 0 8px 0' }}
+        sx={{ alignSelf: 'flex-end', mb: 1 }}
         variant="contained"
         color="primary"
+        size="small"
         onClick={() => handleChange(recommendedAmount)}
       >
         Set Recommended GasPrice
@@ -58,7 +59,7 @@ const GasPriceField: React.FC<GasPriceFieldProps> = ({
         value={gasPrice.toString()}
         InputProps={{
           endAdornment: (
-            <Typography style={{ fontSize: '0.8rem' }}>
+            <Typography variant="caption">
               SATOSHI/GAS
             </Typography>
           ),
@@ -67,11 +68,11 @@ const GasPriceField: React.FC<GasPriceFieldProps> = ({
         onKeyDown={(event) => onEnterPress?.(event)}
       />
       {gasPriceFieldError && (
-        <Typography color="error" style={{ fontSize: '0.8rem', textAlign: 'left' }}>
+        <Typography color="error" variant="caption" sx={{ textAlign: 'left', mt: 0.5 }}>
           {gasPriceFieldError}
         </Typography>
       )}
-    </div>
+    </FormControl>
   );
 };
 

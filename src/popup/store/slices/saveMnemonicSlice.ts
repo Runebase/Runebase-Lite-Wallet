@@ -27,13 +27,11 @@ const saveMnemonicSlice = createSlice({
     },
     generateNewMnemonic: (state) => {
       state.mnemonic = generateMnemonic().split(' ');
-      console.log('Generated mnemonic:', state.mnemonic);
     },
     setWalletName: (state, action: PayloadAction<string>) => {
       state.walletName = action.payload;
     },
     resetSaveMnemonic: () => {
-      console.log('Resetting save mnemonic store');
       return initialState;
     },
   },
@@ -42,7 +40,6 @@ const saveMnemonicSlice = createSlice({
 // Side-effect actions
 export const createWallet = () => (dispatch: any, getState: any) => {
   const { saveMnemonic } = getState();
-  console.log('Creating wallet');
   const navigate = getNavigateFunction();
   navigate?.('/loading');
   sendMessage({
@@ -54,7 +51,6 @@ export const createWallet = () => (dispatch: any, getState: any) => {
 
 export const saveToFile = () => (dispatch: any, getState: any) => {
   const { saveMnemonic } = getState();
-  console.log('Saving Wallet To File');
   sendMessage({
     type: MESSAGE_TYPE.SAVE_TO_FILE,
     accountName: saveMnemonic.walletName,

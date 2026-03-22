@@ -4,48 +4,39 @@ import './global.css';
 import App from './App';
 import { PORT_NAME } from '../constants';
 
-// Abstraction for connecting to a runtime port
-interface PortConnector {
-  connectToPort(portName: string): any; // Adjust the return type based on the actual return value
+const isExtension = typeof chrome !== 'undefined'
+  && !!chrome.runtime && !!chrome.runtime.id;
+
+// Connect port
+let port: any;
+if (isExtension) {
+  port = chrome.runtime.connect({ name: PORT_NAME.POPUP });
 }
 
-// Chrome extension implementation
-class ChromePortConnector implements PortConnector {
-  connectToPort(portName: string): chrome.runtime.Port {
-    return chrome.runtime.connect({ name: portName });
+const root = document.getElementById('root');
+if (!root) throw new Error('Root element not found');
+
+// Detect layout: extension popup = fixed 400×600, everything else = fill viewport.
+// For extension, check chrome.storage for viewMode set by the side panel toggle.
+// Render React AFTER the class is applied so the first paint uses correct layout.
+function applyLayoutAndRender() {
+  if (!isExtension) {
+    // Non-extension (dev:browser, Electron, Cordova): always fill viewport
+    document.documentElement.classList.add('fill-viewport');
+    render();
+  } else {
+    chrome.storage.local.get('viewMode', (data) => {
+      if (data.viewMode === 'sidePanel') {
+        document.documentElement.classList.add('fill-viewport');
+      }
+      // Extension popup: no class → fixed 400×600 via CSS default
+      render();
+    });
   }
 }
 
-// Web-compatible implementation
-class WebPortConnector implements PortConnector {
-
-   
-  connectToPort(_portName: string): any {
-    // Provide a web-compatible implementation if needed
-    // For example, you can use postMessage for communication
-    // Adjust the return type accordingly
-  }
+function render() {
+  createRoot(root!).render(<App port={port} />);
 }
 
-// Determine the environment and use the appropriate implementation
-let portConnector: PortConnector;
-
-if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.id) {
-  // Check if chrome.runtime.connect is an actual function (Chrome extension environment)
-  portConnector = new ChromePortConnector();
-} else {
-  // Web-compatible environment
-  portConnector = new WebPortConnector();
-}
-
-// Usage example
-const port = portConnector.connectToPort(PORT_NAME.POPUP);
-
-const root: Element | null = document.getElementById('root');
-if (!root) {
-  throw new Error('Root element not found'); // or handle it in some way
-}
-
-const rootContainer = createRoot(root);
-
-rootContainer.render(<App port={port} />);
+applyLayoutAndRender();

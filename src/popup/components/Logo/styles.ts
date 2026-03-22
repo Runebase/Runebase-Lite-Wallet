@@ -2,18 +2,21 @@ import { makeStyles } from 'tss-react/mui';
 
 const useStyles = makeStyles()((theme) => ({
   logoContainer: {
-    flex: 1,
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'center',
     alignItems: 'center',
   },
   logo: {
-    width: 112,
-    height: 112,
+    width: 72,
+    height: 72,
+    [theme.breakpoints.up('sm')]: {
+      width: 96,
+      height: 96,
+    },
   },
   logoText: {
-    fontSize: 24,
+    fontSize: theme.typography.h5.fontSize,
     fontWeight: theme.typography.fontWeightBold,
     color: theme.palette.primary.light,
     alignSelf: 'center',

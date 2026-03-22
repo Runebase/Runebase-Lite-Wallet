@@ -8,6 +8,7 @@ import {
   ListItemText,
   Chip,
 } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 import {
   FiberManualRecord,
   Check,
@@ -19,16 +20,17 @@ import {
   switchElectrumXServer,
 } from '../../store/slices/sessionSlice';
 
-const CONNECTION_COLORS: Record<string, string> = {
-  connected: '#4caf50',
-  connecting: '#ff9800',
-  reconnecting: '#ff9800',
-  disconnected: '#f44336',
-};
-
 const ElectrumXStatusBar: React.FC = () => {
+  const theme = useTheme();
   const electrumxStatus = useAppSelector(selectElectrumXStatus);
   const [menuAnchor, setMenuAnchor] = useState<HTMLElement | null>(null);
+
+  const CONNECTION_COLORS: Record<string, string> = {
+    connected: theme.palette.success.main,
+    connecting: theme.palette.warning.main,
+    reconnecting: theme.palette.warning.main,
+    disconnected: theme.palette.error.main,
+  };
 
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
     setMenuAnchor(event.currentTarget);
@@ -43,7 +45,7 @@ const ElectrumXStatusBar: React.FC = () => {
     handleClose();
   };
 
-  const dotColor = CONNECTION_COLORS[electrumxStatus.state] || '#9e9e9e';
+  const dotColor = CONNECTION_COLORS[electrumxStatus.state] || theme.palette.text.secondary;
   const label = electrumxStatus.state === 'connected'
     ? electrumxStatus.serverLabel
     : electrumxStatus.state.charAt(0).toUpperCase() + electrumxStatus.state.slice(1);
@@ -79,7 +81,7 @@ const ElectrumXStatusBar: React.FC = () => {
         transformOrigin={{ vertical: 'top', horizontal: 'center' }}
       >
         <MenuItem disabled dense>
-          <Typography variant="caption" color="textSecondary">
+          <Typography variant="caption" color="text.secondary">
             Select ElectrumX Server
           </Typography>
         </MenuItem>

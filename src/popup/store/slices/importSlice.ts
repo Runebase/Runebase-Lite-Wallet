@@ -39,18 +39,15 @@ const importSlice = createSlice({
       state.importMnemonicPrKeyFailed = action.payload;
     },
     setImportType: (state, action: PayloadAction<string>) => {
-      console.log('Import type changed:', action.payload);
       state.importType = action.payload;
     },
     setMnemonic: (state, action: PayloadAction<string[]>) => {
       state.mnemonic = action.payload;
-      console.log(action.payload);
     },
     setPrivateKey: (state, action: PayloadAction<string>) => {
       state.privateKey = action.payload;
     },
     resetImport: (state) => {
-      console.log('Resetting import store');
       const tempImportType = state.importType;
       Object.assign(state, {
         ...initialState,
@@ -85,7 +82,6 @@ export const selectPrivateKeyPageError = (state: RootState): boolean => {
 export const selectMnemonicPageError = (state: RootState): boolean => {
   const { mnemonic, accountName, walletNameTaken } = state.import;
   const isMnemonicValid = mnemonic.length === 12 && mnemonic.every((word: string) => word.length > 0);
-  console.log('isMnemonicValid: ', isMnemonicValid);
   const walletNameError = walletNameTaken ? 'Wallet name is taken' : undefined;
   return !isMnemonicValid || !!walletNameError || accountName.length < 1;
 };
@@ -93,11 +89,9 @@ export const selectMnemonicPageError = (state: RootState): boolean => {
 // Side-effect actions
 export const validateImportWalletName = (name: string) => (dispatch: any) => {
   dispatch(importSlice.actions.setAccountName(name));
-  console.log('Account name changed:', name);
   sendMessage(
     { type: MESSAGE_TYPE.VALIDATE_WALLET_NAME, name },
     (response: any) => {
-      console.log('Wallet name validation response:', response);
       dispatch(importSlice.actions.setWalletNameTaken(response));
     },
   );
@@ -106,7 +100,6 @@ export const validateImportWalletName = (name: string) => (dispatch: any) => {
 export const importPrivateKey = () => (dispatch: any, getState: any) => {
   const state: RootState = getState();
   if (!selectPrivateKeyPageError(state)) {
-    console.log('Importing private key');
     const navigate = getNavigateFunction();
     navigate?.('/loading');
     sendMessage({
@@ -120,7 +113,6 @@ export const importPrivateKey = () => (dispatch: any, getState: any) => {
 export const importSeedPhrase = () => (dispatch: any, getState: any) => {
   const state: RootState = getState();
   if (!selectMnemonicPageError(state)) {
-    console.log('Importing seed phrase');
     const navigate = getNavigateFunction();
     navigate?.('/loading');
     sendMessage({

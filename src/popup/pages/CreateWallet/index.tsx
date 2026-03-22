@@ -1,6 +1,6 @@
 import React, { useEffect, ChangeEvent } from 'react';
-import { Button, Divider } from '@mui/material';
-import NavBar from '../../components/NavBar';
+import { Button, Divider, Stack } from '@mui/material';
+import PageLayout from '../../components/PageLayout';
 import Logo from '../../components/Logo';
 import BorderTextField from '../../components/BorderTextField';
 import { useAppSelector, useAppDispatch } from '../../store/hooks';
@@ -41,46 +41,40 @@ const CreateWallet: React.FC = () => {
   };
 
   return (
-    <div className={classes.root}>
-      <NavBar
-        hasBackButton={showBackButton}
-        // hasNetworkSelector
-        title=""
-      />
+    <PageLayout hasBackButton={showBackButton} title="">
       <div className={classes.contentContainer}>
         <Logo />
-        <div className={classes.fieldContainer}>
+        <Stack spacing={2} sx={{ mt: 2, width: '100%' }}>
           <BorderTextField
-            className={classes.walletNameField}
             placeholder="Wallet name"
             error={walletNameTaken}
             errorText={walletNameError}
             onChange={onWalletNameChange}
             onEnterPress={handleEnterPress}
           />
-        </div>
-        <Button
-          className={classes.loginButton}
-          fullWidth
-          variant="contained"
-          color="primary"
-          disabled={error}
-          onClick={() => routeToSaveMnemonic()}
-        >
-          Create Wallet
-        </Button>
-        <Divider sx={{margin: '20px'}}>Or</Divider>
-        <Button
-          className={classes.loginButton}
-          fullWidth
-          variant="contained"
-          color="primary"
-          onClick={() => routeToImportWallet()}
-        >
-          Import Wallet
-        </Button>
+          <Button
+            fullWidth
+            variant="contained"
+            color="primary"
+            size="large"
+            disabled={error}
+            onClick={() => routeToSaveMnemonic()}
+          >
+            Create Wallet
+          </Button>
+          <Divider>Or</Divider>
+          <Button
+            fullWidth
+            variant="outlined"
+            color="primary"
+            size="large"
+            onClick={() => routeToImportWallet()}
+          >
+            Import Wallet
+          </Button>
+        </Stack>
       </div>
-    </div>
+    </PageLayout>
   );
 };
 

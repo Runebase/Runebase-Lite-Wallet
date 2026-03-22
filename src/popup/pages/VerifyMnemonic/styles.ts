@@ -10,13 +10,13 @@ const useStyles = makeStyles()((theme) => ({
     flex: 1,
     display: 'flex',
     flexDirection: 'column',
-    alignItems: 'center', // Center the content horizontally
+    alignItems: 'center',
   },
   topContainer: {
     flex: 1,
     display: 'flex',
     flexDirection: 'column',
-    alignItems: 'center', // Center the content horizontally
+    alignItems: 'center',
   },
   walletCreatedHeader: {
     marginBottom: theme.spacing(1),
@@ -27,9 +27,9 @@ const useStyles = makeStyles()((theme) => ({
     padding: theme.spacing(2),
     marginBottom: theme.spacing(2),
     fontFamily: 'Roboto Mono, monospace',
-    border: '1px solid black',
+    border: `1px solid ${theme.palette.divider}`,
     borderRadius: theme.shape.borderRadius,
-    textAlign: 'center', // Center the text
+    textAlign: 'center',
   },
   actionButton: {
     height: theme.spacing(8),

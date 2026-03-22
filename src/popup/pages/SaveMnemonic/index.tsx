@@ -1,12 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { Typography, Button } from '@mui/material';
-import cx from 'classnames';
-import NavBar from '../../components/NavBar';
+import { Typography, Button, Alert, Stack } from '@mui/material';
+import PageLayout from '../../components/PageLayout';
 import { useAppSelector, useAppDispatch } from '../../store/hooks';
 import { generateNewMnemonic, setWalletName, saveToFile } from '../../store/slices/saveMnemonicSlice';
 import { getNavigateFunction } from '../../store/messageMiddleware';
 import useStyles from './styles';
-import WarningIcon from '@mui/icons-material/Warning';
 import SaveIcon from '@mui/icons-material/Save';
 import FactCheckIcon from '@mui/icons-material/FactCheck';
 import SeedPhraseInput from '../../components/SeedphraseInput';
@@ -27,11 +25,10 @@ const SaveMnemonic: React.FC = () => {
   }, [dispatch, createWalletName]);
 
   return (
-    <div className={classes.root}>
-      <NavBar hasBackButton title={''} />
+    <PageLayout hasBackButton title="">
       <div className={classes.contentContainer}>
         <div className={classes.topContainer}>
-          <Typography className={classes.walletCreatedHeader}>
+          <Typography variant="h6" fontWeight="bold" sx={{ mb: 1 }}>
             Creating Wallet
           </Typography>
           <SeedPhraseInput
@@ -41,43 +38,39 @@ const SaveMnemonic: React.FC = () => {
             setError={null}
             disabled={true}
           />
-          <Typography className={classes.warningText}>
-            <WarningIcon className={classes.warningIcon} />
+          <Alert severity="warning" sx={{ my: 2, width: '100%' }}>
             {strings['saveMnemonic.warningText']}
-          </Typography>
+          </Alert>
         </div>
-        <Button
-          className={cx(classes.actionButton, 'marginBottom')}
-          fullWidth
-          variant="contained"
-          color="primary"
-          onClick={() => {
-            const navigate = getNavigateFunction();
-            navigate?.('/verify-mnemonic');
-          }}
-          startIcon={<FactCheckIcon />}
-        >
-          Verify Seed Phrase
-        </Button>
-        {/*
-          Developer Note: Download functionality is disabled for Cordova
-          since i encountered issues in making it work.
-        */}
-        {
-          !isCordova && (
+        <Stack spacing={1.5} sx={{ px: 2, pb: 2, width: '100%' }}>
+          <Button
+            fullWidth
+            variant="contained"
+            color="primary"
+            size="large"
+            onClick={() => {
+              const navigate = getNavigateFunction();
+              navigate?.('/verify-mnemonic');
+            }}
+            startIcon={<FactCheckIcon />}
+          >
+            Verify Seed Phrase
+          </Button>
+          {!isCordova && (
             <Button
-              className={cx(classes.actionButton, classes.saveButton)}
               fullWidth
-              variant="contained"
-              color="secondary"
+              variant="outlined"
+              color="primary"
+              size="large"
               onClick={() => dispatch(saveToFile())}
               startIcon={<SaveIcon />}
             >
               Save Seed Phrase to File
             </Button>
           )}
+        </Stack>
       </div>
-    </div>
+    </PageLayout>
   );
 };
 

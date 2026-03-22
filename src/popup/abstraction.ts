@@ -12,13 +12,11 @@ if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.id) {
 } else if (typeof process !== 'undefined' && process.type) {
   targetOrigin = 'file://';
 } else {
-  console.log('Not running in Cordova environment');
   targetOrigin = window.location.origin;
 }
 
 function setTargetOriginForCordova() {
   if (typeof window.cordova !== 'undefined') {
-    console.log('Running in Cordova environment');
     targetOrigin = 'https://localhost';
   }
 }
@@ -30,8 +28,16 @@ if (typeof document !== 'undefined' && typeof document.addEventListener === 'fun
 export function sendMessage(message: any, callback?: any) {
   try {
     if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.id) {
-      console.log('sending message on chrome');
-      chrome.runtime.sendMessage(message, callback);
+      // In MV3 extensions, sendMessage throws "Receiving end does not
+      // exist" when the popup/side-panel is closed. Passing a callback
+      // (even a no-op) lets us read chrome.runtime.lastError and
+      // suppress the noisy unchecked-error warning in the console.
+      chrome.runtime.sendMessage(message, (response: any) => {
+        if (chrome.runtime.lastError) {
+          // Expected when popup is closed — silently ignore
+        }
+        if (callback) callback(response);
+      });
     } else {
       if (
         callback
@@ -51,7 +57,6 @@ export function sendMessage(message: any, callback?: any) {
         window.addEventListener('message', handler);
         message.id = messageId;
       }
-      console.log('sending message with window');
       window.postMessage(message, targetOrigin);
     }
   } catch (error) {
@@ -202,9 +207,6 @@ export function saveFile(
   content: string,
   filename: string
 ) {
-  console.log(content);
-  console.log(filename);
-  console.log('saveFileContent');
   if (isCordova()) {
     // Cordova environment
     downloadAndSaveFileCordova(content, filename);
@@ -220,17 +222,10 @@ export function isCordova() {
 
 
 function downloadAndSaveFileCordova(content: string, originalFilename: string) {
-  console.log('downloadAndSaveFileCordova called');
   const sanitizedFilename = originalFilename.replace(/[:/\\?%*|"<>]/g, '_');
   const filename = sanitizedFilename + '.txt';
-  console.log(filename);
 
   document.addEventListener('deviceready', function () {
-    console.log('deviceready event triggered');
-
-    console.log('Content:', content);
-    console.log('Content type:', typeof content);
-
     // Request WRITE_EXTERNAL_STORAGE permission
     cordova.plugins.permissions.requestPermission(
       cordova.plugins.permissions.WRITE_EXTERNAL_STORAGE,
@@ -243,7 +238,6 @@ function downloadAndSaveFileCordova(content: string, originalFilename: string) {
           window.resolveLocalFileSystemURL(
             fileDir,
             function (directoryEntry) {
-              console.log('Successfully resolved file system URL');
               createOrOpenFile(directoryEntry, filename, content);
             },
             function (error) {
@@ -265,12 +259,10 @@ function downloadAndSaveFileCordova(content: string, originalFilename: string) {
       filename,
       { create: true, exclusive: false },
       function (fileEntry) {
-        console.log('Found file');
         // Create a FileWriter object
         fileEntry.createWriter(
           function (fileWriter) {
             fileWriter.onwriteend = function () {
-              console.log('File saved locally: ' + fileEntry.toURL());
               // Handle further operations here, if needed
             };
 

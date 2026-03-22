@@ -23,6 +23,11 @@ export default class ElectrumXManager {
   private _state: ManagerState = 'disconnected';
   private subscriptionRegistry: Array<{ method: string; callback: SubscriptionCallback }> = [];
   private protocolVersion: [string, string] = ['1.4', '1.4.2'];
+  // Prevents concurrent connect/failover attempts
+  private connectingPromise: Promise<void> | null = null;
+  // Cooldown: don't retry failover within this window after a failure
+  private lastFailoverFailedAt = 0;
+  private static FAILOVER_COOLDOWN_MS = 15000;
 
   // Event callbacks
   public onConnected?: (server: ElectrumXServerConfig) => void;
@@ -31,6 +36,7 @@ export default class ElectrumXManager {
   public onServerChanged?: (server: ElectrumXServerConfig) => void;
 
   constructor(servers: ElectrumXServerConfig[]) {
+    console.log('[BUILD-CHECK] ElectrumXManager v2 loaded');
     if (servers.length === 0) {
       throw new Error('At least one server must be provided');
     }
@@ -56,47 +62,87 @@ export default class ElectrumXManager {
   /**
    * Connect to the first available server in the list.
    * If preferredIndex is given, try that server first.
+   * Concurrent calls share the same connection attempt.
    */
   async connect(preferredIndex?: number): Promise<void> {
+    // If a connection attempt is already in progress, wait for it
+    if (this.connectingPromise) {
+      return this.connectingPromise;
+    }
+
+    this.connectingPromise = this.doConnect(preferredIndex);
+    try {
+      await this.connectingPromise;
+    } finally {
+      this.connectingPromise = null;
+    }
+  }
+
+  private async doConnect(preferredIndex?: number): Promise<void> {
     this._state = 'connecting';
 
-    // Build ordered list: preferred first, then the rest
     const indices: number[] = [];
-    if (preferredIndex !== undefined && preferredIndex >= 0 && preferredIndex < this.servers.length) {
+    if (
+      preferredIndex !== undefined
+      && preferredIndex >= 0
+      && preferredIndex < this.servers.length
+    ) {
       indices.push(preferredIndex);
     }
     for (let i = 0; i < this.servers.length; i++) {
       if (!indices.includes(i)) indices.push(i);
     }
 
+    const failures: string[] = [];
     for (const idx of indices) {
       try {
         await this.connectToServer(idx);
         return;
-      } catch (err) {
-        console.warn(`ElectrumX: Failed to connect to ${this.servers[idx].host}:${this.servers[idx].port}:`, err);
+      } catch (_err) {
+        failures.push(this.servers[idx].label
+          || this.servers[idx].host);
       }
     }
 
     this._state = 'disconnected';
+    console.warn(
+      `ElectrumX: All servers failed: ${failures.join(', ')}`,
+    );
     throw new Error('Failed to connect to any ElectrumX server');
   }
 
   /**
    * Manually switch to a specific server by index.
+   * Keeps the old connection alive until the new one succeeds,
+   * so a failed switch doesn't leave the user disconnected.
    */
   async switchServer(index: number): Promise<void> {
     if (index < 0 || index >= this.servers.length) {
       throw new Error(`Invalid server index: ${index}`);
     }
 
-    if (this.activeClient) {
-      await this.activeClient.disconnect();
-      this.activeClient = null;
-    }
+    const previousClient = this.activeClient;
+    const previousIndex = this.activeServerIndex;
 
-    await this.connectToServer(index);
-    this.onServerChanged?.(this.servers[index]);
+    try {
+      // Connect to new server first (connectToServer will disconnect
+      // the old activeClient internally once the new one succeeds)
+      await this.connectToServer(index);
+      this.onServerChanged?.(this.servers[index]);
+    } catch (_err) {
+      // New server failed — restore previous connection if we had one
+      if (previousClient && previousClient.state === 'connected') {
+        this.activeClient = previousClient;
+        this.activeServerIndex = previousIndex;
+        this._state = 'connected';
+        this.reattachSubscriptions();
+      }
+      const serverLabel = this.servers[index].label || `${this.servers[index].host}:${this.servers[index].port}`;
+      const restoredMsg = previousClient && previousClient.state === 'connected'
+        ? ` Staying connected to ${this.servers[previousIndex].label || 'previous server'}.`
+        : '';
+      throw new Error(`Could not connect to ${serverLabel}. The server may be offline or unreachable.${restoredMsg}`);
+    }
   }
 
   /**
@@ -230,18 +276,14 @@ export default class ElectrumXManager {
 
   private async call(method: string, params: unknown[] = []): Promise<unknown> {
     if (!this.activeClient || this.activeClient.state !== 'connected') {
-      // Try to reconnect/failover
-      await this.failover();
+      // Don't attempt reconnection from data requests — just fail.
+      // Connections are established explicitly via connect()/switchServer().
+      // This prevents every polling tick or data fetch from triggering
+      // a full failover cycle across all servers.
+      throw new Error('ElectrumX not connected');
     }
 
-    try {
-      return await this.activeClient!.request(method, params);
-    } catch (_err) {
-      console.warn(`ElectrumX: Request failed (${method}), attempting failover...`);
-      await this.failover();
-      // Retry once on new connection
-      return await this.activeClient!.request(method, params);
-    }
+    return await this.activeClient!.request(method, params);
   }
 
   private async connectToServer(index: number): Promise<void> {
@@ -251,13 +293,11 @@ export default class ElectrumXManager {
     client.onDisconnected = (reason) => {
       console.warn(`ElectrumX: Disconnected from ${config.host}: ${reason}`);
       if (this._state === 'connected') {
-        this._state = 'reconnecting';
+        // Mark as disconnected — the next API call via call() will
+        // trigger a single failover on-demand. This avoids cascading
+        // reconnection storms from eager auto-failover.
+        this._state = 'disconnected';
         this.onDisconnected?.(reason);
-        // Auto-failover
-        this.failover().catch((err) => {
-          console.error('ElectrumX: Failover failed:', err);
-          this._state = 'disconnected';
-        });
       }
     };
 
@@ -285,18 +325,43 @@ export default class ElectrumXManager {
   }
 
   private async failover(): Promise<void> {
+    // If a connection attempt is already in progress, wait for it
+    if (this.connectingPromise) {
+      return this.connectingPromise;
+    }
+
+    // Don't retry if we recently failed — prevents rapid reconnect spam
+    const elapsed = Date.now() - this.lastFailoverFailedAt;
+    if (elapsed < ElectrumXManager.FAILOVER_COOLDOWN_MS) {
+      throw new Error('All ElectrumX servers unavailable (cooldown)');
+    }
+
+    this.connectingPromise = this.doFailover();
+    try {
+      await this.connectingPromise;
+      // Success — reset cooldown
+      this.lastFailoverFailedAt = 0;
+    } catch (err) {
+      this.lastFailoverFailedAt = Date.now();
+      throw err;
+    } finally {
+      this.connectingPromise = null;
+    }
+  }
+
+  private async doFailover(): Promise<void> {
     this._state = 'reconnecting';
 
-    // Try all servers except the current one
     for (let i = 0; i < this.servers.length; i++) {
       const idx = (this.activeServerIndex + 1 + i) % this.servers.length;
       try {
         await this.connectToServer(idx);
-        console.log(`ElectrumX: Failover to ${this.servers[idx].host}:${this.servers[idx].port}`);
         this.onServerChanged?.(this.servers[idx]);
         return;
       } catch (_err) {
-        console.warn(`ElectrumX: Failover attempt to ${this.servers[idx].host} failed`);
+        console.warn(
+          `ElectrumX: Failover to ${this.servers[idx].host} failed`,
+        );
       }
     }
 

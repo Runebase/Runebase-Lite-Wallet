@@ -6,10 +6,7 @@ const DisabledSuperstakerAddressField: React.FC = () => {
   const selectedSuperstaker = useAppSelector((state) => state.delegate.selectedSuperstaker);
 
   return (
-    <FormControl
-      fullWidth
-      sx={{marginBottom: '8px'}}
-    >
+    <FormControl fullWidth>
       <TextField
         disabled
         fullWidth
@@ -20,7 +17,7 @@ const DisabledSuperstakerAddressField: React.FC = () => {
         value={selectedSuperstaker?.address || ''}
       />
       {selectedSuperstaker && !selectedSuperstaker.address && (
-        <Typography color="error" style={{ fontSize: '0.8rem', textAlign: 'left' }}>
+        <Typography color="error" variant="caption" sx={{ textAlign: 'left', mt: 0.5 }}>
           No Superstaker selected
         </Typography>
       )}

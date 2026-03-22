@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Typography, Button } from '@mui/material';
 import cx from 'classnames';
-import NavBar from '../../components/NavBar';
+import PageLayout from '../../components/PageLayout';
 import { useAppSelector, useAppDispatch } from '../../store/hooks';
 import { createWallet } from '../../store/slices/saveMnemonicSlice';
 import useStyles from './styles';
@@ -22,8 +22,7 @@ const VerifyMnemonic: React.FC = () => {
   };
 
   return (
-    <div className={classes.root}>
-      <NavBar hasBackButton title={''} />
+    <PageLayout hasBackButton title="">
       <div className={classes.contentContainer}>
         <div className={classes.topContainer}>
           <Typography className={classes.walletCreatedHeader}>
@@ -57,7 +56,7 @@ const VerifyMnemonic: React.FC = () => {
           Verify Seed Phrase
         </Button>
       </div>
-    </div>
+    </PageLayout>
   );
 };
 
