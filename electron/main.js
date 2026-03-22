@@ -1,5 +1,4 @@
-const { app, BrowserWindow, Menu, dialog } = require('electron');
-const axios = require('axios');
+const { app, BrowserWindow, Menu, dialog, net } = require('electron');
 const ProgressBar = require('electron-progressbar');
 const { autoUpdater } = require('electron-updater');
 const path = require('path');
@@ -40,8 +39,9 @@ async function checkForUpdates(
   clickedCheckForUpdates = false,
 ) {
   try {
-    const response = await axios.get(`https://api.github.com/repos/${owner}/${repo}/releases/latest`);
-    const latestVersion = response.data.tag_name.replace('v', '');
+    const response = await net.fetch(`https://api.github.com/repos/${owner}/${repo}/releases/latest`);
+    const data = await response.json();
+    const latestVersion = data.tag_name.replace('v', '');
     const currentVersion = app.getVersion();
 
     if (latestVersion !== currentVersion) {

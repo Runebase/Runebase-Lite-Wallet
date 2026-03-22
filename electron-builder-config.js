@@ -6,7 +6,27 @@ module.exports = {
     'dist/**/*',
     'electron/**/*',
     'package.json',
-    'main.js'
+    'main.js',
+    // Only include node_modules needed by electron/main.js at runtime.
+    // The frontend deps are already bundled by webpack into dist/.
+    'node_modules/electron-progressbar/**',
+    'node_modules/electron-updater/**',
+    'node_modules/extend/**',
+    'node_modules/builder-util-runtime/**',
+    'node_modules/fs-extra/**',
+    'node_modules/graceful-fs/**',
+    'node_modules/js-yaml/**',
+    'node_modules/argparse/**',
+    'node_modules/jsonfile/**',
+    'node_modules/lazy-val/**',
+    'node_modules/lodash.escaperegexp/**',
+    'node_modules/lodash.isequal/**',
+    'node_modules/semver/**',
+    'node_modules/tiny-typed-emitter/**',
+    'node_modules/universalify/**',
+    'node_modules/debug/**',
+    'node_modules/ms/**',
+    'node_modules/sax/**',
   ],
   win: {
     icon: 'dist/icons/icon.ico',
