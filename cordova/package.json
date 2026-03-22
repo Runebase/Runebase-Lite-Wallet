@@ -1,7 +1,7 @@
 {
   "name": "io.runebase.runebaselitewallet",
   "displayName": "Runebase Lite Wallet",
-  "version": "1.8.1",
+  "version": "2.0.0",
   "description": "A Runebase Lite Wallet",
   "main": "index.js",
   "scripts": {
