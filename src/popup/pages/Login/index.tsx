@@ -40,6 +40,7 @@ const Login: React.FC = () => {
   const hasAccounts = useAppSelector((state) => state.login.hasAccounts);
   const password = useAppSelector((state) => state.login.password);
   const algorithm = useAppSelector((state) => state.login.algorithm);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const invalidPassword = useAppSelector((state) => state.login.invalidPassword);
   const matchError = useAppSelector(selectMatchError);
   const error = useAppSelector(selectLoginError);

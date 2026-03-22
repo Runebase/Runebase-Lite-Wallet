@@ -16,9 +16,9 @@ import RRCToken from '../../../models/RRCToken';
 
 const ManageTokens: React.FC = () => {
   const { classes } = useStyles();
-  const dispatch = useAppDispatch();
-  const verifiedTokens = useAppSelector((state) => state.accountDetail.verifiedTokens);
-  const editTokenMode = useAppSelector((state) => state.accountDetail.editTokenMode);
+  const _dispatch = useAppDispatch();
+  const _verifiedTokens = useAppSelector((state) => state.accountDetail.verifiedTokens);
+  const _editTokenMode = useAppSelector((state) => state.accountDetail.editTokenMode);
 
   useEffect(() => {
     initAccountDetail();

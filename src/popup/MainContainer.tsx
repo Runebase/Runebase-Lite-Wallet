@@ -27,6 +27,7 @@ import RemoveDelegation from './pages/RemoveDelegation';
 import RemoveDelegationConfirm from './pages/RemoveDelegationConfirm';
 import VerifyMnemonic from './pages/VerifyMnemonic';
 import BackupWallet from './pages/BackupWallet';
+import TransactionDetail from './pages/TransactionDetail';
 import { MESSAGE_TYPE } from '../constants';
 import { isExtensionEnvironment, sendMessage } from './abstraction';
 import { setNavigateFunction, setLocationRef } from './store/messageMiddleware';
@@ -136,6 +137,7 @@ const MainContainer: React.FC = () => {
         <Route path="/manage-tokens" element={<ManageTokens />} />
         <Route path="/add-token" element={<AddToken />} />
         <Route path="/backup-wallet" element={<BackupWallet />} />
+        <Route path="/transaction-detail" element={<TransactionDetail />} />
       </Routes>
       <UnexpectedErrorDialog
         unexpectedError={unexpectedError}

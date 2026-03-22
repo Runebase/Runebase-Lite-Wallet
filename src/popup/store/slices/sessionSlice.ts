@@ -10,6 +10,13 @@ interface WalletBackupInfo {
   privateKey: string;
 }
 
+export interface ElectrumXStatus {
+  state: 'disconnected' | 'connecting' | 'connected' | 'reconnecting';
+  serverLabel: string;
+  serverIndex: number;
+  servers: Array<{ host: string; port: number; protocol: string; label?: string }>;
+}
+
 interface SessionState {
   networkIndex: number;
   networks: any[];
@@ -19,6 +26,7 @@ interface SessionState {
   delegationInfo?: any;
   runebaseUSD?: number;
   walletBackupInfo: WalletBackupInfo;
+  electrumxStatus: ElectrumXStatus;
 }
 
 const initialState: SessionState = {
@@ -26,6 +34,12 @@ const initialState: SessionState = {
   networks: [],
   loggedInAccountName: undefined,
   walletInfo: undefined,
+  electrumxStatus: {
+    state: 'disconnected',
+    serverLabel: '',
+    serverIndex: -1,
+    servers: [],
+  },
   blockchainInfo: {
     height: 0,
     supply: 0,
@@ -84,6 +98,9 @@ const sessionSlice = createSlice({
     initWalletBackupInfo: (state) => {
       state.walletBackupInfo = { address: '', privateKey: '' };
     },
+    setElectrumXStatus: (state, action: PayloadAction<ElectrumXStatus>) => {
+      state.electrumxStatus = action.payload;
+    },
   },
 });
 
@@ -107,7 +124,10 @@ export const {
   setRunebaseUSD,
   setWalletBackupInfo,
   initWalletBackupInfo,
+  setElectrumXStatus,
 } = sessionSlice.actions;
+
+export const selectElectrumXStatus = (state: RootState) => state.session.electrumxStatus;
 
 // Side-effect function (not a reducer — just sends messages to background)
 export const initSession = () => {
@@ -127,6 +147,11 @@ export const refreshSession = () => {
   sendMessage({ type: MESSAGE_TYPE.GET_WALLET_INFO });
   sendMessage({ type: MESSAGE_TYPE.GET_DELEGATION_INFO });
   sendMessage({ type: MESSAGE_TYPE.GET_RUNEBASE_USD });
+  sendMessage({ type: MESSAGE_TYPE.GET_ELECTRUMX_STATUS });
+};
+
+export const switchElectrumXServer = (serverIndex: number) => {
+  sendMessage({ type: MESSAGE_TYPE.SWITCH_ELECTRUMX_SERVER, serverIndex });
 };
 
 export default sessionSlice.reducer;

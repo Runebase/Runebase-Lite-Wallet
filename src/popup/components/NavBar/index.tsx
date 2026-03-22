@@ -1,28 +1,31 @@
-import React, { Fragment, FC, useState, useRef } from 'react';
+import React, { Fragment, FC, useState } from 'react';
 import {
   Typography,
   Menu,
   MenuItem,
   IconButton,
-  ListItemIcon
+  ListItemIcon,
+  Tooltip,
 } from '@mui/material';
 import {
   Toll,
   Backup,
   Settings as SettingsIcon,
   AccountCircle,
+  FiberManualRecord,
 } from '@mui/icons-material';
 import { ArrowBack, Settings } from '@mui/icons-material';
 import cx from 'classnames';
 import { useNavigate } from 'react-router';
 import DropDownMenu from '../DropDownMenu';
-import { useAppSelector, useAppDispatch } from '../../store/hooks';
+import { useAppSelector } from '../../store/hooks';
 import {
   changeNetwork,
   routeToSettings,
   routeToManageTokens,
   logout,
 } from '../../store/slices/navBarSlice';
+import { selectElectrumXStatus } from '../../store/slices/sessionSlice';
 import QryNetwork from '../../../models/QryNetwork';
 import useStyles from './styles';
 import EnterPasswordDialog from '../EnterPasswordDialog';
@@ -36,6 +39,20 @@ interface IProps {
   title: string;
 }
 
+const CONNECTION_COLORS: Record<string, string> = {
+  connected: '#4caf50',
+  connecting: '#ff9800',
+  reconnecting: '#ff9800',
+  disconnected: '#f44336',
+};
+
+const CONNECTION_LABELS: Record<string, string> = {
+  connected: 'Connected',
+  connecting: 'Connecting...',
+  reconnecting: 'Reconnecting...',
+  disconnected: 'Disconnected',
+};
+
 const NavBar: FC<IProps> = ({
   hasBackButton,
   hasSettingsButton,
@@ -46,6 +63,7 @@ const NavBar: FC<IProps> = ({
   const { classes } = useStyles();
   const networks = useAppSelector((state) => state.session.networks);
   const networkIndex = useAppSelector((state) => state.session.networkIndex);
+  const electrumxStatus = useAppSelector(selectElectrumXStatus);
 
   return (
     <div className={classes.root}>
@@ -63,11 +81,22 @@ const NavBar: FC<IProps> = ({
         <Typography className={cx(classes.locationText, isDarkTheme ? 'white' : '')}>{title}</Typography>
       </div>
       {hasNetworkSelector && (
-        <DropDownMenu
-          onSelect={(index: number) => changeNetwork(index)}
-          selections={networks.map((net: QryNetwork) => net.name)}
-          selectedIndex={networkIndex}
-        />
+        <div className={classes.rightContainer}>
+          <Tooltip
+            title={`${CONNECTION_LABELS[electrumxStatus.state] || 'Unknown'}${electrumxStatus.serverLabel ? ` - ${electrumxStatus.serverLabel}` : ''}`}
+            placement="bottom"
+          >
+            <FiberManualRecord
+              className={classes.connectionDot}
+              style={{ color: CONNECTION_COLORS[electrumxStatus.state] || '#9e9e9e' }}
+            />
+          </Tooltip>
+          <DropDownMenu
+            onSelect={(index: number) => changeNetwork(index)}
+            selections={networks.map((net: QryNetwork) => net.name)}
+            selectedIndex={networkIndex}
+          />
+        </div>
       )}
     </div>
   );

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Typography, Card, CardContent, CardActions, Button, Tooltip } from '@mui/material';
-import { RunebaseInfo } from 'runebasejs-wallet';
+import { IGetAddressDelegation } from '../../../services/wallet/types';
 import SportsScoreIcon from '@mui/icons-material/SportsScore';
 import AppRegistrationIcon from '@mui/icons-material/AppRegistration';
 import NotificationAddIcon from '@mui/icons-material/NotificationAdd';
@@ -13,7 +13,7 @@ import { setSelectedSuperStaker } from '../../store/slices/delegateSlice';
 
 interface SuperStakerCardProps {
   superstaker: SuperStaker;
-  delegationInfo: RunebaseInfo.IGetAddressDelegation | undefined;
+  delegationInfo: IGetAddressDelegation | undefined;
 }
 
 const SuperStakerCard: React.FC<SuperStakerCardProps> = ({

@@ -1,8 +1,5 @@
 import { each, findIndex, isEmpty } from 'lodash';
 import BigNumber from 'bignumber.js';
-import { RunebaseInfo } from 'runebasejs-wallet';
- 
-const { Rweb3 } = require('rweb3');
 
 import RunebaseChromeController from '.';
 import IController from './iController';
@@ -13,7 +10,12 @@ import mainnetTokenList from '../../contracts/mainnetTokenList';
 import testnetTokenList from '../../contracts/testnetTokenList';
 import regtestTokenList from '../../contracts/regtestTokenList';
 import { generateRequestId } from '../../utils';
+import {
+  encodeContractCall,
+  decodeContractCallResult,
+} from '../../utils/abi';
 import { IRPCCallResponse } from '../../types';
+import { ISendRawTxResult } from '../../services/wallet/types';
 import moment from 'moment';
 import Transaction from '../../models/Transaction';
 import { getStorageValue, setStorageValue, addMessageListener, sendMessage, isExtensionEnvironment } from '../../popup/abstraction';
@@ -22,7 +24,6 @@ const INIT_VALUES = {
   tokens: undefined,
   getBalancesInterval: undefined,
 };
-const rweb3 = new Rweb3('null');
 
 export default class TokenController extends IController {
   private static GET_BALANCES_INTERVAL_MS: number = 60000;
@@ -42,9 +43,6 @@ export default class TokenController extends IController {
     this.tokens = INIT_VALUES.tokens;
   };
 
-  /*
-  * Init the token list based on the environment.
-  */
   public initTokenList = () => {
     if (this.tokens) {
       return;
@@ -65,9 +63,6 @@ export default class TokenController extends IController {
     });
   };
 
-  /*
-  * Starts polling for periodic info updates.
-  */
   public startPolling = async () => {
     await this.getBalances();
     if (!this.getBalancesInterval) {
@@ -77,9 +72,6 @@ export default class TokenController extends IController {
     }
   };
 
-  /*
-  * Stops polling for the periodic info updates.
-  */
   public stopPolling = () => {
     if (this.getBalancesInterval) {
       clearInterval(this.getBalancesInterval);
@@ -87,36 +79,47 @@ export default class TokenController extends IController {
     }
   };
 
-  /*
-  * Fetch the tokens balances via RPC calls.
-  */
+  public setupTokenSubscriptions = async () => {
+    const wallet = this.main.account.loggedInAccount?.wallet;
+    const electrumx = this.main.network.electrumx;
+    if (!wallet || !electrumx || !this.tokens) return;
+
+    for (const token of this.tokens) {
+      try {
+        await wallet.subscribeTokenEvents(electrumx, token.address, () => {
+          this.getRRCTokenBalance(token);
+        });
+      } catch (err) {
+        console.warn(`Failed to subscribe to token events for ${token.symbol}:`, err);
+      }
+    }
+    console.log(`Subscribed to transfer events for ${this.tokens.length} tokens`);
+  };
+
   private getBalances = () => {
     each(this.tokens, async (token: RRCToken) => {
       await this.getRRCTokenBalance(token);
     });
   };
 
-  /*
-  * Makes an RPC call to the contract to get the token balance of this current wallet address.
-  * @param token The RRCToken to get the balance of.
-  */
   private getRRCTokenBalance = async (token: RRCToken) => {
     if (!this.main.account.loggedInAccount
       || !this.main.account.loggedInAccount.wallet
-      || !this.main.account.loggedInAccount.wallet.rjsWallet
     ) {
       console.error('Cannot getRRCTokenBalance without wallet instance.');
       return;
     }
 
-    const methodName = 'balanceOf';
-    const data = rweb3.encoder.constructData(
+    const walletAddr = this.main.account.loggedInAccount.wallet.address;
+    const data = encodeContractCall(
       rrc223TokenABI,
-      methodName,
-      [this.main.account.loggedInAccount.wallet.rjsWallet.address],
+      'balanceOf',
+      [walletAddr],
     );
     const args = [token.address, data];
-    const { result, error } = await this.main.rpc.callContract(generateRequestId(), args);
+    const { result, error } = await this.main.rpc.callContract(
+      generateRequestId(), args,
+    );
 
     if (error) {
       console.error(error);
@@ -124,62 +127,65 @@ export default class TokenController extends IController {
     }
 
     // Decode result
-    const decodedRes = rweb3.decoder.decodeCall(result, rrc223TokenABI, methodName);
-    const bnBal = decodedRes!.executionResult.formattedOutput[0]; // Returns as a BN instance
-    const bigNumberBal = new BigNumber(bnBal.toString(10)); // Convert to BigNumber instance
-    const balance = bigNumberBal.dividedBy(new BigNumber(10 ** token.decimals)).toNumber(); // Convert to regular denomination
+    const decoded = decodeContractCallResult(
+      result, rrc223TokenABI, 'balanceOf',
+    );
+    const bnBal = decoded.executionResult.formattedOutput[0];
+    const bigNumberBal = new BigNumber(bnBal.toString(10));
+    const balance = bigNumberBal
+      .dividedBy(new BigNumber(10 ** token.decimals))
+      .toNumber();
 
     // Update token balance in place
-    const index = findIndex(this.tokens, { name: token.name, symbol: token.symbol });
+    const index = findIndex(this.tokens, {
+      name: token.name, symbol: token.symbol,
+    });
     if (index !== -1) {
       this.tokens![index].balance = balance;
     }
 
-    sendMessage({ type: MESSAGE_TYPE.RRC_TOKENS_RETURN, tokens: this.tokens }, () => {});
+    sendMessage({
+      type: MESSAGE_TYPE.RRC_TOKENS_RETURN,
+      tokens: this.tokens,
+    }, () => {});
   };
 
-  /**
-   * Gets the RRC token details (name, symbol, decimals) given a contract address.
-   * @param {string} contractAddress RRC token contract address.
-   */
   private getRRCTokenDetails = async (contractAddress: string) => {
     let msg;
 
-    /*
-    * Further contract address validation - if the addr provided does not have name,
-    * symbol, and decimals fields, it will throw an error as it is not a valid
-    * rrc20TokenContractAddr
-    */
     try {
       // Get name
-      let methodName = 'name';
-      let data = rweb3.encoder.constructData(rrc223TokenABI, methodName, []);
+      let data = encodeContractCall(rrc223TokenABI, 'name', []);
       let { result, error }: IRPCCallResponse =
-        await this.main.rpc.callContract(generateRequestId(), [contractAddress, data]);
-      if (error) {
-        throw Error(error);
-      }
-      result = rweb3.decoder.decodeCall(result, rrc223TokenABI, methodName) as RunebaseInfo.IContractCall;
+        await this.main.rpc.callContract(
+          generateRequestId(), [contractAddress, data],
+        );
+      if (error) throw Error(error);
+      result = decodeContractCallResult(
+        result, rrc223TokenABI, 'name',
+      );
       const name = result.executionResult.formattedOutput[0];
 
       // Get symbol
-      methodName = 'symbol';
-      data = rweb3.encoder.constructData(rrc223TokenABI, methodName, []);
-      ({ result, error } = await this.main.rpc.callContract(generateRequestId(), [contractAddress, data]));
-      if (error) {
-        throw Error(error);
-      }
-      result = rweb3.decoder.decodeCall(result, rrc223TokenABI, methodName) as RunebaseInfo.IContractCall;
+      data = encodeContractCall(rrc223TokenABI, 'symbol', []);
+      ({ result, error } = await this.main.rpc.callContract(
+        generateRequestId(), [contractAddress, data],
+      ));
+      if (error) throw Error(error);
+      result = decodeContractCallResult(
+        result, rrc223TokenABI, 'symbol',
+      );
       const symbol = result.executionResult.formattedOutput[0];
 
       // Get decimals
-      methodName = 'decimals';
-      data = rweb3.encoder.constructData(rrc223TokenABI, methodName, []);
-      ({ result, error } = await this.main.rpc.callContract(generateRequestId(), [contractAddress, data]));
-      if (error) {
-        throw Error(error);
-      }
-      result = rweb3.decoder.decodeCall(result, rrc223TokenABI, methodName) as RunebaseInfo.IContractCall;
+      data = encodeContractCall(rrc223TokenABI, 'decimals', []);
+      ({ result, error } = await this.main.rpc.callContract(
+        generateRequestId(), [contractAddress, data],
+      ));
+      if (error) throw Error(error);
+      result = decodeContractCallResult(
+        result, rrc223TokenABI, 'decimals',
+      );
       const decimals = result.executionResult.formattedOutput[0];
 
       if (name && symbol && decimals) {
@@ -214,27 +220,31 @@ export default class TokenController extends IController {
     gasPrice: number
   ) => {
     try {
-      console.log('token in sendRRCToken Background.js');
-      console.log('amount: ', amount);
-      console.log(token);
-      // bn.js does not handle decimals well (Ex: BN(1.2) => 1 not 1.2) so we use BigNumber
-      const bnAmount = new BigNumber(amount ?? 0).times(new BigNumber(10 ** token.decimals));
-      const data = rweb3.encoder.constructData(rrc223TokenABI, 'transfer', [receiverAddress, bnAmount]);
+      console.log('sendRRCToken:', { amount, token: token.symbol });
+      const bnAmount = new BigNumber(amount ?? 0)
+        .times(new BigNumber(10 ** token.decimals))
+        .dp(0);
+      const data = encodeContractCall(
+        rrc223TokenABI,
+        'transfer',
+        [receiverAddress, bnAmount.toString(10)],
+      );
       const args = [token.address, data, null, gasLimit, gasPrice];
 
-      console.log('Sending RRCToken with the following arguments:', args);
+      console.log('Sending RRCToken with args:', args);
 
       const requestId = generateRequestId();
       const response = await this.main.rpc.sendToContract(requestId, args);
-      const { error, result } = response as { error: any, result: RunebaseInfo.ISendRawTxResult };
+      const { error, result } = response as {
+        error: any; result: ISendRawTxResult;
+      };
 
-      console.log('sendRRCToken result: ', result);
-      console.log(`sendRRCToken result: gaslimit: ${gasLimit} gasPrice: ${gasPrice} = (${new BigNumber(gasLimit ?? 0).times(new BigNumber(gasPrice ?? 0).times(1e8)).dp(0).toNumber()})`);
       const newTransaction = new Transaction({
         id: result && result.txid ? result.txid : undefined,
         timestamp: moment().format('MM-DD-YYYY, HH:mm'),
         confirmations: 0,
-        amount: new BigNumber(gasLimit ?? 0).times(new BigNumber(gasPrice ?? 0).times(1e8)).dp(0).toNumber(),
+        amount: -new BigNumber(gasLimit ?? 0)
+          .times(gasPrice ?? 0).dp(0).toNumber(),
         qrc20TokenTransfers: [
           {
             address: token.address,
@@ -252,20 +262,28 @@ export default class TokenController extends IController {
 
       if (error) {
         console.error('Error sending RRCToken:', error);
-        sendMessage({ type: MESSAGE_TYPE.SEND_TOKENS_FAILURE, error }, () => {});
+        sendMessage({
+          type: MESSAGE_TYPE.SEND_TOKENS_FAILURE, error,
+        }, () => {});
         return;
       }
 
       console.log('RRCToken sent successfully!');
-      sendMessage({ type: MESSAGE_TYPE.SEND_TOKENS_SUCCESS }, () => {});
+      sendMessage({
+        type: MESSAGE_TYPE.SEND_TOKENS_SUCCESS,
+      }, () => {});
     } catch (e: any) {
       console.error('An unexpected error occurred:', e);
-      sendMessage({ type: MESSAGE_TYPE.SEND_TOKENS_FAILURE, error: e.message }, () => {});
+      sendMessage({
+        type: MESSAGE_TYPE.SEND_TOKENS_FAILURE, error: e.message,
+      }, () => {});
     }
   };
 
-
-  private addToken = async (contractAddress: string, name: string, symbol: string, decimals: number) => {
+  private addToken = async (
+    contractAddress: string, name: string,
+    symbol: string, decimals: number,
+  ) => {
     const newToken = new RRCToken(name, symbol, decimals, contractAddress);
     this.tokens!.push(newToken);
     this.setTokenListInStorage();
@@ -280,11 +298,7 @@ export default class TokenController extends IController {
 
   private setTokenListInStorage = async () => {
     const storageKey = this.chromeStorageAccountTokenListKey();
-
-    // Add tokens to storage
     await setStorageValue(storageKey, this.tokens);
-
-    // Send a message to the runtime
     sendMessage({
       type: MESSAGE_TYPE.RRC_TOKENS_RETURN,
       tokens: this.tokens,
@@ -292,13 +306,13 @@ export default class TokenController extends IController {
   };
 
   private chromeStorageAccountTokenListKey = () => {
-    return `${STORAGE.ACCOUNT_TOKEN_LIST}-${this.main.account.loggedInAccount!.name}-${this.main.network.networkName}`;
+    return `${STORAGE.ACCOUNT_TOKEN_LIST}-` +
+      `${this.main.account.loggedInAccount!.name}-` +
+      `${this.main.network.networkName}`;
   };
 
-   
   private handleMessage = (
     request: any,
-     
     _?: chrome.runtime.MessageSender,
     sendResponse?: (response: any) => void,
   ) => {
@@ -312,7 +326,7 @@ export default class TokenController extends IController {
         } else {
           sendMessage({
             type: MESSAGE_TYPE.USE_CALLBACK,
-            id: requestData.id,// include the messageId in the response for the identifying correct window to close
+            id: requestData.id,
             result: this.tokens,
           });
         }
@@ -327,7 +341,10 @@ export default class TokenController extends IController {
         );
         break;
       case MESSAGE_TYPE.ADD_TOKEN:
-        this.addToken(requestData.contractAddress, requestData.name, requestData.symbol, requestData.decimals);
+        this.addToken(
+          requestData.contractAddress, requestData.name,
+          requestData.symbol, requestData.decimals,
+        );
         break;
       case MESSAGE_TYPE.GET_RRC_TOKEN_DETAILS:
         this.getRRCTokenDetails(requestData.contractAddress);

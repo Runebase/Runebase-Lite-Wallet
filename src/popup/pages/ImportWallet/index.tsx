@@ -20,7 +20,7 @@ import {
   validateImportWalletName,
   importPrivateKey,
   importSeedPhrase,
-  cancelImport,
+  // cancelImport,
   setImportType,
   setPrivateKey,
   setMnemonic,
@@ -40,12 +40,12 @@ const ImportWallet: React.FC = () => {
   const { classes } = useStyles();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const accountName = useAppSelector((state) => state.import.accountName);
+  const _accountName = useAppSelector((state) => state.import.accountName);
   const importType = useAppSelector((state) => state.import.importType);
   const mnemonic = useAppSelector((state) => state.import.mnemonic);
   const privateKey = useAppSelector((state) => state.import.privateKey);
   const walletNameTaken = useAppSelector((state) => state.import.walletNameTaken);
-  const importMnemonicPrKeyFailed = useAppSelector((state) => state.import.importMnemonicPrKeyFailed);
+  const _importMnemonicPrKeyFailed = useAppSelector((state) => state.import.importMnemonicPrKeyFailed);
   const walletNameError = useAppSelector(selectWalletNameError);
   const privateKeyError = useAppSelector(selectPrivateKeyError);
   const privateKeyPageError = useAppSelector(selectPrivateKeyPageError);

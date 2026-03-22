@@ -1,9 +1,8 @@
 import React, { Fragment } from 'react';
-import { RunebaseInfo } from 'runebasejs-wallet';
 import { Typography, Button, Box, Divider, Grid } from '@mui/material';
 import { KeyboardArrowRight } from '@mui/icons-material';
 import { useNavigate } from 'react-router';
-import { useAppSelector, useAppDispatch } from '../../store/hooks';
+import { useAppSelector } from '../../store/hooks';
 import { selectRunebaseBalanceUSD } from '../../store/slices/sessionSlice';
 import { getSuperstaker } from '../../store/slices/delegateSlice';
 import useStyles from './styles';
@@ -123,42 +122,31 @@ const AccountInfo: React.FC<IProps> = ({ hasRightArrow }) => {
         <Typography className={classes.balanceUSD}>{`${runebaseBalanceUSD}`}</Typography>
       </Box>
 
-      {walletInfo.qrc20Balances.map((
-        token: RunebaseInfo.IRrc20Balance,
+      {(verifiedTokens || []).map((
+        token: { address: string; balance: number; decimals: number; name: string; symbol: string },
         index: number
       ) => {
-        const isVerifiedToken = verifiedTokens.find((x: any) => x.address === token.address);
         const tokenLogoSrc = TOKEN_IMAGES[token.address];
-        if (isVerifiedToken) {
-          return (
-            <Fragment
-              key={index}
+        return (
+          <Fragment key={index}>
+            <Divider />
+            <Box
+              className={`${classes.amountContainer} ${!tokenLogoSrc ? classes.tokenContainer : ''}`}
             >
-              <Divider />
-              <Box
-                className={`${classes.amountContainer} ${!tokenLogoSrc ? classes.tokenContainer : ''}`}
-              >
-                {
-                  tokenLogoSrc && (
-                    <img
-                      style={{
-                        height: '24px',
-                        width: '24px'
-                      }}
-                      src={getImageUrl(tokenLogoSrc)}
-                      alt={token.symbol}
-                    />
-                  )
-                }
-                <Typography className={classes.tokenAmount}>
-                  {Number(token.balance) / (10 ** Number(token.decimals))}
-                </Typography>
-                <Typography className={classes.token}>{token.symbol}</Typography>
-              </Box>
-            </Fragment>
-          );
-        }
-        return null;
+              {tokenLogoSrc && (
+                <img
+                  style={{ height: '24px', width: '24px' }}
+                  src={getImageUrl(tokenLogoSrc)}
+                  alt={token.symbol}
+                />
+              )}
+              <Typography className={classes.tokenAmount}>
+                {token.balance ?? 0}
+              </Typography>
+              <Typography className={classes.token}>{token.symbol}</Typography>
+            </Box>
+          </Fragment>
+        );
       })}
       <Divider />
       <Box

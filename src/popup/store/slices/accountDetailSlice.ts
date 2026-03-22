@@ -2,15 +2,15 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { MESSAGE_TYPE } from '../../../constants';
 import {
-  openUrlInNewTab,
   sendMessage,
-  TabOpener,
 } from '../../abstraction';
 import { getNavigateFunction } from '../messageMiddleware';
 
 interface AccountDetailState {
   activeTabIdx: number;
   transactions: any[];
+  tokenTransfers: any[];
+  selectedTransaction: any | null;
   tokens: any[];
   verifiedTokens: any[];
   hasMore: boolean;
@@ -21,6 +21,8 @@ interface AccountDetailState {
 const initialState: AccountDetailState = {
   activeTabIdx: 0,
   transactions: [],
+  tokenTransfers: [],
+  selectedTransaction: null,
   tokens: [],
   verifiedTokens: [],
   hasMore: false,
@@ -37,6 +39,12 @@ const accountDetailSlice = createSlice({
     },
     setTransactions: (state, action: PayloadAction<any[]>) => {
       state.transactions = action.payload;
+    },
+    setSelectedTransaction: (state, action: PayloadAction<any | null>) => {
+      state.selectedTransaction = action.payload;
+    },
+    setTokenTransfers: (state, action: PayloadAction<any[]>) => {
+      state.tokenTransfers = action.payload;
     },
     setTokens: (state, action: PayloadAction<any[]>) => {
       state.tokens = action.payload;
@@ -71,34 +79,6 @@ export const fetchMoreTxs = () => {
   sendMessage({ type: MESSAGE_TYPE.GET_MORE_TXS });
 };
 
-// Chrome-specific implementation for opening tabs
-class ChromeTabOpener implements TabOpener {
-  openUrlInNewTab(url: string): void {
-    chrome.tabs.create({ url });
-  }
-}
-
-// Web-compatible implementation for opening tabs
-class WebTabOpener implements TabOpener {
-  openUrlInNewTab(url: string): void {
-    window.open(url, '_blank');
-  }
-}
-
-export const onTransactionClick = (txid: string) => {
-  sendMessage({
-    type: MESSAGE_TYPE.GET_NETWORK_EXPLORER_URL,
-  }, (response: any) => {
-    if (response) {
-      const url = `${response}/${txid}`;
-      const tabOpener = typeof chrome !== 'undefined' ? new ChromeTabOpener() : new WebTabOpener();
-      openUrlInNewTab(url, tabOpener);
-    } else {
-      console.error('Error: Invalid response for network explorer URL.');
-    }
-  });
-};
-
 export const removeToken = (contractAddress: string) => {
   sendMessage({
     type: MESSAGE_TYPE.REMOVE_TOKEN,
@@ -114,6 +94,8 @@ export const routeToAddToken = () => {
 export const {
   setActiveTabIdx,
   setTransactions,
+  setSelectedTransaction,
+  setTokenTransfers,
   setTokens,
   setVerifiedTokens,
   setHasMore,

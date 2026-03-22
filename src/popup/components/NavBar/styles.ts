@@ -34,6 +34,15 @@ const useStyles = makeStyles()((theme) => ({
   locationText: {
     '&.white': {},
   },
+  rightContainer: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: theme.spacing(0.5),
+  },
+  connectionDot: {
+    fontSize: 12,
+    cursor: 'pointer',
+  },
 }));
 
 export default useStyles;

@@ -1,16 +1,13 @@
-// import { utils } from 'ethers';
-import { RunebaseInfo } from 'runebasejs-wallet';
-import { ISendTxOptions } from 'runebasejs-wallet/lib/tx';
 import {
   API_TYPE,
   TARGET_NAME,
-  // INTERNAL_API_TYPE,
   RUNEBASECHROME_ACCOUNT_CHANGE
 } from './constants';
 import {
-  // Transaction,
   InpageAccount
 } from './models';
+import { ISendRawTxResult, IContractCall } from './services/wallet/types';
+import { ElectrumXManager } from './services/electrumx';
 
 export interface PodReturnResult {
   podMessage: string;
@@ -80,7 +77,7 @@ export interface IRPCCallRequest {
 
 export interface IRPCCallResponse {
   id: string;
-  result?: RunebaseInfo.IContractCall | RunebaseInfo.ISendRawTxResult;
+  result?: IContractCall | ISendRawTxResult;
   error?: string;
 }
 
@@ -95,8 +92,10 @@ export interface ISignExternalTxRequest {
 }
 
 export interface ISigner {
-  send(to: string, amount: number, options: ISendTxOptions): Promise<RunebaseInfo.ISendRawTxResult>;
-  sendTransaction(args: any[]): any;
+  send(
+    to: string, amount: number, options: { feeRate: number }, electrumx: ElectrumXManager
+  ): Promise<ISendRawTxResult>;
+  sendTransaction(args: any[], electrumx: ElectrumXManager, feeRate?: number): Promise<ISendRawTxResult>;
 }
 
 export interface IInpageAccountWrapper {

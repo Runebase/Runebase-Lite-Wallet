@@ -43,6 +43,31 @@ module.exports = merge(baseConfig, {
     devMiddleware: {
       writeToDisk: false,
     },
+    // Proxy external API requests to bypass CORS in browser dev mode.
+    // In the Chrome extension, CORS is bypassed via host_permissions.
+    proxy: [
+      {
+        context: ['/proxy/discord'],
+        target: 'https://discord.runebase.io',
+        pathRewrite: { '^/proxy/discord': '' },
+        changeOrigin: true,
+        secure: true,
+      },
+      {
+        context: ['/proxy/explorer'],
+        target: 'https://explorer.runebase.io',
+        pathRewrite: { '^/proxy/explorer': '' },
+        changeOrigin: true,
+        secure: true,
+      },
+      {
+        context: ['/proxy/coinpaprika'],
+        target: 'https://api.coinpaprika.com',
+        pathRewrite: { '^/proxy/coinpaprika': '' },
+        changeOrigin: true,
+        secure: true,
+      },
+    ],
   },
 
   plugins: [

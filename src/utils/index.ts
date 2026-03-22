@@ -1,5 +1,5 @@
 import { isFinite } from 'lodash';
-import { validatePrivateKey } from 'runebasejs-wallet';
+import { validatePrivateKey } from '../services/wallet';
 
 import { TARGET_NAME } from '../constants';
 import { IExtensionMessageData } from '../types';

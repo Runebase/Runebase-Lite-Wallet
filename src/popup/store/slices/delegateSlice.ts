@@ -123,7 +123,7 @@ export const sendDelegationConfirm = () => (dispatch: any, getState: any) => {
     signedPoD: stringifiedSignedPoD,
     fee: delegationFee,
     gasLimit: Number(gasLimit),
-    gasPrice: Number(gasPrice * 1e-8),
+    gasPrice: Number(gasPrice),
   }, () => {});
 };
 
@@ -133,7 +133,7 @@ export const sendRemoveDelegationConfirm = () => (dispatch: any, getState: any) 
   sendMessage({
     type: MESSAGE_TYPE.SEND_REMOVE_DELEGATION_CONFIRM,
     gasLimit: Number(gasLimit),
-    gasPrice: Number(gasPrice * 1e-8),
+    gasPrice: Number(gasPrice),
   }, () => {});
 };
 

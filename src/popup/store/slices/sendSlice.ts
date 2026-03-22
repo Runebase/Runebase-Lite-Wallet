@@ -160,26 +160,26 @@ export const initSend = () => (dispatch: any, getState: any) => {
     const verifiedTokens = response || [];
     dispatch(sendSlice.actions.setVerifiedTokens(verifiedTokens));
 
-    walletInfo?.qrc20Balances?.forEach((tokenInfo: any) => {
-      const { name, symbol, decimals, balance, address } = tokenInfo;
-      const isTokenVerified = verifiedTokens.find((x: any) => x.address === address);
-      if (isTokenVerified) {
-        tokens.push({
-          name,
-          symbol,
-          decimals: Number(decimals),
-          address,
-          balance: new BigNumber(balance ?? 0).dividedBy(`1e${decimals}`).toNumber(),
-        });
-      }
-    });
+    // Build token list from verifiedTokens (tokenController data)
+    // Balance is already in human-readable form (divided by decimals)
+    for (const t of verifiedTokens) {
+      tokens.push({
+        name: t.name,
+        symbol: t.symbol,
+        decimals: Number(t.decimals),
+        address: t.address,
+        balance: t.balance ?? 0,
+      });
+    }
 
     const runesToken: RRCTokenData = {
       name: 'Runebase Token',
       symbol: 'RUNES',
       decimals: 8,
       address: '',
-      balance: walletInfo ? Number(walletInfo.balance) : undefined,
+      balance: walletInfo
+        ? new BigNumber(walletInfo.balance).dividedBy(1e8).toNumber()
+        : undefined,
     };
 
     const allTokens = [runesToken, ...tokens];
@@ -218,7 +218,7 @@ export const executeSend = () => (dispatch: any, getState: any) => {
       amount: Number(amount),
       token,
       gasLimit: Number(gasLimit),
-      gasPrice: Number(gasPrice * 1e-8),
+      gasPrice: Number(gasPrice),
     });
     sendMessage({
       type: MESSAGE_TYPE.SEND_RRC_TOKENS,
@@ -226,7 +226,7 @@ export const executeSend = () => (dispatch: any, getState: any) => {
       amount: Number(amount),
       token,
       gasLimit: Number(gasLimit),
-      gasPrice: Number(gasPrice * 1e-8),
+      gasPrice: Number(gasPrice),
     });
   }
 };

@@ -12,6 +12,7 @@ import {
   setDelegationInfo,
   setRunebaseUSD,
   setWalletBackupInfo,
+  setElectrumXStatus,
   refreshSession,
 } from './slices/sessionSlice';
 import {
@@ -23,6 +24,7 @@ import {
 } from './slices/accountLoginSlice';
 import {
   setTransactions,
+  setTokenTransfers,
   setHasMore,
   setVerifiedTokens as setAccountDetailVerifiedTokens,
 } from './slices/accountDetailSlice';
@@ -88,6 +90,10 @@ export const messageMiddleware: Middleware = (storeApi) => {
       console.log('Changing network success. New network index:', requestData.networkIndex);
       dispatch(setNetworkIndex(requestData.networkIndex));
       break;
+    case MESSAGE_TYPE.GET_ELECTRUMX_STATUS_RETURN:
+    case MESSAGE_TYPE.ELECTRUMX_STATUS_CHANGED:
+      dispatch(setElectrumXStatus(requestData.electrumxStatus));
+      break;
     case MESSAGE_TYPE.ACCOUNT_LOGIN_SUCCESS:
       console.log('Account login success. Initializing session and routing to home');
       refreshSession();
@@ -147,6 +153,9 @@ export const messageMiddleware: Middleware = (storeApi) => {
       console.log('GET_TXS_RETURN', requestData);
       dispatch(setTransactions(parseJsonOrFallback(requestData.transactions)));
       dispatch(setHasMore(requestData.hasMore));
+      break;
+    case MESSAGE_TYPE.GET_TOKEN_TXS_RETURN:
+      dispatch(setTokenTransfers(parseJsonOrFallback(requestData.tokenTransfers)));
       break;
     case MESSAGE_TYPE.RRC_TOKENS_RETURN:
       console.log('RRC_TOKENS_RETURN', requestData);

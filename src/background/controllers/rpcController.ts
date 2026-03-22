@@ -1,9 +1,9 @@
-import { WalletRPCProvider, RunebaseInfo } from 'runebasejs-wallet';
 import RunebaseChromeController from '.';
 import IController from './iController';
 import { MESSAGE_TYPE, RPC_METHOD } from '../../constants';
 import { IRPCCallResponse } from '../../types';
 import Config from '../../config';
+import { ISendRawTxResult, IContractCall } from '../../services/wallet/types';
 import { addMessageListener, isExtensionEnvironment } from '../../popup/abstraction';
 
 export default class RPCController extends IController {
@@ -18,10 +18,9 @@ export default class RPCController extends IController {
     let result: any;
     let error: string | undefined;
     try {
-      const rpcProvider = this.rpcProvider();
-      if (!rpcProvider) {
-        throw Error('Cannot sendtocontract without RPC provider.');
-      }
+      const wallet = this.getWallet();
+      const electrumx = this.getElectrumX();
+
       if (args.length < 2) {
         throw Error('Requires first two arguments: contractAddress and data.');
       }
@@ -41,8 +40,7 @@ export default class RPCController extends IController {
 
       console.log('Sending transaction. New Args:', newArgs);
 
-      // eslint-disable-next-line max-len
-      result = await this.main.account.loggedInAccount!.wallet!.sendTransaction(newArgs) as RunebaseInfo.ISendRawTxResult;
+      result = await wallet.sendTransaction(newArgs, electrumx) as ISendRawTxResult;
 
       console.log('Transaction result:', result);
     } catch (err) {
@@ -57,17 +55,17 @@ export default class RPCController extends IController {
     let result: any;
     let error: string | undefined;
     try {
-      const rpcProvider = this.rpcProvider();
-      if (!rpcProvider) {
-        throw Error('Cannot callcontract without RPC provider.');
-      }
+      const wallet = this.getWallet();
+      const electrumx = this.getElectrumX();
+
       if (args.length < 2) {
         throw Error('Requires first two arguments: contractAddress and data.');
       }
 
       console.log('Calling contract. Args:', args);
 
-      result = await rpcProvider.rawCall(RPC_METHOD.CALL_CONTRACT, args) as RunebaseInfo.IContractCall;
+      const [contractAddress, data] = args;
+      result = await wallet.callContract(contractAddress, data, electrumx) as IContractCall;
 
       console.log('Contract call result:', result);
     } catch (err) {
@@ -78,21 +76,24 @@ export default class RPCController extends IController {
     return { id, result, error };
   };
 
-  /*
-  * Gets the current logged in RPC provider.
-  * @return Logged in account's RPC provider.
-  */
-  private rpcProvider = (): WalletRPCProvider | undefined => {
+  private getWallet() {
     const acct = this.main.account.loggedInAccount;
-    return acct && acct.wallet && acct.wallet.rpcProvider;
-  };
+    if (!acct || !acct.wallet) {
+      throw Error('Cannot call RPC without wallet.');
+    }
+    return acct.wallet;
+  }
+
+  private getElectrumX() {
+    const electrumx = this.main.network.electrumx;
+    if (!electrumx) {
+      throw Error('ElectrumX not connected.');
+    }
+    return electrumx;
+  }
 
   /**
    * Sends the RPC response or error to the active tab that requested.
-   * @param id Request ID.
-   * @param result RPC call result.
-   * @param error RPC call error.message, passed in and as a string because
-   * chrome.tabs.sendMessage does not support passing the error object type
    */
   private sendRpcResponseToActiveTab = (id: string, result: any, error?: string) => {
     chrome.tabs.query({ active: true, currentWindow: true }, ([{ id: tabID }]) => {
@@ -105,14 +106,19 @@ export default class RPCController extends IController {
     let error: string | undefined;
 
     try {
-      const rpcProvider = this.rpcProvider();
-      if (!rpcProvider) {
-        throw Error('Cannot call RPC without provider.');
-      }
+      const wallet = this.getWallet();
+      const electrumx = this.getElectrumX();
 
       console.log('External raw call. Method:', method, 'Args:', args);
 
-      result = await rpcProvider.rawCall(method, args);
+      if (method === RPC_METHOD.CALL_CONTRACT) {
+        const [contractAddress, data] = args;
+        result = await wallet.callContract(contractAddress, data, electrumx);
+      } else if (method === RPC_METHOD.SEND_TO_CONTRACT) {
+        result = await wallet.sendTransaction(args, electrumx);
+      } else {
+        throw Error(`Unsupported RPC method: ${method}`);
+      }
 
       console.log('External raw call result:', result);
     } catch (e) {
@@ -124,36 +130,16 @@ export default class RPCController extends IController {
     this.sendRpcResponseToActiveTab(id, result, error);
   };
 
-  /*
-  * Handles a sendToContract requested externally and sends the response back to the active tab.
-  * @param id Request ID.
-  * @param args Request arguments. [contractAddress, data, amount?, gasLimit?, gasPrice?]
-  */
   private externalSendToContract = async (id: string, args: any[]) => {
-    if (!this.rpcProvider()) {
-      throw Error('Cannot call RPC without provider.');
-    }
-
     const { result, error } = await this.sendToContract(id, args);
     this.sendRpcResponseToActiveTab(id, result, error);
   };
 
-  /*
-  * Handles a callContract requested externally and sends the response back to the active tab.
-  * @param id Request ID.
-  * @param args Request arguments. [contractAddress, data, amount?, gasLimit?, gasPrice?]
-  */
   private externalCallContract = async (id: string, args: any[]) => {
-    if (!this.rpcProvider()) {
-      throw Error('Cannot call RPC without provider.');
-    }
-
     const { result, error } = await this.callContract(id, args);
     this.sendRpcResponseToActiveTab(id, result, error);
   };
 
-   
-   
   private handleMessage = (request: any, _: chrome.runtime.MessageSender) => {
     const requestData = isExtensionEnvironment() ? request : request.data;
     try {

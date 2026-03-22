@@ -1,9 +1,11 @@
 import SubAccount from './SubAccount';
+import Wallet from './Wallet';
 
 export default class Account {
   public name: string;
   public privateKeyHash: string;
   public subAccounts: SubAccount[] = [];
+  public wallet?: Wallet;
 
   constructor(name: string, privateKeyHash: string, subAccounts: SubAccount[] = []) {
     this.name = name;

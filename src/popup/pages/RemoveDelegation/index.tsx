@@ -14,7 +14,7 @@ import {
 
 const RemoveDelegation: React.FC = () => {
   const { classes } = useStyles();
-  const dispatch = useAppDispatch();
+  const _dispatch = useAppDispatch();
   const loggedInAccountName = useAppSelector((state) => state.session.loggedInAccountName);
   const walletInfo = useAppSelector((state) => state.session.walletInfo);
   const buttonDisabled = useAppSelector(selectDelegateButtonDisabled);

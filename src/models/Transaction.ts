@@ -3,6 +3,7 @@ export default class Transaction {
   public timestamp?: string;
   public confirmations: number = 0;
   public amount: number = 0;
+  public fee?: number; // network fee in satoshi
   public qrc20TokenTransfers: Qrc20TokenTransfer[] = [];
 
   public get pending() {
@@ -25,6 +26,7 @@ interface TransactionAttributes {
   timestamp?: string;
   confirmations?: number;
   amount?: number;
+  fee?: number;
   qrc20TokenTransfers?: Qrc20TokenTransfer[];
 }
 

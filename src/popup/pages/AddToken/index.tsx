@@ -19,11 +19,11 @@ const AddToken: React.FC = () => {
   const { classes } = useStyles();
   const dispatch = useAppDispatch();
 
-  const contractAddress = useAppSelector((state) => state.addToken.contractAddress);
+  const _contractAddress = useAppSelector((state) => state.addToken.contractAddress);
   const name = useAppSelector((state) => state.addToken.name);
   const symbol = useAppSelector((state) => state.addToken.symbol);
   const decimals = useAppSelector((state) => state.addToken.decimals);
-  const contractAddressFieldError = useAppSelector(selectContractAddressFieldError);
+  const _contractAddressFieldError = useAppSelector(selectContractAddressFieldError);
   const tokenAlreadyInListError = useAppSelector(selectTokenAlreadyInListError);
   const buttonDisabled = useAppSelector(selectAddTokenButtonDisabled);
 

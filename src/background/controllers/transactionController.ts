@@ -1,17 +1,18 @@
-import { RunebaseInfo } from 'runebasejs-wallet';
-import { round } from 'lodash';
 import moment from 'moment';
 
 import RunebaseChromeController from '.';
 import IController from './iController';
 import { MESSAGE_TYPE } from '../../constants';
-import Transaction, { Qrc20TokenTransfer } from '../../models/Transaction';
+import Transaction from '../../models/Transaction';
+import RRCToken from '../../models/RRCToken';
+import { addressToHash160, hash160ToAddress } from '../../services/wallet';
 import { addMessageListener, isExtensionEnvironment, sendMessage } from '../../popup/abstraction';
 
 export default class TransactionController extends IController {
   private static GET_TX_INTERVAL_MS: number = 60000;
 
   public transactions: Transaction[] = [];
+  public tokenTransfers: any[] = [];
   public pageNum: number = 0;
   public pagesTotal?: number;
   public totalTransactions: number = 0;
@@ -28,39 +29,26 @@ export default class TransactionController extends IController {
     this.initFinished();
   }
   public addTransaction = (transaction: Transaction) => {
-    this.transactions.unshift(transaction); // Add the new transaction to the beginning of the array
+    this.transactions.unshift(transaction);
     this.totalTransactions += 1;
     console.log('new transactions after adding: ', this.transactions);
-    this.sendTransactionsMessage(); // Update the UI with the new transactions
-  };
-
-  /*
-  * Fetches the first page of transactions.
-  */
-  public fetchFirst = async () => {
-    this.transactions = await this.fetchTransactions(
-      10, // Limit
-      0, // Offset
-    );
     this.sendTransactionsMessage();
   };
 
-  /*
-  * Fetches the more transactions based on pageNum.
-  */
+  public fetchFirst = async () => {
+    this.transactions = await this.fetchTransactions(10, 0);
+    this.sendTransactionsMessage();
+    // Also fetch token transfers
+    await this.fetchTokenTransfers();
+  };
+
   public fetchMore = async () => {
     this.pageNum = this.pageNum + 1;
-    const txs = await this.fetchTransactions(
-      10,
-      this.pageNum * 10,
-    );
+    const txs = await this.fetchTransactions(10, this.pageNum * 10);
     this.transactions = this.transactions.concat(txs);
     this.sendTransactionsMessage();
   };
 
-  /*
-  * Stops polling for the periodic info updates.
-  */
   public stopPolling = () => {
     if (this.getTransactionsInterval) {
       clearInterval(this.getTransactionsInterval);
@@ -69,26 +57,19 @@ export default class TransactionController extends IController {
     }
   };
 
-  // TODO: if a new transaction comes in, the transactions on a page will shift(ie if 1 page has 10 transactions,
-  // transaction number 10 shifts to page2), and the bottom most transaction would disappear from the list.
-  // Need to add some additional logic to keep the bottom most transaction displaying.
   private refreshTransactions = async () => {
     let refreshedItems: Transaction[] = [];
     for (let i = 0; i <= this.pageNum; i++) {
       refreshedItems = refreshedItems.concat(
-        await this.fetchTransactions(
-          10, // Limit
-          i * 10 // Offset
-        )
+        await this.fetchTransactions(10, i * 10)
       );
     }
     this.transactions = refreshedItems;
     this.sendTransactionsMessage();
+    // Also refresh token transfers
+    await this.fetchTokenTransfers();
   };
 
-  /*
-  * Starts polling for periodic info updates.
-  */
   private startPolling = async () => {
     this.fetchFirst();
     if (!this.getTransactionsInterval) {
@@ -98,91 +79,218 @@ export default class TransactionController extends IController {
     }
   };
 
-  /*
-  * Fetches the transactions of the current wallet instance.
-  * @param pageNum The page of transactions to fetch.
-  * @return The Transactions array.
-  */
+  // ─── Regular Transactions ─────────────────────────────────────
+
   private fetchTransactions = async (
     limit: number = 10,
     offset: number = 0
   ): Promise<Transaction[]> => {
     if (
       !this.main.account.loggedInAccount ||
-      !this.main.account.loggedInAccount.wallet ||
-      !this.main.account.loggedInAccount.wallet.rjsWallet
+      !this.main.account.loggedInAccount.wallet
     ) {
       console.error('Cannot get transactions without a wallet instance.');
       return [];
     }
 
-    const wallet = this.main.account.loggedInAccount.wallet.rjsWallet;
+    const wallet = this.main.account.loggedInAccount.wallet;
+    const electrumx = this.main.network.electrumx;
+    if (!electrumx) {
+      console.error('ElectrumX not connected.');
+      return [];
+    }
 
-    const { totalCount, transactions } = await wallet.getWalletTransactions(
+    const { totalCount, transactions } = await wallet.getTransactionHistory(
+      electrumx,
       limit,
-      offset
+      offset,
     );
 
     this.totalTransactions = totalCount;
 
-    return transactions.map((tx: RunebaseInfo.IRawWalletTransactionInfo) => {
-      let amount = 0;
-      const {
-        timestamp,
-        confirmations,
-        id,
-        inputs,
-        outputs,
-        qrc20TokenTransfers,
-      } = tx;
-
-      // Sum up input values
-      const inputSum = inputs.reduce((sum: number, input: any) => {
-        if (
-          input.address ===
-          this.main.account.loggedInAccount!.wallet!.info!.address
-        ) {
-          sum += Number(input.value);
-        }
-        return sum;
-      }, 0);
-
-      // Sum up output values
-      const outputSum = outputs.reduce((sum: number, output: any) => {
-        if (
-          output.address ===
-          this.main.account.loggedInAccount!.wallet!.info!.address
-        ) {
-          sum += Number(output.value);
-        }
-        return sum;
-      }, 0);
-
-      amount += outputSum - inputSum;
-
-      const transaction = new Transaction({
-        id: id,
-        timestamp: moment(new Date(timestamp * 1000)).format('MM-DD-YYYY, HH:mm'),
-        confirmations,
-        amount: round(Number(amount), 8),
-        qrc20TokenTransfers: qrc20TokenTransfers && qrc20TokenTransfers.map(
-          (transfer: any) => new Qrc20TokenTransfer(transfer)
-        ),
-      });
-
-      return transaction;
-    });
+    return transactions.map((tx) => new Transaction({
+      id: tx.txid,
+      timestamp: tx.time
+        ? moment(new Date(tx.time * 1000)).format('MM-DD-YYYY, HH:mm')
+        : moment().format('MM-DD-YYYY, HH:mm'),
+      confirmations: tx.confirmations || 0,
+      amount: tx.amount,
+      fee: tx.fee,
+    }));
   };
 
-  /*
-  * Sends the message after fetching transactions.
-  */
+  // ─── Token Transfers ──────────────────────────────────────────
+
+  /**
+   * Fetch QRC20 Transfer events for all tracked tokens.
+   * Events are fetched via blockchain.contract.event.get_history,
+   * then decoded from transaction receipts.
+   * Sorted newest first (highest block height / lowest confirmations first).
+   */
+  private fetchTokenTransfers = async () => {
+    const wallet = this.main.account.loggedInAccount?.wallet;
+    const electrumx = this.main.network.electrumx;
+    const tokens = this.main.token.tokens;
+    if (!wallet || !electrumx || !tokens || tokens.length === 0) {
+      this.tokenTransfers = [];
+      this.sendTokenTransfersMessage();
+      return;
+    }
+
+    const network = this.main.network.runebaseNetwork;
+    const walletAddress = wallet.address;
+    const walletHash160 = addressToHash160(walletAddress);
+    const transferTopic =
+      'ddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef';
+
+    const allTransfers: Array<{
+      id: string;
+      timestamp: string;
+      confirmations: number;
+      height: number;
+      from: string;
+      to: string;
+      value: string;
+      symbol: string;
+      name: string;
+      decimals: number;
+      tokenAddress: string;
+    }> = [];
+
+    for (const token of tokens) {
+      try {
+        const events = await electrumx.getContractEventHistory(
+          walletHash160,
+          token.address,
+          transferTopic,
+        );
+        if (!events || events.length === 0) continue;
+
+        for (const event of events) {
+          try {
+            const transfer = await this.decodeTransferEvent(
+              event, token, network, transferTopic,
+            );
+            if (transfer) {
+              allTransfers.push(transfer);
+            }
+          } catch (err) {
+            console.warn(
+              `Failed to decode token event ${event.tx_hash}:`, err,
+            );
+          }
+        }
+      } catch (err) {
+        console.warn(
+          `Failed to fetch token history for ${token.symbol}:`, err,
+        );
+      }
+    }
+
+    // Sort newest first (highest height first, 0 = mempool goes to top)
+    allTransfers.sort((a, b) => {
+      if (a.height === 0 && b.height !== 0) return -1;
+      if (b.height === 0 && a.height !== 0) return 1;
+      return b.height - a.height;
+    });
+
+    this.tokenTransfers = allTransfers;
+    this.sendTokenTransfersMessage();
+  };
+
+  /**
+   * Decode a single Transfer event from its tx receipt.
+   */
+  private decodeTransferEvent = async (
+    event: { tx_hash: string; height: number; log_index: number },
+    token: RRCToken,
+    network: any,
+    transferTopic: string,
+  ) => {
+    const electrumx = this.main.network.electrumx;
+    if (!electrumx) return null;
+
+    const receipt = await electrumx.getTransactionReceipt(
+      event.tx_hash,
+    ) as any;
+
+    // Receipt is an array of contract calls
+    const calls = Array.isArray(receipt) ? receipt : [receipt];
+    for (const call of calls) {
+      const logs = call?.log || [];
+      for (const log of logs) {
+        const topics = log.topics || [];
+        if (topics[0] !== transferTopic) continue;
+        if (log.address !== token.address) continue;
+
+        const fromH160 = topics[1]?.substring(24, 64);
+        const toH160 = topics[2]?.substring(24, 64);
+        const value = log.data
+          ? BigInt('0x' + log.data).toString()
+          : '0';
+
+        let fromAddr = '';
+        let toAddr = '';
+        try {
+          if (fromH160 && fromH160 !== '0'.repeat(40)) {
+            fromAddr = hash160ToAddress(fromH160, network);
+          }
+        } catch { /* mint */ }
+        try {
+          if (toH160 && toH160 !== '0'.repeat(40)) {
+            toAddr = hash160ToAddress(toH160, network);
+          }
+        } catch { /* burn */ }
+
+        // Get timestamp from verbose tx
+        let timestamp = moment().format('MM-DD-YYYY, HH:mm');
+        let confirmations = 0;
+        try {
+          const verboseTx = await electrumx.getTransaction(
+            event.tx_hash, true,
+          ) as any;
+          if (verboseTx?.time) {
+            timestamp = moment(new Date(verboseTx.time * 1000))
+              .format('MM-DD-YYYY, HH:mm');
+          }
+          confirmations = verboseTx?.confirmations || 0;
+        } catch { /* use defaults */ }
+
+        return {
+          id: event.tx_hash,
+          timestamp,
+          confirmations,
+          height: event.height,
+          from: fromAddr,
+          to: toAddr,
+          value,
+          symbol: token.symbol,
+          name: token.name,
+          decimals: token.decimals,
+          tokenAddress: token.address,
+        };
+      }
+    }
+    return null;
+  };
+
+  // ─── Messaging ────────────────────────────────────────────────
+
   private sendTransactionsMessage = () => {
-    const stringifiedTransactions = this.transactions.map(transaction => ({ ...transaction })); // Make a shallow copy to avoid modifying the original object
+    const stringified = this.transactions.map(
+      (transaction) => ({ ...transaction }),
+    );
     sendMessage({
       type: MESSAGE_TYPE.GET_TXS_RETURN,
-      transactions: JSON.stringify(stringifiedTransactions),
+      transactions: JSON.stringify(stringified),
       hasMore: this.hasMore,
+    }, () => {});
+  };
+
+  private sendTokenTransfersMessage = () => {
+    sendMessage({
+      type: MESSAGE_TYPE.GET_TOKEN_TXS_RETURN,
+      tokenTransfers: JSON.stringify(this.tokenTransfers),
     }, () => {});
   };
 

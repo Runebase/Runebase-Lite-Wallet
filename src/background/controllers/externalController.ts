@@ -4,6 +4,7 @@ import { MESSAGE_TYPE } from '../../constants';
 import BigNumber from 'bignumber.js';
 import { SuperStaker, SuperStakerArray } from '../../types';
 import { addMessageListener, isExtensionEnvironment, sendMessage } from '../../popup/abstraction';
+import { proxyFetch } from '../../utils/fetchProxy';
 
 const INIT_VALUES = {
   getPriceInterval: undefined,
@@ -56,7 +57,7 @@ export default class ExternalController extends IController {
   private getRunebasePrice = async () => {
     try {
       // Replace Axios with Fetch API
-      const response = await fetch('https://api.coinpaprika.com/v1/ticker/runes-runebase');
+      const response = await proxyFetch('https://api.coinpaprika.com/v1/ticker/runes-runebase');
       const jsonObj = await response.json();
 
       this.runebasePriceUSD = jsonObj.price_usd;
@@ -83,7 +84,7 @@ export default class ExternalController extends IController {
 
   private getSuperstakers = async () => {
     try {
-      const response = await fetch('https://discord.runebase.io/api/super-stakers');
+      const response = await proxyFetch('https://discord.runebase.io/api/super-stakers');
       const jsonObj = await response.json();
       sendMessage({
         type: MESSAGE_TYPE.GET_SUPERSTAKERS_RETURN,
@@ -98,7 +99,7 @@ export default class ExternalController extends IController {
     address: string,
   ) => {
     try {
-      const response = await fetch(`https://discord.runebase.io/api/super-staker/${address}`);
+      const response = await proxyFetch(`https://discord.runebase.io/api/super-staker/${address}`);
       const jsonObj = await response.json();
       sendMessage({
         type: MESSAGE_TYPE.GET_SUPERSTAKER_RETURN,
