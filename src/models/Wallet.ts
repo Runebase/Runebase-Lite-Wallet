@@ -296,6 +296,7 @@ export default class Wallet implements ISigner {
       confirmations: number;
       amount: number; // satoshi, net effect on this wallet
       fee: number;    // satoshi, network fee
+      height: number;
     }>;
   }> => {
     const history = await electrumx.getHistory(this.scripthash);
@@ -303,70 +304,90 @@ export default class Wallet implements ISigner {
     const slice = history.reverse().slice(offset, offset + limit);
     const myAddress = this.wallet.address;
 
-    // Cache verbose tx lookups to avoid re-fetching
-    const txCache = new Map<string, ElectrumXTransaction>();
-    const fetchVerboseTx = async (
-      txid: string,
-    ): Promise<ElectrumXTransaction> => {
-      const cached = txCache.get(txid);
-      if (cached) return cached;
-      const tx = await electrumx.getTransaction(
-        txid, true,
-      ) as ElectrumXTransaction;
-      txCache.set(txid, tx);
-      return tx;
+    // Helper: get address from a vout
+    const getVoutAddress = (
+      vout: ElectrumXVout,
+    ): string | undefined => {
+      const sp = vout.scriptPubKey;
+      if (!sp) return undefined;
+      if (sp.address) return sp.address;
+      if (sp.addresses && sp.addresses.length > 0) {
+        return sp.addresses[0];
+      }
+      return undefined;
     };
 
+    // ── Batch fetch all slice txs in parallel ──────────────────
+    const txCache = new Map<string, ElectrumXTransaction>();
+    const sliceTxids = slice.map((item) => item.tx_hash);
+    const sliceTxResults = await Promise.allSettled(
+      sliceTxids.map((txid) => electrumx.getTransaction(txid, true)),
+    );
+    sliceTxResults.forEach((result, idx) => {
+      if (result.status === 'fulfilled') {
+        txCache.set(sliceTxids[idx], result.value as ElectrumXTransaction);
+      }
+    });
+
+    // ── Collect all unique prev-tx ids needed for input resolution ──
+    const prevTxidsNeeded = new Set<string>();
+    for (const item of slice) {
+      const tx = txCache.get(item.tx_hash);
+      if (!tx) continue;
+      for (const vin of (tx.vin || [])) {
+        if (vin.txid && !txCache.has(vin.txid)) {
+          prevTxidsNeeded.add(vin.txid);
+        }
+      }
+    }
+
+    // ── Batch fetch all prev txs in parallel ───────────────────
+    const prevTxids = Array.from(prevTxidsNeeded);
+    if (prevTxids.length > 0) {
+      const prevResults = await Promise.allSettled(
+        prevTxids.map((txid) => electrumx.getTransaction(txid, true)),
+      );
+      prevResults.forEach((result, idx) => {
+        if (result.status === 'fulfilled') {
+          txCache.set(prevTxids[idx], result.value as ElectrumXTransaction);
+        }
+      });
+    }
+
+    // ── Resolve amounts using cached txs (no more awaits) ──────
     const results: Array<{
       txid: string;
       time?: number;
       confirmations: number;
       amount: number;
       fee: number;
+      height: number;
     }> = [];
 
     for (const item of slice) {
       try {
-        const tx = await fetchVerboseTx(item.tx_hash);
+        const tx = txCache.get(item.tx_hash);
+        if (!tx) continue;
 
-        // Helper: get address from a vout
-        // Runebase daemon uses "address" (singular), some use "addresses"
-        const getVoutAddress = (
-          vout: ElectrumXVout,
-        ): string | undefined => {
-          const sp = vout.scriptPubKey;
-          if (!sp) return undefined;
-          if (sp.address) return sp.address;
-          if (sp.addresses && sp.addresses.length > 0) {
-            return sp.addresses[0];
-          }
-          return undefined;
-        };
-
-        // Resolve input values by looking up previous tx outputs
         let myInputTotal = 0;
         let allInputTotal = 0;
         let hasMyInputs = false;
         let isCoinbase = false;
         for (const vin of (tx.vin || [])) {
           if (!vin.txid) { isCoinbase = true; continue; }
-          try {
-            const prevTx = await fetchVerboseTx(vin.txid);
-            const prevVout = prevTx.vout?.[vin.vout];
-            if (!prevVout) continue;
-            const val = Number(prevVout.value || 0);
-            allInputTotal += val;
-            const prevAddr = getVoutAddress(prevVout);
-            if (prevAddr === myAddress) {
-              myInputTotal += val;
-              hasMyInputs = true;
-            }
-          } catch {
-            // Skip unresolvable inputs
+          const prevTx = txCache.get(vin.txid);
+          if (!prevTx) continue;
+          const prevVout = prevTx.vout?.[vin.vout];
+          if (!prevVout) continue;
+          const val = Number(prevVout.value || 0);
+          allInputTotal += val;
+          const prevAddr = getVoutAddress(prevVout);
+          if (prevAddr === myAddress) {
+            myInputTotal += val;
+            hasMyInputs = true;
           }
         }
 
-        // Classify outputs
         let myOutputTotal = 0;
         let otherOutputTotal = 0;
         let allOutputTotal = 0;
@@ -381,19 +402,15 @@ export default class Wallet implements ISigner {
           }
         }
 
-        // Fee = total inputs - total outputs (0 for coinbase)
         const feeCoins = isCoinbase ? 0 : allInputTotal - allOutputTotal;
         const feeSatoshi = Math.round(Math.max(0, feeCoins) * 1e8);
 
         let amountCoins: number;
         if (hasMyInputs && otherOutputTotal > 0) {
-          // Outgoing tx: show amount sent to others (negative)
           amountCoins = -otherOutputTotal;
         } else if (hasMyInputs) {
-          // Self-transfer or staking: show net delta
           amountCoins = myOutputTotal - myInputTotal;
         } else {
-          // Incoming tx: show what we received
           amountCoins = myOutputTotal;
         }
 
@@ -405,6 +422,7 @@ export default class Wallet implements ISigner {
           confirmations: tx.confirmations || 0,
           amount: amountSatoshi,
           fee: feeSatoshi,
+          height: item.height || 0,
         });
       } catch (err) {
         console.error(`Failed to process tx ${item.tx_hash}:`, err);

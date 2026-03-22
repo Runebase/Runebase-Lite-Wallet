@@ -7,6 +7,10 @@ import Transaction from '../../models/Transaction';
 import RRCToken from '../../models/RRCToken';
 import { addressToHash160, hash160ToAddress } from '../../services/wallet';
 import { addMessageListener, isExtensionEnvironment, sendMessage } from '../../popup/abstraction';
+import txCacheDB, { CachedTransaction, CachedTokenTransfer } from '../../services/db/TransactionCache';
+
+const PAGE_SIZE = 10;
+const TOKEN_PAGE_SIZE = 20;
 
 export default class TransactionController extends IController {
   private static GET_TX_INTERVAL_MS: number = 60000;
@@ -20,6 +24,13 @@ export default class TransactionController extends IController {
     return !!this.pagesTotal && (this.pagesTotal > this.pageNum + 1);
   }
 
+  // Token transfer pagination
+  private allTokenTransfers: any[] = [];
+  private tokenPageNum: number = 0;
+  public get hasMoreTokenTransfers(): boolean {
+    return this.allTokenTransfers.length > (this.tokenPageNum + 1) * TOKEN_PAGE_SIZE;
+  }
+
   private getTransactionsInterval?: any = undefined;
 
   constructor(main: RunebaseChromeController) {
@@ -28,6 +39,7 @@ export default class TransactionController extends IController {
     addMessageListener(this.handleMessage);
     this.initFinished();
   }
+
   public addTransaction = (transaction: Transaction) => {
     this.transactions.unshift(transaction);
     this.totalTransactions += 1;
@@ -35,17 +47,26 @@ export default class TransactionController extends IController {
   };
 
   public fetchFirst = async () => {
-    this.transactions = await this.fetchTransactions(10, 0);
+    this.pageNum = 0;
+    this.tokenPageNum = 0;
+    this.transactions = await this.fetchTransactions(PAGE_SIZE, 0);
     this.sendTransactionsMessage();
-    // Also fetch token transfers
     await this.fetchTokenTransfers();
   };
 
   public fetchMore = async () => {
     this.pageNum = this.pageNum + 1;
-    const txs = await this.fetchTransactions(10, this.pageNum * 10);
+    const txs = await this.fetchTransactions(PAGE_SIZE, this.pageNum * PAGE_SIZE);
     this.transactions = this.transactions.concat(txs);
     this.sendTransactionsMessage();
+  };
+
+  public fetchMoreTokenTransfers = () => {
+    this.tokenPageNum += 1;
+    this.tokenTransfers = this.allTokenTransfers.slice(
+      0, (this.tokenPageNum + 1) * TOKEN_PAGE_SIZE,
+    );
+    this.sendTokenTransfersMessage();
   };
 
   public stopPolling = () => {
@@ -53,16 +74,27 @@ export default class TransactionController extends IController {
       clearInterval(this.getTransactionsInterval);
       this.getTransactionsInterval = undefined;
       this.pageNum = 0;
+      this.tokenPageNum = 0;
     }
   };
 
+  /**
+   * Optimized refresh: only re-resolve unconfirmed txs and the first page
+   * (to pick up new txs). Confirmed txs are served from cache.
+   */
   private refreshTransactions = async () => {
-    let refreshedItems: Transaction[] = [];
-    for (let i = 0; i <= this.pageNum; i++) {
-      refreshedItems = refreshedItems.concat(
-        await this.fetchTransactions(10, i * 10)
-      );
+    // Re-fetch only first page fully (picks up new txs)
+    const firstPage = await this.fetchTransactions(PAGE_SIZE, 0);
+
+    // For remaining loaded pages, use cache for confirmed txs
+    let refreshedItems: Transaction[] = [...firstPage];
+    if (this.pageNum > 0) {
+      for (let i = 1; i <= this.pageNum; i++) {
+        const pageTxs = await this.fetchTransactions(PAGE_SIZE, i * PAGE_SIZE);
+        refreshedItems = refreshedItems.concat(pageTxs);
+      }
     }
+
     this.transactions = refreshedItems;
     this.sendTransactionsMessage();
     // Also refresh token transfers
@@ -81,7 +113,7 @@ export default class TransactionController extends IController {
   // ─── Regular Transactions ─────────────────────────────────────
 
   private fetchTransactions = async (
-    limit: number = 10,
+    limit: number = PAGE_SIZE,
     offset: number = 0
   ): Promise<Transaction[]> => {
     if (
@@ -99,6 +131,8 @@ export default class TransactionController extends IController {
       return [];
     }
 
+    const walletAddress = wallet.address;
+
     const { totalCount, transactions } = await wallet.getTransactionHistory(
       electrumx,
       limit,
@@ -106,31 +140,59 @@ export default class TransactionController extends IController {
     );
 
     this.totalTransactions = totalCount;
+    this.pagesTotal = Math.ceil(totalCount / PAGE_SIZE);
 
-    return transactions.map((tx) => new Transaction({
-      id: tx.txid,
-      timestamp: tx.time
-        ? moment(new Date(tx.time * 1000)).format('MM-DD-YYYY, HH:mm')
-        : moment().format('MM-DD-YYYY, HH:mm'),
-      confirmations: tx.confirmations || 0,
-      amount: tx.amount,
-      fee: tx.fee,
-    }));
+    const now = Date.now();
+    const result: Transaction[] = [];
+    const toCache: CachedTransaction[] = [];
+
+    for (const tx of transactions) {
+      result.push(new Transaction({
+        id: tx.txid,
+        timestamp: tx.time
+          ? moment(new Date(tx.time * 1000)).format('MM-DD-YYYY, HH:mm')
+          : moment().format('MM-DD-YYYY, HH:mm'),
+        confirmations: tx.confirmations || 0,
+        amount: tx.amount,
+        fee: tx.fee,
+      }));
+
+      // Cache confirmed txs to Dexie
+      toCache.push({
+        txid: tx.txid,
+        walletAddress,
+        amount: tx.amount,
+        fee: tx.fee,
+        time: tx.time,
+        confirmations: tx.confirmations || 0,
+        height: tx.height || 0,
+        cachedAt: now,
+      });
+    }
+
+    // Write cache in background (don't block UI)
+    if (toCache.length > 0) {
+      txCacheDB.putTxBatch(toCache)
+        .then(() => txCacheDB.evictOldTxs(walletAddress))
+        .catch((err) => console.warn('TX cache write failed:', err));
+    }
+
+    return result;
   };
 
   // ─── Token Transfers ──────────────────────────────────────────
 
   /**
    * Fetch QRC20 Transfer events for all tracked tokens.
-   * Events are fetched via blockchain.contract.event.get_history,
-   * then decoded from transaction receipts.
-   * Sorted newest first (highest block height / lowest confirmations first).
+   * Uses Dexie cache for confirmed transfers to avoid redundant RPC calls.
+   * Only re-decodes unconfirmed (mempool) events and newly seen events.
    */
   private fetchTokenTransfers = async () => {
     const wallet = this.main.account.loggedInAccount?.wallet;
     const electrumx = this.main.network.electrumx;
     const tokens = this.main.token.tokens;
     if (!wallet || !electrumx || !tokens || tokens.length === 0) {
+      this.allTokenTransfers = [];
       this.tokenTransfers = [];
       this.sendTokenTransfersMessage();
       return;
@@ -141,6 +203,17 @@ export default class TransactionController extends IController {
     const walletHash160 = addressToHash160(walletAddress);
     const transferTopic =
       'ddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef';
+
+    // Load existing cache into a lookup map
+    let cachedMap = new Map<string, CachedTokenTransfer>();
+    try {
+      const cached = await txCacheDB.getCachedTokenTransfers(walletAddress);
+      for (const entry of cached) {
+        cachedMap.set(entry.id, entry);
+      }
+    } catch {
+      cachedMap = new Map();
+    }
 
     const allTransfers: Array<{
       id: string;
@@ -156,6 +229,9 @@ export default class TransactionController extends IController {
       tokenAddress: string;
     }> = [];
 
+    const newCacheEntries: CachedTokenTransfer[] = [];
+    const now = Date.now();
+
     for (const token of tokens) {
       try {
         const events = await electrumx.getContractEventHistory(
@@ -165,18 +241,75 @@ export default class TransactionController extends IController {
         );
         if (!events || events.length === 0) continue;
 
+        // Batch: collect events that need decoding vs those from cache
+        const toDecode: Array<{ tx_hash: string; height: number; log_index: number }> = [];
+        const fromCache: typeof allTransfers = [];
+
         for (const event of events) {
-          try {
-            const transfer = await this.decodeTransferEvent(
-              event, token, network, transferTopic,
-            );
-            if (transfer) {
-              allTransfers.push(transfer);
+          const cacheKey = `${event.tx_hash}:${event.log_index}`;
+          const cached = cachedMap.get(cacheKey);
+
+          // Use cache if confirmed (height > 0) and we have a cached entry
+          if (cached && event.height > 0 && cached.height > 0) {
+            fromCache.push({
+              id: cached.txid,
+              timestamp: cached.time
+                ? moment(new Date(cached.time * 1000)).format('MM-DD-YYYY, HH:mm')
+                : moment().format('MM-DD-YYYY, HH:mm'),
+              confirmations: cached.confirmations,
+              height: cached.height,
+              from: cached.from,
+              to: cached.to,
+              value: cached.value,
+              symbol: cached.symbol,
+              name: cached.name,
+              decimals: cached.decimals,
+              tokenAddress: cached.tokenAddress,
+            });
+          } else {
+            toDecode.push(event);
+          }
+        }
+
+        allTransfers.push(...fromCache);
+
+        // Batch-decode remaining events (unconfirmed or newly seen)
+        // Process in parallel batches of 5 to avoid overwhelming the server
+        for (let i = 0; i < toDecode.length; i += 5) {
+          const batch = toDecode.slice(i, i + 5);
+          const results = await Promise.allSettled(
+            batch.map((event) =>
+              this.decodeTransferEvent(event, token, network, transferTopic)
+            ),
+          );
+          for (let j = 0; j < results.length; j++) {
+            const result = results[j];
+            if (result.status === 'fulfilled' && result.value) {
+              allTransfers.push(result.value);
+              // Cache confirmed entries
+              const event = batch[j];
+              if (event.height > 0) {
+                newCacheEntries.push({
+                  id: `${event.tx_hash}:${event.log_index}`,
+                  walletAddress,
+                  txid: event.tx_hash,
+                  logIndex: event.log_index,
+                  height: event.height,
+                  from: result.value.from,
+                  to: result.value.to,
+                  value: result.value.value,
+                  symbol: result.value.symbol,
+                  name: result.value.name,
+                  decimals: result.value.decimals,
+                  tokenAddress: result.value.tokenAddress,
+                  time: result.value.timestamp
+                    ? moment(result.value.timestamp, 'MM-DD-YYYY, HH:mm').unix()
+                    : undefined,
+                  confirmations: result.value.confirmations,
+                  cachedAt: now,
+                });
+              }
             }
-          } catch (err) {
-            console.warn(
-              `Failed to decode token event ${event.tx_hash}:`, err,
-            );
           }
         }
       } catch (err) {
@@ -186,6 +319,13 @@ export default class TransactionController extends IController {
       }
     }
 
+    // Write new cache entries in background
+    if (newCacheEntries.length > 0) {
+      txCacheDB.putTokenTransferBatch(newCacheEntries)
+        .then(() => txCacheDB.evictOldTokenTransfers(walletAddress))
+        .catch((err) => console.warn('Token transfer cache write failed:', err));
+    }
+
     // Sort newest first (highest height first, 0 = mempool goes to top)
     allTransfers.sort((a, b) => {
       if (a.height === 0 && b.height !== 0) return -1;
@@ -193,7 +333,11 @@ export default class TransactionController extends IController {
       return b.height - a.height;
     });
 
-    this.tokenTransfers = allTransfers;
+    this.allTokenTransfers = allTransfers;
+    // Apply pagination: show first N pages
+    this.tokenTransfers = allTransfers.slice(
+      0, (this.tokenPageNum + 1) * TOKEN_PAGE_SIZE,
+    );
     this.sendTokenTransfersMessage();
   };
 
@@ -290,6 +434,7 @@ export default class TransactionController extends IController {
     sendMessage({
       type: MESSAGE_TYPE.GET_TOKEN_TXS_RETURN,
       tokenTransfers: JSON.stringify(this.tokenTransfers),
+      hasMoreTokenTransfers: this.hasMoreTokenTransfers,
     }, () => {});
   };
 
@@ -305,6 +450,9 @@ export default class TransactionController extends IController {
         break;
       case MESSAGE_TYPE.GET_MORE_TXS:
         this.fetchMore();
+        break;
+      case MESSAGE_TYPE.GET_MORE_TOKEN_TXS:
+        this.fetchMoreTokenTransfers();
         break;
       default:
         break;

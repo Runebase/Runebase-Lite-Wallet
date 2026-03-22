@@ -114,6 +114,7 @@ export enum MESSAGE_TYPE {
 
   // Token transfer history
   GET_TOKEN_TXS_RETURN = 'GET_TOKEN_TXS_RETURN',
+  GET_MORE_TOKEN_TXS = 'GET_MORE_TOKEN_TXS',
 
   // ElectrumX server management
   GET_ELECTRUMX_STATUS = 'GET_ELECTRUMX_STATUS',

@@ -14,7 +14,7 @@ const isBrowserDev = typeof process !== 'undefined'
 
 const PROXY_MAP: Array<[string, string]> = [
   ['https://discord.runebase.io', '/proxy/discord'],
-  ['https://api.coinpaprika.com', '/proxy/coinpaprika'],
+  ['https://www.runesx.xyz', '/proxy/runesx'],
   ['https://explorer.runebase.io/api', '/proxy/explorer/api'],
   ['https://testnet.runebase.io/api', '/proxy/explorer/api'],
 ];

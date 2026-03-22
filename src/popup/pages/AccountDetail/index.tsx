@@ -22,11 +22,13 @@ import ElectrumXStatusBar from '../../components/ElectrumXStatusBar';
 import { useAppSelector, useAppDispatch } from '../../store/hooks';
 import {
   fetchMoreTxs,
+  fetchMoreTokenTxs,
   initAccountDetail,
   setActiveTabIdx,
   setSelectedTransaction,
   setShouldScrollToBottom,
   setIsLoadingMore,
+  setIsLoadingMoreTokenTransfers,
 } from '../../store/slices/accountDetailSlice';
 import { shortenTxid } from '../../../utils';
 import useStyles from './styles';
@@ -368,11 +370,18 @@ const TokenTransferList: React.FC<{
     (state) => state.accountDetail.tokenTransfers,
   );
   const isLoading = useAppSelector((state) => state.accountDetail.isLoading);
+  const hasMoreTokenTransfers = useAppSelector((state) => state.accountDetail.hasMoreTokenTransfers);
+  const isLoadingMoreTokenTransfers = useAppSelector((state) => state.accountDetail.isLoadingMoreTokenTransfers);
   const walletAddress = useAppSelector(
     (state) => state.session.walletInfo?.address,
   );
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+
+  const handleLoadMoreTokenTransfers = () => {
+    dispatch(setIsLoadingMoreTokenTransfers(true));
+    fetchMoreTokenTxs();
+  };
 
   const handleClick = (transfer: any) => {
     dispatch(setSelectedTransaction({
@@ -472,6 +481,19 @@ const TokenTransferList: React.FC<{
           </ListItemButton>
         );
       })}
+      <Box sx={{ display: 'flex', justifyContent: 'center', py: 2 }}>
+        {hasMoreTokenTransfers && (
+          <Button
+            color="primary"
+            size="small"
+            onClick={handleLoadMoreTokenTransfers}
+            disabled={isLoadingMoreTokenTransfers}
+            startIcon={isLoadingMoreTokenTransfers ? <CircularProgress size={16} /> : undefined}
+          >
+            {isLoadingMoreTokenTransfers ? 'Loading...' : 'Load More'}
+          </Button>
+        )}
+      </Box>
     </div>
   );
 };

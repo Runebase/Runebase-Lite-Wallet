@@ -19,6 +19,8 @@ import {
 import {
   setHasAccounts,
   setInvalidPassword,
+  setIsLoggingIn,
+  resetLoginForm,
 } from './slices/loginSlice';
 import {
   setAccounts,
@@ -27,6 +29,7 @@ import {
   setTransactions,
   setTokenTransfers,
   setHasMore,
+  setHasMoreTokenTransfers,
   setVerifiedTokens as setAccountDetailVerifiedTokens,
 } from './slices/accountDetailSlice';
 import {
@@ -144,6 +147,7 @@ export const messageMiddleware: Middleware = (storeApi) => {
       break;
     case MESSAGE_TYPE.GET_TOKEN_TXS_RETURN:
       dispatch(setTokenTransfers(parseJsonOrFallback(requestData.tokenTransfers)));
+      dispatch(setHasMoreTokenTransfers(!!requestData.hasMoreTokenTransfers));
       break;
     case MESSAGE_TYPE.RRC_TOKENS_RETURN:
       dispatch(setAccountDetailVerifiedTokens(parseJsonOrFallback(requestData.tokens)));
@@ -217,6 +221,8 @@ export const messageMiddleware: Middleware = (storeApi) => {
       break;
     }
     case MESSAGE_TYPE.CLEARED_SESSION_RETURN:
+      dispatch(setIsLoggingIn(false));
+      dispatch(resetLoginForm());
       navigateFn?.('/login');
       break;
     case MESSAGE_TYPE.ROUTE_LOGIN:

@@ -12,7 +12,7 @@ const INIT_VALUES = {
 };
 
 export default class ExternalController extends IController {
-  private static GET_PRICE_INTERVAL_MS: number = 60000;
+  private static GET_PRICE_INTERVAL_MS: number = 600000; // 10 minutes
 
   private getPriceInterval?: any = INIT_VALUES.getPriceInterval;
   private runebasePriceUSD: number = INIT_VALUES.runebasePriceUSD;
@@ -52,12 +52,11 @@ export default class ExternalController extends IController {
   };
 
   /*
-  * Gets the current Runebase market price.
+  * Gets the current Runebase market price from the RunesX DEX RUNES/USDC pool.
   */
   private getRunebasePrice = async () => {
     try {
-      // Replace Axios with Fetch API
-      const response = await proxyFetch('https://api.coinpaprika.com/v1/ticker/runes-runebase');
+      const response = await proxyFetch('https://www.runesx.xyz/api/runes-price');
       const jsonObj = await response.json();
 
       this.runebasePriceUSD = jsonObj.price_usd;

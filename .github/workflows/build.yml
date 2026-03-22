@@ -244,7 +244,8 @@ jobs:
 
       - name: Zip iOS simulator build
         run: |
-          APP_DIR=$(find cordova/platforms/ios/build -name "*.app" -type d | head -1 | xargs dirname)
+          APP_PATH=$(find cordova/platforms/ios/build -name "*.app" -type d | head -1)
+          APP_DIR=$(dirname "$APP_PATH")
           echo "Found build output in: $APP_DIR"
           cd "$APP_DIR"
           zip -r "$GITHUB_WORKSPACE/Runebase-Lite-Wallet-ios-simulator.zip" *.app

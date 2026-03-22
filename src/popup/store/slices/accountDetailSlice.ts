@@ -14,10 +14,12 @@ interface AccountDetailState {
   tokens: any[];
   verifiedTokens: any[];
   hasMore: boolean;
+  hasMoreTokenTransfers: boolean;
   shouldScrollToBottom: boolean;
   editTokenMode: boolean;
   isLoading: boolean;
   isLoadingMore: boolean;
+  isLoadingMoreTokenTransfers: boolean;
 }
 
 const initialState: AccountDetailState = {
@@ -28,10 +30,12 @@ const initialState: AccountDetailState = {
   tokens: [],
   verifiedTokens: [],
   hasMore: false,
+  hasMoreTokenTransfers: false,
   shouldScrollToBottom: false,
   editTokenMode: false,
   isLoading: true,
   isLoadingMore: false,
+  isLoadingMoreTokenTransfers: false,
 };
 
 const accountDetailSlice = createSlice({
@@ -52,6 +56,7 @@ const accountDetailSlice = createSlice({
     setTokenTransfers: (state, action: PayloadAction<any[]>) => {
       state.tokenTransfers = action.payload;
       state.isLoading = false;
+      state.isLoadingMoreTokenTransfers = false;
     },
     setTokens: (state, action: PayloadAction<any[]>) => {
       state.tokens = action.payload;
@@ -61,6 +66,12 @@ const accountDetailSlice = createSlice({
     },
     setHasMore: (state, action: PayloadAction<boolean>) => {
       state.hasMore = action.payload;
+    },
+    setHasMoreTokenTransfers: (state, action: PayloadAction<boolean>) => {
+      state.hasMoreTokenTransfers = action.payload;
+    },
+    setIsLoadingMoreTokenTransfers: (state, action: PayloadAction<boolean>) => {
+      state.isLoadingMoreTokenTransfers = action.payload;
     },
     setShouldScrollToBottom: (state, action: PayloadAction<boolean>) => {
       state.shouldScrollToBottom = action.payload;
@@ -92,6 +103,10 @@ export const fetchMoreTxs = () => {
   sendMessage({ type: MESSAGE_TYPE.GET_MORE_TXS });
 };
 
+export const fetchMoreTokenTxs = () => {
+  sendMessage({ type: MESSAGE_TYPE.GET_MORE_TOKEN_TXS });
+};
+
 export const removeToken = (contractAddress: string) => {
   sendMessage({
     type: MESSAGE_TYPE.REMOVE_TOKEN,
@@ -112,10 +127,12 @@ export const {
   setTokens,
   setVerifiedTokens,
   setHasMore,
+  setHasMoreTokenTransfers,
   setShouldScrollToBottom,
   setEditTokenMode,
   setIsLoading,
   setIsLoadingMore,
+  setIsLoadingMoreTokenTransfers,
 } = accountDetailSlice.actions;
 
 export default accountDetailSlice.reducer;

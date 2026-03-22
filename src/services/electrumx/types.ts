@@ -122,6 +122,12 @@ export interface ElectrumXEventHistoryItem {
   log_index: number;
 }
 
+/** Paginated response from get_history / event.get_history when limit/offset are provided */
+export interface ElectrumXPaginatedHistory<T> {
+  items: T[];
+  total: number;
+}
+
 export interface ElectrumXServerFeatures {
   genesis_hash: string;
   hosts: Record<string, Record<string, number>>;

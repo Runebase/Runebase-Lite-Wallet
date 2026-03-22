@@ -9,6 +9,7 @@ import {
   ElectrumXContractCallResult,
   ElectrumXTokenInfo,
   ElectrumXEventHistoryItem,
+  ElectrumXPaginatedHistory,
   ElectrumXServerFeatures,
   ElectrumXHeaderNotification,
   SubscriptionCallback,
@@ -28,6 +29,9 @@ export default class ElectrumXManager {
   // Cooldown: don't retry failover within this window after a failure
   private lastFailoverFailedAt = 0;
   private static FAILOVER_COOLDOWN_MS = 15000;
+  // Auto-reconnect timer
+  private autoReconnectTimer: ReturnType<typeof setTimeout> | null = null;
+  private static AUTO_RECONNECT_DELAY_MS = 3000;
 
   // Event callbacks
   public onConnected?: (server: ElectrumXServerConfig) => void;
@@ -167,6 +171,7 @@ export default class ElectrumXManager {
   }
 
   async disconnect(): Promise<void> {
+    this.cancelAutoReconnect();
     if (this.activeClient) {
       await this.activeClient.disconnect();
       this.activeClient = null;
@@ -187,6 +192,21 @@ export default class ElectrumXManager {
 
   async getHistory(scripthash: string): Promise<ElectrumXHistoryItem[]> {
     return await this.call('blockchain.scripthash.get_history', [scripthash]) as ElectrumXHistoryItem[];
+  }
+
+  /**
+   * Paginated history. Returns { items, total } where total is the full
+   * confirmed history count and items is the requested page.
+   * Server caps limit at 200 per request.
+   */
+  async getHistoryPaginated(
+    scripthash: string,
+    limit: number,
+    offset: number,
+  ): Promise<ElectrumXPaginatedHistory<ElectrumXHistoryItem>> {
+    return await this.call('blockchain.scripthash.get_history', [
+      scripthash, limit, offset,
+    ]) as ElectrumXPaginatedHistory<ElectrumXHistoryItem>;
   }
 
   async getMempool(scripthash: string): Promise<ElectrumXHistoryItem[]> {
@@ -238,6 +258,22 @@ export default class ElectrumXManager {
     return await this.call('blockchain.contract.event.get_history', [hash160, contractAddr, topic]) as ElectrumXEventHistoryItem[];
   }
 
+  /**
+   * Paginated contract event history. Returns { items, total }.
+   * Server caps limit at 200 per request.
+   */
+  async getContractEventHistoryPaginated(
+    hash160: string,
+    contractAddr: string,
+    topic: string,
+    limit: number,
+    offset: number,
+  ): Promise<ElectrumXPaginatedHistory<ElectrumXEventHistoryItem>> {
+    return await this.call('blockchain.contract.event.get_history', [
+      hash160, contractAddr, topic, limit, offset,
+    ]) as ElectrumXPaginatedHistory<ElectrumXEventHistoryItem>;
+  }
+
   async getServerFeatures(): Promise<ElectrumXServerFeatures> {
     return await this.call('server.features') as ElectrumXServerFeatures;
   }
@@ -276,11 +312,10 @@ export default class ElectrumXManager {
 
   private async call(method: string, params: unknown[] = []): Promise<unknown> {
     if (!this.activeClient || this.activeClient.state !== 'connected') {
-      // Don't attempt reconnection from data requests — just fail.
-      // Connections are established explicitly via connect()/switchServer().
-      // This prevents every polling tick or data fetch from triggering
-      // a full failover cycle across all servers.
-      throw new Error('ElectrumX not connected');
+      // Attempt failover before failing — this handles the case where the
+      // server went offline and a poll/data request arrives before or
+      // during the auto-reconnect timer.
+      await this.failover();
     }
 
     return await this.activeClient!.request(method, params);
@@ -292,12 +327,10 @@ export default class ElectrumXManager {
 
     client.onDisconnected = (reason) => {
       console.warn(`ElectrumX: Disconnected from ${config.host}: ${reason}`);
-      if (this._state === 'connected') {
-        // Mark as disconnected — the next API call via call() will
-        // trigger a single failover on-demand. This avoids cascading
-        // reconnection storms from eager auto-failover.
+      if (this.activeClient === client && this._state === 'connected') {
         this._state = 'disconnected';
         this.onDisconnected?.(reason);
+        this.scheduleAutoReconnect();
       }
     };
 
@@ -311,6 +344,7 @@ export default class ElectrumXManager {
     await client.request('server.version', ['RunebaseLiteWallet', this.protocolVersion]);
 
     // Success - set as active
+    this.cancelAutoReconnect();
     if (this.activeClient) {
       await this.activeClient.disconnect();
     }
@@ -367,6 +401,33 @@ export default class ElectrumXManager {
 
     this._state = 'disconnected';
     throw new Error('All ElectrumX servers unavailable');
+  }
+
+  private scheduleAutoReconnect(): void {
+    // Don't stack multiple timers
+    if (this.autoReconnectTimer) return;
+
+    console.log(`ElectrumX: Auto-reconnect in ${ElectrumXManager.AUTO_RECONNECT_DELAY_MS}ms`);
+    this.autoReconnectTimer = setTimeout(async () => {
+      this.autoReconnectTimer = null;
+      // Only reconnect if still disconnected (not manually reconnected)
+      if (this._state !== 'disconnected') return;
+
+      try {
+        await this.failover();
+        console.log(`ElectrumX: Auto-reconnected to ${this.currentServer?.host}`);
+      } catch (_err) {
+        console.warn('ElectrumX: Auto-reconnect failed, will retry');
+        this.scheduleAutoReconnect();
+      }
+    }, ElectrumXManager.AUTO_RECONNECT_DELAY_MS);
+  }
+
+  private cancelAutoReconnect(): void {
+    if (this.autoReconnectTimer) {
+      clearTimeout(this.autoReconnectTimer);
+      this.autoReconnectTimer = null;
+    }
   }
 
   private registerSubscription(method: string, callback: SubscriptionCallback): void {

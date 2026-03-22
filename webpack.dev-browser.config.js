@@ -61,9 +61,9 @@ module.exports = merge(baseConfig, {
         secure: true,
       },
       {
-        context: ['/proxy/coinpaprika'],
-        target: 'https://api.coinpaprika.com',
-        pathRewrite: { '^/proxy/coinpaprika': '' },
+        context: ['/proxy/runesx'],
+        target: 'https://www.runesx.xyz',
+        pathRewrite: { '^/proxy/runesx': '' },
         changeOrigin: true,
         secure: true,
       },
