@@ -198,9 +198,11 @@ export enum RUNEBASECHROME_ACCOUNT_CHANGE {
   DAPP_CONNECTION = 'Account Connected to Dapp',
 }
 
+export const CREDITS_CONTRACT_ADDRESS = '579efd47ed4c7dfd0c3b4ec570fb727e1e732df7';
+
 export const TOKEN_IMAGES: Record<string, string> = {
   '': 'images/runes.png',
-  '579efd47ed4c7dfd0c3b4ec570fb727e1e732df7': 'images/credits.png',
+  [CREDITS_CONTRACT_ADDRESS]: 'images/credits.png',
 };
 
 export const DELEGATION_CONTRACT_ADDRESS = '0000000000000000000000000000000000000086';

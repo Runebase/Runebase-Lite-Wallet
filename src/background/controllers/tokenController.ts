@@ -3,7 +3,7 @@ import BigNumber from 'bignumber.js';
 
 import RunebaseChromeController from '.';
 import IController from './iController';
-import { MESSAGE_TYPE, STORAGE, NETWORK_NAMES } from '../../constants';
+import { MESSAGE_TYPE, STORAGE, NETWORK_NAMES, CREDITS_CONTRACT_ADDRESS } from '../../constants';
 import RRCToken from '../../models/RRCToken';
 import rrc223TokenABI from '../../contracts/rrc223TokenABI';
 import mainnetTokenList from '../../contracts/mainnetTokenList';
@@ -284,7 +284,9 @@ export default class TokenController extends IController {
   };
 
   private removeToken = (contractAddress: string) => {
+    if (contractAddress === CREDITS_CONTRACT_ADDRESS) return;
     const index = findIndex(this.tokens, { address: contractAddress });
+    if (index < 0) return;
     this.tokens!.splice(index, 1);
     this.setTokenListInStorage();
   };

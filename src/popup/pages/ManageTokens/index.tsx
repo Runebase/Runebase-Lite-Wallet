@@ -19,7 +19,7 @@ import {
   setEditTokenMode,
 } from '../../store/slices/accountDetailSlice';
 import RRCToken from '../../../models/RRCToken';
-import { TOKEN_IMAGES } from '../../../constants';
+import { TOKEN_IMAGES, CREDITS_CONTRACT_ADDRESS } from '../../../constants';
 import { getImageUrl } from '../../abstraction';
 
 const ManageTokens: React.FC = () => {
@@ -49,13 +49,14 @@ const TokenList: React.FC<{ classes: Record<string, string> }> = ({ classes }) =
       {verifiedTokens && verifiedTokens.length > 0 ? (
         verifiedTokens.map(({ name, symbol, balance, address }: RRCToken) => {
           const tokenLogoSrc = TOKEN_IMAGES[address];
+          const isRemovable = address !== CREDITS_CONTRACT_ADDRESS;
           return (
             <div
               key={symbol}
-              onClick={() => editTokenMode && removeToken(address)}
+              onClick={() => editTokenMode && isRemovable && removeToken(address)}
             >
               <Box sx={{ display: 'flex', alignItems: 'center', py: 1, px: 1, gap: 1.5 }}>
-                {editTokenMode && (
+                {editTokenMode && isRemovable && (
                   <Button
                     className={classes.tokenDeleteButton}
                     id="removeTokenButton"
