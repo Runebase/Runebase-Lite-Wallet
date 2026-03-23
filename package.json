@@ -5,7 +5,7 @@
     "name": "Bago",
     "email": "support@runebase.io"
   },
-  "version": "2.0.1",
+  "version": "2.0.2",
   "homepage": "https://github.com/runebase/runebase-lite-wallet",
   "private": true,
   "scripts": {
