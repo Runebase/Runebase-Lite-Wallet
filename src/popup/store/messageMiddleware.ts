@@ -31,6 +31,7 @@ import {
   setHasMore,
   setHasMoreTokenTransfers,
   setVerifiedTokens as setAccountDetailVerifiedTokens,
+  setTxDetail,
 } from './slices/accountDetailSlice';
 import {
   setSendState,
@@ -148,6 +149,9 @@ export const messageMiddleware: Middleware = (storeApi) => {
     case MESSAGE_TYPE.GET_TOKEN_TXS_RETURN:
       dispatch(setTokenTransfers(parseJsonOrFallback(requestData.tokenTransfers)));
       dispatch(setHasMoreTokenTransfers(!!requestData.hasMoreTokenTransfers));
+      break;
+    case MESSAGE_TYPE.GET_TX_DETAIL_RETURN:
+      dispatch(setTxDetail(requestData.detail ? parseJsonOrFallback(requestData.detail) : null));
       break;
     case MESSAGE_TYPE.RRC_TOKENS_RETURN:
       dispatch(setAccountDetailVerifiedTokens(parseJsonOrFallback(requestData.tokens)));

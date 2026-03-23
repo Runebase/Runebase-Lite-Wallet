@@ -478,7 +478,9 @@ export default class AccountController extends IController {
 
       const output = result?.executionResult?.output;
       if (!output || output === '0'.repeat(512) || result?.executionResult?.excepted !== 'None') {
-        // No delegation found or contract call failed
+        // No delegation found or contract call failed — cache empty result
+        // so subsequent GET_DELEGATION_INFO returns cached instead of re-fetching
+        this.loggedInAccount.wallet.delegationInfo = { staker: '', fee: 0, blockHeight: 0, PoD: '' };
         sendMessage({
           type: MESSAGE_TYPE.GET_DELEGATION_INFO_RETURN,
           delegationInfo: null,
@@ -510,7 +512,10 @@ export default class AccountController extends IController {
         PoD: pod,
       } : null;
 
-      this.loggedInAccount.wallet.delegationInfo = delegationInfo ?? undefined;
+      // Cache result so subsequent GET_DELEGATION_INFO returns immediately.
+      // Use empty-staker object for "no delegation" to distinguish from
+      // undefined (not yet fetched).
+      this.loggedInAccount.wallet.delegationInfo = delegationInfo ?? { staker: '', fee: 0, blockHeight: 0, PoD: '' };
 
       sendMessage({
         type: MESSAGE_TYPE.GET_DELEGATION_INFO_RETURN,
@@ -998,12 +1003,17 @@ export default class AccountController extends IController {
         });
         break;
       case MESSAGE_TYPE.GET_DELEGATION_INFO:
-        // Return cached delegation info to avoid ElectrumX calls on
-        // every popup open. Fresh data is fetched by polling intervals.
-        sendMessage({
-          type: MESSAGE_TYPE.GET_DELEGATION_INFO_RETURN,
-          delegationInfo: this.loggedInAccount?.wallet?.delegationInfo ?? null,
-        });
+        // Return cached delegation info if available, otherwise fetch fresh
+        // from ElectrumX. This ensures delegation state is correct on first
+        // popup open after wallet startup.
+        if (this.loggedInAccount?.wallet?.delegationInfo !== undefined) {
+          sendMessage({
+            type: MESSAGE_TYPE.GET_DELEGATION_INFO_RETURN,
+            delegationInfo: this.loggedInAccount.wallet.delegationInfo,
+          });
+        } else {
+          this.getDelegationInfo();
+        }
         break;
       case MESSAGE_TYPE.GET_DELEGATION_READINESS:
         this.getDelegationReadiness();

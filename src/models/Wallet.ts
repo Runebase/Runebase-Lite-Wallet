@@ -171,10 +171,15 @@ export default class Wallet implements ISigner {
         if (result.status === 'fulfilled' && typeof result.value !== 'string') {
           const tx = result.value as ElectrumXTransaction;
           // Coinstake detection for QTUM/Runebase:
-          // Coinstake transactions always have vout[0] with value 0 (empty marker output).
-          // Regular transactions never have a zero-value first output.
+          // Coinstake transactions have vout[0] with value=0 AND empty scriptPubKey.
+          // OP_CALL outputs also have value=0 but contain contract bytecode in
+          // scriptPubKey.hex, so we must check for the empty marker specifically.
           const firstVout = tx.vout?.[0];
-          if (firstVout && firstVout.value === 0) {
+          if (
+            firstVout
+            && firstVout.value === 0
+            && (!firstVout.scriptPubKey?.hex || firstVout.scriptPubKey.hex === '')
+          ) {
             coinstakeTxids.add(uniqueTxids[idx]);
           }
         }
@@ -297,6 +302,7 @@ export default class Wallet implements ISigner {
       amount: number; // satoshi, net effect on this wallet
       fee: number;    // satoshi, network fee
       height: number;
+      isStake: boolean;
     }>;
   }> => {
     const history = await electrumx.getHistory(this.scripthash);
@@ -362,12 +368,24 @@ export default class Wallet implements ISigner {
       amount: number;
       fee: number;
       height: number;
+      isStake: boolean;
     }> = [];
 
     for (const item of slice) {
       try {
         const tx = txCache.get(item.tx_hash);
         if (!tx) continue;
+
+        // Coinstake detection: vout[0] is the coinstake marker — value=0 AND
+        // empty scriptPubKey (distinguishes from OP_CALL outputs which also
+        // have value=0 but contain contract bytecode in scriptPubKey.hex).
+        const firstVout = tx.vout?.[0];
+        const isStake = !!(
+          firstVout
+          && Number(firstVout.value) === 0
+          && (tx.vin || []).length > 0
+          && (!firstVout.scriptPubKey?.hex || firstVout.scriptPubKey.hex === '')
+        );
 
         let myInputTotal = 0;
         let allInputTotal = 0;
@@ -423,6 +441,7 @@ export default class Wallet implements ISigner {
           amount: amountSatoshi,
           fee: feeSatoshi,
           height: item.height || 0,
+          isStake,
         });
       } catch (err) {
         console.error(`Failed to process tx ${item.tx_hash}:`, err);

@@ -4,6 +4,7 @@ export default class Transaction {
   public confirmations: number = 0;
   public amount: number = 0;
   public fee?: number; // network fee in satoshi
+  public isStake?: boolean; // true for coinstake (staking reward) transactions
   public qrc20TokenTransfers: Qrc20TokenTransfer[] = [];
 
   public get pending() {
@@ -27,6 +28,7 @@ interface TransactionAttributes {
   confirmations?: number;
   amount?: number;
   fee?: number;
+  isStake?: boolean;
   qrc20TokenTransfers?: Qrc20TokenTransfer[];
 }
 

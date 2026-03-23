@@ -16,7 +16,7 @@ import NotificationAddIcon from '@mui/icons-material/NotificationAdd';
 import DynamicFormIcon from '@mui/icons-material/DynamicForm';
 import moment from 'moment';
 import { useAppSelector, useAppDispatch } from '../../store/hooks';
-import { getSelectedSuperstakerDelegations } from '../../store/slices/delegateSlice';
+import { getSelectedSuperstakerDelegations, getDelegationReadiness } from '../../store/slices/delegateSlice';
 import { getNavigateFunction } from '../../store/messageMiddleware';
 
 const SuperstakerDetail: React.FC = () => {
@@ -26,9 +26,13 @@ const SuperstakerDetail: React.FC = () => {
   const delegationInfo = useAppSelector((state) => state.session.delegationInfo);
   const selectedSuperstaker = useAppSelector((state) => state.delegate.selectedSuperstaker);
   const selectedSuperstakerDelegations = useAppSelector((state) => state.delegate.selectedSuperstakerDelegations);
+  const pendingAction = useAppSelector((state) => state.session.pendingDelegationAction);
+  const canDelegate = useAppSelector((state) => state.delegate.readiness?.canDelegate ?? true);
+  const isPending = !!pendingAction;
 
   useEffect(() => {
     dispatch(getSelectedSuperstakerDelegations());
+    getDelegationReadiness();
   }, []);
 
   if (!loggedInAccountName || !walletInfo) {
@@ -124,6 +128,7 @@ const SuperstakerDetail: React.FC = () => {
               fullWidth
               variant="contained"
               color="secondary"
+              disabled={isPending || !canDelegate}
               onClick={() => navigate?.('/remove-delegation')}
             >
               Undelegate
@@ -133,6 +138,7 @@ const SuperstakerDetail: React.FC = () => {
               fullWidth
               variant="contained"
               color="primary"
+              disabled={isPending || !canDelegate}
               onClick={() => navigate?.('/add-delegation')}
             >
               Change Delegate
@@ -142,6 +148,7 @@ const SuperstakerDetail: React.FC = () => {
               fullWidth
               variant="contained"
               color="primary"
+              disabled={isPending || !canDelegate}
               onClick={() => navigate?.('/add-delegation')}
             >
               Delegate

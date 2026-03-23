@@ -1,56 +1,141 @@
 import { makeStyles } from 'tss-react/mui';
 
 const useStyles = makeStyles()((theme) => ({
-  root: {
-    width: '100%',
-    height: '100%',
+  // Type header row
+  headerRow: {
     display: 'flex',
-    flexDirection: 'column',
+    alignItems: 'center',
+    gap: theme.spacing(1),
+    marginBottom: theme.spacing(2),
   },
-  contentContainer: {
-    flex: 1,
-    overflow: 'auto',
+  headerIcon: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 36,
+    height: 36,
+    borderRadius: '50%',
+    backgroundColor: theme.palette.action.hover,
+    flexShrink: 0,
+  },
+  headerLabel: {
+    fontSize: '1rem',
+    fontWeight: 600,
+  },
+  headerMeta: {
+    fontSize: '0.75rem',
+    color: theme.palette.text.secondary,
+  },
+
+  // Hero amount card
+  amountCard: {
+    textAlign: 'center' as const,
     padding: theme.spacing(2),
-  },
-  section: {
     marginBottom: theme.spacing(2),
   },
-  sectionAfterDivider: {
-    marginBottom: theme.spacing(2),
-    marginTop: theme.spacing(2),
+  amountText: {
+    fontSize: '1.25rem',
+    fontWeight: 700,
+    lineHeight: 1.4,
   },
-  label: {
-    fontSize: theme.typography.caption.fontSize,
+  amountTokenRow: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: theme.spacing(0.75),
+  },
+
+  // Details card
+  detailsCard: {
+    padding: theme.spacing(1.5),
+    marginBottom: theme.spacing(1.5),
+  },
+  detailRow: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    padding: `${theme.spacing(0.75)} 0`,
+  },
+  detailLabel: {
+    fontSize: '0.75rem',
     color: theme.palette.text.secondary,
-    textTransform: 'uppercase',
-    marginBottom: theme.spacing(0.5),
+    flexShrink: 0,
+    minWidth: 56,
   },
-  value: {
-    fontSize: theme.typography.body2.fontSize,
-    wordBreak: 'break-all',
+  detailValue: {
+    fontSize: '0.8rem',
+    textAlign: 'right' as const,
+    wordBreak: 'break-all' as const,
   },
-  amountPositive: {
-    color: theme.palette.success.main,
-    fontWeight: 'bold',
-  },
-  amountNegative: {
-    color: theme.palette.error.main,
-    fontWeight: 'bold',
-  },
-  feeText: {
-    fontSize: theme.typography.caption.fontSize,
-    color: theme.palette.text.secondary,
-  },
-  txidText: {
-    fontSize: theme.typography.caption.fontSize,
-    wordBreak: 'break-all',
+  txidValue: {
+    fontSize: '0.75rem',
+    fontFamily: 'Roboto Mono, monospace',
+    wordBreak: 'break-all' as const,
     cursor: 'pointer',
     '&:hover': {
       textDecoration: 'underline',
     },
   },
-  explorerButton: {
-    marginTop: theme.spacing(2),
+
+  // Token transfer card
+  transferCard: {
+    padding: theme.spacing(1.5),
+    marginBottom: theme.spacing(1.5),
+  },
+  transferHeader: {
+    fontSize: '0.75rem',
+    color: theme.palette.text.secondary,
+    marginBottom: theme.spacing(1),
+    fontWeight: 500,
+  },
+  transferAmountRow: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: theme.spacing(0.75),
+    marginBottom: theme.spacing(1),
+  },
+  transferAmount: {
+    fontSize: '0.9rem',
+    fontWeight: 600,
+  },
+  transferSymbol: {
+    fontSize: '0.75rem',
+    color: theme.palette.text.secondary,
+  },
+  // Full-width address rows
+  addressLabel: {
+    fontSize: '0.7rem',
+    color: theme.palette.text.secondary,
+    marginBottom: 2,
+  },
+  addressValue: {
+    fontSize: '0.7rem',
+    fontFamily: 'Roboto Mono, monospace',
+    wordBreak: 'break-all' as const,
+    lineHeight: 1.5,
+    marginBottom: theme.spacing(0.75),
+  },
+
+  // Input/output amount (right-aligned in each row)
+  ioAmount: {
+    fontSize: '0.75rem',
+    fontWeight: 500,
+    fontFamily: 'Roboto Mono, monospace',
+    flexShrink: 0,
+    whiteSpace: 'nowrap' as const,
+  },
+
+  // Maturity progress
+  maturityRow: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: theme.spacing(1),
+    marginTop: theme.spacing(0.5),
+  },
+  maturityText: {
+    fontSize: '0.65rem',
+    color: theme.palette.text.secondary,
+    flexShrink: 0,
   },
 }));
 

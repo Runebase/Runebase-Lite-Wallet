@@ -22,6 +22,8 @@ export interface CachedTransaction {
   height: number;
   /** Epoch ms when this entry was last written */
   cachedAt: number;
+  /** True for coinstake (staking reward) transactions */
+  isStake?: boolean;
 }
 
 export interface CachedTokenTransfer {
@@ -65,6 +67,11 @@ class TransactionCacheDB extends Dexie {
       transactions: 'txid, walletAddress, height, cachedAt',
       tokenTransfers: 'id, walletAddress, height, cachedAt',
     });
+    // v2: adds isStake column (non-indexed — filtered in-memory from capped set)
+    this.version(2).stores({
+      transactions: 'txid, walletAddress, height, cachedAt',
+      tokenTransfers: 'id, walletAddress, height, cachedAt',
+    });
   }
 
   // ─── Regular Transactions ─────────────────────────────────────
@@ -83,11 +90,19 @@ class TransactionCacheDB extends Dexie {
   }
 
   async putTx(entry: CachedTransaction): Promise<void> {
-    await this.transactions.put(entry);
+    try {
+      await this.transactions.put(entry);
+    } catch (err) {
+      console.warn('putTx failed (quota?):', err);
+    }
   }
 
   async putTxBatch(entries: CachedTransaction[]): Promise<void> {
-    await this.transactions.bulkPut(entries);
+    try {
+      await this.transactions.bulkPut(entries);
+    } catch (err) {
+      console.warn('putTxBatch failed (quota?):', err);
+    }
   }
 
   /**
@@ -117,7 +132,11 @@ class TransactionCacheDB extends Dexie {
   }
 
   async putTokenTransferBatch(entries: CachedTokenTransfer[]): Promise<void> {
-    await this.tokenTransfers.bulkPut(entries);
+    try {
+      await this.tokenTransfers.bulkPut(entries);
+    } catch (err) {
+      console.warn('putTokenTransferBatch failed (quota?):', err);
+    }
   }
 
   async evictOldTokenTransfers(walletAddress: string): Promise<void> {

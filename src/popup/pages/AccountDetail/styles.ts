@@ -6,32 +6,31 @@ const useStyles = makeStyles()((theme) => ({
   },
   listItem: {
     width: '100%',
-    padding: `${theme.spacing(1.5)} 0`,
+    padding: `${theme.spacing(1)} 0`,
     display: 'flex',
-    minHeight: 64,
+    minHeight: 48,
     gap: theme.spacing(1),
+    alignItems: 'center',
   },
   txInfoContainer: {
     flex: 1,
     minWidth: 0,
   },
-  txState: {
-    fontSize: theme.typography.body2.fontSize,
-    textTransform: 'uppercase',
-    fontWeight: theme.typography.fontWeightBold,
+  // Primary label — tx type or timestamp (first line, left)
+  txLabel: {
+    fontSize: '0.8rem',
+    fontWeight: 500,
     lineHeight: 1.3,
   },
-  txId: {
-    fontSize: theme.typography.caption.fontSize,
+  // Secondary metadata line — txid, timestamp (second line, left)
+  txMeta: {
+    fontSize: '0.7rem',
     color: theme.palette.text.secondary,
     overflow: 'hidden',
     textOverflow: 'ellipsis',
     whiteSpace: 'nowrap',
     fontFamily: 'Roboto Mono, monospace',
-  },
-  txTime: {
-    fontSize: theme.typography.body2.fontSize,
-    lineHeight: 1.3,
+    lineHeight: 1.4,
   },
   directionIcon: {
     display: 'flex',
@@ -42,26 +41,36 @@ const useStyles = makeStyles()((theme) => ({
     borderRadius: '50%',
     backgroundColor: theme.palette.action.hover,
     flexShrink: 0,
-    alignSelf: 'center',
+  },
+  // Right column
+  amountColumn: {
+    textAlign: 'right' as const,
+    flexShrink: 0,
   },
   tokenContainer: {
     display: 'inline-flex',
     alignItems: 'center',
     gap: theme.spacing(0.5),
-    flexWrap: 'wrap',
     justifyContent: 'flex-end',
   },
   tokenAmount: {
-    fontSize: theme.typography.body2.fontSize,
-    fontWeight: theme.typography.fontWeightBold,
+    fontSize: '0.8rem',
+    fontWeight: 600,
   },
   tokenTypeContainer: {
     display: 'flex',
     alignItems: 'center',
-    gap: theme.spacing(0.5),
+    gap: 3,
   },
   tokenType: {
-    fontSize: theme.typography.caption.fontSize,
+    fontSize: '0.7rem',
+    color: theme.palette.text.secondary,
+  },
+  // Tertiary metadata on right side (conf count, fee)
+  amountMeta: {
+    fontSize: '0.65rem',
+    color: theme.palette.text.secondary,
+    lineHeight: 1.3,
   },
 }));
 

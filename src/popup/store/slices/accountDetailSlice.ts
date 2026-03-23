@@ -11,6 +11,8 @@ interface AccountDetailState {
   transactions: any[];
   tokenTransfers: any[];
   selectedTransaction: any | null;
+  txDetail: { inputs: any[]; outputs: any[] } | null;
+  txDetailLoading: boolean;
   tokens: any[];
   verifiedTokens: any[];
   hasMore: boolean;
@@ -27,6 +29,8 @@ const initialState: AccountDetailState = {
   transactions: [],
   tokenTransfers: [],
   selectedTransaction: null,
+  txDetail: null,
+  txDetailLoading: false,
   tokens: [],
   verifiedTokens: [],
   hasMore: false,
@@ -52,6 +56,16 @@ const accountDetailSlice = createSlice({
     },
     setSelectedTransaction: (state, action: PayloadAction<any | null>) => {
       state.selectedTransaction = action.payload;
+      // Clear previous detail when selecting a new tx
+      state.txDetail = null;
+      state.txDetailLoading = false;
+    },
+    setTxDetail: (state, action: PayloadAction<{ inputs: any[]; outputs: any[] } | null>) => {
+      state.txDetail = action.payload;
+      state.txDetailLoading = false;
+    },
+    setTxDetailLoading: (state, action: PayloadAction<boolean>) => {
+      state.txDetailLoading = action.payload;
     },
     setTokenTransfers: (state, action: PayloadAction<any[]>) => {
       state.tokenTransfers = action.payload;
@@ -103,6 +117,10 @@ export const fetchMoreTxs = () => {
   sendMessage({ type: MESSAGE_TYPE.GET_MORE_TXS });
 };
 
+export const fetchTxDetail = (txid: string) => {
+  sendMessage({ type: MESSAGE_TYPE.GET_TX_DETAIL, txid });
+};
+
 export const fetchMoreTokenTxs = () => {
   sendMessage({ type: MESSAGE_TYPE.GET_MORE_TOKEN_TXS });
 };
@@ -133,6 +151,8 @@ export const {
   setIsLoading,
   setIsLoadingMore,
   setIsLoadingMoreTokenTransfers,
+  setTxDetail,
+  setTxDetailLoading,
 } = accountDetailSlice.actions;
 
 export default accountDetailSlice.reducer;

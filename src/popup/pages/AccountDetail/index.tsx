@@ -12,7 +12,7 @@ import {
   CircularProgress,
   Stack,
 } from '@mui/material';
-import { ArrowUpward, ArrowDownward, ReceiptLong, Inbox, Refresh } from '@mui/icons-material';
+import { ArrowUpward, ArrowDownward, ElectricBolt, ReceiptLong, Inbox, Refresh } from '@mui/icons-material';
 import { isUndefined } from 'lodash';
 import { useNavigate } from 'react-router';
 import PageLayout from '../../components/PageLayout';
@@ -265,7 +265,7 @@ const TransactionList: React.FC<{
       {transactions.map((tx: Transaction) => {
         const {
           id, pending, confirmations, timestamp,
-          amount, fee, qrc20TokenTransfers,
+          amount, fee, isStake, qrc20TokenTransfers,
         } = tx;
         const filteredTransfers = qrc20TokenTransfers?.filter(
           (t) => t.to === walletAddress || t.from === walletAddress,
@@ -282,64 +282,59 @@ const TransactionList: React.FC<{
             onClick={() => handleTxClick(tx)}
           >
             <Box className={classes.directionIcon}>
-              {isOutgoing
-                ? <ArrowUpward sx={{ fontSize: 18, color: 'error.main' }} />
-                : <ArrowDownward sx={{ fontSize: 18, color: 'success.main' }} />
+              {isStake
+                ? <ElectricBolt sx={{ fontSize: 16, color: 'warning.main' }} />
+                : isOutgoing
+                  ? <ArrowUpward sx={{ fontSize: 16, color: 'error.main' }} />
+                  : <ArrowDownward sx={{ fontSize: 16, color: 'success.main' }} />
               }
             </Box>
             <div className={classes.txInfoContainer}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.25 }}>
-                {pending ? (
-                  <Typography className={classes.txState} color="warning.main">
-                    pending
-                  </Typography>
-                ) : (
-                  <Typography className={classes.txState} color="success.main">
-                    {confirmations} conf.
-                  </Typography>
-                )}
-                <Typography className={classes.txTime} color="text.secondary">
+              <Typography className={classes.txLabel}>
+                {isStake ? 'Staking Reward' : isOutgoing ? 'Sent' : 'Received'}
+              </Typography>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                <Typography className={classes.txMeta}>
                   {timestamp || ''}
                 </Typography>
-              </Box>
-              <Typography className={classes.txId}>
-                {shortenTxid(id)}
-              </Typography>
-            </div>
-            <Box sx={{ textAlign: 'right', flexShrink: 0 }}>
-              <Box sx={{ width: '100%' }}>
-                <AmountInfo
-                  classes={classes}
-                  amount={amountCoins}
-                  token={{ symbol: 'RUNES', address: '' }}
-                />
-              </Box>
-              {isOutgoing && feeCoins > 0 && (
-                <Typography variant="caption" color="text.secondary">
-                  fee: {feeCoins} RUNES
+                <Typography className={classes.txMeta} sx={{ opacity: 0.5 }}>
+                  ·
                 </Typography>
-              )}
+                <Typography className={classes.txMeta}>
+                  {shortenTxid(id)}
+                </Typography>
+              </Box>
+            </div>
+            <Box className={classes.amountColumn}>
+              <AmountInfo
+                classes={classes}
+                amount={amountCoins}
+                token={{ symbol: 'RUNES', address: '' }}
+              />
               {filteredTransfers && filteredTransfers.length > 0 &&
                 filteredTransfers.map((tokenTransfer, index) => (
-                  <Box key={index} sx={{ width: '100%' }}>
-                    <AmountInfo
-                      classes={classes}
-                      amount={
-                        tokenTransfer.to === walletAddress
-                          ? new BigNumber(tokenTransfer.value || '0')
-                            .dividedBy(`1e${tokenTransfer.decimals}`)
-                            .toNumber()
-                          : new BigNumber(tokenTransfer.value || '0')
-                            .dividedBy(`-1e${tokenTransfer.decimals}`)
-                            .toNumber()
-                      }
-                      token={{
-                        symbol: tokenTransfer.symbol || '',
-                        address: tokenTransfer.address || '',
-                      }}
-                    />
-                  </Box>
+                  <AmountInfo
+                    key={index}
+                    classes={classes}
+                    amount={
+                      tokenTransfer.to === walletAddress
+                        ? new BigNumber(tokenTransfer.value || '0')
+                          .dividedBy(`1e${tokenTransfer.decimals}`)
+                          .toNumber()
+                        : new BigNumber(tokenTransfer.value || '0')
+                          .dividedBy(`-1e${tokenTransfer.decimals}`)
+                          .toNumber()
+                    }
+                    token={{
+                      symbol: tokenTransfer.symbol || '',
+                      address: tokenTransfer.address || '',
+                    }}
+                  />
                 ))}
+              <Typography className={classes.amountMeta}>
+                {pending ? 'pending' : `${confirmations.toLocaleString()} conf.`}
+                {isOutgoing && feeCoins > 0 ? ` · fee ${feeCoins}` : ''}
+              </Typography>
             </Box>
           </ListItemButton>
         );
@@ -428,30 +423,27 @@ const TokenTransferList: React.FC<{
           >
             <Box className={classes.directionIcon}>
               {isIncoming
-                ? <ArrowDownward sx={{ fontSize: 18, color: 'success.main' }} />
-                : <ArrowUpward sx={{ fontSize: 18, color: 'error.main' }} />
+                ? <ArrowDownward sx={{ fontSize: 16, color: 'success.main' }} />
+                : <ArrowUpward sx={{ fontSize: 16, color: 'error.main' }} />
               }
             </Box>
             <div className={classes.txInfoContainer}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mb: 0.25 }}>
-                {transfer.confirmations === 0 ? (
-                  <Typography className={classes.txState} color="warning.main">
-                    pending
-                  </Typography>
-                ) : (
-                  <Typography className={classes.txState} color="success.main">
-                    {transfer.confirmations} conf.
-                  </Typography>
-                )}
-                <Typography className={classes.txTime} color="text.secondary">
+              <Typography className={classes.txLabel}>
+                {isIncoming ? 'Received' : 'Sent'} {transfer.symbol}
+              </Typography>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                <Typography className={classes.txMeta}>
                   {transfer.timestamp}
                 </Typography>
+                <Typography className={classes.txMeta} sx={{ opacity: 0.5 }}>
+                  ·
+                </Typography>
+                <Typography className={classes.txMeta}>
+                  {shortenTxid(transfer.id)}
+                </Typography>
               </Box>
-              <Typography className={classes.txId}>
-                {shortenTxid(transfer.id)}
-              </Typography>
             </div>
-            <Box sx={{ textAlign: 'right', flexShrink: 0 }}>
+            <Box className={classes.amountColumn}>
               <div className={classes.tokenContainer}>
                 <Typography
                   className={classes.tokenAmount}
@@ -465,7 +457,7 @@ const TokenTransferList: React.FC<{
                       component="img"
                       src={getImageUrl(tokenLogoSrc)}
                       alt={transfer.symbol}
-                      sx={{ width: 18, height: 18 }}
+                      sx={{ width: 16, height: 16 }}
                     />
                   )}
                   <Typography className={classes.tokenType}>
@@ -473,9 +465,8 @@ const TokenTransferList: React.FC<{
                   </Typography>
                 </Box>
               </div>
-              <Typography variant="caption" color="text.secondary">
-                {isIncoming ? 'from' : 'to'}:{' '}
-                {shortenTxid(isIncoming ? transfer.from : transfer.to)}
+              <Typography className={classes.amountMeta}>
+                {transfer.confirmations === 0 ? 'pending' : `${transfer.confirmations.toLocaleString()} conf.`}
               </Typography>
             </Box>
           </ListItemButton>
@@ -508,28 +499,26 @@ const AmountInfo: React.FC<{
   const tokenLogoSrc = TOKEN_IMAGES[token.address];
   const isPositive = amount !== undefined && amount >= 0;
   return (
-    <div>
-      <div className={classes.tokenContainer}>
-        <Typography
-          className={classes.tokenAmount}
-          color={isPositive ? 'success.main' : 'error.main'}
-        >
-          {formatAmount(amount)}
+    <div className={classes.tokenContainer}>
+      <Typography
+        className={classes.tokenAmount}
+        color={isPositive ? 'success.main' : 'error.main'}
+      >
+        {formatAmount(amount)}
+      </Typography>
+      <Box className={classes.tokenTypeContainer}>
+        {tokenLogoSrc && (
+          <Box
+            component="img"
+            src={getImageUrl(tokenLogoSrc)}
+            alt={token.symbol}
+            sx={{ width: 16, height: 16 }}
+          />
+        )}
+        <Typography className={classes.tokenType}>
+          {token.symbol}
         </Typography>
-        <Box className={classes.tokenTypeContainer}>
-          {tokenLogoSrc && (
-            <Box
-              component="img"
-              src={getImageUrl(tokenLogoSrc)}
-              alt={token.symbol}
-              sx={{ width: 18, height: 18 }}
-            />
-          )}
-          <Typography className={classes.tokenType}>
-            {token.symbol}
-          </Typography>
-        </Box>
-      </div>
+      </Box>
     </div>
   );
 };

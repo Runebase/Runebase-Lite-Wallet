@@ -8,6 +8,7 @@ import RRCToken from '../../models/RRCToken';
 import { addressToHash160, hash160ToAddress } from '../../services/wallet';
 import { addMessageListener, isExtensionEnvironment, sendMessage } from '../../popup/abstraction';
 import txCacheDB, { CachedTransaction, CachedTokenTransfer } from '../../services/db/TransactionCache';
+import type { ElectrumXTransaction, ElectrumXVout } from '../../services/electrumx/types';
 
 const PAGE_SIZE = 10;
 const TOKEN_PAGE_SIZE = 20;
@@ -155,6 +156,7 @@ export default class TransactionController extends IController {
         confirmations: tx.confirmations || 0,
         amount: tx.amount,
         fee: tx.fee,
+        isStake: tx.isStake || false,
       }));
 
       // Cache confirmed txs to Dexie
@@ -167,6 +169,7 @@ export default class TransactionController extends IController {
         confirmations: tx.confirmations || 0,
         height: tx.height || 0,
         cachedAt: now,
+        isStake: tx.isStake || false,
       });
     }
 
@@ -417,6 +420,84 @@ export default class TransactionController extends IController {
     return null;
   };
 
+  // ─── Transaction Detail (on-demand vin/vout) ─────────────────
+
+  /**
+   * Fetch full transaction details including resolved inputs and outputs.
+   * Inputs require fetching the referenced previous transactions to get
+   * the address and value (ElectrumX vin only provides txid + vout index).
+   */
+  private fetchTxDetail = async (txid: string) => {
+    const electrumx = this.main.network.electrumx;
+    if (!electrumx) {
+      sendMessage({ type: MESSAGE_TYPE.GET_TX_DETAIL_RETURN, detail: null }, () => {});
+      return;
+    }
+
+    try {
+      const raw = await electrumx.getTransaction(txid, true);
+      if (typeof raw === 'string' || !raw) {
+        sendMessage({ type: MESSAGE_TYPE.GET_TX_DETAIL_RETURN, detail: null }, () => {});
+        return;
+      }
+      const tx = raw as ElectrumXTransaction;
+
+      const getVoutAddress = (vout: ElectrumXVout): string =>
+        vout.scriptPubKey?.address || vout.scriptPubKey?.addresses?.[0] || '';
+
+      // ── Resolve outputs (already have address + value) ──
+      const outputs = (tx.vout || []).map((vout) => ({
+        address: getVoutAddress(vout),
+        value: Math.round(Number(vout.value || 0) * 1e8), // satoshi
+        index: vout.n,
+        type: vout.scriptPubKey?.type || '',
+        scriptHex: vout.scriptPubKey?.hex || '',
+      }));
+
+      // ── Resolve inputs (need to fetch previous txs) ──
+      const prevTxids = [...new Set(
+        (tx.vin || [])
+          .filter((vin) => vin.txid) // skip coinbase inputs
+          .map((vin) => vin.txid),
+      )];
+
+      const prevTxMap = new Map<string, ElectrumXTransaction>();
+      if (prevTxids.length > 0) {
+        const results = await Promise.allSettled(
+          prevTxids.map((id) => electrumx.getTransaction(id, true)),
+        );
+        results.forEach((result, idx) => {
+          if (result.status === 'fulfilled' && typeof result.value !== 'string') {
+            prevTxMap.set(prevTxids[idx], result.value as ElectrumXTransaction);
+          }
+        });
+      }
+
+      const inputs = (tx.vin || []).map((vin) => {
+        if (!vin.txid) {
+          // Coinbase input
+          return { address: 'Coinbase', value: 0, prevTxid: '', prevIndex: 0 };
+        }
+        const prevTx = prevTxMap.get(vin.txid);
+        const prevVout = prevTx?.vout?.[vin.vout];
+        return {
+          address: prevVout ? getVoutAddress(prevVout) : '',
+          value: prevVout ? Math.round(Number(prevVout.value || 0) * 1e8) : 0,
+          prevTxid: vin.txid,
+          prevIndex: vin.vout,
+        };
+      });
+
+      sendMessage({
+        type: MESSAGE_TYPE.GET_TX_DETAIL_RETURN,
+        detail: JSON.stringify({ inputs, outputs }),
+      }, () => {});
+    } catch (err) {
+      console.error('fetchTxDetail failed:', err);
+      sendMessage({ type: MESSAGE_TYPE.GET_TX_DETAIL_RETURN, detail: null }, () => {});
+    }
+  };
+
   // ─── Messaging ────────────────────────────────────────────────
 
   private sendTransactionsMessage = () => {
@@ -453,6 +534,9 @@ export default class TransactionController extends IController {
         break;
       case MESSAGE_TYPE.GET_MORE_TOKEN_TXS:
         this.fetchMoreTokenTransfers();
+        break;
+      case MESSAGE_TYPE.GET_TX_DETAIL:
+        this.fetchTxDetail(requestData.txid);
         break;
       default:
         break;

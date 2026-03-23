@@ -324,12 +324,13 @@ export function buildContractSendTx(
   const filtered = filterUtxos(utxos);
 
   // We need: amount (to contract) + gasFee + txFee
-  // Use coinselect with the contract output as a script target
+  // Tell coinselect the target value includes gasFee so it selects enough UTXOs.
+  // We don't actually output gasFee — it becomes part of the tx fee (input-output
+  // difference), which the node checks against the gas stipend.
   const targets = [
-    { script: opcallScript, value: amount },
+    { script: opcallScript, value: amount + gasFee },
   ];
 
-  // Add a dummy output for gas fee reservation
   const { inputs, outputs, fee } = coinSelect(
     filtered.map((u) => ({ ...u, txId: u.hash, vout: u.pos })),
     targets,
@@ -385,7 +386,7 @@ export function buildContractCreateTx(
   const filtered = filterUtxos(utxos);
 
   const targets = [
-    { script: createScript, value: 0 },
+    { script: createScript, value: gasFee },
   ];
 
   const { inputs, outputs, fee } = coinSelect(
