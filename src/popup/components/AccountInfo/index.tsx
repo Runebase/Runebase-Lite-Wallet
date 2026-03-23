@@ -179,7 +179,11 @@ const AccountInfo: React.FC<IProps> = ({ hasRightArrow, onRefresh }) => {
               </Typography>
               {hasRightArrow && <KeyboardArrowRight sx={{ fontSize: 22, alignSelf: 'center' }} aria-hidden="true" />}
             </Box>
-            <Typography variant="caption" color="text.secondary">
+            <Typography
+              variant="caption"
+              color={runebaseBalanceUSD === 'Price unavailable' ? 'text.disabled' : 'text.secondary'}
+              sx={runebaseBalanceUSD === 'Price unavailable' ? { fontSize: '0.65rem', fontStyle: 'italic' } : undefined}
+            >
               {runebaseBalanceUSD}
             </Typography>
           </Box>

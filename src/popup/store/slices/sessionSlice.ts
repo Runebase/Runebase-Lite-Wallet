@@ -30,7 +30,7 @@ interface SessionState {
   blockchainInfo?: any;
   delegationInfo?: any;
   pendingDelegationAction?: PendingDelegationAction;
-  runebaseUSD?: number;
+  runebaseUSD?: number | null;
   walletBackupInfo: WalletBackupInfo;
   electrumxStatus: ElectrumXStatus;
 }
@@ -99,7 +99,7 @@ const sessionSlice = createSlice({
     setPendingDelegationAction: (state, action: PayloadAction<PendingDelegationAction | undefined>) => {
       state.pendingDelegationAction = action.payload;
     },
-    setRunebaseUSD: (state, action: PayloadAction<number>) => {
+    setRunebaseUSD: (state, action: PayloadAction<number | null>) => {
       state.runebaseUSD = action.payload;
     },
     setWalletBackupInfo: (state, action: PayloadAction<WalletBackupInfo>) => {
@@ -115,8 +115,12 @@ const sessionSlice = createSlice({
 });
 
 // Selectors
-export const selectRunebaseBalanceUSD = (state: RootState) =>
-  isUndefined(state.session.runebaseUSD) ? 'Loading...' : `(~$${state.session.runebaseUSD})`;
+export const selectRunebaseBalanceUSD = (state: RootState) => {
+  const usd = state.session.runebaseUSD;
+  if (isUndefined(usd)) return 'Loading...';
+  if (usd === null) return 'Price unavailable';
+  return `(≈$${usd})`;
+};
 
 export const selectNetworkName = (state: RootState) =>
   state.session.networks[state.session.networkIndex]?.name;

@@ -4,8 +4,22 @@
     <description>A lightweight wallet and transaction signing client for the Runebase network</description>
     <author email="support@runebase.io" href="https://www.runebase.io">Bago</author>
     <content src="popup.html" />
+    <access origin="https://www.runesx.xyz" />
+    <access origin="https://discord.runebase.io" />
+    <access origin="https://explorer.runebase.io" />
+    <access origin="https://testnet.runebase.io" />
+    <access origin="https://electrum1.runebase.io:50004" />
+    <access origin="https://electrum2.runebase.io:50004" />
+    <access origin="https://electrum3.runebase.io:50004" />
+    <access origin="https://electrum4.runebase.io:50004" />
+    <access origin="https://testelectrum1.runebase.io:50004" />
+    <access origin="https://testelectrum2.runebase.io:50004" />
     <allow-intent href="http://*/*" />
     <allow-intent href="https://*/*" />
+    <allow-navigation href="https://www.runesx.xyz/*" />
+    <allow-navigation href="https://discord.runebase.io/*" />
+    <allow-navigation href="https://explorer.runebase.io/*" />
+    <allow-navigation href="https://testnet.runebase.io/*" />
     <platform name="android">
         <preference name="AndroidExtraFilesystems" value="files,files-external,documents,sdcard,cache,cache-external,root" />
         <preference name="AndroidPersistentFileLocation" value="internal" />

@@ -100,6 +100,14 @@ export default class NetworkController extends IController {
 
     this.electrumx.onConnected = () => {
       this.broadcastElectrumXStatus();
+      // Start polling when connection is (re-)established so that
+      // price/balance/token data is fetched even if the initial
+      // session restore happened while disconnected.
+      if (this.main.account.loggedInAccount) {
+        this.main.account.startPolling();
+        this.main.token.startPolling();
+        this.main.external.startPolling();
+      }
     };
     this.electrumx.onDisconnected = (reason?: string) => {
       console.warn(`ElectrumX: Disconnected: ${reason}`);

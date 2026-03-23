@@ -74,10 +74,13 @@ export default class ExternalController extends IController {
         sendMessage({
           type: MESSAGE_TYPE.GET_RUNEBASE_USD_RETURN,
           runebaseUSD,
-        }, () => {});
+        });
       }
     } catch (_err) {
-      // price fetch failed silently
+      sendMessage({
+        type: MESSAGE_TYPE.GET_RUNEBASE_USD_RETURN,
+        runebaseUSD: null,
+      });
     }
   };
 
