@@ -171,6 +171,7 @@ Build the webpack bundle first (from project root):
 npm run clean && mkdir dist
 ./scripts/create-empty-thunk.sh
 npx webpack --progress --config webpack.prod.config.js
+mkdir -p cordova/www
 cp -R dist/* cordova/www
 ```
 
@@ -178,10 +179,29 @@ cp -R dist/* cordova/www
 ```bash
 cd cordova
 npm install
-npx cordova platform add android
-npx cordova platform add ios    # macOS only
 ```
+
+> **Important**: When adding platforms, use the full npm package name (e.g. `cordova-android`), not just `android`. The `cordova/android/` directory contains resource overrides and Cordova will try to use it as a local platform source if you run `cordova platform add android`.
+
+```bash
+cd cordova
+npx cordova platform add cordova-android@^15.0.0 --save
+npx cordova platform add cordova-ios@^7.1.1 --save    # macOS only
+```
+
 Plugins (`cordova-plugin-file`, `cordova-plugin-qrscanner`, `cordova-plugin-android-permissions`) are automatically installed from `config.xml`.
+
+#### Fix QR Scanner Plugin (Android)
+The `cordova-plugin-qrscanner` has outdated Gradle and import references. After adding the Android platform, apply these fixes:
+```bash
+# Fix deprecated compile() -> implementation() in plugin gradle files
+sed -i "s/\bcompile\b/implementation/g" platforms/android/cordova-plugin-qrscanner/*.gradle
+
+# Fix android.support.v4 -> AndroidX imports
+find platforms/android/app/src -name "*.java" -exec sed -i 's/android\.support\.v4\.app\.ActivityCompat/androidx.core.app.ActivityCompat/g' {} +
+```
+
+> **Note**: These fixes must be reapplied every time you remove and re-add the Android platform.
 
 ### Updating Icons & Splash Screens
 ```bash
@@ -238,6 +258,14 @@ Or install a debug APK manually:
 adb install cordova/platforms/android/app/build/outputs/apk/debug/app-debug.apk
 ```
 
+#### Testing with Android Studio Emulator
+1. Open **Android Studio** → **Device Manager** (right sidebar or Tools → Device Manager)
+2. Create/start an emulator
+3. Either drag & drop the `.apk` onto the emulator window, or run:
+```bash
+adb install cordova/platforms/android/app/build/outputs/apk/debug/app-debug.apk
+```
+
 ---
 
 ### iOS (macOS only)
@@ -276,7 +304,7 @@ brew install ios-deploy
 ```bash
 cd cordova
 npm install
-npx cordova platform add ios
+npx cordova platform add cordova-ios@^7.1.1 --save
 ```
 
 #### Build for iOS

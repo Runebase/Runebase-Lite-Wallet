@@ -48,8 +48,7 @@ sed -i "s/\"version\": \".*\"/\"version\": \"$new_version\"/" static/manifest.js
 git add package.json cordova/package.json cordova/config.xml static/manifest.json
 git commit -m "release: v$new_version"
 git tag "v$new_version"
-git push
-git push --tags
+git push && git push --tags
 
 echo ""
 echo "Released v$new_version"

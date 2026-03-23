@@ -185,9 +185,10 @@ const MainContainer: React.FC = () => {
             showLabels
             sx={{
               bgcolor: 'background.paper',
-              pb: 'env(safe-area-inset-bottom, 0px)',
+              height: 56,
               '& .MuiBottomNavigationAction-root': {
                 minWidth: 0,
+                maxHeight: 56,
                 px: 0.5,
                 py: 0,
                 margin: 0,
