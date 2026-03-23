@@ -185,6 +185,33 @@ jobs:
       - name: Install Cordova CLI
         run: npm install -g cordova
 
+      - name: Decode signing keystore
+        if: env.ANDROID_KEYSTORE_BASE64 != ''
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: |
+          echo "$ANDROID_KEYSTORE_BASE64" | base64 -d > cordova/runebase-release.keystore
+
+      - name: Create build.json for signing
+        if: env.ANDROID_KEYSTORE_BASE64 != ''
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        working-directory: cordova
+        run: |
+          cat > build.json <<EOF
+          {
+            "android": {
+              "release": {
+                "keystore": "runebase-release.keystore",
+                "storePassword": "${{ secrets.ANDROID_KEYSTORE_PASSWORD }}",
+                "alias": "${{ secrets.ANDROID_KEY_ALIAS }}",
+                "password": "${{ secrets.ANDROID_KEY_PASSWORD }}",
+                "keystoreType": "jks"
+              }
+            }
+          }
+          EOF
+
       - name: Build Android
         working-directory: cordova
         run: |

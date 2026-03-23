@@ -189,6 +189,11 @@ const MainContainer: React.FC = () => {
               '& .MuiBottomNavigationAction-root': {
                 minWidth: 0,
                 px: 0.5,
+                py: 0,
+                margin: 0,
+                '& .MuiSvgIcon-root': {
+                  margin: 0,
+                },
                 '& .MuiBottomNavigationAction-label': {
                   fontSize: '0.75rem',
                   '&.Mui-selected': {

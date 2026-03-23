@@ -29,7 +29,13 @@ body {
  * Side panel, Electron, browser dev: fill the viewport.
  * Class is added in index.tsx before React renders.
  */
-html.fill-viewport,
+html.fill-viewport {
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+}
+
 html.fill-viewport body {
   width: 100%;
   height: 100%;
