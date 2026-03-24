@@ -59,8 +59,16 @@ const NavBar: FC<IProps> = ({
       className={classes.appBar}
     >
       <Toolbar variant="dense" className={classes.toolbar} disableGutters>
-        <div className={classes.leftButtonsContainer}>
+        <div className={classes.leftContainer}>
           {hasBackButton && <BackButton isDarkTheme={isDarkTheme} />}
+          {blockHeight > 0 && (
+            <Tooltip title={`Block #${blockHeight.toLocaleString()}`} placement="bottom">
+              <Typography variant="caption" className={classes.blockHeight}>
+                <Widgets className={classes.blockIcon} />
+                {blockHeight.toLocaleString()}
+              </Typography>
+            </Tooltip>
+          )}
         </div>
         <Typography
           className={classes.locationText}
@@ -72,24 +80,13 @@ const NavBar: FC<IProps> = ({
         </Typography>
         <div className={classes.rightContainer}>
           <Tooltip
-            title={`${CONNECTION_LABELS[electrumxStatus.state] || 'Unknown'}${electrumxStatus.serverLabel ? ` - ${electrumxStatus.serverLabel}` : ''}${blockHeight > 0 ? ` | Block #${blockHeight.toLocaleString()}` : ''}`}
+            title={`${CONNECTION_LABELS[electrumxStatus.state] || 'Unknown'}${electrumxStatus.serverLabel ? ` - ${electrumxStatus.serverLabel}` : ''}`}
             placement="bottom"
           >
-            <span className={classes.connectionIndicator}>
-              <FiberManualRecord
-                className={classes.connectionDot}
-                color={getConnectionColor(electrumxStatus.state)}
-              />
-              <Typography variant="caption" className={classes.connectionLabel}>
-                {CONNECTION_LABELS[electrumxStatus.state] || 'Unknown'}
-              </Typography>
-              {blockHeight > 0 && (
-                <Typography variant="caption" className={classes.blockHeight}>
-                  <Widgets className={classes.blockIcon} />
-                  {blockHeight.toLocaleString()}
-                </Typography>
-              )}
-            </span>
+            <FiberManualRecord
+              className={classes.connectionDot}
+              color={getConnectionColor(electrumxStatus.state)}
+            />
           </Tooltip>
           {isChromeExtension && <SidePanelToggle />}
         </div>

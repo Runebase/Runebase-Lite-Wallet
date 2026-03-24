@@ -7,44 +7,33 @@ const useStyles = makeStyles()((theme) => ({
   toolbar: {
     padding: `0 ${theme.spacing(1)}`,
     minHeight: 48,
-    position: 'relative',
-  },
-  leftButtonsContainer: {
     display: 'flex',
     alignItems: 'center',
-    zIndex: 1,
+  },
+  leftContainer: {
+    display: 'flex',
+    alignItems: 'center',
+    flex: '0 0 auto',
+    gap: theme.spacing(0.5),
   },
   locationText: {
-    position: 'absolute',
-    left: '50%',
-    transform: 'translateX(-50%)',
+    flex: 1,
     fontWeight: theme.typography.fontWeightBold,
     textAlign: 'center',
-    maxWidth: '60%',
-    pointerEvents: 'none',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
+    minWidth: 0,
   },
   rightContainer: {
     display: 'flex',
     alignItems: 'center',
+    flex: '0 0 auto',
     gap: theme.spacing(0.5),
-    marginLeft: 'auto',
-    zIndex: 1,
-  },
-  connectionIndicator: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: theme.spacing(0.5),
-    cursor: 'pointer',
   },
   connectionDot: {
     fontSize: 14,
-  },
-  connectionLabel: {
-    display: 'none',
-    fontSize: theme.typography.caption.fontSize,
-    [theme.breakpoints.up('sm')]: {
-      display: 'inline',
-    },
+    cursor: 'pointer',
   },
   blockHeight: {
     display: 'flex',

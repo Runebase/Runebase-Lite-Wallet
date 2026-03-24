@@ -19,6 +19,7 @@ import {
   IBlockchainInfo,
 } from '../services/wallet/types';
 import { ElectrumXManager, ElectrumXTransaction, ElectrumXVout, ElectrumXUtxo } from '../services/electrumx';
+import { proxyFetch } from '../utils/fetchProxy';
 
 function sha256(buffer: Buffer): Buffer {
   return createHash('sha256').update(buffer).digest();
@@ -70,7 +71,11 @@ export default class Wallet implements ISigner {
   /**
    * Fetch balance from ElectrumX and ranking/txCount from explorer API.
    */
-  public updateInfo = async (electrumx: ElectrumXManager, explorerApiUrl?: string): Promise<boolean> => {
+  public updateInfo = async (
+    electrumx: ElectrumXManager,
+    explorerApiUrl?: string,
+    onExplorerInfoUpdated?: () => void,
+  ): Promise<boolean> => {
     const balance = await electrumx.getBalance(this.scripthash);
     const newInfo: IAddressInfo = {
       address: this.wallet.address,
@@ -90,7 +95,9 @@ export default class Wallet implements ISigner {
       this.info = newInfo;
       // Fetch ranking and transaction count from explorer (non-blocking)
       if (explorerApiUrl) {
-        this.fetchExplorerInfo(explorerApiUrl).catch((err) => {
+        this.fetchExplorerInfo(explorerApiUrl).then(() => {
+          onExplorerInfoUpdated?.();
+        }).catch((err) => {
           console.warn('Explorer info fetch failed (non-critical):', err);
         });
       }
@@ -105,7 +112,6 @@ export default class Wallet implements ISigner {
    */
   private fetchExplorerInfo = async (explorerApiUrl: string): Promise<void> => {
     try {
-      const { proxyFetch } = await import('../utils/fetchProxy');
       const response = await proxyFetch(`${explorerApiUrl}/address/${this.wallet.address}`);
       if (!response.ok) return;
       const data = await response.json();

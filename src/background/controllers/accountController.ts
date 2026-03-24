@@ -438,7 +438,13 @@ export default class AccountController extends IController {
 
     const electrumx = this.getElectrumX();
     const explorerApiUrl = this.main.network.network.explorerApiUrl;
-    const infoDidUpdate = await this.loggedInAccount.wallet.updateInfo(electrumx, explorerApiUrl);
+    const infoDidUpdate = await this.loggedInAccount.wallet.updateInfo(electrumx, explorerApiUrl, () => {
+      // Re-send wallet info once explorer data (ranking, txCount) arrives
+      const info = this.loggedInAccount?.wallet?.info;
+      if (info) {
+        sendMessage({ type: MESSAGE_TYPE.GET_WALLET_INFO_RETURN, info });
+      }
+    });
     if (infoDidUpdate) {
       sendMessage({
         type: MESSAGE_TYPE.GET_WALLET_INFO_RETURN,

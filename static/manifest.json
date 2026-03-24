@@ -16,7 +16,14 @@
   },
   "permissions": [
     "storage",
-    "sidePanel"
+    "sidePanel",
+    "scripting"
+  ],
+  "host_permissions": [
+    "https://explorer.runebase.io/*",
+    "https://testnet.runebase.io/*",
+    "https://www.runesx.xyz/*",
+    "https://discord.runebase.io/*"
   ],
   "background": {
     "service_worker": "background.js",

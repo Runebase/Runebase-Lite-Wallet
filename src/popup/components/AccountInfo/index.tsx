@@ -86,13 +86,15 @@ const AccountInfo: React.FC<IProps> = ({ hasRightArrow, onRefresh }) => {
               </IconButton>
             </Tooltip>
           )}
-          <Chip
-            icon={<StarIcon sx={{ fontSize: 14 }} />}
-            label={`#${walletInfo.ranking}`}
-            size="small"
-            variant="outlined"
-            sx={{ fontSize: '0.7rem', height: 24 }}
-          />
+          {walletInfo.ranking != null && (
+            <Chip
+              icon={<StarIcon sx={{ fontSize: 14 }} />}
+              label={`#${walletInfo.ranking}`}
+              size="small"
+              variant="outlined"
+              sx={{ fontSize: '0.7rem', height: 24 }}
+            />
+          )}
           {onRefresh && (
             <IconButton size="small" onClick={onRefresh} aria-label="Refresh">
               <Refresh sx={{ fontSize: 18 }} />

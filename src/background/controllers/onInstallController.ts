@@ -45,13 +45,16 @@ export default class OnInstallController extends IController {
 
   private refreshTab(tab: chrome.tabs.Tab) {
     // Tells the content script to post a msg to the inpage window letting it know that RunebaseChrome was installed or updated.
-    chrome.tabs.executeScript(tab.id!, {code:
-      `window.postMessage(
-        {
-          message: { type: 'RUNEBASECHROME_INSTALLED_OR_UPDATED' }
-        },
-        '*'
-      )`,
-    });
+    // Silently fails for tabs we don't have host permission for (chrome://, etc.)
+    if (!tab.id) return;
+    chrome.scripting.executeScript({
+      target: { tabId: tab.id },
+      func: () => {
+        window.postMessage(
+          { message: { type: 'RUNEBASECHROME_INSTALLED_OR_UPDATED' } },
+          '*',
+        );
+      },
+    }).catch(() => {});
   }
 }
