@@ -46,7 +46,6 @@ const ImportWallet: React.FC = () => {
   const mnemonic = useAppSelector((state) => state.import.mnemonic);
   const privateKey = useAppSelector((state) => state.import.privateKey);
   const walletNameTaken = useAppSelector((state) => state.import.walletNameTaken);
-  const _importMnemonicPrKeyFailed = useAppSelector((state) => state.import.importMnemonicPrKeyFailed);
   const walletNameError = useAppSelector(selectWalletNameError);
   const privateKeyError = useAppSelector(selectPrivateKeyError);
   const privateKeyPageError = useAppSelector(selectPrivateKeyPageError);

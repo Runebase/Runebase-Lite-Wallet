@@ -54,11 +54,11 @@ const Send: React.FC = () => {
 
   const startScan = () => {
     setScanError(null);
-    window.QRScanner.prepare((err: any, status: any) => {
+    window.QRScanner?.prepare((err: any, status: any) => {
       if (err) {
         setScanError('Failed to access camera. Please try again.');
       } else if (status.authorized) {
-        window.QRScanner.scan(displayContents);
+        window.QRScanner?.scan(displayContents);
         setScanning(true);
       } else if (status.denied) {
         setScanError('Camera access denied. Please enable camera access in your device settings.');
@@ -79,12 +79,13 @@ const Send: React.FC = () => {
   };
 
   const stopScan = () => {
-    window.QRScanner.destroy(() => {
+    window.QRScanner?.destroy(() => {
       setScanning(false);
     });
   };
 
-  const onEnterPress = (event: React.KeyboardEvent) => {
+  const onEnterPress = (event?: React.KeyboardEvent) => {
+    if (!event) return;
     handleEnterPress(event, () => {
       if (!buttonDisabled) {
         routeToSendConfirm();

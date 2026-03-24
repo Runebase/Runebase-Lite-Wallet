@@ -31,11 +31,12 @@ const ToField: React.FC<ToFieldProps> = ({
 
   useEffect(() => {
     if (scanning) {
-      window.QRScanner.show();
+      window.QRScanner?.show();
       return () => {
         stopScan();
       };
     }
+    return undefined;
   }, [scanning, stopScan]);
 
   return (

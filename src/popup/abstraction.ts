@@ -9,7 +9,7 @@ export const messageCallbacks = {};
 let targetOrigin = '*'; // Default to allow cross-origin communication
 if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.id) {
   targetOrigin = chrome.runtime.getURL('/');
-} else if (typeof process !== 'undefined' && process.type) {
+} else if (typeof process !== 'undefined' && (process as any).type) {
   targetOrigin = 'file://';
 } else {
   targetOrigin = window.location.origin;
@@ -229,7 +229,7 @@ function downloadAndSaveFileCordova(content: string, originalFilename: string) {
     // Request WRITE_EXTERNAL_STORAGE permission
     cordova.plugins.permissions.requestPermission(
       cordova.plugins.permissions.WRITE_EXTERNAL_STORAGE,
-      function (status) {
+      function (status: any) {
         if (status.hasPermission) {
           // Use cordova.file.externalDataDirectory for external storage (like the Download folder)
           const fileDir = cordova.file.externalDataDirectory;
@@ -237,10 +237,10 @@ function downloadAndSaveFileCordova(content: string, originalFilename: string) {
           // Check if the directory exists, and create it if it doesn't
           window.resolveLocalFileSystemURL(
             fileDir,
-            function (directoryEntry) {
+            function (directoryEntry: any) {
               createOrOpenFile(directoryEntry, filename, content);
             },
-            function (error) {
+            function (error: any) {
               console.error('Error resolving file system URL: ' + JSON.stringify(error));
             }
           );
@@ -254,19 +254,19 @@ function downloadAndSaveFileCordova(content: string, originalFilename: string) {
     );
   }, false);
 
-  function createOrOpenFile(directoryEntry, filename, content) {
+  function createOrOpenFile(directoryEntry: any, filename: any, content: any) {
     directoryEntry.getFile(
       filename,
       { create: true, exclusive: false },
-      function (fileEntry) {
+      function (fileEntry: any) {
         // Create a FileWriter object
         fileEntry.createWriter(
-          function (fileWriter) {
+          function (fileWriter: any) {
             fileWriter.onwriteend = function () {
               // Handle further operations here, if needed
             };
 
-            fileWriter.onerror = function (error) {
+            fileWriter.onerror = function (error: any) {
               console.error('Error writing to file: ' + JSON.stringify(error));
             };
 
@@ -276,12 +276,12 @@ function downloadAndSaveFileCordova(content: string, originalFilename: string) {
             // Use the WRITE flag to open the file with write access
             fileWriter.write(blob);
           },
-          function (error) {
+          function (error: any) {
             console.error('Error creating FileWriter: ' + JSON.stringify(error));
           }
         );
       },
-      function (error) {
+      function (error: any) {
         console.error('Error creating or opening file: ' + JSON.stringify(error));
       }
     );

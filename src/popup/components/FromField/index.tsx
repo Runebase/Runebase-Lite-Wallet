@@ -3,7 +3,7 @@ import { FormControl, InputLabel, MenuItem, Select, Typography } from '@mui/mate
 import { useAppSelector } from '../../store/hooks';
 
 const FromField: React.FC = () => {
-  const _senderAddress = useAppSelector((state) => state.send.senderAddress);
+  useAppSelector((state) => state.send.senderAddress);
   const walletAddress = useAppSelector((state) => state.session.walletInfo?.address);
   const loggedInAccountName = useAppSelector((state) => state.session.loggedInAccountName);
 

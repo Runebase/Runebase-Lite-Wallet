@@ -48,7 +48,7 @@ export const getAccounts = (validatesNetwork: boolean = false) => (dispatch: any
   sendMessage({ type: MESSAGE_TYPE.GET_ACCOUNTS });
 };
 
-export const loginAccount = () => (dispatch: any, getState: any) => {
+export const loginAccount = () => (_dispatch: any, getState: any) => {
   const { accountLogin } = getState();
   const navigate = getNavigateFunction();
   navigate?.('/loading');

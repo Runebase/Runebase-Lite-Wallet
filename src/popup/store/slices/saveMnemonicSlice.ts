@@ -38,7 +38,7 @@ const saveMnemonicSlice = createSlice({
 });
 
 // Side-effect actions
-export const createWallet = () => (dispatch: any, getState: any) => {
+export const createWallet = () => (_dispatch: any, getState: any) => {
   const { saveMnemonic } = getState();
   const navigate = getNavigateFunction();
   navigate?.('/loading');
@@ -49,7 +49,7 @@ export const createWallet = () => (dispatch: any, getState: any) => {
   });
 };
 
-export const saveToFile = () => (dispatch: any, getState: any) => {
+export const saveToFile = () => (_dispatch: any, getState: any) => {
   const { saveMnemonic } = getState();
   sendMessage({
     type: MESSAGE_TYPE.SAVE_TO_FILE,

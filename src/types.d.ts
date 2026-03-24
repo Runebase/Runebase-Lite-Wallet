@@ -104,6 +104,17 @@ export interface IInpageAccountWrapper {
   statusChangeReason: RUNEBASECHROME_ACCOUNT_CHANGE;
 }
 
+declare global {
+  interface Window {
+    cordova?: any;
+    QRScanner?: any;
+    runebasechrome?: any;
+    resolveLocalFileSystemURL?: any;
+  }
+
+  const cordova: any;
+}
+
 /* MUI v7 theme augmentation for custom properties */
 declare module '@mui/material/styles' {
   interface Theme {

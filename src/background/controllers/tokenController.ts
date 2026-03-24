@@ -15,7 +15,7 @@ import {
   decodeContractCallResult,
 } from '../../utils/abi';
 import { IRPCCallResponse } from '../../types';
-import { ISendRawTxResult } from '../../services/wallet/types';
+import { IContractCall, ISendRawTxResult } from '../../services/wallet/types';
 import moment from 'moment';
 import Transaction from '../../models/Transaction';
 import { getStorageValue, setStorageValue, addMessageListener, sendMessage, isExtensionEnvironment } from '../../popup/abstraction';
@@ -127,8 +127,8 @@ export default class TokenController extends IController {
     // Decode result
     const decoded = decodeContractCallResult(
       result, rrc223TokenABI, 'balanceOf',
-    );
-    const bnBal = decoded.executionResult.formattedOutput[0];
+    ) as IContractCall;
+    const bnBal = decoded.executionResult.formattedOutput![0];
     const bigNumberBal = new BigNumber(bnBal.toString(10));
     const balance = bigNumberBal
       .dividedBy(new BigNumber(10 ** token.decimals))
@@ -162,7 +162,7 @@ export default class TokenController extends IController {
       result = decodeContractCallResult(
         result, rrc223TokenABI, 'name',
       );
-      const name = result.executionResult.formattedOutput[0];
+      const name = (result as IContractCall).executionResult.formattedOutput![0];
 
       // Get symbol
       data = encodeContractCall(rrc223TokenABI, 'symbol', []);
@@ -173,7 +173,7 @@ export default class TokenController extends IController {
       result = decodeContractCallResult(
         result, rrc223TokenABI, 'symbol',
       );
-      const symbol = result.executionResult.formattedOutput[0];
+      const symbol = (result as IContractCall).executionResult.formattedOutput![0];
 
       // Get decimals
       data = encodeContractCall(rrc223TokenABI, 'decimals', []);
@@ -184,7 +184,7 @@ export default class TokenController extends IController {
       result = decodeContractCallResult(
         result, rrc223TokenABI, 'decimals',
       );
-      const decimals = result.executionResult.formattedOutput[0];
+      const decimals = (result as IContractCall).executionResult.formattedOutput![0];
 
       if (name && symbol && decimals) {
         const token = new RRCToken(name, symbol, decimals, contractAddress);

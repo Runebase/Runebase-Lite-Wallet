@@ -22,8 +22,6 @@ export default class ElectrumXClient {
   private subscriptions = new Map<string, SubscriptionCallback[]>();
   private _state: ConnectionState = 'disconnected';
   private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
-  private reconnectAttempts = 0;
-  private maxReconnectAttempts = 5;
   private requestTimeoutMs = 30000;
   private keepAliveTimer: ReturnType<typeof setInterval> | null = null;
 
@@ -65,7 +63,6 @@ export default class ElectrumXClient {
         this.ws.onopen = () => {
           clearTimeout(connectTimeout);
           this._state = 'connected';
-          this.reconnectAttempts = 0;
           this.startKeepAlive();
           this.onConnected?.();
           resolve();

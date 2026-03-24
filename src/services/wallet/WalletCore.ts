@@ -190,7 +190,7 @@ export function buildPaymentTx(
  * Estimate the maximum sendable amount (accounting for fees)
  */
 export function estimateMaxSend(
-  wallet: WalletKeyPair,
+  _wallet: WalletKeyPair,
   utxos: UtxoInput[],
   to: string,
   feeRate: number,

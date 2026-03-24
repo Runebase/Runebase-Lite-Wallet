@@ -117,7 +117,7 @@ export const getSuperstaker = (address: string) => {
   sendMessage({ type: MESSAGE_TYPE.GET_SUPERSTAKER, address }, () => {});
 };
 
-export const getSelectedSuperstakerDelegations = () => (dispatch: any, getState: any) => {
+export const getSelectedSuperstakerDelegations = () => (_dispatch: any, getState: any) => {
   const state: RootState = getState();
   const { selectedSuperstaker } = state.delegate;
   if (selectedSuperstaker) {
@@ -128,7 +128,7 @@ export const getSelectedSuperstakerDelegations = () => (dispatch: any, getState:
   }
 };
 
-export const routeToAddDelegationConfirm = () => (dispatch: any, getState: any) => {
+export const routeToAddDelegationConfirm = () => (_dispatch: any, getState: any) => {
   const state: RootState = getState();
   const { selectedSuperstaker, customSuperstakerAddress } = state.delegate;
   const address = selectedSuperstaker?.address || customSuperstakerAddress;

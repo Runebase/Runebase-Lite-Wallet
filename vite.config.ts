@@ -1,13 +1,13 @@
 import { defineConfig, type Plugin } from 'vite';
 import react from '@vitejs/plugin-react';
-import { nodePolyfills } from 'vite-plugin-node-polyfills';
 import path from 'path';
 import { readFileSync } from 'fs';
 
 const pkg = JSON.parse(readFileSync('./package.json', 'utf-8'));
 const nm = (p: string) => path.resolve(__dirname, 'node_modules', p);
 
-// Manually map Node builtins to browser polyfills
+// Map Node builtins to browser polyfill packages.
+// Replaces vite-plugin-node-polyfills (which doesn't support Vite 8).
 const nodeAliases: Record<string, string> = {
   crypto: nm('crypto-browserify'),
   stream: nm('stream-browserify'),
@@ -24,9 +24,8 @@ const nodeAliases: Record<string, string> = {
 };
 
 // Plugin that injects process/Buffer/global shims into pre-bundled dep chunks.
-// This is needed because vite-plugin-node-polyfills' esbuild banner injection
-// is deprecated in Vite 8 (rolldown). CJS deps like readable-stream reference
-// bare `process` at module init time and need it available in the chunk scope.
+// CJS deps like readable-stream reference bare `process` at module init time
+// and need it available in the chunk scope during Vite's dep optimization.
 function injectNodeGlobals(): Plugin {
   return {
     name: 'inject-node-globals',
@@ -37,9 +36,7 @@ function injectNodeGlobals(): Plugin {
             plugins: [
               {
                 name: 'prepend-process-shim',
-                // Transform individual files before bundling into chunks
                 transform(code, id) {
-                  // Only add to JS/CJS files from node_modules that reference process or Buffer
                   if (!id.includes('node_modules')) return null;
                   if (id.endsWith('.json') || id.endsWith('.css')) return null;
                   if (!code.includes('process') && !code.includes('Buffer') && !code.includes('global')) return null;
@@ -63,8 +60,8 @@ function injectNodeGlobals(): Plugin {
   };
 }
 
-// Browser dev mode config — equivalent to the old webpack.dev-browser.config.js
-// Only builds popup + background for rapid iteration in a regular browser tab.
+// Browser dev mode config — runs the wallet UI in a regular browser tab
+// with HMR and CORS proxying. Chrome extension APIs are shimmed via abstraction.ts.
 export default defineConfig({
   root: '.',
   publicDir: 'static',
@@ -72,18 +69,12 @@ export default defineConfig({
   plugins: [
     injectNodeGlobals(),
     react(),
-    nodePolyfills({
-      include: [
-        'buffer', 'crypto', 'stream', 'util', 'assert', 'events',
-        'http', 'https', 'zlib', 'url', 'vm', 'process',
-      ],
-      globals: { Buffer: true, process: true },
-    }),
   ],
 
   define: {
     'process.env.PLATFORM': JSON.stringify('browser'),
     'process.env.APP_VERSION': JSON.stringify(pkg.version),
+    'global': 'globalThis',
   },
 
   resolve: {

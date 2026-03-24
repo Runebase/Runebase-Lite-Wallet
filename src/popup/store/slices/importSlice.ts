@@ -97,7 +97,7 @@ export const validateImportWalletName = (name: string) => (dispatch: any) => {
   );
 };
 
-export const importPrivateKey = () => (dispatch: any, getState: any) => {
+export const importPrivateKey = () => (_dispatch: any, getState: any) => {
   const state: RootState = getState();
   if (!selectPrivateKeyPageError(state)) {
     const navigate = getNavigateFunction();
@@ -110,7 +110,7 @@ export const importPrivateKey = () => (dispatch: any, getState: any) => {
   }
 };
 
-export const importSeedPhrase = () => (dispatch: any, getState: any) => {
+export const importSeedPhrase = () => (_dispatch: any, getState: any) => {
   const state: RootState = getState();
   if (!selectMnemonicPageError(state)) {
     const navigate = getNavigateFunction();
