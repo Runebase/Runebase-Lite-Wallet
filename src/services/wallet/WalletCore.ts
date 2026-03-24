@@ -1,10 +1,12 @@
 /**
  * WalletCore - Key management, transaction building, and signing.
- * Replaces runebasejs-wallet and runebasejs-lib entirely.
- * Uses bitcoinjs-lib v3 directly for crypto primitives.
+ * Uses bitcoinjs-lib v7 with ecpair and bip32 for crypto primitives.
  */
 import { Buffer } from 'buffer';
 import * as bitcoin from 'bitcoinjs-lib';
+import { ECPairFactory, ECPairInterface } from 'ecpair';
+import { BIP32Factory } from 'bip32';
+import * as ecc from '@bitcoinerlab/secp256k1';
 import * as bip39 from 'bip39';
 import * as bip38 from 'bip38';
 import * as wif from 'wif';
@@ -12,12 +14,16 @@ import coinSelect from 'coinselect';
 
 import { RunebaseNetwork, BIP32_PATH } from './networks';
 
+// Initialize factories with the secp256k1 ECC implementation
+const ECPair = ECPairFactory(ecc);
+const bip32 = BIP32Factory(ecc);
+
 // Runebase-specific opcodes (different from Bitcoin — these are VM extensions)
 const OP_CALL = 0xc2;   // 194
 const OP_CREATE = 0xc1;  // 193
 
 export interface WalletKeyPair {
-  keyPair: any; // bitcoinjs-lib ECPair
+  keyPair: ECPairInterface;
   network: RunebaseNetwork;
   address: string;
   compressed: boolean;
@@ -48,25 +54,81 @@ const DEFAULT_GAS_PRICE = 40;
 const STAKE_MATURITY = 2000; // Coinbase/coinstake maturity on Runebase (4x speed adjustment)
 
 /**
+ * Derive a P2PKH address from a public key and network.
+ * Replaces the removed keyPair.getAddress() from bitcoinjs-lib v3.
+ */
+function getAddress(publicKey: Uint8Array, network: RunebaseNetwork): string {
+  const hash = bitcoin.crypto.hash160(Buffer.from(publicKey));
+  return bitcoin.address.toBase58Check(Buffer.from(hash), network.pubKeyHash);
+}
+
+/**
+ * Build a P2PKH scriptPubKey for an address
+ */
+function addressToOutputScript(addr: string, network: RunebaseNetwork): Buffer {
+  const { hash, version } = bitcoin.address.fromBase58Check(addr);
+  if (version !== network.pubKeyHash) {
+    throw new Error(`Address version ${version} does not match network pubKeyHash ${network.pubKeyHash}`);
+  }
+  // P2PKH: OP_DUP OP_HASH160 <20 bytes> OP_EQUALVERIFY OP_CHECKSIG
+  return Buffer.from(bitcoin.script.compile([
+    bitcoin.opcodes.OP_DUP,
+    bitcoin.opcodes.OP_HASH160,
+    Buffer.from(hash),
+    bitcoin.opcodes.OP_EQUALVERIFY,
+    bitcoin.opcodes.OP_CHECKSIG,
+  ]));
+}
+
+/**
+ * Sign all inputs of a transaction (P2PKH).
+ * Replaces TransactionBuilder.sign() from bitcoinjs-lib v3.
+ */
+function signP2PKH(
+  tx: InstanceType<typeof bitcoin.Transaction>,
+  inputs: Array<{ txId: string; vout: number }>,
+  keyPair: ECPairInterface,
+  network: RunebaseNetwork,
+): void {
+  const hashType = bitcoin.Transaction.SIGHASH_ALL;
+  const prevOutScript = addressToOutputScript(getAddress(keyPair.publicKey, network), network);
+
+  for (let i = 0; i < inputs.length; i++) {
+    const sigHash = tx.hashForSignature(i, prevOutScript, hashType);
+    const rawSig = keyPair.sign(Buffer.from(sigHash));
+    // Encode the 64-byte compact signature as DER + hashType byte
+    const derSig = bitcoin.script.signature.encode(Buffer.from(rawSig), hashType);
+    const scriptSig = bitcoin.script.compile([
+      derSig,
+      Buffer.from(keyPair.publicKey),
+    ]);
+    tx.setInputScript(i, Buffer.from(scriptSig));
+  }
+}
+
+/**
  * Create a wallet from a BIP39 mnemonic
  */
 export function fromMnemonic(mnemonic: string, network: RunebaseNetwork): WalletKeyPair {
   const seed = bip39.mnemonicToSeedSync(mnemonic);
-  const hdNode = bitcoin.HDNode.fromSeedBuffer(seed, network as any);
+  const hdNode = bip32.fromSeed(Buffer.from(seed), network as any);
   // Derive using Runebase BIP32 path: m/88'/0'/0'
   const child = hdNode.derivePath(BIP32_PATH);
-  const keyPair = child.keyPair;
-  const address = keyPair.getAddress();
+  const keyPair = ECPair.fromPrivateKey(Buffer.from(child.privateKey!), {
+    network: network as any,
+    compressed: true,
+  });
+  const address = getAddress(keyPair.publicKey, network);
 
-  return { keyPair, network, address, compressed: keyPair.compressed };
+  return { keyPair, network, address, compressed: true };
 }
 
 /**
  * Create a wallet from a WIF-encoded private key
  */
 export function fromWIF(wifKey: string, network: RunebaseNetwork): WalletKeyPair {
-  const keyPair = bitcoin.ECPair.fromWIF(wifKey, network as any);
-  const address = keyPair.getAddress();
+  const keyPair = ECPair.fromWIF(wifKey, network as any);
+  const address = getAddress(keyPair.publicKey, network);
   return { keyPair, network, address, compressed: keyPair.compressed };
 }
 
@@ -80,11 +142,13 @@ export function fromEncryptedPrivateKey(
   network: RunebaseNetwork,
 ): WalletKeyPair {
   const decrypted = bip38.decrypt(encrypted, passphrase, undefined, scryptParams);
-  const keyPair = bitcoin.ECPair.fromWIF(
-    wif.encode(network.wif, decrypted.privateKey, decrypted.compressed),
-    network as any,
-  );
-  const address = keyPair.getAddress();
+  const encoded = (wif.encode as any)({
+    version: network.wif,
+    privateKey: Buffer.from(decrypted.privateKey),
+    compressed: decrypted.compressed,
+  });
+  const keyPair = ECPair.fromWIF(encoded, network as any);
+  const address = getAddress(keyPair.publicKey, network);
   return { keyPair, network, address, compressed: keyPair.compressed };
 }
 
@@ -97,7 +161,8 @@ export function toEncryptedPrivateKey(
   scryptParams: { N: number; r: number; p: number },
 ): string {
   const decoded = wif.decode(wallet.keyPair.toWIF());
-  return bip38.encrypt(decoded.privateKey, decoded.compressed, passphrase, undefined, scryptParams);
+  // bip38 v3.1.1 expects Buffer, decoded.privateKey is Uint8Array in wif v5
+  return bip38.encrypt(Buffer.from(decoded.privateKey), decoded.compressed, passphrase, undefined, scryptParams);
 }
 
 /**
@@ -139,6 +204,41 @@ function filterUtxos(utxos: UtxoInput[]): UtxoInput[] {
 }
 
 /**
+ * Create a raw Transaction, add inputs and outputs, and sign.
+ * Replaces TransactionBuilder from bitcoinjs-lib v3.
+ */
+function buildAndSignTx(
+  wallet: WalletKeyPair,
+  inputs: Array<{ txId: string; vout: number; [key: string]: any }>,
+  outputs: Array<{ address?: string; script?: Buffer; value: number }>,
+): string {
+  const tx = new bitcoin.Transaction();
+  tx.version = 2;
+
+  const inputRefs: Array<{ txId: string; vout: number }> = [];
+  for (const input of inputs) {
+    const txIdBuf = Buffer.from(input.txId, 'hex').reverse();
+    tx.addInput(txIdBuf, input.vout);
+    inputRefs.push({ txId: input.txId, vout: input.vout });
+  }
+
+  for (const output of outputs) {
+    const value = BigInt(output.value);
+    if (output.script) {
+      tx.addOutput(output.script, value);
+    } else if (output.address) {
+      tx.addOutput(addressToOutputScript(output.address, wallet.network), value);
+    } else {
+      // Change output - send back to self
+      tx.addOutput(addressToOutputScript(wallet.address, wallet.network), value);
+    }
+  }
+
+  signP2PKH(tx, inputRefs, wallet.keyPair, wallet.network);
+  return tx.toHex();
+}
+
+/**
  * Build and sign a standard P2PKH payment transaction
  */
 export function buildPaymentTx(
@@ -160,27 +260,13 @@ export function buildPaymentTx(
     throw new Error('Insufficient funds');
   }
 
-  const txb = new bitcoin.TransactionBuilder(wallet.network as any);
-
-  for (const input of inputs) {
-    txb.addInput(input.txId || input.hash, input.vout ?? input.pos);
-  }
-
-  for (const output of outputs) {
-    if (output.address) {
-      txb.addOutput(output.address, output.value);
-    } else {
-      // Change output - send back to self
-      txb.addOutput(wallet.address, output.value);
-    }
-  }
-
-  for (let i = 0; i < inputs.length; i++) {
-    txb.sign(i, wallet.keyPair);
-  }
+  const txOutputs = outputs.map((output: any) => ({
+    address: output.address || wallet.address,
+    value: output.value,
+  }));
 
   return {
-    rawTx: txb.build().toHex(),
+    rawTx: buildAndSignTx(wallet, inputs as any, txOutputs),
     fee,
     inputs: inputs as UtxoInput[],
   };
@@ -199,7 +285,6 @@ export function estimateMaxSend(
   const totalValue = filtered.reduce((sum, u) => sum + u.value, 0);
   if (totalValue === 0) return 0;
 
-  // Try sending total, let coinselect figure out the fee
   const targets = [{ address: to, value: totalValue }];
   const { fee } = coinSelect(
     filtered.map((u) => ({ ...u, txId: u.hash, vout: u.pos })),
@@ -213,11 +298,6 @@ export function estimateMaxSend(
 
 /**
  * Encode a number using Runebase's contract number format.
- * This is NOT Bitcoin's script number encoding — it uses a
- * length-prefixed little-endian format:
- *   [length_byte][data_bytes_le...]
- * With sign-bit handling identical to the Electrum client's
- * contract_encode_number() function.
  */
 function contractEncodeNumber(n: number): Buffer {
   if (n === 0) return Buffer.alloc(0);
@@ -231,7 +311,6 @@ function contractEncodeNumber(n: number): Buffer {
     absvalue >>= 8;
   }
 
-  // Handle sign bit
   if (r[r.length - 1] & 0x80) {
     r.push(neg ? 0x80 : 0x00);
   } else if (neg) {
@@ -243,7 +322,6 @@ function contractEncodeNumber(n: number): Buffer {
 
 /**
  * Push data onto the script using Bitcoin's push opcodes.
- * Matches the Electrum client's push_data() function.
  */
 function pushData(hex: string): Buffer {
   const data = Buffer.from(hex, 'hex');
@@ -268,8 +346,6 @@ function pushData(hex: string): Buffer {
 
 /**
  * Build an OP_CALL script for calling a smart contract.
- * Format matches the Electrum client's contract_script() exactly:
- *   [0x01][0x04][gas_limit_encoded][gas_price_encoded][data_pushed][contract_addr_pushed][OP_CALL]
  */
 function buildOPCallScript(
   contractAddress: string,
@@ -278,12 +354,12 @@ function buildOPCallScript(
   gasPrice: number,
 ): Buffer {
   return Buffer.concat([
-    Buffer.from([0x01, 0x04]),              // version prefix
-    contractEncodeNumber(gasLimit),          // gas limit
-    contractEncodeNumber(gasPrice),          // gas price
-    pushData(encodedData),                  // ABI-encoded call data
-    pushData(contractAddress),              // 20-byte contract address
-    Buffer.from([OP_CALL]),                 // OP_CALL opcode (0xc2)
+    Buffer.from([0x01, 0x04]),
+    contractEncodeNumber(gasLimit),
+    contractEncodeNumber(gasPrice),
+    pushData(encodedData),
+    pushData(contractAddress),
+    Buffer.from([OP_CALL]),
   ]);
 }
 
@@ -296,11 +372,11 @@ function buildOPCreateScript(
   gasPrice: number,
 ): Buffer {
   return Buffer.concat([
-    Buffer.from([0x01, 0x04]),              // version prefix
-    contractEncodeNumber(gasLimit),          // gas limit
-    contractEncodeNumber(gasPrice),          // gas price
-    pushData(code),                         // contract bytecode
-    Buffer.from([OP_CREATE]),               // OP_CREATE opcode (0xc1)
+    Buffer.from([0x01, 0x04]),
+    contractEncodeNumber(gasLimit),
+    contractEncodeNumber(gasPrice),
+    pushData(code),
+    Buffer.from([OP_CREATE]),
   ]);
 }
 
@@ -323,10 +399,6 @@ export function buildContractSendTx(
   const opcallScript = buildOPCallScript(contractAddress, encodedData, gasLimit, gasPrice);
   const filtered = filterUtxos(utxos);
 
-  // We need: amount (to contract) + gasFee + txFee
-  // Tell coinselect the target value includes gasFee so it selects enough UTXOs.
-  // We don't actually output gasFee — it becomes part of the tx fee (input-output
-  // difference), which the node checks against the gas stipend.
   const targets = [
     { script: opcallScript, value: amount + gasFee },
   ];
@@ -341,28 +413,19 @@ export function buildContractSendTx(
     throw new Error('Insufficient funds for contract call');
   }
 
-  const txb = new bitcoin.TransactionBuilder(wallet.network as any);
+  // Build outputs: contract call + change
+  const txOutputs: Array<{ script?: Buffer; address?: string; value: number }> = [
+    { script: opcallScript, value: amount },
+  ];
 
-  for (const input of inputs) {
-    txb.addInput(input.txId || input.hash, input.vout ?? input.pos);
-  }
-
-  // Add the contract output
-  txb.addOutput(opcallScript, amount);
-
-  // Calculate total input value
   const totalIn = inputs.reduce((sum: number, i: any) => sum + i.value, 0);
   const change = totalIn - fee - gasFee - amount;
   if (change > 0) {
-    txb.addOutput(wallet.address, change);
-  }
-
-  for (let i = 0; i < inputs.length; i++) {
-    txb.sign(i, wallet.keyPair);
+    txOutputs.push({ address: wallet.address, value: change });
   }
 
   return {
-    rawTx: txb.build().toHex(),
+    rawTx: buildAndSignTx(wallet, inputs as any, txOutputs),
     fee: fee + gasFee,
     inputs: inputs as UtxoInput[],
   };
@@ -399,26 +462,18 @@ export function buildContractCreateTx(
     throw new Error('Insufficient funds for contract creation');
   }
 
-  const txb = new bitcoin.TransactionBuilder(wallet.network as any);
-
-  for (const input of inputs) {
-    txb.addInput(input.txId || input.hash, input.vout ?? input.pos);
-  }
-
-  txb.addOutput(createScript, 0);
+  const txOutputs: Array<{ script?: Buffer; address?: string; value: number }> = [
+    { script: createScript, value: 0 },
+  ];
 
   const totalIn = inputs.reduce((sum: number, i: any) => sum + i.value, 0);
   const change = totalIn - fee - gasFee;
   if (change > 0) {
-    txb.addOutput(wallet.address, change);
-  }
-
-  for (let i = 0; i < inputs.length; i++) {
-    txb.sign(i, wallet.keyPair);
+    txOutputs.push({ address: wallet.address, value: change });
   }
 
   return {
-    rawTx: txb.build().toHex(),
+    rawTx: buildAndSignTx(wallet, inputs as any, txOutputs),
     fee: fee + gasFee,
     inputs: inputs as UtxoInput[],
   };
@@ -429,7 +484,7 @@ export function buildContractCreateTx(
  */
 export function addressToHash160(address: string): string {
   const { hash } = bitcoin.address.fromBase58Check(address);
-  return hash.toString('hex');
+  return Buffer.from(hash).toString('hex');
 }
 
 /**

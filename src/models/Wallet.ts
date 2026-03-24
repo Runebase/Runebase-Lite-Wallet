@@ -536,9 +536,10 @@ export default class Wallet implements ISigner {
       ]),
     );
 
+    const privateKey = Buffer.from(this.wallet.keyPair.privateKey!);
     const { signature, recid } = secp256k1.ecdsaSign(
       hash,
-      this.wallet.keyPair.d.toBuffer(32),
+      privateKey,
     );
     const signed = Buffer.concat([
       Buffer.from([recid + (this.wallet.compressed ? 31 : 27)]),
@@ -547,7 +548,7 @@ export default class Wallet implements ISigner {
     const podMessage = `0x${signed.toString('hex')}`;
 
     // Verify
-    const pubKey = secp256k1.publicKeyCreate(this.wallet.keyPair.d.toBuffer(32));
+    const pubKey = secp256k1.publicKeyCreate(privateKey);
     const verified = secp256k1.ecdsaVerify(signature, hash, pubKey);
     if (!verified) throw new Error('Unable to verify signature');
     if (podMessage.length !== 132) throw new Error('Incorrect POD length');

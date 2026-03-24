@@ -54,6 +54,7 @@
     "web-ext-types": "^3.2.1"
   },
   "dependencies": {
+    "@bitcoinerlab/secp256k1": "^1.2.0",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
     "@mui/icons-material": "^7.3.9",
@@ -70,9 +71,10 @@
     "@types/yargs": "^17.0.35",
     "assert": "^2.1.0",
     "bignumber.js": "^10.0.2",
+    "bip32": "^5.0.1",
     "bip38": "^3.1.1",
     "bip39": "^3.1.0",
-    "bitcoinjs-lib": "^3.3.2",
+    "bitcoinjs-lib": "^7.0.1",
     "browserify-zlib": "^0.2.0",
     "buffer": "^6.0.3",
     "chrome-call": "^4.0.1",
@@ -83,6 +85,7 @@
     "crypto-browserify": "^3.12.1",
     "deep-equal": "^2.2.3",
     "dexie": "^4.3.0",
+    "ecpair": "^3.0.1",
     "electron-progressbar": "^2.2.1",
     "electron-updater": "^6.8.3",
     "ethjs-abi": "^0.2.1",
@@ -104,7 +107,7 @@
     "subworkers": "^1.0.1",
     "tss-react": "^4.9.20",
     "url": "^0.11.4",
-    "wif": "^4.0.0"
+    "wif": "^5.0.0"
   },
   "main": "electron/main.js"
 }
