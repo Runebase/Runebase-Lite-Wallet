@@ -9,11 +9,12 @@ import {
 import {
   FiberManualRecord,
   ViewSidebar,
+  Widgets,
 } from '@mui/icons-material';
 import { ArrowBack } from '@mui/icons-material';
 import { useNavigate } from 'react-router';
 import { useAppSelector } from '../../store/hooks';
-import { selectElectrumXStatus } from '../../store/slices/sessionSlice';
+import { selectElectrumXStatus, selectBlockchainHeight } from '../../store/slices/sessionSlice';
 import useStyles from './styles';
 import { isExtensionEnvironment } from '../../abstraction';
 
@@ -47,6 +48,7 @@ const NavBar: FC<IProps> = ({
 }) => {
   const { classes } = useStyles();
   const electrumxStatus = useAppSelector(selectElectrumXStatus);
+  const blockHeight = useAppSelector(selectBlockchainHeight);
   const isChromeExtension = isExtensionEnvironment();
 
   return (
@@ -70,7 +72,7 @@ const NavBar: FC<IProps> = ({
         </Typography>
         <div className={classes.rightContainer}>
           <Tooltip
-            title={`${CONNECTION_LABELS[electrumxStatus.state] || 'Unknown'}${electrumxStatus.serverLabel ? ` - ${electrumxStatus.serverLabel}` : ''}`}
+            title={`${CONNECTION_LABELS[electrumxStatus.state] || 'Unknown'}${electrumxStatus.serverLabel ? ` - ${electrumxStatus.serverLabel}` : ''}${blockHeight > 0 ? ` | Block #${blockHeight.toLocaleString()}` : ''}`}
             placement="bottom"
           >
             <span className={classes.connectionIndicator}>
@@ -81,6 +83,12 @@ const NavBar: FC<IProps> = ({
               <Typography variant="caption" className={classes.connectionLabel}>
                 {CONNECTION_LABELS[electrumxStatus.state] || 'Unknown'}
               </Typography>
+              {blockHeight > 0 && (
+                <Typography variant="caption" className={classes.blockHeight}>
+                  <Widgets className={classes.blockIcon} />
+                  {blockHeight.toLocaleString()}
+                </Typography>
+              )}
             </span>
           </Tooltip>
           {isChromeExtension && <SidePanelToggle />}

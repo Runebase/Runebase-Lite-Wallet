@@ -46,6 +46,18 @@ const useStyles = makeStyles()((theme) => ({
       display: 'inline',
     },
   },
+  blockHeight: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: theme.spacing(0.25),
+    fontSize: 11,
+    opacity: 0.85,
+    fontFamily: 'monospace',
+    whiteSpace: 'nowrap',
+  },
+  blockIcon: {
+    fontSize: 12,
+  },
 }));
 
 export default useStyles;

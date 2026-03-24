@@ -143,6 +143,7 @@ export const {
 } = sessionSlice.actions;
 
 export const selectElectrumXStatus = (state: RootState) => state.session.electrumxStatus;
+export const selectBlockchainHeight = (state: RootState): number => state.session.blockchainInfo?.height ?? 0;
 
 // Side-effect function (not a reducer — just sends messages to background)
 export const initSession = () => {
