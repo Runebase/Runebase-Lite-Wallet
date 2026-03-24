@@ -4,10 +4,8 @@ set -e
 # Quick rebuild & deploy to Android phone
 # Usage: ./dev-android.sh
 
-echo "=== Building webpack bundle ==="
-npm run clean && mkdir dist
-./scripts/create-empty-thunk.sh
-npx webpack --progress --config webpack.prod.config.js
+echo "=== Building with Vite ==="
+npm run build
 
 echo "=== Copying to cordova/www ==="
 rm -rf cordova/www/*

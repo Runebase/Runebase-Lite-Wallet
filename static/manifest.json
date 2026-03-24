@@ -19,7 +19,8 @@
     "sidePanel"
   ],
   "background": {
-    "service_worker": "background.js"
+    "service_worker": "background.js",
+    "type": "module"
   },
   "content_scripts": [
     {
@@ -29,13 +30,6 @@
         "https://*/*"
       ],
       "js": [
-        "commons.all.js",
-        "commons.exclude-background.js",
-        "commons.exclude-popup.js",
-        "commons.exclude-inpage.js",
-        "commons.background-contentscript.js",
-        "commons.contentscript-popup.js",
-        "commons.contentscript-inpage.js",
         "contentscript.js"
       ],
       "run_at": "document_start"
@@ -47,14 +41,8 @@
   "web_accessible_resources": [
     {
       "resources": [
-        "commons.all.js",
-        "commons.exclude-background.js",
-        "commons.exclude-contentscript.js",
-        "commons.exclude-popup.js",
-        "commons.background-inpage.js",
-        "commons.contentscript-inpage.js",
-        "commons.popup-inpage.js",
         "inpage.js",
+        "chunks/*",
         "sign-tx.html",
         "images/logo.png",
         "images/runes.png",

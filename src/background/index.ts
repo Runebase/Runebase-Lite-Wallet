@@ -1,3 +1,4 @@
+import '../polyfills';
 import RunebaseChromeController from './controllers';
 
 // Add instance to window for debugging

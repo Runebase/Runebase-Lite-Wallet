@@ -8,7 +8,7 @@ import useStyles from './styles';
 import SaveIcon from '@mui/icons-material/Save';
 import FactCheckIcon from '@mui/icons-material/FactCheck';
 import SeedPhraseInput from '../../components/SeedphraseInput';
-const strings = require('../../localization/locales/en_US.json');
+import strings from '../../localization/locales/en_US.json';
 
 const SaveMnemonic: React.FC = () => {
   const { classes } = useStyles();

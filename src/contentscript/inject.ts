@@ -28,13 +28,6 @@ function injectStylesheet(src: string): Promise<void> {
 
 export async function injectAllScripts() {
   try {
-    // await injectScript(chrome.runtime.getURL('commons.all.js'));
-    // await injectScript(chrome.runtime.getURL('commons.exclude-background.js'));
-    // await injectScript(chrome.runtime.getURL('commons.exclude-contentscript.js'));
-    // await injectScript(chrome.runtime.getURL('commons.exclude-popup.js'));
-    // await injectScript(chrome.runtime.getURL('commons.background-inpage.js'));
-    // await injectScript(chrome.runtime.getURL('commons.contentscript-inpage.js'));
-    // await injectScript(chrome.runtime.getURL('commons.popup-inpage.js'));
     await injectScript(chrome.runtime.getURL('inpage.js'));
 
     // Pass the Chrome extension absolute URL of the Sign Transaction dialog to the Inpage

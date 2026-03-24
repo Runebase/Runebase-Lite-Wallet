@@ -127,55 +127,85 @@ You can connect RunebaseChrome to regtest. You will need to set the following in
 }
 ```
 
-## Running Dev Version (NodeJs v18)
-### Development Chrome
-1. Install web-ext `npm install -g web-ext`
-2. Run development `npm run dev`
-3. Open secondary terminal
-4. navigate to dist folder
-5. Run web-ext for hot-reload `web-ext run --target=chromium`
+## Development (Node.js v20+)
 
-### Build Chrome
-1. `npm run start` in the project folder to build the dev version and wait for it to be built
-2. Open Chrome and load URL: `chrome://extensions`
-3. Turn `Developer mode` on in the top right
-4. At the top, click `Load Unpacked Extension`
-5. Navigate to your `runebasechrome/dist` folder
-6. Click `Select`. The extension should now be loaded
-7. Click on the RunebaseChrome logo in your Chrome extensions bar to open
+The project uses **Vite** for both development and production builds. All platform builds (Chrome extension, Electron, Cordova) consume the same `dist/` output.
 
-## Security Flow
-**First Time Flow**
-1. `appSalt` is generated on a per-install basis
-2. User enters `password` in Login page
-3. `password` + `appSalt` runs through `scrpyt` encryption for ~3 seconds to generate `passwordHash`
-4. User creates or imports wallet
-5. `passwordHash` + wallet's `privateKey` runs through `scrypt` encryption for ~1 second to generate `encryptedPrivateKey`
-6. Account is saved in storage with `encryptedPrivateKey`
-
-**Return User Flow**
-1. User enters password in Login page
-2. `password` + `appSalt` runs through `scrpyt` encryption for ~3 seconds to generate `passwordHash`
-3. Existing account is fetched from storage
-4. `passwordHash` is used to decrypted the `encryptedPrivateKey`. On successful decryption of the wallet, the password is validated.
-
-**Running a WebApp Abstraction**
-1. Navigate to dist folder
-2. start http server `http-server -c-1`
-
-## Cordova Mobile Builds (Android & iOS)
-
-### Shared Prerequisites
-Build the webpack bundle first (from project root):
+### Browser Dev Mode (recommended for daily development)
+Runs the wallet UI in a regular browser tab with hot module replacement (HMR) and CORS proxying:
 ```bash
-npm run clean && mkdir dist
-./scripts/create-empty-thunk.sh
-npx webpack --progress --config webpack.prod.config.js
-mkdir -p cordova/www
-cp -R dist/* cordova/www
+npm install --legacy-peer-deps
+npm run dev
+```
+Opens `http://localhost:3030`. Chrome extension APIs are shimmed via `abstraction.ts` so the wallet UI works in a normal browser.
+
+### Chrome Extension Dev Mode
+Builds the full extension and launches Chromium with hot-reload via `web-ext`:
+```bash
+npm install -g web-ext
+npm run dev:ext
 ```
 
-### Setup
+### Loading the Extension Manually
+1. `npm run build` to create the production bundle
+2. Open Chrome and navigate to `chrome://extensions`
+3. Enable **Developer mode** (top right)
+4. Click **Load unpacked** and select the `dist/` folder
+5. The extension should now appear in your Chrome toolbar
+
+## Building for All Platforms
+
+All platforms start with the same Vite production build:
+```bash
+npm install --legacy-peer-deps
+npm run build
+```
+This produces the `dist/` directory containing the Chrome extension and the base files used by Electron and Cordova.
+
+### Chrome Extension
+After `npm run build`, the `dist/` folder is a ready-to-load Chrome extension. To create a distributable zip:
+```bash
+cd dist && zip -r ../Runebase-Chrome-Wallet.zip * && cd ..
+```
+
+### Electron (Desktop)
+
+All Electron builds read from `dist/` and output to `dist-electron/`.
+
+**Linux:**
+```bash
+npx electron-builder --linux -c electron-builder-config.js
+```
+Outputs `.deb` and `.AppImage` to `dist-electron/`.
+
+**Windows:**
+```bash
+npx electron-builder --win -c electron-builder-config.js
+```
+Outputs NSIS installer (`.exe`) and portable (`.exe`) to `dist-electron/`.
+
+**macOS** (must be run on a Mac):
+```bash
+npx electron-builder --mac -c electron-builder-config.js
+```
+Outputs `.dmg` to `dist-electron/`.
+
+**Windows + Linux combined:**
+```bash
+npx electron-builder --win --linux -c electron-builder-config.js
+```
+
+### Cordova (Mobile)
+
+#### Shared Prerequisites
+Copy the Vite build output to the Cordova www directory:
+```bash
+npm run build
+mkdir -p cordova/www
+cp -R dist/* cordova/www/
+```
+
+#### Cordova Setup
 ```bash
 cd cordova
 npm install
@@ -203,29 +233,21 @@ find platforms/android/app/src -name "*.java" -exec sed -i 's/android\.support\.
 
 > **Note**: These fixes must be reapplied every time you remove and re-add the Android platform.
 
-### Updating Icons & Splash Screens
+#### Updating Icons & Splash Screens
 ```bash
-# Install cordova-res globally if you haven't already
 npm install -g cordova-res
-
-# Run in the cordova directory to generate icons and splash screens
 cd cordova
 cordova-res
-```
-
-#### Regenerate after updating sources
-```bash
-cd cordova
+# Or regenerate for a specific platform:
 cordova-res ios --copy
 cordova-res android --copy
 ```
-The `--copy` flag puts generated files directly into the platform directories.
 
 ---
 
-### Android
+#### Android
 
-#### Prerequisites
+**Prerequisites:**
 - Android SDK Platform 36 and Build Tools 36.0.0 (required by cordova-android 15)
 - Install via Android Studio: **Settings > Languages & Frameworks > Android SDK > SDK Tools**
 - Or via command line:
@@ -233,14 +255,14 @@ The `--copy` flag puts generated files directly into the platform directories.
 $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "build-tools;36.0.0" "platforms;android-36"
 ```
 
-#### Build Debug APK
+**Build Debug APK:**
 ```bash
 cd cordova
 npx cordova build android
 ```
 Output: `cordova/platforms/android/app/build/outputs/apk/debug/app-debug.apk`
 
-#### Build Release AAB
+**Build Release AAB:**
 Requires a `build.json` in the cordova directory (see `build.json.example` for template):
 ```bash
 cd cordova
@@ -248,91 +270,74 @@ npx cordova build android --release --buildConfig=build.json
 ```
 Output: `cordova/platforms/android/app/build/outputs/bundle/release/app-release.aab`
 
-#### Run on Emulator or Device
+**Run on Emulator or Device:**
 ```bash
 cd cordova
 npx cordova run android
 ```
-Or install a debug APK manually:
-```bash
-adb install cordova/platforms/android/app/build/outputs/apk/debug/app-debug.apk
-```
 
-#### Testing with Android Studio Emulator
-1. Open **Android Studio** → **Device Manager** (right sidebar or Tools → Device Manager)
-2. Create/start an emulator
-3. Either drag & drop the `.apk` onto the emulator window, or run:
+**Quick rebuild & deploy** (from project root):
 ```bash
-adb install cordova/platforms/android/app/build/outputs/apk/debug/app-debug.apk
+./dev-android.sh
 ```
 
 ---
 
-### iOS (macOS only)
+#### iOS (macOS only)
 
-#### Prerequisites
+**Prerequisites:**
 
-1. **Install Homebrew** (Mac package manager):
-```bash
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-```
-
-2. **Install Node.js**:
-```bash
-brew install node
-```
-
-3. **Install Xcode** from the Mac App Store (search "Xcode"). After installing, open it once to accept the license, then run:
+1. **Xcode** from the Mac App Store. After installing, accept the license and run:
 ```bash
 sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
 xcode-select --install
 ```
 
-4. **Install CocoaPods**:
+2. **CocoaPods:**
 ```bash
 sudo gem install cocoapods
 ```
 
-5. **Install ios-deploy** (for deploying to physical devices):
+3. **ios-deploy** (for physical devices):
 ```bash
 brew install ios-deploy
 ```
 
-6. **Apple Developer account** is required for deploying to physical devices (simulator is free)
+4. **Apple Developer account** is required for deploying to physical devices (simulator is free)
 
-#### Setup
+**Setup:**
 ```bash
 cd cordova
 npm install
 npx cordova platform add cordova-ios@^7.1.1 --save
 ```
 
-#### Build for iOS
+**Build for iOS:**
 ```bash
 cd cordova
 npx cordova build ios
 ```
 
-#### Open in Xcode
+**Open in Xcode:**
 ```bash
 open cordova/platforms/ios/Runebase\ Lite\ Wallet.xcworkspace
 ```
 Choose a simulator or connected device, then click **Run**.
 
-#### Run on Simulator
+**Run on Simulator:**
 ```bash
 cd cordova
 npx cordova run ios --target="iPhone-16-Pro"
 ```
 
-#### Run on Physical Device
+**Run on Physical Device:**
 ```bash
 cd cordova
 npx cordova run ios --device
 ```
 Requires a valid signing identity configured in Xcode (**Signing & Capabilities** tab).
 
-#### Build Release IPA
+**Build Release IPA:**
 ```bash
 cd cordova
 npx cordova build ios --release --device --buildConfig=build.json
@@ -351,70 +356,75 @@ The `build.json` should include your iOS signing configuration:
 }
 ```
 
-#### Troubleshooting
-- **White screen on launch**: Ensure `cordova-plugin-qrscanner` is installed. The app requires this plugin to be present — removing it causes the JS to fail silently.
+**Troubleshooting:**
+- **White screen on launch**: Ensure `cordova-plugin-qrscanner` is installed. The app requires this plugin to be present.
 - **Simulator not found**: Open Xcode > **Settings > Platforms** and install the iOS simulator runtime.
 - **Signing errors**: Ensure your Apple Developer Team ID is set in Xcode under **Signing & Capabilities**.
 
-## Electron Desktop Builds
-
-All Electron builds require the webpack production bundle to be built first:
-```bash
-# Clean and prepare
-npm run clean && mkdir dist
-
-# Create empty thunk files
-./scripts/create-empty-thunk.sh
-
-# Build the production bundle
-npx webpack --progress --config webpack.prod.config.js
-```
-
-### Building for Windows
-```bash
-npx electron-builder --win -c electron-builder-config.js
-```
-Outputs NSIS installer (`.exe`) and portable (`.exe`) to `dist-electron/`.
-
-### Building for Linux
-```bash
-npx electron-builder --linux -c electron-builder-config.js
-```
-Outputs `.deb` and `.AppImage` to `dist-electron/`.
-
-### Building for Windows + Linux (combined)
-```bash
-npx electron-builder --win --linux -c electron-builder-config.js
-```
-
-### Building for macOS
-Must be run on a macOS machine.
-```bash
-npx electron-builder --mac -c electron-builder-config.js
-```
-Outputs `.dmg` to `dist-electron/`.
-
-### Full Release Build (all platforms except macOS)
-The `build.sh` script automates version bumping, webpack build, Cordova Android build, Electron Windows/Linux builds, and Chrome extension packaging:
+### Full Local Release Build
+The `build.sh` script automates version bumping, Vite build, Cordova Android build, Electron Windows/Linux builds, and Chrome extension packaging:
 ```bash
 # patch, minor, or major
 ./build.sh patch
 ```
 All compiled artifacts are copied to the `compiled_files/` directory.
 
-After pushing to GitHub, the CI/CD pipeline will automatically build macOS and iOS artifacts (see below).
+### Version Bumping
+```bash
+npm run release:patch   # 2.1.0 -> 2.1.1
+npm run release:minor   # 2.1.0 -> 2.2.0
+npm run release:major   # 2.1.0 -> 3.0.0
+```
+This updates the version in `package.json`, `cordova/package.json`, `cordova/config.xml`, and `static/manifest.json`, then commits, tags, and pushes. The GitHub Actions workflow will automatically build all platforms and create a release.
+
+## Security Flow
+**First Time Flow**
+1. `appSalt` is generated on a per-install basis
+2. User enters `password` in Login page
+3. `password` + `appSalt` runs through `scrypt` encryption for ~3 seconds to generate `passwordHash`
+4. User creates or imports wallet
+5. `passwordHash` + wallet's `privateKey` runs through `scrypt` encryption for ~1 second to generate `encryptedPrivateKey`
+6. Account is saved in storage with `encryptedPrivateKey`
+
+**Return User Flow**
+1. User enters password in Login page
+2. `password` + `appSalt` runs through `scrypt` encryption for ~3 seconds to generate `passwordHash`
+3. Existing account is fetched from storage
+4. `passwordHash` is used to decrypt the `encryptedPrivateKey`. On successful decryption of the wallet, the password is validated.
 
 ## CI/CD (GitHub Actions)
 
-A GitHub Actions workflow (`.github/workflows/build.yml`) automatically builds **all platforms** on every push to `main`:
+The workflow at `.github/workflows/build.yml` builds **all platforms** automatically. It triggers on pushes to `master`, version tags (`v*`), and manual dispatch.
 
-| Job | Runner | Artifacts |
-|-----|--------|-----------|
-| Chrome Extension | Ubuntu | `.zip` |
-| Electron (Linux + Windows) | Ubuntu | `.AppImage`, `.deb`, `.exe` |
-| Electron (macOS) | macOS | `.dmg` |
-| Cordova Android | Ubuntu | `.apk`, `.aab` |
-| Cordova iOS | macOS | Xcode build output |
+### Pipeline Architecture
+
+```
+build-web (Vite)
+    |
+    +---> build-chrome          (Ubuntu)    -> .zip
+    +---> build-electron-linux  (Ubuntu)    -> .AppImage, .deb
+    +---> build-electron-win    (Windows)   -> .exe
+    +---> build-electron-mac    (macOS)     -> .dmg
+    +---> build-android         (Ubuntu)    -> .apk, .aab
+    +---> build-ios             (macOS)     -> .app (simulator)
+    |
+    +---> release (only on v* tags, after all jobs pass)
+```
+
+The `build-web` job runs `npm run build` (Vite) and uploads the `dist/` artifact. All downstream jobs download that artifact and package it for their platform.
+
+### Jobs
+
+| Job | Runner | What it does | Artifacts |
+|-----|--------|-------------|-----------|
+| `build-web` | Ubuntu | `npm run build` (Vite production build) | `dist/` bundle |
+| `build-chrome` | Ubuntu | Zips `dist/` | `Runebase-Chrome-Wallet.zip` |
+| `build-electron-linux` | Ubuntu | `electron-builder --linux` | `.AppImage`, `.deb` |
+| `build-electron-win` | Windows | `electron-builder --win` | `.exe` |
+| `build-electron-mac` | macOS | `electron-builder --mac` | `.dmg` |
+| `build-android` | Ubuntu | Cordova Android build | `app-debug.apk`, `app-release.aab` |
+| `build-ios` | macOS | Cordova iOS build (emulator) | `.app` zip |
+| `release` | Ubuntu | Creates GitHub Release with all artifacts | (only on `v*` tags) |
 
 ### Downloading Build Artifacts
 1. Go to your repo's **Actions** tab on GitHub
@@ -422,8 +432,22 @@ A GitHub Actions workflow (`.github/workflows/build.yml`) automatically builds *
 3. Download artifacts from the **Artifacts** section at the bottom
 
 ### Triggering a Build
-- **Automatic**: Builds on every push to `main`
+- **Automatic**: Pushes to `master` or version tags (`v*`)
 - **Manual**: Go to **Actions > Build All Platforms > Run workflow**
 
-> **Note**: iOS builds require code signing for device deployment. The CI builds an unsigned version suitable for simulator testing. For App Store submission, configure signing secrets in your GitHub repository settings.
+### Creating a Release
+Push a version tag to trigger a full release:
+```bash
+npm run release:patch   # bumps version, commits, tags, pushes
+```
+The workflow will build all platforms and create a GitHub Release with all artifacts attached.
+
+### Android Signing (CI)
+To produce signed release builds, add these secrets to your GitHub repository settings:
+- `ANDROID_KEYSTORE_BASE64` — base64-encoded `.jks` keystore
+- `ANDROID_KEYSTORE_PASSWORD` — keystore password
+- `ANDROID_KEY_ALIAS` — signing key alias
+- `ANDROID_KEY_PASSWORD` — signing key password
+
+> **Note**: iOS builds in CI are unsigned simulator builds. For App Store submission, configure signing locally or add Apple signing secrets to your CI.
 

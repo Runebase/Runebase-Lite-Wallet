@@ -2,7 +2,8 @@
 # Created by https://www.gitignore.io/api/node,linux,macos,windows,visualstudio,visualstudiocode
 
 ###CUSTOM
-dist/*
+dist/
+dist-browser/
 src/script_no_chromeext_no_react.js
 
 ### Linux ###

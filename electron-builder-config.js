@@ -8,7 +8,7 @@ module.exports = {
     'package.json',
     'main.js',
     // Only include node_modules needed by electron/main.js at runtime.
-    // The frontend deps are already bundled by webpack into dist/.
+    // The frontend deps are already bundled by Vite into dist/.
     'node_modules/electron-progressbar/**',
     'node_modules/electron-updater/**',
     'node_modules/extend/**',

@@ -1,0 +1,22 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, viewport-fit=cover">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; font-src 'self'; connect-src 'self' https://www.runesx.xyz https://discord.runebase.io https://explorer.runebase.io https://testnet.runebase.io wss://electrum1.runebase.io:50004 wss://electrum2.runebase.io:50004 wss://electrum3.runebase.io:50004 wss://electrum4.runebase.io:50004 wss://testelectrum1.runebase.io:50004 wss://testelectrum2.runebase.io:50004;">
+    <title>Runebase Lite Wallet</title>
+    <link rel="stylesheet" href="./css/fonts.css">
+    <style>
+      :root { color-scheme: light dark; }
+      html, body { margin: 0; padding: 0; height: 100%; }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <!-- Background controller must load before popup in Electron/Cordova
+         (in the Chrome extension, background runs as a separate service worker) -->
+    <script type="module" src="/src/background/index.ts"></script>
+    <script type="module" src="/src/popup/index.tsx"></script>
+    <script type="text/javascript" src="cordova.js"></script>
+  </body>
+</html>

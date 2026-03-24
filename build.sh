@@ -7,7 +7,7 @@ command_exists() {
     command -v "$1" >/dev/null 2>&1
 }
 
-for cmd in yarn jq zip cordova electron-builder webpack; do
+for cmd in yarn jq zip cordova electron-builder npx; do
     if ! command_exists "$cmd"; then
         echo "Error: $cmd not found. Please install it before running this script."
         exit 1
@@ -59,7 +59,6 @@ fi
 
 # Clean and prepare directories
 yarn clean
-mkdir -p dist
 rm -rf dist-electron/*
 rm -rf cordova/www/*
 rm -rf compiled_files/*
@@ -68,11 +67,8 @@ rm -rf compiled_files/*
 compiled_dir="compiled_files"
 mkdir -p "$compiled_dir"
 
-# Run the script to create an empty thunk (assuming it doesn't need special permissions)
-./scripts/create-empty-thunk.sh
-
-# Build the application with Webpack
-webpack --progress --config webpack.prod.config.js
+# Build the application with Vite
+npx vite build --config vite.config.extension.ts
 
 # Copy the build output to the Cordova www directory
 cp -R dist/* cordova/www

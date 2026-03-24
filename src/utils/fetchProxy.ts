@@ -1,13 +1,11 @@
 /**
- * In browser dev mode (webpack-dev-server), external API requests
+ * In browser dev mode (Vite dev server), external API requests
  * are blocked by CORS. This helper rewrites known external URLs to
- * go through the webpack proxy so they work without CORS headers.
+ * go through the dev server proxy so they work without CORS headers.
  *
  * In the Chrome extension, fetch bypasses CORS via host_permissions,
  * so the URLs are used as-is.
  */
-
-declare const process: { env: { PLATFORM?: string } };
 
 const isBrowserDev = typeof process !== 'undefined'
   && process.env?.PLATFORM === 'browser';

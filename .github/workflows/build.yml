@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  # Build webpack bundle (shared by all platform jobs)
+  # Build Vite bundle (shared by all platform jobs)
   build-web:
     runs-on: ubuntu-latest
     steps:
@@ -22,16 +22,13 @@ jobs:
 
       - run: npm ci --legacy-peer-deps
 
-      - name: Build webpack bundle
-        run: |
-          npm run clean && mkdir dist
-          ./scripts/create-empty-thunk.sh
-          npx webpack --progress --config webpack.prod.config.js
+      - name: Build with Vite
+        run: npm run build
 
       - name: Upload dist artifact
         uses: actions/upload-artifact@v4
         with:
-          name: webpack-dist
+          name: vite-dist
           path: dist/
 
   # Chrome extension zip
@@ -41,7 +38,7 @@ jobs:
     steps:
       - uses: actions/download-artifact@v4
         with:
-          name: webpack-dist
+          name: vite-dist
           path: dist/
 
       - name: Create Chrome extension zip
@@ -72,7 +69,7 @@ jobs:
 
       - uses: actions/download-artifact@v4
         with:
-          name: webpack-dist
+          name: vite-dist
           path: dist/
 
       - name: Build Electron (Linux)
@@ -104,7 +101,7 @@ jobs:
 
       - uses: actions/download-artifact@v4
         with:
-          name: webpack-dist
+          name: vite-dist
           path: dist/
 
       - name: Build Electron (Windows)
@@ -135,7 +132,7 @@ jobs:
 
       - uses: actions/download-artifact@v4
         with:
-          name: webpack-dist
+          name: vite-dist
           path: dist/
 
       - name: Build Electron (macOS)
@@ -174,7 +171,7 @@ jobs:
 
       - uses: actions/download-artifact@v4
         with:
-          name: webpack-dist
+          name: vite-dist
           path: dist/
 
       - name: Copy dist to cordova/www
@@ -249,7 +246,7 @@ jobs:
 
       - uses: actions/download-artifact@v4
         with:
-          name: webpack-dist
+          name: vite-dist
           path: dist/
 
       - name: Copy dist to cordova/www

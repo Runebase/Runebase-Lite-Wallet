@@ -1,8 +1,16 @@
 const { app, BrowserWindow, Menu, dialog, net } = require('electron');
-const ProgressBar = require('electron-progressbar');
-const { autoUpdater } = require('electron-updater');
 const path = require('path');
 const url = require('url');
+
+// electron-updater and electron-progressbar crash when running unpackaged
+// (e.g. `npx electron .`), so load them lazily.
+let ProgressBar, autoUpdater;
+try {
+  ProgressBar = require('electron-progressbar');
+  autoUpdater = require('electron-updater').autoUpdater;
+} catch (e) {
+  // Running in dev mode — updater not available
+}
 
 let mainWindow;
 let progressBar;
@@ -18,6 +26,17 @@ function createWindow() {
       nodeIntegration: false,
       contextIsolation: true,
     },
+  });
+
+  // Remove the restrictive extension CSP so ES module chunks can load
+  // from file:// and external API connections are not blocked.
+  mainWindow.webContents.session.webRequest.onHeadersReceived((details, callback) => {
+    callback({
+      responseHeaders: {
+        ...details.responseHeaders,
+        'Content-Security-Policy': [''],
+      },
+    });
   });
 
   mainWindow.loadURL(
@@ -38,6 +57,7 @@ function createWindow() {
 async function checkForUpdates(
   clickedCheckForUpdates = false,
 ) {
+  if (!autoUpdater || !ProgressBar) return;
   try {
     const response = await net.fetch(`https://api.github.com/repos/${owner}/${repo}/releases/latest`);
     const data = await response.json();
