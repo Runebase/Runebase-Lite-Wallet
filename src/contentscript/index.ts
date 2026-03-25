@@ -181,6 +181,12 @@ function handleBackgroundScriptMessage(message: any) {
       payload: message,
     });
     break;
+  case MESSAGE_TYPE.INSTALLED_OR_UPDATED:
+    window.postMessage(
+      { message: { type: 'RUNEBASECHROME_INSTALLED_OR_UPDATED' } },
+      '*',
+    );
+    break;
   default:
     break;
   }

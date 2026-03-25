@@ -16,8 +16,7 @@
   },
   "permissions": [
     "storage",
-    "sidePanel",
-    "scripting"
+    "sidePanel"
   ],
   "background": {
     "service_worker": "background.js",

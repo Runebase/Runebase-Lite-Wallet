@@ -1,5 +1,6 @@
 import RunebaseChromeController from '.';
 import IController from './iController';
+import { MESSAGE_TYPE } from '../../constants';
 
 export default class OnInstallController extends IController {
   constructor(main: RunebaseChromeController) {
@@ -47,14 +48,6 @@ export default class OnInstallController extends IController {
     // Tells the content script to post a msg to the inpage window letting it know that RunebaseChrome was installed or updated.
     // Silently fails for tabs we don't have host permission for (chrome://, etc.)
     if (!tab.id) return;
-    chrome.scripting.executeScript({
-      target: { tabId: tab.id },
-      func: () => {
-        window.postMessage(
-          { message: { type: 'RUNEBASECHROME_INSTALLED_OR_UPDATED' } },
-          '*',
-        );
-      },
-    }).catch(() => {});
+    chrome.tabs.sendMessage(tab.id, { type: MESSAGE_TYPE.INSTALLED_OR_UPDATED }).catch(() => {});
   }
 }
