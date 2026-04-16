@@ -1,5 +1,14 @@
 import Dexie, { type Table } from 'dexie';
 
+export interface RecentAddress {
+  /** The receiver address — primary key */
+  address: string;
+  /** Wallet address that sent to this receiver */
+  walletAddress: string;
+  /** Epoch ms when this address was last sent to */
+  lastUsedAt: number;
+}
+
 /**
  * Cached resolved transaction data.
  * Stores the expensive-to-compute fields (amount, fee) so we don't
@@ -55,11 +64,14 @@ export interface CachedTokenTransfer {
 class TransactionCacheDB extends Dexie {
   transactions!: Table<CachedTransaction, string>;
   tokenTransfers!: Table<CachedTokenTransfer, string>;
+  recentAddresses!: Table<RecentAddress, string>;
 
   /** Max cached regular transactions per wallet */
   static MAX_TX_ENTRIES = 500;
   /** Max cached token transfer entries per wallet */
   static MAX_TOKEN_ENTRIES = 500;
+  /** Max recent addresses remembered per wallet */
+  static MAX_RECENT_ADDRESSES = 50;
 
   constructor() {
     super('RunebaseTxCache');
@@ -71,6 +83,12 @@ class TransactionCacheDB extends Dexie {
     this.version(2).stores({
       transactions: 'txid, walletAddress, height, cachedAt',
       tokenTransfers: 'id, walletAddress, height, cachedAt',
+    });
+    // v3: adds recentAddresses table for remembering send destinations
+    this.version(3).stores({
+      transactions: 'txid, walletAddress, height, cachedAt',
+      tokenTransfers: 'id, walletAddress, height, cachedAt',
+      recentAddresses: 'address, walletAddress, lastUsedAt',
     });
   }
 
@@ -154,16 +172,52 @@ class TransactionCacheDB extends Dexie {
     }
   }
 
+  // ─── Recent Addresses ─────────────────────────────────────────
+
+  async getRecentAddresses(walletAddress: string): Promise<RecentAddress[]> {
+    return this.recentAddresses
+      .where('walletAddress').equals(walletAddress)
+      .reverse()
+      .sortBy('lastUsedAt');
+  }
+
+  async addRecentAddress(walletAddress: string, receiverAddress: string): Promise<void> {
+    try {
+      await this.recentAddresses.put({
+        address: receiverAddress,
+        walletAddress,
+        lastUsedAt: Date.now(),
+      });
+      await this.evictOldRecentAddresses(walletAddress);
+    } catch (err) {
+      console.warn('addRecentAddress failed (quota?):', err);
+    }
+  }
+
+  async evictOldRecentAddresses(walletAddress: string): Promise<void> {
+    const entries = await this.recentAddresses
+      .where('walletAddress').equals(walletAddress)
+      .sortBy('lastUsedAt');
+
+    if (entries.length > TransactionCacheDB.MAX_RECENT_ADDRESSES) {
+      const toRemove = entries.length - TransactionCacheDB.MAX_RECENT_ADDRESSES;
+      const keys = entries.slice(0, toRemove).map((e) => e.address);
+      await this.recentAddresses.bulkDelete(keys);
+    }
+  }
+
   // ─── Cleanup ──────────────────────────────────────────────────
 
   async clearForWallet(walletAddress: string): Promise<void> {
     await this.transactions.where('walletAddress').equals(walletAddress).delete();
     await this.tokenTransfers.where('walletAddress').equals(walletAddress).delete();
+    await this.recentAddresses.where('walletAddress').equals(walletAddress).delete();
   }
 
   async clearAll(): Promise<void> {
     await this.transactions.clear();
     await this.tokenTransfers.clear();
+    await this.recentAddresses.clear();
   }
 }
 

@@ -25,6 +25,7 @@ import {
   WalletKeyPair,
 } from '../../services/wallet';
 import { IBlockchainInfo, ISendRawTxResult } from '../../services/wallet/types';
+import txCacheDB from '../../services/db/TransactionCache';
 globalThis.Buffer = Buffer;
 
 /**
@@ -791,6 +792,10 @@ export default class AccountController extends IController {
         amount: new BigNumber(amount ?? 0).times(1e8).dp(0).toNumber(),
       });
       this.main.transaction.addTransaction(newTransaction);
+      const senderAddress = this.loggedInAccount.wallet.info?.address;
+      if (senderAddress) {
+        txCacheDB.addRecentAddress(senderAddress, receiverAddress).catch(() => {});
+      }
       sendMessage({
         type: MESSAGE_TYPE.SEND_TOKENS_SUCCESS,
       });

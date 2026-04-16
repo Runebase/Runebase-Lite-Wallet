@@ -18,6 +18,7 @@ import { IRPCCallResponse } from '../../types';
 import { IContractCall, ISendRawTxResult } from '../../services/wallet/types';
 import moment from 'moment';
 import Transaction from '../../models/Transaction';
+import txCacheDB from '../../services/db/TransactionCache';
 import { getStorageValue, setStorageValue, addMessageListener, sendMessage, isExtensionEnvironment } from '../../popup/abstraction';
 
 const INIT_VALUES = {
@@ -262,6 +263,10 @@ export default class TokenController extends IController {
         return;
       }
 
+      const senderAddress = this.main.account.loggedInAccount?.wallet?.info?.address;
+      if (senderAddress) {
+        txCacheDB.addRecentAddress(senderAddress, receiverAddress).catch(() => {});
+      }
       sendMessage({
         type: MESSAGE_TYPE.SEND_TOKENS_SUCCESS,
       }, () => {});

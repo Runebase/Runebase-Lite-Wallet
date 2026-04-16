@@ -1,9 +1,10 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { ArrowDropDown } from '@mui/icons-material';
-import { FormControl, TextField, Typography, Button } from '@mui/material';
+import { FormControl, TextField, Typography, Button, Autocomplete } from '@mui/material';
 import { useAppSelector, useAppDispatch } from '../../store/hooks';
 import { setReceiverAddress, selectReceiverFieldError } from '../../store/slices/sendSlice';
 import { isCordova } from '../../abstraction';
+import txCacheDB, { type RecentAddress } from '../../../services/db/TransactionCache';
 
 interface ToFieldProps {
   onEnterPress: () => void;
@@ -22,12 +23,20 @@ const ToField: React.FC<ToFieldProps> = ({
   const receiverAddress = useAppSelector((state) => state.send.receiverAddress);
   const receiverFieldError = useAppSelector(selectReceiverFieldError);
   const walletAddress = useAppSelector((state) => state.session.walletInfo?.address);
+  const [recentAddresses, setRecentAddresses] = useState<string[]>([]);
 
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+  useEffect(() => {
+    if (!walletAddress) return;
+    txCacheDB.getRecentAddresses(walletAddress).then((entries: RecentAddress[]) => {
+      setRecentAddresses(entries.map((e) => e.address));
+    }).catch(() => {});
+  }, [walletAddress]);
+
+  const handleKeyDown = useCallback((event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === 'Enter') {
       onEnterPress();
     }
-  };
+  }, [onEnterPress]);
 
   useEffect(() => {
     if (scanning) {
@@ -44,19 +53,34 @@ const ToField: React.FC<ToFieldProps> = ({
       {
         !scanning && (
           <FormControl fullWidth>
-            <TextField
-              fullWidth
-              label="To"
-              type="text"
-              multiline={false}
-              placeholder={walletAddress || ''}
+            <Autocomplete
+              freeSolo
+              options={recentAddresses}
               value={receiverAddress || ''}
-              InputProps={{
-                endAdornment: <ArrowDropDown />,
-                readOnly: scanning,
+              onInputChange={(_event, newValue) => {
+                dispatch(setReceiverAddress((newValue || '').replace(/^runebase:/i, '')));
               }}
-              onChange={(event) => dispatch(setReceiverAddress(event.target.value.replace(/^runebase:/i, '')))}
-              onKeyDown={handleKeyDown}
+              popupIcon={<ArrowDropDown />}
+              forcePopupIcon
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="To"
+                  placeholder={walletAddress || ''}
+                  onKeyDown={handleKeyDown}
+                />
+              )}
+              slotProps={{
+                listbox: {
+                  sx: {
+                    '& .MuiAutocomplete-option': {
+                      fontSize: '0.75rem',
+                      fontFamily: 'monospace',
+                      overflowWrap: 'anywhere',
+                    },
+                  },
+                },
+              }}
             />
             {!!receiverAddress && receiverFieldError && (
               <Typography color="error" variant="caption" sx={{ textAlign: 'left', mt: 0.5 }}>
