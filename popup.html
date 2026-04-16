@@ -9,6 +9,18 @@
     <style>
       :root { color-scheme: light dark; }
       html, body { margin: 0; padding: 0; height: 100%; }
+
+      /* QR scanner: make webview transparent so native camera preview shows through.
+         The cordova QR plugin renders the camera behind the webview, so every
+         layer must be transparent. We hide #root entirely and render the
+         scanner overlay via a React portal directly on <body>. */
+      html.qr-scanning,
+      html.qr-scanning body {
+        background: transparent !important;
+        background-color: transparent !important;
+        color-scheme: normal !important;
+      }
+      html.qr-scanning #root { display: none !important; }
     </style>
   </head>
   <body>

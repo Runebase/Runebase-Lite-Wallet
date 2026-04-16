@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Box, CircularProgress, Alert, Collapse, Paper, Stack, Skeleton, Typography } from '@mui/material';
+import { createPortal } from 'react-dom';
+import { Button, Box, CircularProgress, Alert, Paper, Stack, Skeleton, Typography } from '@mui/material';
 import { Send as SendIcon } from '@mui/icons-material';
 import { handleEnterPress } from '../../../utils';
 import PageLayout from '../../components/PageLayout';
@@ -59,6 +60,8 @@ const Send: React.FC = () => {
         setScanError('Failed to access camera. Please try again.');
       } else if (status.authorized) {
         window.QRScanner?.scan(displayContents);
+        window.QRScanner?.show();
+        document.documentElement.classList.add('qr-scanning');
         setScanning(true);
       } else if (status.denied) {
         setScanError('Camera access denied. Please enable camera access in your device settings.');
@@ -79,6 +82,7 @@ const Send: React.FC = () => {
   };
 
   const stopScan = () => {
+    document.documentElement.classList.remove('qr-scanning');
     window.QRScanner?.destroy(() => {
       setScanning(false);
     });
@@ -103,6 +107,58 @@ const Send: React.FC = () => {
     );
   }
 
+  if (scanning) {
+    return createPortal(
+      <div
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          zIndex: 9999,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        {/* Crosshair / scan area indicator */}
+        <div
+          style={{
+            width: 220,
+            height: 220,
+            border: '2px solid rgba(255,255,255,0.7)',
+            borderRadius: 8,
+            marginBottom: 32,
+          }}
+        />
+
+        <p style={{ color: '#fff', textShadow: '0 1px 4px rgba(0,0,0,0.8)', marginBottom: 24, fontFamily: 'sans-serif' }}>
+          Point camera at QR code
+        </p>
+
+        <button
+          onClick={stopScan}
+          style={{
+            minWidth: 160,
+            padding: '12px 24px',
+            fontSize: 16,
+            fontWeight: 'bold',
+            color: '#fff',
+            backgroundColor: 'rgba(0,0,0,0.5)',
+            border: '1px solid rgba(255,255,255,0.4)',
+            borderRadius: 24,
+            cursor: 'pointer',
+          }}
+        >
+          Cancel
+        </button>
+      </div>,
+      document.body,
+    );
+  }
+
   return (
     <PageLayout title="Send">
       {isInitializing ? (
@@ -116,58 +172,51 @@ const Send: React.FC = () => {
           )}
 
           {/* Addresses section */}
-          <Collapse in={!scanning}>
-            <Paper variant="outlined" sx={{ p: 2 }}>
-              <Typography variant="subtitle2" color="text.secondary" sx={{ fontWeight: 'bold', mb: 0.5 }}>
-                Addresses
-              </Typography>
-              <Stack spacing={1}>
-                <FromField />
-                <ToField
-                  onEnterPress={onEnterPress}
-                  scanning={scanning}
-                  startScan={startScan}
-                  stopScan={stopScan}
-                />
-              </Stack>
-            </Paper>
-          </Collapse>
+          <Paper variant="outlined" sx={{ p: 2 }}>
+            <Typography variant="subtitle2" color="text.secondary" sx={{ fontWeight: 'bold', mb: 0.5 }}>
+              Addresses
+            </Typography>
+            <Stack spacing={1}>
+              <FromField />
+              <ToField
+                onEnterPress={onEnterPress}
+                scanning={scanning}
+                startScan={startScan}
+              />
+            </Stack>
+          </Paper>
 
           {/* Amount & fees section */}
-          <Collapse in={!scanning}>
-            <Paper variant="outlined" sx={{ p: 2 }}>
-              <Typography variant="subtitle2" color="text.secondary" sx={{ fontWeight: 'bold', mb: 0.5 }}>
-                Amount & Fees
-              </Typography>
-              <Stack spacing={1}>
-                <TokenField />
-                <AmountField onEnterPress={onEnterPress} />
-                {token && token.symbol === 'RUNES' ? (
-                  <TransactionSpeedField />
-                ) : (
-                  <>
-                    <GasLimitField onEnterPress={onEnterPress} />
-                    <GasPriceField onEnterPress={onEnterPress} />
-                  </>
-                )}
-              </Stack>
-            </Paper>
-          </Collapse>
+          <Paper variant="outlined" sx={{ p: 2 }}>
+            <Typography variant="subtitle2" color="text.secondary" sx={{ fontWeight: 'bold', mb: 0.5 }}>
+              Amount & Fees
+            </Typography>
+            <Stack spacing={1}>
+              <TokenField />
+              <AmountField onEnterPress={onEnterPress} />
+              {token && token.symbol === 'RUNES' ? (
+                <TransactionSpeedField />
+              ) : (
+                <>
+                  <GasLimitField onEnterPress={onEnterPress} />
+                  <GasPriceField onEnterPress={onEnterPress} />
+                </>
+              )}
+            </Stack>
+          </Paper>
 
-          <Collapse in={!scanning}>
-            <Button
-              fullWidth
-              variant="contained"
-              color="primary"
-              size="large"
-              disabled={buttonDisabled}
-              onClick={routeToSendConfirm}
-              endIcon={<SendIcon />}
-              sx={{ mt: 'auto' }}
-            >
-              Send
-            </Button>
-          </Collapse>
+          <Button
+            fullWidth
+            variant="contained"
+            color="primary"
+            size="large"
+            disabled={buttonDisabled}
+            onClick={routeToSendConfirm}
+            endIcon={<SendIcon />}
+            sx={{ mt: 'auto' }}
+          >
+            Send
+          </Button>
         </Stack>
       )}
     </PageLayout>

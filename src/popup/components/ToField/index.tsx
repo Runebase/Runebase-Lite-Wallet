@@ -10,14 +10,12 @@ interface ToFieldProps {
   onEnterPress: () => void;
   scanning: boolean;
   startScan: () => void;
-  stopScan: () => void;
 }
 
 const ToField: React.FC<ToFieldProps> = ({
   onEnterPress,
   scanning,
   startScan,
-  stopScan,
 }) => {
   const dispatch = useAppDispatch();
   const receiverAddress = useAppSelector((state) => state.send.receiverAddress);
@@ -38,82 +36,54 @@ const ToField: React.FC<ToFieldProps> = ({
     }
   }, [onEnterPress]);
 
-  useEffect(() => {
-    if (scanning) {
-      window.QRScanner?.show();
-      return () => {
-        stopScan();
-      };
-    }
-    return undefined;
-  }, [scanning, stopScan]);
-
   return (
     <>
-      {
-        !scanning && (
-          <FormControl fullWidth>
-            <Autocomplete
-              freeSolo
-              options={recentAddresses}
-              value={receiverAddress || ''}
-              onInputChange={(_event, newValue) => {
-                dispatch(setReceiverAddress((newValue || '').replace(/^runebase:/i, '')));
-              }}
-              popupIcon={<ArrowDropDown />}
-              forcePopupIcon
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  label="To"
-                  placeholder={walletAddress || ''}
-                  onKeyDown={handleKeyDown}
-                />
-              )}
-              slotProps={{
-                listbox: {
-                  sx: {
-                    '& .MuiAutocomplete-option': {
-                      fontSize: '0.75rem',
-                      fontFamily: 'monospace',
-                      overflowWrap: 'anywhere',
-                    },
-                  },
-                },
-              }}
+      <FormControl fullWidth>
+        <Autocomplete
+          freeSolo
+          options={recentAddresses}
+          value={receiverAddress || ''}
+          onInputChange={(_event, newValue) => {
+            dispatch(setReceiverAddress((newValue || '').replace(/^runebase:/i, '')));
+          }}
+          popupIcon={<ArrowDropDown />}
+          forcePopupIcon
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              label="To"
+              placeholder={walletAddress || ''}
+              onKeyDown={handleKeyDown}
             />
-            {!!receiverAddress && receiverFieldError && (
-              <Typography color="error" variant="caption" sx={{ textAlign: 'left', mt: 0.5 }}>
-                {receiverFieldError}
-              </Typography>
-            )}
-          </FormControl>
-        )
-      }
-      {isCordova() && (
-        <>
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={startScan}
-            disabled={scanning}
-            fullWidth
-            sx={{ mb: 1 }}
-          >
-            {scanning ? 'Scanning...' : 'Scan QR'}
-          </Button>
-
-          {scanning && (
-            <Button
-              variant="contained"
-              color="secondary"
-              sx={{ position: 'fixed', bottom: 0, left: 0, width: '100%' }}
-              onClick={stopScan}
-            >
-              Stop Scan
-            </Button>
           )}
-        </>
+          slotProps={{
+            listbox: {
+              sx: {
+                '& .MuiAutocomplete-option': {
+                  fontSize: '0.75rem',
+                  fontFamily: 'monospace',
+                  overflowWrap: 'anywhere',
+                },
+              },
+            },
+          }}
+        />
+        {!!receiverAddress && receiverFieldError && (
+          <Typography color="error" variant="caption" sx={{ textAlign: 'left', mt: 0.5 }}>
+            {receiverFieldError}
+          </Typography>
+        )}
+      </FormControl>
+      {isCordova() && !scanning && (
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={startScan}
+          fullWidth
+          sx={{ mb: 1 }}
+        >
+          Scan QR
+        </Button>
       )}
     </>
   );
