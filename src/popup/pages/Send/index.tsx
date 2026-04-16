@@ -118,7 +118,7 @@ const Send: React.FC = () => {
           {/* Addresses section */}
           <Collapse in={!scanning}>
             <Paper variant="outlined" sx={{ p: 2 }}>
-              <Typography variant="subtitle2" color="text.secondary" fontWeight="bold" sx={{ mb: 0.5 }}>
+              <Typography variant="subtitle2" color="text.secondary" sx={{ fontWeight: 'bold', mb: 0.5 }}>
                 Addresses
               </Typography>
               <Stack spacing={1}>
@@ -136,7 +136,7 @@ const Send: React.FC = () => {
           {/* Amount & fees section */}
           <Collapse in={!scanning}>
             <Paper variant="outlined" sx={{ p: 2 }}>
-              <Typography variant="subtitle2" color="text.secondary" fontWeight="bold" sx={{ mb: 0.5 }}>
+              <Typography variant="subtitle2" color="text.secondary" sx={{ fontWeight: 'bold', mb: 0.5 }}>
                 Amount & Fees
               </Typography>
               <Stack spacing={1}>

@@ -46,11 +46,10 @@ const Receive: React.FC = () => {
   return (
     <PageLayout title="Receive">
       <Stack
-        alignItems="center"
         spacing={2}
-        sx={{ flex: 1 }}
+        sx={{ alignItems: 'center', flex: 1 }}
       >
-        <Typography variant="h6" fontWeight="bold">
+        <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
           {loggedInAccountName}
         </Typography>
 

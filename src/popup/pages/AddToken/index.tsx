@@ -59,7 +59,7 @@ const AddToken: React.FC = () => {
               multiline={false}
               value={contractAddress || ''}
               onChange={(event) => dispatch(validateContractAddress(event.target.value))}
-              onKeyPress={onEnterPress}
+              onKeyDown={onEnterPress}
             />
             {isValidating && (
               <CircularProgress
@@ -114,7 +114,7 @@ const DetailField: React.FC<{
 }> = ({ classes: _classes, fieldName, value }) => (
   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
     <Typography variant="caption" color="text.secondary">{fieldName}</Typography>
-    <Typography variant="body2" fontWeight="bold">{value || ''}</Typography>
+    <Typography variant="body2" sx={{ fontWeight: 'bold' }}>{value || ''}</Typography>
   </Box>
 );
 

@@ -40,10 +40,12 @@ const DelegationFeeField: React.FC<DelegationFeeFieldProps> = ({ onEnterPress })
         label="Fee"
         placeholder={DELEGATION_FEE_RECOMMENDED.toString()}
         value={delegationFee}
-        InputProps={{
-          endAdornment: (
-            <Typography variant="caption">%</Typography>
-          ),
+        slotProps={{
+          input: {
+            endAdornment: (
+              <Typography variant="caption">%</Typography>
+            ),
+          },
         }}
         onChange={(event) => dispatch(setDelegationFee(Number(event.target.value)))}
         onKeyDown={handleKeyDown}

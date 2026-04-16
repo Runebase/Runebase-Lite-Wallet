@@ -57,10 +57,12 @@ const GasLimitField: React.FC<GasLimitFieldProps> = ({
         label="Gas Limit"
         placeholder={recommendedAmount.toString()}
         value={gasLimit}
-        InputProps={{
-          endAdornment: (
-            <Typography variant="caption">GAS</Typography>
-          ),
+        slotProps={{
+          input: {
+            endAdornment: (
+              <Typography variant="caption">GAS</Typography>
+            ),
+          },
         }}
         onChange={(event) => handleChange(Number(event.target.value))}
         onKeyDown={(event) => onEnterPress?.(event)}

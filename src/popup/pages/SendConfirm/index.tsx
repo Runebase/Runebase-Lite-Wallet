@@ -44,7 +44,7 @@ const SendConfirm: React.FC = () => {
         <Typography variant="overline" color="text.secondary">
             You are sending
         </Typography>
-        <Typography variant="h4" fontWeight="bold" sx={{ my: 0.5 }}>
+        <Typography variant="h4" sx={{ fontWeight: 'bold', my: 0.5 }}>
           {amount}
         </Typography>
         <Typography variant="body2" color="text.secondary">

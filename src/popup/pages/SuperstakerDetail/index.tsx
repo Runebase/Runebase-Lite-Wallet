@@ -75,8 +75,8 @@ const SuperstakerDetail: React.FC = () => {
         {/* Address */}
         <Typography
           variant="subtitle2"
-          fontWeight="bold"
           sx={{
+            fontWeight: 'bold',
             overflow: 'hidden',
             textOverflow: 'ellipsis',
             whiteSpace: 'nowrap',
@@ -159,7 +159,7 @@ const SuperstakerDetail: React.FC = () => {
 
       {/* Delegations Section */}
       <Paper variant="outlined" sx={{ p: 2 }}>
-        <Typography variant="subtitle2" fontWeight="bold" sx={{ mb: 1.5 }}>
+        <Typography variant="subtitle2" sx={{ fontWeight: 'bold', mb: 1.5 }}>
           Delegations
         </Typography>
 

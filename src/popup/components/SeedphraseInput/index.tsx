@@ -54,15 +54,17 @@ const SeedPhraseInput: React.FC<any> = ({
                 fullWidth
                 disabled={disabled}
                 aria-label={`Seed word ${index + 1}`}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start" className={classes.tileNumber}>
-                      {index + 1}.
-                    </InputAdornment>
-                  ),
-                  sx: {
-                    '& .MuiInputBase-input.Mui-disabled': {
-                      WebkitTextFillColor: theme.palette.text.primary,
+                slotProps={{
+                  input: {
+                    startAdornment: (
+                      <InputAdornment position="start" className={classes.tileNumber}>
+                        {index + 1}.
+                      </InputAdornment>
+                    ),
+                    sx: {
+                      '& .MuiInputBase-input.Mui-disabled': {
+                        WebkitTextFillColor: theme.palette.text.primary,
+                      },
                     },
                   },
                 }}

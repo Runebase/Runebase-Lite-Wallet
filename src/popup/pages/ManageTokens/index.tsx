@@ -93,7 +93,7 @@ const TokenList: React.FC<{ classes: Record<string, string> }> = ({ classes }) =
                   </Box>
                 )}
                 <Box sx={{ flex: 1 }}>
-                  <Typography variant="body2" fontWeight="bold">{name}</Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 'bold' }}>{name}</Typography>
                   <Typography variant="caption" color="text.secondary">
                     {isUndefined(balance) ? '...' : balance} {symbol}
                   </Typography>
@@ -114,7 +114,7 @@ const TokenList: React.FC<{ classes: Record<string, string> }> = ({ classes }) =
         </Box>
       )}
 
-      <Stack direction="row" justifyContent="space-between" sx={{ p: 1.5 }}>
+      <Stack direction="row" sx={{ justifyContent: 'space-between', p: 1.5 }}>
         <Button
           id="editTokenButton"
           color="primary"

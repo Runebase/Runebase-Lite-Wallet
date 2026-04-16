@@ -103,7 +103,7 @@ const ElectrumXStatusBar: React.FC = () => {
               </ListItemIcon>
               <ListItemText
                 primary={serverLabel}
-                primaryTypographyProps={{ fontSize: '0.8rem' }}
+                slotProps={{ primary: { sx: { fontSize: '0.8rem' } } }}
               />
             </MenuItem>
           );

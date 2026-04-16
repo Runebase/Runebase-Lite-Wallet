@@ -45,20 +45,22 @@ const PasswordTextField: FC<PasswordTextFieldProps> = ({
         error={error}
         aria-label={placeholder || 'Password'}
         onChange={onChange}
-        onKeyPress={(e) => handleEnterPress(e, onEnterPress)}
-        InputProps={{
-          endAdornment: (
-            <InputAdornment position="end">
-              <IconButton
-                aria-label={showPassword ? 'Hide password' : 'Show password'}
-                onClick={() => setShowPassword(!showPassword)}
-                edge="end"
-                size="small"
-              >
-                {showPassword ? <VisibilityOff /> : <Visibility />}
-              </IconButton>
-            </InputAdornment>
-          ),
+        onKeyDown={(e) => handleEnterPress(e, onEnterPress)}
+        slotProps={{
+          input: {
+            endAdornment: (
+              <InputAdornment position="end">
+                <IconButton
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  onClick={() => setShowPassword(!showPassword)}
+                  edge="end"
+                  size="small"
+                >
+                  {showPassword ? <VisibilityOff /> : <Visibility />}
+                </IconButton>
+              </InputAdornment>
+            ),
+          },
         }}
       />
       {error && errorText && (

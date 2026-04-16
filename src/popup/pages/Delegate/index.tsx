@@ -75,7 +75,7 @@ const MyDelegationCard: React.FC = () => {
       <Paper variant="outlined" sx={{ p: 2, m: 1.5, mb: 0 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <CircularProgress size={16} />
-          <Typography variant="body2" color="warning.main" fontWeight={500}>
+          <Typography variant="body2" color="warning.main" sx={{ fontWeight: 500 }}>
             {label}
           </Typography>
         </Box>
@@ -121,7 +121,7 @@ const MyDelegationCard: React.FC = () => {
     <Paper variant="outlined" sx={{ p: 2, m: 1.5, mb: 0 }}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mb: 1 }}>
         <ElectricBolt sx={{ fontSize: 18, color: 'warning.main' }} />
-        <Typography variant="subtitle2" fontWeight="bold">
+        <Typography variant="subtitle2" sx={{ fontWeight: 'bold' }}>
           My Delegation
         </Typography>
         <Chip label="Active" size="small" color="success" variant="outlined" sx={{ ml: 'auto', height: 20, fontSize: '0.7rem' }} />
@@ -132,7 +132,7 @@ const MyDelegationCard: React.FC = () => {
           <Typography variant="caption" color="text.secondary" sx={{ minWidth: 72 }}>
             Staker
           </Typography>
-          <Typography variant="caption" fontWeight={500} sx={{ wordBreak: 'break-all' }}>
+          <Typography variant="caption" sx={{ fontWeight: 500, wordBreak: 'break-all' }}>
             {shortenTxid(delegationInfo.staker)}
           </Typography>
         </Box>
@@ -140,7 +140,7 @@ const MyDelegationCard: React.FC = () => {
           <Typography variant="caption" color="text.secondary" sx={{ minWidth: 72 }}>
             Fee
           </Typography>
-          <Typography variant="caption" fontWeight={500}>
+          <Typography variant="caption" sx={{ fontWeight: 500 }}>
             {delegationInfo.fee}%
           </Typography>
         </Box>
@@ -148,7 +148,7 @@ const MyDelegationCard: React.FC = () => {
           <Typography variant="caption" color="text.secondary" sx={{ minWidth: 72 }}>
             Since Block
           </Typography>
-          <Typography variant="caption" fontWeight={500}>
+          <Typography variant="caption" sx={{ fontWeight: 500 }}>
             {delegationInfo.blockHeight}
           </Typography>
         </Box>
@@ -214,7 +214,7 @@ const CustomStakerSection: React.FC<{ canDelegate: boolean }> = ({ canDelegate }
 
   return (
     <Paper variant="outlined" sx={{ p: 2, mx: 1.5, mb: 1.5 }}>
-      <Typography variant="subtitle2" fontWeight="bold" sx={{ mb: 1 }}>
+      <Typography variant="subtitle2" sx={{ fontWeight: 'bold', mb: 1 }}>
         Custom Super Staker
       </Typography>
       <TextField
@@ -284,7 +284,7 @@ const UtxoMaturityBanner: React.FC<{
       icon={<HourglassBottom sx={{ fontSize: 20 }} />}
       sx={{ mx: 1.5, mt: 1 }}
     >
-      <Typography variant="body2" fontWeight={500} sx={{ mb: 0.5 }}>
+      <Typography variant="body2" sx={{ fontWeight: 500, mb: 0.5 }}>
         {canDelegate ? 'Staking rewards maturing' : 'Cannot delegate yet — rewards still maturing'}
       </Typography>
       <Typography variant="caption" color="text.secondary" component="div">
@@ -301,7 +301,7 @@ const UtxoMaturityBanner: React.FC<{
               value={progress ?? 0}
               sx={{ flex: 1, height: 6, borderRadius: 3 }}
             />
-            <Typography variant="caption" fontWeight={500} sx={{ flexShrink: 0 }}>
+            <Typography variant="caption" sx={{ fontWeight: 500, flexShrink: 0 }}>
               {progress}%
             </Typography>
           </Box>

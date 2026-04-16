@@ -44,12 +44,14 @@ const AmountField: React.FC<AmountFieldProps> = ({ onEnterPress }) => {
         multiline={false}
         placeholder={'0.00'}
         value={amount}
-        InputProps={{
-          endAdornment: (
-            <Typography>
-              {token && token.symbol}
-            </Typography>
-          ),
+        slotProps={{
+          input: {
+            endAdornment: (
+              <Typography>
+                {token && token.symbol}
+              </Typography>
+            ),
+          },
         }}
         onChange={(event) => {
           const newValue = event.target.value;

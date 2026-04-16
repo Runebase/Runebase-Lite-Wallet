@@ -79,21 +79,23 @@ const EnterPasswordDialog: React.FC<IProps> = ({
         <DialogContent>
           <TextField
             autoFocus
-            margin="dense"
+            size="small"
             id="password"
             label="Password"
             type={showPassword ? 'text' : 'password'}
             fullWidth
             value={password || ''}
             onChange={(event) => dispatch(setPassword(event.target.value))}
-            InputProps={{
-              endAdornment: (
-                <InputAdornment position="end">
-                  <IconButton onClick={handleTogglePasswordVisibility}>
-                    {showPassword ? <VisibilityOff /> : <Visibility />}
-                  </IconButton>
-                </InputAdornment>
-              ),
+            slotProps={{
+              input: {
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton onClick={handleTogglePasswordVisibility}>
+                      {showPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              },
             }}
           />
         </DialogContent>

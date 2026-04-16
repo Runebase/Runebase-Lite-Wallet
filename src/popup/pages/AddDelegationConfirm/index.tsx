@@ -98,7 +98,7 @@ const AddDelegationConfirm: React.FC = () => {
 /** Confirmation detail row */
 const ConfirmItem: React.FC<{ label: string; value: string }> = ({ label, value }) => (
   <Box sx={{ py: 1.5 }}>
-    <Typography variant="caption" color="text.secondary" fontWeight="bold">
+    <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 'bold' }}>
       {label}
     </Typography>
     <Typography

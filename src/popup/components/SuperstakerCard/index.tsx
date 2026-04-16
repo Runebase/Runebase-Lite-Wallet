@@ -65,8 +65,8 @@ const SuperStakerCard: React.FC<SuperStakerCardProps> = ({
       {/* Address */}
       <Typography
         variant="subtitle2"
-        fontWeight="bold"
         sx={{
+          fontWeight: 'bold',
           overflow: 'hidden',
           textOverflow: 'ellipsis',
           whiteSpace: 'nowrap',

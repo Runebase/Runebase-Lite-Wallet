@@ -115,7 +115,7 @@ declare global {
   const cordova: any;
 }
 
-/* MUI v7 theme augmentation for custom properties */
+/* MUI v9 theme augmentation for custom properties */
 declare module '@mui/material/styles' {
   interface Theme {
     color: {

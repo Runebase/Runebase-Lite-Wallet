@@ -57,12 +57,14 @@ const GasPriceField: React.FC<GasPriceFieldProps> = ({
         multiline={false}
         placeholder={recommendedAmount.toString()}
         value={gasPrice.toString()}
-        InputProps={{
-          endAdornment: (
-            <Typography variant="caption">
-              SATOSHI/GAS
-            </Typography>
-          ),
+        slotProps={{
+          input: {
+            endAdornment: (
+              <Typography variant="caption">
+                SATOSHI/GAS
+              </Typography>
+            ),
+          },
         }}
         onChange={(event) => handleChange(Number(event.target.value))}
         onKeyDown={(event) => onEnterPress?.(event)}

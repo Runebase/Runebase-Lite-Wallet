@@ -28,7 +28,7 @@ const SaveMnemonic: React.FC = () => {
     <PageLayout hasBackButton title="">
       <div className={classes.contentContainer}>
         <div className={classes.topContainer}>
-          <Typography variant="h6" fontWeight="bold" sx={{ mb: 1 }}>
+          <Typography variant="h6" sx={{ fontWeight: 'bold', mb: 1 }}>
             Creating Wallet
           </Typography>
           <SeedPhraseInput

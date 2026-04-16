@@ -58,7 +58,7 @@ const AppearanceField: React.FC = () => {
 
   return (
     <Paper variant="outlined" sx={{ p: 2 }}>
-      <Typography variant="subtitle2" gutterBottom fontWeight="bold">
+      <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 'bold' }}>
         Appearance
       </Typography>
       <FormControlLabel
@@ -93,7 +93,7 @@ const ElectrumXServerField: React.FC = () => {
 
   return (
     <Paper variant="outlined" sx={{ p: 2 }}>
-      <Typography variant="subtitle2" gutterBottom fontWeight="bold">
+      <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 'bold' }}>
         ElectrumX Server
       </Typography>
       <Box sx={{ mb: 1.5 }}>
@@ -132,7 +132,7 @@ const SliField: React.FC = () => {
 
   return (
     <Paper variant="outlined" sx={{ p: 2 }}>
-      <Typography variant="subtitle2" gutterBottom fontWeight="bold">
+      <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 'bold' }}>
         Session Logout Interval
       </Typography>
       <Select
@@ -157,7 +157,7 @@ const BackupWalletField: React.FC = () => {
 
   return (
     <Paper variant="outlined" sx={{ p: 2 }}>
-      <Typography variant="subtitle2" gutterBottom fontWeight="bold">
+      <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 'bold' }}>
         Backup Wallet
       </Typography>
       <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
@@ -182,7 +182,7 @@ const BackupWalletField: React.FC = () => {
 
 const ChangeAccountField: React.FC = () => (
   <Paper variant="outlined" sx={{ p: 2 }}>
-    <Typography variant="subtitle2" gutterBottom fontWeight="bold">
+    <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 'bold' }}>
       Account
     </Typography>
     <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
@@ -201,7 +201,7 @@ const ChangeAccountField: React.FC = () => (
 
 const AboutField: React.FC = () => (
   <Paper variant="outlined" sx={{ p: 2 }}>
-    <Typography variant="subtitle2" gutterBottom fontWeight="bold">
+    <Typography variant="subtitle2" gutterBottom sx={{ fontWeight: 'bold' }}>
       About
     </Typography>
     <Typography variant="body2" color="text.secondary">
