@@ -227,18 +227,16 @@ jobs:
       - name: Build mobile web assets
         run: npm run build:mobile
 
-      - name: Add iOS platform
+      - name: Add iOS platform and sync
         run: |
           npm install @capacitor/ios --legacy-peer-deps
           npx cap add ios
+          npx cap sync ios
 
       - name: Install CocoaPods dependencies
         run: |
           cd ios/App
           pod install
-
-      - name: Sync Capacitor
-        run: npx cap sync ios
 
       - name: Build for simulator
         run: |
