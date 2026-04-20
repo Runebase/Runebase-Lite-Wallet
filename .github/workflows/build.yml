@@ -196,7 +196,7 @@ jobs:
       - name: Build release AAB
         working-directory: android
         env:
-          KEYSTORE_PATH: app/release.keystore
+          KEYSTORE_PATH: release.keystore
           KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
@@ -232,6 +232,11 @@ jobs:
           npm install @capacitor/ios --legacy-peer-deps
           npx cap add ios
 
+      - name: Install CocoaPods dependencies
+        run: |
+          cd ios/App
+          pod install
+
       - name: Sync Capacitor
         run: npx cap sync ios
 
@@ -242,7 +247,7 @@ jobs:
             -scheme App \
             -configuration Debug \
             -sdk iphonesimulator \
-            -destination 'platform=iOS Simulator,name=iPhone 16' \
+            -destination 'platform=iOS Simulator,OS=latest,name=iPhone 16' \
             -derivedDataPath build \
             build
 
