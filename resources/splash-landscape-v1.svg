@@ -1,0 +1,114 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2000 1200">
+  <defs>
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="1" y2="0.7">
+      <stop offset="0%" stop-color="#0a1628"/>
+      <stop offset="50%" stop-color="#0f2344"/>
+      <stop offset="100%" stop-color="#091a30"/>
+    </linearGradient>
+
+    <radialGradient id="centerGlow" cx="50%" cy="50%" r="40%">
+      <stop offset="0%" stop-color="#1a4a7a" stop-opacity="0.4"/>
+      <stop offset="60%" stop-color="#0f2344" stop-opacity="0.1"/>
+      <stop offset="100%" stop-color="#0a1628" stop-opacity="0"/>
+    </radialGradient>
+
+    <radialGradient id="nodeGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#4a9eff" stop-opacity="0.6"/>
+      <stop offset="100%" stop-color="#4a9eff" stop-opacity="0"/>
+    </radialGradient>
+
+    <radialGradient id="logoGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#62a0ea" stop-opacity="0.3"/>
+      <stop offset="50%" stop-color="#3a7bd5" stop-opacity="0.1"/>
+      <stop offset="100%" stop-color="#1a4a7a" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="2000" height="1200" fill="url(#bgGrad)"/>
+  <rect width="2000" height="1200" fill="url(#centerGlow)"/>
+
+  <!-- Network lines -->
+  <g stroke="#2a5a8a" stroke-opacity="0.15" stroke-width="1" fill="none">
+    <line x1="100" y1="150" x2="280" y2="250"/>
+    <line x1="280" y1="250" x2="400" y2="180"/>
+    <line x1="400" y1="180" x2="520" y2="300"/>
+    <line x1="100" y1="150" x2="250" y2="80"/>
+    <line x1="250" y1="80" x2="400" y2="180"/>
+
+    <line x1="1600" y1="150" x2="1750" y2="250"/>
+    <line x1="1750" y1="250" x2="1900" y2="180"/>
+    <line x1="1600" y1="150" x2="1700" y2="300"/>
+    <line x1="1700" y1="300" x2="1900" y2="280"/>
+
+    <line x1="100" y1="900" x2="250" y2="830"/>
+    <line x1="250" y1="830" x2="380" y2="950"/>
+    <line x1="100" y1="900" x2="200" y2="1050"/>
+    <line x1="200" y1="1050" x2="380" y2="950"/>
+
+    <line x1="1650" y1="900" x2="1800" y2="830"/>
+    <line x1="1800" y1="830" x2="1900" y2="950"/>
+    <line x1="1650" y1="900" x2="1750" y2="1050"/>
+    <line x1="1750" y1="1050" x2="1900" y2="950"/>
+
+    <line x1="520" y1="300" x2="750" y2="500" stroke-opacity="0.06" stroke-width="0.5"/>
+    <line x1="1500" y1="500" x2="1700" y2="300" stroke-opacity="0.06" stroke-width="0.5"/>
+  </g>
+
+  <!-- Network nodes -->
+  <g fill="#4a9eff">
+    <circle cx="100" cy="150" r="3" opacity="0.4"/>
+    <circle cx="280" cy="250" r="2.5" opacity="0.3"/>
+    <circle cx="400" cy="180" r="3.5" opacity="0.35"/>
+    <circle cx="520" cy="300" r="2" opacity="0.25"/>
+    <circle cx="250" cy="80" r="2" opacity="0.3"/>
+
+    <circle cx="1600" cy="150" r="3" opacity="0.35"/>
+    <circle cx="1750" cy="250" r="2.5" opacity="0.3"/>
+    <circle cx="1900" cy="180" r="2" opacity="0.25"/>
+    <circle cx="1700" cy="300" r="3" opacity="0.3"/>
+
+    <circle cx="100" cy="900" r="2.5" opacity="0.3"/>
+    <circle cx="250" cy="830" r="3" opacity="0.35"/>
+    <circle cx="380" cy="950" r="2" opacity="0.25"/>
+    <circle cx="200" cy="1050" r="2.5" opacity="0.3"/>
+
+    <circle cx="1650" cy="900" r="2.5" opacity="0.3"/>
+    <circle cx="1800" cy="830" r="3" opacity="0.35"/>
+    <circle cx="1900" cy="950" r="2" opacity="0.25"/>
+    <circle cx="1750" cy="1050" r="2.5" opacity="0.3"/>
+  </g>
+
+  <!-- Accent nodes -->
+  <g>
+    <circle cx="400" cy="180" r="12" fill="url(#nodeGlow)" opacity="0.5"/>
+    <circle cx="400" cy="180" r="4" fill="#5ab0ff" opacity="0.6"/>
+    <circle cx="1750" cy="250" r="10" fill="url(#nodeGlow)" opacity="0.4"/>
+    <circle cx="1750" cy="250" r="3.5" fill="#5ab0ff" opacity="0.5"/>
+    <circle cx="250" cy="830" r="10" fill="url(#nodeGlow)" opacity="0.4"/>
+    <circle cx="250" cy="830" r="3.5" fill="#5ab0ff" opacity="0.5"/>
+    <circle cx="1800" cy="830" r="10" fill="url(#nodeGlow)" opacity="0.4"/>
+    <circle cx="1800" cy="830" r="3.5" fill="#5ab0ff" opacity="0.5"/>
+  </g>
+
+  <!-- Hexagons -->
+  <g stroke="#2a5a8a" stroke-opacity="0.08" stroke-width="0.8" fill="none">
+    <polygon points="200,50 230,33 260,50 260,83 230,100 200,83"/>
+    <polygon points="1700,60 1730,43 1760,60 1760,93 1730,110 1700,93"/>
+    <polygon points="100,600 130,583 160,600 160,633 130,650 100,633"/>
+    <polygon points="1850,550 1880,533 1910,550 1910,583 1880,600 1850,583"/>
+    <polygon points="300,1050 330,1033 360,1050 360,1083 330,1100 300,1083"/>
+    <polygon points="1650,1050 1680,1033 1710,1050 1710,1083 1680,1100 1650,1083"/>
+  </g>
+
+  <!-- Decorative rings around logo center -->
+  <circle cx="1000" cy="520" r="220" fill="none" stroke="#2a5a8a" stroke-opacity="0.08" stroke-width="1"/>
+  <circle cx="1000" cy="520" r="180" fill="none" stroke="#3a7bd5" stroke-opacity="0.06" stroke-width="0.8" stroke-dasharray="8 16"/>
+  <circle cx="1000" cy="520" r="140" fill="none" stroke="#4a9eff" stroke-opacity="0.05" stroke-width="1.5"/>
+  <circle cx="1000" cy="520" r="130" fill="url(#logoGlow)"/>
+
+  <!-- App name -->
+  <text x="1000" y="790" text-anchor="middle" font-family="sans-serif" font-weight="300" font-size="48" fill="#c8ddf0" letter-spacing="8" opacity="0.9">RUNEBASE</text>
+  <text x="1000" y="835" text-anchor="middle" font-family="sans-serif" font-weight="300" font-size="24" fill="#7ba3c9" letter-spacing="12" opacity="0.7">LITE WALLET</text>
+  <line x1="880" y1="860" x2="1120" y2="860" stroke="#3a7bd5" stroke-opacity="0.2" stroke-width="1"/>
+</svg>

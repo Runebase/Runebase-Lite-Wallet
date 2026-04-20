@@ -1,0 +1,223 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 2000">
+  <defs>
+    <!-- Main background gradient: deep navy to dark blue -->
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="0.3" y2="1">
+      <stop offset="0%" stop-color="#0a1628"/>
+      <stop offset="50%" stop-color="#0f2344"/>
+      <stop offset="100%" stop-color="#091a30"/>
+    </linearGradient>
+
+    <!-- Accent glow gradient for the central area -->
+    <radialGradient id="centerGlow" cx="50%" cy="45%" r="40%">
+      <stop offset="0%" stop-color="#1a4a7a" stop-opacity="0.4"/>
+      <stop offset="60%" stop-color="#0f2344" stop-opacity="0.1"/>
+      <stop offset="100%" stop-color="#0a1628" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Node glow -->
+    <radialGradient id="nodeGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#4a9eff" stop-opacity="0.6"/>
+      <stop offset="100%" stop-color="#4a9eff" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Logo glow effect -->
+    <radialGradient id="logoGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#62a0ea" stop-opacity="0.3"/>
+      <stop offset="50%" stop-color="#3a7bd5" stop-opacity="0.1"/>
+      <stop offset="100%" stop-color="#1a4a7a" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Hexagon clip for decorative purposes -->
+    <filter id="softGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="3"/>
+    </filter>
+
+    <filter id="bigGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="8"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="2000" fill="url(#bgGrad)"/>
+
+  <!-- Subtle center glow -->
+  <rect width="1200" height="2000" fill="url(#centerGlow)"/>
+
+  <!-- ═══════════════════════════════════════════════
+       BLOCKCHAIN NETWORK PATTERN — scattered nodes
+       connected by thin lines, suggesting a
+       decentralized network / distributed ledger
+       ═══════════════════════════════════════════════ -->
+
+  <!-- Network connection lines (subtle, behind nodes) -->
+  <g stroke="#2a5a8a" stroke-opacity="0.15" stroke-width="1" fill="none">
+    <!-- Top-left cluster -->
+    <line x1="80" y1="180" x2="220" y2="320"/>
+    <line x1="220" y1="320" x2="350" y2="250"/>
+    <line x1="350" y1="250" x2="480" y2="380"/>
+    <line x1="80" y1="180" x2="200" y2="120"/>
+    <line x1="200" y1="120" x2="350" y2="250"/>
+
+    <!-- Top-right cluster -->
+    <line x1="850" y1="200" x2="1000" y2="280"/>
+    <line x1="1000" y1="280" x2="1100" y2="180"/>
+    <line x1="850" y1="200" x2="950" y2="380"/>
+    <line x1="950" y1="380" x2="1100" y2="350"/>
+    <line x1="1000" y1="280" x2="1100" y2="350"/>
+
+    <!-- Mid-left cluster -->
+    <line x1="50" y1="650" x2="180" y2="580"/>
+    <line x1="180" y1="580" x2="300" y2="700"/>
+    <line x1="300" y1="700" x2="150" y2="780"/>
+    <line x1="50" y1="650" x2="150" y2="780"/>
+
+    <!-- Mid-right cluster -->
+    <line x1="900" y1="620" x2="1050" y2="550"/>
+    <line x1="1050" y1="550" x2="1150" y2="680"/>
+    <line x1="900" y1="620" x2="1000" y2="750"/>
+    <line x1="1000" y1="750" x2="1150" y2="680"/>
+
+    <!-- Bottom-left cluster -->
+    <line x1="100" y1="1350" x2="250" y2="1280"/>
+    <line x1="250" y1="1280" x2="380" y2="1400"/>
+    <line x1="100" y1="1350" x2="200" y2="1480"/>
+    <line x1="200" y1="1480" x2="380" y2="1400"/>
+
+    <!-- Bottom-right cluster -->
+    <line x1="850" y1="1400" x2="1000" y2="1320"/>
+    <line x1="1000" y1="1320" x2="1120" y2="1450"/>
+    <line x1="850" y1="1400" x2="950" y2="1520"/>
+    <line x1="950" y1="1520" x2="1120" y2="1450"/>
+
+    <!-- Far bottom cluster -->
+    <line x1="300" y1="1700" x2="500" y2="1650"/>
+    <line x1="500" y1="1650" x2="650" y2="1780"/>
+    <line x1="700" y1="1700" x2="900" y2="1750"/>
+    <line x1="500" y1="1650" x2="700" y2="1700"/>
+
+    <!-- Cross-cluster connections (long range, very subtle) -->
+    <line x1="480" y1="380" x2="900" y2="620" stroke-opacity="0.06" stroke-width="0.5"/>
+    <line x1="300" y1="700" x2="600" y2="850" stroke-opacity="0.06" stroke-width="0.5"/>
+    <line x1="1000" y1="750" x2="600" y2="850" stroke-opacity="0.06" stroke-width="0.5"/>
+    <line x1="380" y1="1400" x2="600" y2="1150" stroke-opacity="0.06" stroke-width="0.5"/>
+    <line x1="850" y1="1400" x2="600" y2="1150" stroke-opacity="0.06" stroke-width="0.5"/>
+  </g>
+
+  <!-- Network nodes (small glowing dots at connection intersections) -->
+  <g fill="#4a9eff">
+    <!-- Top-left nodes -->
+    <circle cx="80" cy="180" r="3" opacity="0.4"/>
+    <circle cx="220" cy="320" r="2.5" opacity="0.3"/>
+    <circle cx="350" cy="250" r="3.5" opacity="0.35"/>
+    <circle cx="480" cy="380" r="2" opacity="0.25"/>
+    <circle cx="200" cy="120" r="2" opacity="0.3"/>
+
+    <!-- Top-right nodes -->
+    <circle cx="850" cy="200" r="3" opacity="0.35"/>
+    <circle cx="1000" cy="280" r="2.5" opacity="0.3"/>
+    <circle cx="1100" cy="180" r="2" opacity="0.25"/>
+    <circle cx="950" cy="380" r="3" opacity="0.3"/>
+    <circle cx="1100" cy="350" r="2" opacity="0.2"/>
+
+    <!-- Mid-left nodes -->
+    <circle cx="50" cy="650" r="2.5" opacity="0.3"/>
+    <circle cx="180" cy="580" r="3" opacity="0.35"/>
+    <circle cx="300" cy="700" r="2" opacity="0.25"/>
+    <circle cx="150" cy="780" r="2.5" opacity="0.3"/>
+
+    <!-- Mid-right nodes -->
+    <circle cx="900" cy="620" r="2.5" opacity="0.3"/>
+    <circle cx="1050" cy="550" r="3" opacity="0.35"/>
+    <circle cx="1150" cy="680" r="2" opacity="0.25"/>
+    <circle cx="1000" cy="750" r="2.5" opacity="0.3"/>
+
+    <!-- Bottom-left nodes -->
+    <circle cx="100" cy="1350" r="2.5" opacity="0.3"/>
+    <circle cx="250" cy="1280" r="3" opacity="0.35"/>
+    <circle cx="380" cy="1400" r="2" opacity="0.25"/>
+    <circle cx="200" cy="1480" r="2.5" opacity="0.3"/>
+
+    <!-- Bottom-right nodes -->
+    <circle cx="850" cy="1400" r="2.5" opacity="0.3"/>
+    <circle cx="1000" cy="1320" r="3" opacity="0.35"/>
+    <circle cx="1120" cy="1450" r="2" opacity="0.25"/>
+    <circle cx="950" cy="1520" r="2.5" opacity="0.3"/>
+
+    <!-- Far bottom nodes -->
+    <circle cx="300" cy="1700" r="2" opacity="0.25"/>
+    <circle cx="500" cy="1650" r="2.5" opacity="0.3"/>
+    <circle cx="650" cy="1780" r="2" opacity="0.2"/>
+    <circle cx="700" cy="1700" r="2.5" opacity="0.25"/>
+    <circle cx="900" cy="1750" r="2" opacity="0.2"/>
+  </g>
+
+  <!-- Brighter accent nodes (larger, with glow) -->
+  <g>
+    <circle cx="350" cy="250" r="12" fill="url(#nodeGlow)" opacity="0.5"/>
+    <circle cx="350" cy="250" r="4" fill="#5ab0ff" opacity="0.6"/>
+
+    <circle cx="1050" cy="550" r="10" fill="url(#nodeGlow)" opacity="0.4"/>
+    <circle cx="1050" cy="550" r="3.5" fill="#5ab0ff" opacity="0.5"/>
+
+    <circle cx="180" cy="580" r="10" fill="url(#nodeGlow)" opacity="0.4"/>
+    <circle cx="180" cy="580" r="3.5" fill="#5ab0ff" opacity="0.5"/>
+
+    <circle cx="1000" cy="1320" r="10" fill="url(#nodeGlow)" opacity="0.4"/>
+    <circle cx="1000" cy="1320" r="3.5" fill="#5ab0ff" opacity="0.5"/>
+
+    <circle cx="250" cy="1280" r="10" fill="url(#nodeGlow)" opacity="0.4"/>
+    <circle cx="250" cy="1280" r="3.5" fill="#5ab0ff" opacity="0.5"/>
+  </g>
+
+  <!-- ═══════════════════════════════════════════════
+       HEXAGONAL GRID — faint honeycomb shapes
+       suggesting blockchain blocks / data structure
+       ═══════════════════════════════════════════════ -->
+  <g stroke="#2a5a8a" stroke-opacity="0.08" stroke-width="0.8" fill="none">
+    <!-- Scattered individual hexagons at various sizes -->
+    <!-- Top area hexagons -->
+    <polygon points="150,50 180,33 210,50 210,83 180,100 150,83"/>
+    <polygon points="550,100 575,86 600,100 600,128 575,142 550,128"/>
+    <polygon points="900,80 935,58 970,80 970,120 935,142 900,120"/>
+
+    <!-- Mid area hexagons -->
+    <polygon points="60,450 95,430 130,450 130,490 95,510 60,490"/>
+    <polygon points="1050,400 1080,383 1110,400 1110,433 1080,450 1050,433"/>
+
+    <!-- Lower area hexagons -->
+    <polygon points="200,1100 235,1080 270,1100 270,1140 235,1160 200,1140"/>
+    <polygon points="950,1100 980,1083 1010,1100 1010,1133 980,1150 950,1133"/>
+
+    <!-- Bottom area hexagons -->
+    <polygon points="400,1600 430,1583 460,1600 460,1633 430,1650 400,1633"/>
+    <polygon points="780,1580 810,1563 840,1580 840,1613 810,1630 780,1613"/>
+    <polygon points="100,1800 130,1783 160,1800 160,1833 130,1850 100,1833"/>
+    <polygon points="1050,1750 1080,1733 1110,1750 1110,1783 1080,1800 1050,1783"/>
+  </g>
+
+  <!-- ═══════════════════════════════════════════════
+       DECORATIVE RINGS around the logo area
+       ═══════════════════════════════════════════════ -->
+
+  <!-- Outer decorative ring -->
+  <circle cx="600" cy="880" r="280" fill="none" stroke="#2a5a8a" stroke-opacity="0.08" stroke-width="1"/>
+
+  <!-- Middle ring with dashes -->
+  <circle cx="600" cy="880" r="230" fill="none" stroke="#3a7bd5" stroke-opacity="0.06" stroke-width="0.8"
+          stroke-dasharray="8 16"/>
+
+  <!-- Inner glow ring -->
+  <circle cx="600" cy="880" r="180" fill="none" stroke="#4a9eff" stroke-opacity="0.05" stroke-width="1.5"/>
+
+  <!-- Logo glow backdrop -->
+  <circle cx="600" cy="880" r="160" fill="url(#logoGlow)"/>
+
+  <!-- ═══════════════════════════════════════════════
+       APP NAME
+       ═══════════════════════════════════════════════ -->
+  <text x="600" y="1120" text-anchor="middle" font-family="sans-serif" font-weight="300" font-size="52" fill="#c8ddf0" letter-spacing="8" opacity="0.9">RUNEBASE</text>
+  <text x="600" y="1170" text-anchor="middle" font-family="sans-serif" font-weight="300" font-size="26" fill="#7ba3c9" letter-spacing="12" opacity="0.7">LITE WALLET</text>
+
+  <!-- Thin decorative line under text -->
+  <line x1="480" y1="1200" x2="720" y2="1200" stroke="#3a7bd5" stroke-opacity="0.2" stroke-width="1"/>
+</svg>

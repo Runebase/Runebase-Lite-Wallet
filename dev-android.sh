@@ -4,16 +4,13 @@ set -e
 # Quick rebuild & deploy to Android phone
 # Usage: ./dev-android.sh
 
-echo "=== Building with Vite ==="
-npm run build
+echo "=== Building with Vite (Capacitor config) ==="
+npm run build:mobile
 
-echo "=== Copying to cordova/www ==="
-rm -rf cordova/www/*
-mkdir -p cordova/www
-cp -R dist/* cordova/www/
+echo "=== Syncing Capacitor ==="
+npx cap sync android
 
 echo "=== Building & deploying to device ==="
-cd cordova
-npx cordova run android --device
+npx cap run android
 
 echo "=== Done ==="

@@ -1,0 +1,199 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 2000">
+  <defs>
+    <!-- Deep background gradient -->
+    <linearGradient id="bgGrad" x1="0.2" y1="0" x2="0.8" y2="1">
+      <stop offset="0%" stop-color="#070d1a"/>
+      <stop offset="40%" stop-color="#0c1a30"/>
+      <stop offset="100%" stop-color="#060b16"/>
+    </linearGradient>
+
+    <!-- Central light area where the logo sits — mimics the app icon's blue (#62a0ea) -->
+    <radialGradient id="centerLight" cx="50%" cy="44%" r="20%">
+      <stop offset="0%" stop-color="#78b8e8" stop-opacity="1"/>
+      <stop offset="40%" stop-color="#5a9cd0" stop-opacity="0.9"/>
+      <stop offset="65%" stop-color="#3a78b0" stop-opacity="0.5"/>
+      <stop offset="85%" stop-color="#1e4a72" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#0c1a30" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Outer atmospheric glow around the center -->
+    <radialGradient id="outerGlow" cx="50%" cy="44%" r="38%">
+      <stop offset="0%" stop-color="#3a7cc4" stop-opacity="0.25"/>
+      <stop offset="40%" stop-color="#1e5090" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="#0c1a30" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Soft node glow -->
+    <radialGradient id="nodeGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#5ab8ff" stop-opacity="0.7"/>
+      <stop offset="100%" stop-color="#5ab8ff" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Particle/star glow -->
+    <radialGradient id="starGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.8"/>
+      <stop offset="30%" stop-color="#aad4ff" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#5ab8ff" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Curved path for orbital decoration -->
+    <filter id="blur3" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="3"/>
+    </filter>
+    <filter id="blur6" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="6"/>
+    </filter>
+    <filter id="blur12" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="12"/>
+    </filter>
+  </defs>
+
+  <!-- ═══ BACKGROUND ═══ -->
+  <rect width="1200" height="2000" fill="url(#bgGrad)"/>
+
+  <!-- Atmospheric glow layers -->
+  <rect width="1200" height="2000" fill="url(#outerGlow)"/>
+
+  <!-- ═══ BLOCKCHAIN NETWORK — flowing curved connections ═══ -->
+  <!-- These use quadratic bezier curves for a more organic, flowing feel -->
+  <g stroke="#2e6da8" fill="none" opacity="0.12">
+    <!-- Top region — sweeping arcs -->
+    <path d="M-20,120 Q200,200 380,140 Q520,90 680,180 Q800,250 920,160 Q1050,80 1220,200" stroke-width="0.8"/>
+    <path d="M-20,300 Q150,380 320,280 Q500,180 700,340 Q850,440 1050,320 Q1150,260 1220,380" stroke-width="0.6"/>
+
+    <!-- Mid-upper region -->
+    <path d="M-20,520 Q180,440 350,550 Q480,630 600,520" stroke-width="0.7"/>
+    <path d="M600,520 Q720,420 880,540 Q1020,640 1220,500" stroke-width="0.7"/>
+
+    <!-- Mid-lower region -->
+    <path d="M-20,1200 Q200,1280 380,1180 Q520,1100 680,1240" stroke-width="0.7"/>
+    <path d="M680,1240 Q820,1340 1000,1220 Q1120,1140 1220,1280" stroke-width="0.7"/>
+
+    <!-- Bottom region -->
+    <path d="M-20,1500 Q250,1580 450,1460 Q650,1350 850,1520 Q1000,1620 1220,1480" stroke-width="0.6"/>
+    <path d="M-20,1720 Q180,1800 400,1700 Q600,1600 800,1750 Q950,1850 1220,1740" stroke-width="0.5"/>
+
+    <!-- Vertical / diagonal connections -->
+    <path d="M200,120 Q220,300 320,280" stroke-width="0.5"/>
+    <path d="M680,180 Q700,340 700,340" stroke-width="0.5"/>
+    <path d="M920,160 Q900,300 1050,320" stroke-width="0.5"/>
+    <path d="M380,1180 Q360,1300 450,1460" stroke-width="0.5"/>
+    <path d="M1000,1220 Q980,1380 1000,1480" stroke-width="0.5"/>
+  </g>
+
+  <!-- ═══ NETWORK NODES — dots at intersections ═══ -->
+  <g>
+    <!-- Top nodes -->
+    <circle cx="200" cy="175" r="2.5" fill="#4a9eff" opacity="0.35"/>
+    <circle cx="380" cy="140" r="2" fill="#4a9eff" opacity="0.3"/>
+    <circle cx="680" cy="180" r="3" fill="#4a9eff" opacity="0.4"/>
+    <circle cx="920" cy="160" r="2.5" fill="#4a9eff" opacity="0.3"/>
+    <circle cx="320" cy="280" r="2" fill="#4a9eff" opacity="0.25"/>
+    <circle cx="700" cy="340" r="2.5" fill="#4a9eff" opacity="0.3"/>
+    <circle cx="1050" cy="320" r="2" fill="#4a9eff" opacity="0.25"/>
+
+    <!-- Mid nodes -->
+    <circle cx="350" cy="550" r="2" fill="#4a9eff" opacity="0.25"/>
+    <circle cx="880" cy="540" r="2.5" fill="#4a9eff" opacity="0.3"/>
+
+    <!-- Lower nodes -->
+    <circle cx="380" cy="1180" r="2.5" fill="#4a9eff" opacity="0.3"/>
+    <circle cx="680" cy="1240" r="2" fill="#4a9eff" opacity="0.25"/>
+    <circle cx="1000" cy="1220" r="2.5" fill="#4a9eff" opacity="0.3"/>
+    <circle cx="450" cy="1460" r="2" fill="#4a9eff" opacity="0.25"/>
+    <circle cx="850" cy="1520" r="2.5" fill="#4a9eff" opacity="0.3"/>
+
+    <!-- Bottom nodes -->
+    <circle cx="400" cy="1700" r="2" fill="#4a9eff" opacity="0.2"/>
+    <circle cx="800" cy="1750" r="2" fill="#4a9eff" opacity="0.2"/>
+  </g>
+
+  <!-- Bright accent nodes with glow halos -->
+  <g>
+    <circle cx="680" cy="180" r="16" fill="url(#nodeGlow)" opacity="0.6"/>
+    <circle cx="680" cy="180" r="4" fill="#6ac0ff" opacity="0.7"/>
+
+    <circle cx="880" cy="540" r="14" fill="url(#nodeGlow)" opacity="0.5"/>
+    <circle cx="880" cy="540" r="3.5" fill="#6ac0ff" opacity="0.6"/>
+
+    <circle cx="350" cy="550" r="12" fill="url(#nodeGlow)" opacity="0.4"/>
+    <circle cx="350" cy="550" r="3" fill="#6ac0ff" opacity="0.55"/>
+
+    <circle cx="1000" cy="1220" r="14" fill="url(#nodeGlow)" opacity="0.5"/>
+    <circle cx="1000" cy="1220" r="3.5" fill="#6ac0ff" opacity="0.6"/>
+
+    <circle cx="380" cy="1180" r="12" fill="url(#nodeGlow)" opacity="0.4"/>
+    <circle cx="380" cy="1180" r="3" fill="#6ac0ff" opacity="0.55"/>
+  </g>
+
+  <!-- ═══ SCATTERED MICRO-PARTICLES / STARS ═══ -->
+  <g>
+    <circle cx="120" cy="80" r="6" fill="url(#starGlow)"/>
+    <circle cx="1080" cy="140" r="5" fill="url(#starGlow)"/>
+    <circle cx="80" cy="450" r="4" fill="url(#starGlow)"/>
+    <circle cx="1130" cy="480" r="5" fill="url(#starGlow)"/>
+    <circle cx="150" cy="750" r="3" fill="url(#starGlow)"/>
+    <circle cx="1060" cy="700" r="4" fill="url(#starGlow)"/>
+    <circle cx="90" cy="1050" r="3" fill="url(#starGlow)"/>
+    <circle cx="1120" cy="1000" r="4" fill="url(#starGlow)"/>
+    <circle cx="130" cy="1400" r="3" fill="url(#starGlow)"/>
+    <circle cx="1100" cy="1350" r="4" fill="url(#starGlow)"/>
+    <circle cx="180" cy="1650" r="3" fill="url(#starGlow)"/>
+    <circle cx="1050" cy="1600" r="3" fill="url(#starGlow)"/>
+    <circle cx="500" cy="50" r="3" fill="url(#starGlow)"/>
+    <circle cx="750" cy="1950" r="3" fill="url(#starGlow)"/>
+    <!-- Tiny white dots (distant stars) -->
+    <circle cx="300" cy="30" r="1" fill="white" opacity="0.15"/>
+    <circle cx="900" cy="60" r="1" fill="white" opacity="0.12"/>
+    <circle cx="550" cy="200" r="0.8" fill="white" opacity="0.1"/>
+    <circle cx="1150" cy="600" r="1" fill="white" opacity="0.12"/>
+    <circle cx="50" cy="900" r="0.8" fill="white" opacity="0.1"/>
+    <circle cx="1180" cy="850" r="1" fill="white" opacity="0.1"/>
+    <circle cx="60" cy="1150" r="0.8" fill="white" opacity="0.1"/>
+    <circle cx="250" cy="1550" r="1" fill="white" opacity="0.12"/>
+    <circle cx="950" cy="1650" r="0.8" fill="white" opacity="0.1"/>
+    <circle cx="700" cy="1850" r="1" fill="white" opacity="0.1"/>
+    <circle cx="400" cy="1900" r="0.8" fill="white" opacity="0.12"/>
+  </g>
+
+  <!-- ═══ HEXAGONAL BLOCK SHAPES — faint, geometric ═══ -->
+  <g stroke="#3a7cc4" stroke-opacity="0.07" stroke-width="0.7" fill="none">
+    <!-- Scattered hexagons of varying size -->
+    <polygon points="140,50 170,33 200,50 200,83 170,100 140,83"/>
+    <polygon points="980,90 1005,76 1030,90 1030,118 1005,132 980,118"/>
+
+    <polygon points="40,400 68,384 96,400 96,432 68,448 40,432"/>
+    <polygon points="1100,430 1130,413 1160,430 1160,463 1130,480 1100,463"/>
+
+    <polygon points="80,1080 110,1063 140,1080 140,1113 110,1130 80,1113"/>
+    <polygon points="1060,1060 1090,1043 1120,1060 1120,1093 1090,1110 1060,1093"/>
+
+    <polygon points="200,1550 228,534 256,1550 256,1582 228,1598 200,1582"/>
+    <polygon points="960,1520 990,1503 1020,1520 1020,1553 990,1570 960,1553"/>
+
+    <polygon points="350,1830 378,1813 406,1830 406,1862 378,1878 350,1862"/>
+    <polygon points="820,1860 848,1843 876,1860 876,1892 848,1908 820,1892"/>
+  </g>
+
+  <!-- ═══ CENTER LOGO AREA ═══ -->
+
+  <!-- Soft light backdrop for logo visibility -->
+  <circle cx="600" cy="880" r="260" fill="url(#centerLight)"/>
+
+  <!-- Thin decorative orbital rings echoing the logo shape -->
+  <ellipse cx="600" cy="880" rx="320" ry="160" fill="none" stroke="#5ab8ff" stroke-opacity="0.06" stroke-width="0.8"
+           transform="rotate(-25 600 880)"/>
+  <ellipse cx="600" cy="880" rx="340" ry="170" fill="none" stroke="#5ab8ff" stroke-opacity="0.04" stroke-width="0.6"
+           transform="rotate(25 600 880)"/>
+
+  <!-- Fine dashed circle -->
+  <circle cx="600" cy="880" r="200" fill="none" stroke="#7cc4ff" stroke-opacity="0.1" stroke-width="0.6"
+          stroke-dasharray="4 12"/>
+
+  <!-- ═══ APP NAME ═══ -->
+  <text x="600" y="1140" text-anchor="middle" font-family="'Helvetica Neue', 'Segoe UI', sans-serif" font-weight="200" font-size="50" fill="#c0d8ee" letter-spacing="10" opacity="0.9">RUNEBASE</text>
+  <text x="600" y="1190" text-anchor="middle" font-family="'Helvetica Neue', 'Segoe UI', sans-serif" font-weight="300" font-size="22" fill="#7ba3c9" letter-spacing="14" opacity="0.6">LITE WALLET</text>
+
+  <!-- Thin accent line -->
+  <line x1="490" y1="1215" x2="710" y2="1215" stroke="#4a88bd" stroke-opacity="0.15" stroke-width="0.8"/>
+</svg>

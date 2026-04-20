@@ -29,23 +29,15 @@ fi
 echo "Bumping version: $current_version -> $new_version ($release_type)"
 
 # Update version in main package.json
+# (Android versionCode/versionName are read from package.json at build time
+#  via android/app/build.gradle, so no separate update is needed.)
 jq --arg v "$new_version" '.version = $v' package.json > tmp.json && mv tmp.json package.json
 
-# Update version in cordova/package.json
-jq --arg v "$new_version" '.version = $v' cordova/package.json > tmp.json && mv tmp.json cordova/package.json
-
-# Update version in config.xml
-sed -i "s/version=\"[0-9.]*\"/version=\"$new_version\"/" cordova/config.xml
-
-# Update android-versionCode in config.xml
-android_version_code=$(echo "$new_version" | tr -d .)
-sed -i "s/android-versionCode=\"[0-9]*\"/android-versionCode=\"$android_version_code\"/" cordova/config.xml
-
-# Update version in static/manifest.json
+# Update version in static/manifest.json (Chrome extension)
 sed -i "s/\"version\": \".*\"/\"version\": \"$new_version\"/" static/manifest.json
 
 # Commit, tag, and push
-git add package.json cordova/package.json cordova/config.xml static/manifest.json
+git add package.json static/manifest.json
 git commit -m "release: v$new_version"
 git tag -a "v$new_version" -m "release: v$new_version"
 git push --follow-tags

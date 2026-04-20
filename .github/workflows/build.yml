@@ -17,7 +17,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
 
       - run: npm ci --legacy-peer-deps
@@ -62,7 +62,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
 
       - run: npm ci --legacy-peer-deps
@@ -94,7 +94,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
 
       - run: npm ci --legacy-peer-deps
@@ -125,7 +125,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
 
       - run: npm ci --legacy-peer-deps
@@ -145,7 +145,7 @@ jobs:
             dist-electron/*.dmg
             dist-electron/*.zip
 
-  # Cordova - Android
+  # Android (Capacitor)
   build-android:
     needs: build-web
     runs-on: ubuntu-latest
@@ -156,13 +156,13 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
 
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: 17
+          java-version: 21
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
@@ -174,61 +174,45 @@ jobs:
           name: vite-dist
           path: dist/
 
-      - name: Copy dist to cordova/www
-        run: |
-          mkdir -p cordova/www
-          cp -R dist/* cordova/www/
+      - name: Sync Capacitor
+        run: npx cap sync android
 
-      - name: Install Cordova CLI
-        run: npm install -g cordova
+      - name: Cache Gradle
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('android/**/*.gradle*', 'android/gradle/wrapper/gradle-wrapper.properties') }}
+          restore-keys: ${{ runner.os }}-gradle-
+
+      - name: Build debug APK
+        working-directory: android
+        run: ./gradlew assembleDebug
 
       - name: Decode signing keystore
         if: env.ANDROID_KEYSTORE_BASE64 != ''
         env:
           ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
-        run: |
-          echo "$ANDROID_KEYSTORE_BASE64" | base64 -d > cordova/runebase-release.keystore
+        run: echo "$ANDROID_KEYSTORE_BASE64" | base64 -d > android/app/release.keystore
 
-      - name: Create build.json for signing
-        if: env.ANDROID_KEYSTORE_BASE64 != ''
+      - name: Build release AAB
+        working-directory: android
         env:
-          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
-        working-directory: cordova
-        run: |
-          cat > build.json <<EOF
-          {
-            "android": {
-              "release": {
-                "keystore": "runebase-release.keystore",
-                "storePassword": "${{ secrets.ANDROID_KEYSTORE_PASSWORD }}",
-                "alias": "${{ secrets.ANDROID_KEY_ALIAS }}",
-                "password": "${{ secrets.ANDROID_KEY_PASSWORD }}",
-                "keystoreType": "jks"
-              }
-            }
-          }
-          EOF
-
-      - name: Build Android
-        working-directory: cordova
-        run: |
-          npm ci
-          cordova platform add cordova-android@^15.0.0 --save
-          # Fix deprecated compile() -> implementation() in QR scanner plugin gradle
-          sed -i "s/\bcompile\b/implementation/g" platforms/android/cordova-plugin-qrscanner/*.gradle
-          # Fix android.support.v4 -> AndroidX in QR scanner plugin
-          find platforms/android/app/src -name "*.java" -exec sed -i 's/android\.support\.v4\.app\.ActivityCompat/androidx.core.app.ActivityCompat/g' {} +
-          cordova build android
-          cordova build android --release
+          KEYSTORE_PATH: app/release.keystore
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: ./gradlew bundleRelease
 
       - uses: actions/upload-artifact@v4
         with:
           name: android-apk
           path: |
-            cordova/platforms/android/app/build/outputs/apk/debug/app-debug.apk
-            cordova/platforms/android/app/build/outputs/bundle/release/app-release.aab
+            android/app/build/outputs/apk/debug/app-debug.apk
+            android/app/build/outputs/bundle/release/app-release.aab
 
-  # Cordova - iOS
+  # iOS (Capacitor) — simulator build only
   build-ios:
     needs: build-web
     runs-on: macos-latest
@@ -239,7 +223,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
 
       - run: npm ci --legacy-peer-deps
@@ -249,30 +233,29 @@ jobs:
           name: vite-dist
           path: dist/
 
-      - name: Copy dist to cordova/www
+      - name: Add iOS platform
         run: |
-          mkdir -p cordova/www
-          cp -R dist/* cordova/www/
+          npm install @capacitor/ios --legacy-peer-deps
+          npx cap add ios
 
-      - name: Install Cordova CLI and CocoaPods
-        run: |
-          npm install -g cordova
-          sudo gem install cocoapods
+      - name: Sync Capacitor
+        run: npx cap sync ios
 
-      - name: Build iOS
-        working-directory: cordova
+      - name: Build for simulator
         run: |
-          npm ci
-          cordova platform add cordova-ios@^7.1.1 --save
-          cordova build ios --emulator
+          cd ios/App
+          xcodebuild -workspace App.xcworkspace \
+            -scheme App \
+            -configuration Debug \
+            -sdk iphonesimulator \
+            -destination 'platform=iOS Simulator,name=iPhone 16' \
+            -derivedDataPath build \
+            build
 
-      - name: Zip iOS simulator build
+      - name: Package simulator build
         run: |
-          APP_PATH=$(find cordova/platforms/ios/build -name "*.app" -type d | head -1)
-          APP_DIR=$(dirname "$APP_PATH")
-          echo "Found build output in: $APP_DIR"
-          cd "$APP_DIR"
-          zip -r "$GITHUB_WORKSPACE/Runebase-Lite-Wallet-ios-simulator.zip" *.app
+          APP_PATH=$(find ios/App/build -name "*.app" -type d | head -1)
+          zip -r Runebase-Lite-Wallet-ios-simulator.zip "$APP_PATH"
 
       - uses: actions/upload-artifact@v4
         with:

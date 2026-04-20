@@ -9,26 +9,13 @@
     <style>
       :root { color-scheme: light dark; }
       html, body { margin: 0; padding: 0; height: 100%; }
-
-      /* QR scanner: make webview transparent so native camera preview shows through.
-         The cordova QR plugin renders the camera behind the webview, so every
-         layer must be transparent. We hide #root entirely and render the
-         scanner overlay via a React portal directly on <body>. */
-      html.qr-scanning,
-      html.qr-scanning body {
-        background: transparent !important;
-        background-color: transparent !important;
-        color-scheme: normal !important;
-      }
-      html.qr-scanning #root { display: none !important; }
     </style>
   </head>
   <body>
     <div id="root"></div>
-    <!-- Background controller must load before popup in Electron/Cordova
+    <!-- Background controller must load before popup in Electron
          (in the Chrome extension, background runs as a separate service worker) -->
     <script type="module" src="/src/background/index.ts"></script>
     <script type="module" src="/src/popup/index.tsx"></script>
-    <script type="text/javascript" src="cordova.js"></script>
   </body>
 </html>

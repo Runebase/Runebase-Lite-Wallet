@@ -3,7 +3,7 @@ import { ArrowDropDown } from '@mui/icons-material';
 import { FormControl, TextField, Typography, Button, Autocomplete } from '@mui/material';
 import { useAppSelector, useAppDispatch } from '../../store/hooks';
 import { setReceiverAddress, selectReceiverFieldError } from '../../store/slices/sendSlice';
-import { isCordova } from '../../abstraction';
+import { isNativeMobile } from '../../abstraction';
 import txCacheDB, { type RecentAddress } from '../../../services/db/TransactionCache';
 
 interface ToFieldProps {
@@ -74,7 +74,7 @@ const ToField: React.FC<ToFieldProps> = ({
           </Typography>
         )}
       </FormControl>
-      {isCordova() && !scanning && (
+      {isNativeMobile() && !scanning && (
         <Button
           variant="contained"
           color="primary"

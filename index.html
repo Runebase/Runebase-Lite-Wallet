@@ -9,18 +9,17 @@
     <style>
       :root { color-scheme: light dark; }
       html, body { margin: 0; padding: 0; height: 100%; }
-
-      /* QR scanner: make webview transparent so native camera preview shows through.
-         The cordova QR plugin renders the camera behind the webview, so every
-         layer must be transparent. We hide #root entirely and render the
-         scanner overlay via a React portal directly on <body>. */
-      html.qr-scanning,
-      html.qr-scanning body {
-        background: transparent !important;
-        background-color: transparent !important;
-        color-scheme: normal !important;
+      /* Safe area insets for Capacitor edge-to-edge display.
+         Prevents content from rendering behind the status bar
+         and navigation bar on Android / notched devices. */
+      #root {
+        padding-top: env(safe-area-inset-top);
+        padding-bottom: env(safe-area-inset-bottom);
+        padding-left: env(safe-area-inset-left);
+        padding-right: env(safe-area-inset-right);
+        min-height: 100%;
+        box-sizing: border-box;
       }
-      html.qr-scanning #root { display: none !important; }
     </style>
   </head>
   <body>

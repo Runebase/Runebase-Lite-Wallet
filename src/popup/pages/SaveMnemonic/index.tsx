@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { Typography, Button, Alert, Stack } from '@mui/material';
 import PageLayout from '../../components/PageLayout';
 import { useAppSelector, useAppDispatch } from '../../store/hooks';
@@ -13,13 +13,10 @@ import strings from '../../localization/locales/en_US.json';
 const SaveMnemonic: React.FC = () => {
   const { classes } = useStyles();
   const dispatch = useAppDispatch();
-  const [isCordova, setIsCordova] = useState<boolean>(false);
-
   const mnemonic = useAppSelector((state) => state.saveMnemonic.mnemonic);
   const createWalletName = useAppSelector((state) => state.createWallet.walletName);
 
   useEffect(() => {
-    setIsCordova(typeof window.cordova !== 'undefined');
     dispatch(generateNewMnemonic());
     dispatch(setWalletName(createWalletName));
   }, [dispatch, createWalletName]);
@@ -56,18 +53,16 @@ const SaveMnemonic: React.FC = () => {
           >
             Verify Seed Phrase
           </Button>
-          {!isCordova && (
-            <Button
-              fullWidth
-              variant="outlined"
-              color="primary"
-              size="large"
-              onClick={() => dispatch(saveToFile())}
-              startIcon={<SaveIcon />}
-            >
-              Save Seed Phrase to File
-            </Button>
-          )}
+          <Button
+            fullWidth
+            variant="outlined"
+            color="primary"
+            size="large"
+            onClick={() => dispatch(saveToFile())}
+            startIcon={<SaveIcon />}
+          >
+            Save Seed Phrase to File
+          </Button>
         </Stack>
       </div>
     </PageLayout>

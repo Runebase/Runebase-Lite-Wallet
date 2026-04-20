@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { createPortal } from 'react-dom';
 import { Button, Box, CircularProgress, Alert, Paper, Stack, Skeleton, Typography } from '@mui/material';
 import { Send as SendIcon } from '@mui/icons-material';
 import { handleEnterPress } from '../../../utils';
@@ -18,6 +17,7 @@ import FromField from '../../components/FromField';
 import ToField from '../../components/ToField';
 import TokenField from '../../components/TokenField';
 import TransactionSpeedField from '../../components/TransactionSpeedField';
+import { isNativeMobile } from '../../abstraction';
 
 // ─── Loading Skeleton ────────────────────────────────────────
 
@@ -53,39 +53,35 @@ const Send: React.FC = () => {
     dispatch(initSend());
   }, [dispatch]);
 
-  const startScan = () => {
+  const startScan = async () => {
     setScanError(null);
-    window.QRScanner?.prepare((err: any, status: any) => {
-      if (err) {
-        setScanError('Failed to access camera. Please try again.');
-      } else if (status.authorized) {
-        window.QRScanner?.scan(displayContents);
-        window.QRScanner?.show();
-        document.documentElement.classList.add('qr-scanning');
-        setScanning(true);
-      } else if (status.denied) {
+    if (!isNativeMobile()) return;
+
+    try {
+      const { BarcodeScanner, BarcodeFormat } = await import('@capacitor-mlkit/barcode-scanning');
+
+      const { camera } = await BarcodeScanner.requestPermissions();
+      if (camera !== 'granted' && camera !== 'limited') {
         setScanError('Camera access denied. Please enable camera access in your device settings.');
-      } else {
-        setScanError('Camera access was not granted.');
+        return;
       }
-    });
-  };
 
-  const displayContents = (err: any, text: string) => {
-    if (err) {
-      setScanError('Failed to scan QR code. Please try again.');
-    } else {
-      const address = text.replace(/^runebase:/i, '');
-      dispatch(setReceiverAddress(address));
-    }
-    stopScan();
-  };
+      setScanning(true);
+      const { barcodes } = await BarcodeScanner.scan({
+        formats: [BarcodeFormat.QrCode],
+      });
 
-  const stopScan = () => {
-    document.documentElement.classList.remove('qr-scanning');
-    window.QRScanner?.destroy(() => {
+      if (barcodes.length > 0 && barcodes[0].rawValue) {
+        const address = barcodes[0].rawValue.replace(/^runebase:/i, '');
+        dispatch(setReceiverAddress(address));
+      }
+    } catch (err: any) {
+      if (err?.message !== 'scan canceled') {
+        setScanError('Failed to scan QR code. Please try again.');
+      }
+    } finally {
       setScanning(false);
-    });
+    }
   };
 
   const onEnterPress = (event?: React.KeyboardEvent) => {
@@ -104,58 +100,6 @@ const Send: React.FC = () => {
           <CircularProgress aria-label="Loading send form" />
         </Box>
       </PageLayout>
-    );
-  }
-
-  if (scanning) {
-    return createPortal(
-      <div
-        style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          width: '100%',
-          height: '100%',
-          zIndex: 9999,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
-        {/* Crosshair / scan area indicator */}
-        <div
-          style={{
-            width: 220,
-            height: 220,
-            border: '2px solid rgba(255,255,255,0.7)',
-            borderRadius: 8,
-            marginBottom: 32,
-          }}
-        />
-
-        <p style={{ color: '#fff', textShadow: '0 1px 4px rgba(0,0,0,0.8)', marginBottom: 24, fontFamily: 'sans-serif' }}>
-          Point camera at QR code
-        </p>
-
-        <button
-          onClick={stopScan}
-          style={{
-            minWidth: 160,
-            padding: '12px 24px',
-            fontSize: 16,
-            fontWeight: 'bold',
-            color: '#fff',
-            backgroundColor: 'rgba(0,0,0,0.5)',
-            border: '1px solid rgba(255,255,255,0.4)',
-            borderRadius: 24,
-            cursor: 'pointer',
-          }}
-        >
-          Cancel
-        </button>
-      </div>,
-      document.body,
     );
   }
 

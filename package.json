@@ -18,8 +18,10 @@
     "release:patch": "./scripts/bump-version.sh patch",
     "release:minor": "./scripts/bump-version.sh minor",
     "release:major": "./scripts/bump-version.sh major",
-    "build:cordova:release": "cd cordova && cordova build android --release",
-    "start:cordova": "cd cordova && cordova run android",
+    "build:mobile": "vite build --config vite.config.capacitor.ts",
+    "cap:sync": "npx cap sync",
+    "cap:android": "npm run build:mobile && npx cap sync android && npx cap open android",
+    "cap:run:android": "npm run build:mobile && npx cap sync android && npx cap run android",
     "start:electron": "electron ./electron/main.js",
     "lint": "eslint src/",
     "lint-fix": "eslint src/ --fix",
@@ -29,6 +31,7 @@
     "*.{ts,tsx}": "npm run lint-fix"
   },
   "devDependencies": {
+    "@capacitor/cli": "^8.3.1",
     "@eslint/js": "^10.0.1",
     "@types/chrome": "^0.1.40",
     "@types/classnames": "^2.3.4",
@@ -50,6 +53,11 @@
   },
   "dependencies": {
     "@bitcoinerlab/secp256k1": "^1.2.0",
+    "@capacitor-mlkit/barcode-scanning": "^8.0.1",
+    "@capacitor/android": "^8.3.1",
+    "@capacitor/core": "^8.3.1",
+    "@capacitor/filesystem": "^8.1.2",
+    "@capacitor/splash-screen": "^8.0.1",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
     "@mui/icons-material": "^9.0.0",

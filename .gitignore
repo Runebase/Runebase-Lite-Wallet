@@ -432,7 +432,22 @@ __pycache__/
 
 # End of https://www.gitignore.io/api/node,linux,macos,windows,visualstudio,visualstudiocode
 
+# Cordova (legacy — can remove after cordova/ directory is deleted)
 cordova/build.json
+
+# Electron
 dist-electron
+
+# Local build output
 compiled_files
+
+# Capacitor — the android/ directory IS tracked (it's a source asset).
+# Only ignore build artifacts and local config that shouldn't be committed.
+android/app/build/
+android/app/release.keystore
+android/keystore.properties
+android/.gradle/
+android/build/
+android/capacitor-cordova-android-plugins/build/
+
 !src/popup/pages/BackupWallet

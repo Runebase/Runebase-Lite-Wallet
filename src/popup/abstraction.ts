@@ -1,3 +1,6 @@
+import { Capacitor } from '@capacitor/core';
+import { Filesystem, Directory, Encoding } from '@capacitor/filesystem';
+
 export type MessageCallback = (request: any, _?: any, sendResponse?: (response: any) => void) => void;
 export interface TabOpener {
   openUrlInNewTab(url: string): void;
@@ -11,18 +14,11 @@ if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.id) {
   targetOrigin = chrome.runtime.getURL('/');
 } else if (typeof process !== 'undefined' && (process as any).type) {
   targetOrigin = 'file://';
+} else if (isNativeMobile()) {
+  // Capacitor serves content from https://localhost on Android
+  targetOrigin = window.location.origin;
 } else {
   targetOrigin = window.location.origin;
-}
-
-function setTargetOriginForCordova() {
-  if (typeof window.cordova !== 'undefined') {
-    targetOrigin = 'https://localhost';
-  }
-}
-
-if (typeof document !== 'undefined' && typeof document.addEventListener === 'function') {
-  document.addEventListener('deviceready', setTargetOriginForCordova, false);
 }
 
 export function sendMessage(message: any, callback?: any) {
@@ -61,7 +57,6 @@ export function sendMessage(message: any, callback?: any) {
     }
   } catch (error) {
     console.error('Error in sendMessage:', error);
-    // You might want to add additional error handling logic here
   }
 }
 
@@ -102,6 +97,28 @@ export function isExtensionEnvironment(): boolean {
   return typeof chrome !== 'undefined' && !!chrome.runtime && !!chrome.runtime.id;
 }
 
+/**
+ * Returns true when running inside Capacitor's native Android/iOS shell.
+ * Replaces the old isCordova() check.
+ */
+export function isNativeMobile(): boolean {
+  return Capacitor.isNativePlatform();
+}
+
+/**
+ * @deprecated Use isNativeMobile() instead. Kept temporarily so callers
+ * that haven't been updated yet continue to work.
+ *
+ * ============================================================
+ * CORDOVA COMPATIBILITY SHIM (temporary)
+ *
+ * Remove after: 2027-07-01
+ * ============================================================
+ */
+export function isCordova(): boolean {
+  return isNativeMobile();
+}
+
 export function getStorageValue(key: string): Promise<any> {
   return new Promise((resolve) => {
     if (isExtensionEnvironment()) {
@@ -109,7 +126,7 @@ export function getStorageValue(key: string): Promise<any> {
         resolve(result[key]);
       });
     } else {
-      // Web-compatible implementation
+      // Web-compatible implementation (works in Capacitor too)
       const value = localStorage.getItem(key);
       resolve(value ? JSON.parse(value) : null);
     }
@@ -128,7 +145,7 @@ export function setStorageValue(key: string, value: any): Promise<void> {
         }
       });
     } else {
-      // Web environment
+      // Web / Capacitor environment
       try {
         localStorage.setItem(key, JSON.stringify(value));
         resolve();
@@ -207,84 +224,26 @@ export function saveFile(
   content: string,
   filename: string
 ) {
-  if (isCordova()) {
-    // Cordova environment
-    downloadAndSaveFileCordova(content, filename);
+  if (isNativeMobile()) {
+    saveFileCapacitor(content, filename);
   } else {
-    // Web or Chrome extension environment
     downloadFileWeb(content, filename);
   }
 }
 
-export function isCordova() {
-  return window.cordova !== undefined;
-}
-
-
-function downloadAndSaveFileCordova(content: string, originalFilename: string) {
+async function saveFileCapacitor(content: string, originalFilename: string) {
   const sanitizedFilename = originalFilename.replace(/[:/\\?%*|"<>]/g, '_');
   const filename = sanitizedFilename + '.txt';
 
-  document.addEventListener('deviceready', function () {
-    // Request WRITE_EXTERNAL_STORAGE permission
-    cordova.plugins.permissions.requestPermission(
-      cordova.plugins.permissions.WRITE_EXTERNAL_STORAGE,
-      function (status: any) {
-        if (status.hasPermission) {
-          // Use cordova.file.externalDataDirectory for external storage (like the Download folder)
-          const fileDir = cordova.file.externalDataDirectory;
-
-          // Check if the directory exists, and create it if it doesn't
-          window.resolveLocalFileSystemURL(
-            fileDir,
-            function (directoryEntry: any) {
-              createOrOpenFile(directoryEntry, filename, content);
-            },
-            function (error: any) {
-              console.error('Error resolving file system URL: ' + JSON.stringify(error));
-            }
-          );
-        } else {
-          console.error('WRITE_EXTERNAL_STORAGE permission denied');
-        }
-      },
-      function () {
-        console.error('Error requesting WRITE_EXTERNAL_STORAGE permission');
-      }
-    );
-  }, false);
-
-  function createOrOpenFile(directoryEntry: any, filename: any, content: any) {
-    directoryEntry.getFile(
-      filename,
-      { create: true, exclusive: false },
-      function (fileEntry: any) {
-        // Create a FileWriter object
-        fileEntry.createWriter(
-          function (fileWriter: any) {
-            fileWriter.onwriteend = function () {
-              // Handle further operations here, if needed
-            };
-
-            fileWriter.onerror = function (error: any) {
-              console.error('Error writing to file: ' + JSON.stringify(error));
-            };
-
-            // Create a Blob
-            const blob = new Blob([content], { type: 'text/plain' });
-
-            // Use the WRITE flag to open the file with write access
-            fileWriter.write(blob);
-          },
-          function (error: any) {
-            console.error('Error creating FileWriter: ' + JSON.stringify(error));
-          }
-        );
-      },
-      function (error: any) {
-        console.error('Error creating or opening file: ' + JSON.stringify(error));
-      }
-    );
+  try {
+    await Filesystem.writeFile({
+      path: filename,
+      data: content,
+      directory: Directory.Documents,
+      encoding: Encoding.UTF8,
+    });
+  } catch (error) {
+    console.error('Error saving file:', error);
   }
 }
 

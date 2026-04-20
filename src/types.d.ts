@@ -106,13 +106,8 @@ export interface IInpageAccountWrapper {
 
 declare global {
   interface Window {
-    cordova?: any;
-    QRScanner?: any;
     runebasechrome?: any;
-    resolveLocalFileSystemURL?: any;
   }
-
-  const cordova: any;
 }
 
 /* MUI v9 theme augmentation for custom properties */
