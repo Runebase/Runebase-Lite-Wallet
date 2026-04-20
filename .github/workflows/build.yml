@@ -208,6 +208,7 @@ jobs:
           path: |
             android/app/build/outputs/apk/debug/app-debug.apk
             android/app/build/outputs/bundle/release/app-release.aab
+            android/app/build/outputs/mapping/release/mapping.txt
 
   # iOS (Capacitor) — simulator build only
   build-ios:
@@ -302,6 +303,7 @@ jobs:
           # Android
           find artifacts/android-apk -name "app-debug.apk" -exec cp {} "release/Runebase-Lite-Wallet-v${VERSION}-debug.apk" \;
           find artifacts/android-apk -name "app-release.aab" -exec cp {} "release/Runebase-Lite-Wallet-v${VERSION}-release.aab" \;
+          find artifacts/android-apk -name "mapping.txt" -exec cp {} "release/Runebase-Lite-Wallet-v${VERSION}-mapping.txt" \;
 
           # iOS simulator
           find artifacts/ios-build -name "*.zip" -exec cp {} "release/Runebase-Lite-Wallet-v${VERSION}-ios-simulator.zip" \;
