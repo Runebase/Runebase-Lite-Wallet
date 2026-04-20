@@ -233,21 +233,27 @@ jobs:
           npx cap add ios
           npx cap sync ios
 
-      - name: Install CocoaPods dependencies
-        run: |
-          cd ios/App
-          pod install
-
       - name: Build for simulator
         run: |
           cd ios/App
-          xcodebuild -workspace App.xcworkspace \
-            -scheme App \
-            -configuration Debug \
-            -sdk iphonesimulator \
-            -destination 'platform=iOS Simulator,OS=latest,name=iPhone 16' \
-            -derivedDataPath build \
-            build
+          ls -la *.xcworkspace *.xcodeproj 2>/dev/null || true
+          if [ -d "App.xcworkspace" ]; then
+            xcodebuild -workspace App.xcworkspace \
+              -scheme App \
+              -configuration Debug \
+              -sdk iphonesimulator \
+              -destination 'platform=iOS Simulator,OS=latest,name=iPhone 16' \
+              -derivedDataPath build \
+              build
+          else
+            xcodebuild -project App.xcodeproj \
+              -scheme App \
+              -configuration Debug \
+              -sdk iphonesimulator \
+              -destination 'platform=iOS Simulator,OS=latest,name=iPhone 16' \
+              -derivedDataPath build \
+              build
+          fi
 
       - name: Package simulator build
         run: |
