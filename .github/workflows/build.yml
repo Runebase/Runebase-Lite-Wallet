@@ -147,7 +147,6 @@ jobs:
 
   # Android (Capacitor)
   build-android:
-    needs: build-web
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -169,10 +168,8 @@ jobs:
 
       - run: npm ci --legacy-peer-deps
 
-      - uses: actions/download-artifact@v4
-        with:
-          name: vite-dist
-          path: dist/
+      - name: Build mobile web assets
+        run: npm run build:mobile
 
       - name: Sync Capacitor
         run: npx cap sync android
@@ -214,7 +211,6 @@ jobs:
 
   # iOS (Capacitor) — simulator build only
   build-ios:
-    needs: build-web
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
@@ -228,10 +224,8 @@ jobs:
 
       - run: npm ci --legacy-peer-deps
 
-      - uses: actions/download-artifact@v4
-        with:
-          name: vite-dist
-          path: dist/
+      - name: Build mobile web assets
+        run: npm run build:mobile
 
       - name: Add iOS platform
         run: |
