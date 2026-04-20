@@ -78,23 +78,16 @@ android {
             minifyEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            ndk { debugSymbolLevel 'FULL' }
             if (signingConfigs.release.storeFile != null) {
                 signingConfig signingConfigs.release
             }
         }
     }
 
-    // Include native debug symbols in the AAB so Google Play can
-    // symbolicate native crash reports (resolves the "no debug symbols" warning).
     buildFeatures {
         buildConfig true
     }
-    packagingOptions {
-        jniLibs {
-            keepDebugSymbols += ['**/*.so']
-        }
-    }
-    ndkVersion = "27.0.12077973"
 }
 
 repositories {
