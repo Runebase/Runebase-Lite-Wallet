@@ -237,24 +237,17 @@ jobs:
       - name: Build for simulator
         run: |
           cd ios/App
-          ls -la *.xcworkspace *.xcodeproj 2>/dev/null || true
           if [ -d "App.xcworkspace" ]; then
-            xcodebuild -workspace App.xcworkspace \
-              -scheme App \
-              -configuration Debug \
-              -sdk iphonesimulator \
-              -destination 'platform=iOS Simulator,OS=latest,name=iPhone 16' \
-              -derivedDataPath build \
-              build
+            BUILD_ARG="-workspace App.xcworkspace"
           else
-            xcodebuild -project App.xcodeproj \
-              -scheme App \
-              -configuration Debug \
-              -sdk iphonesimulator \
-              -destination 'platform=iOS Simulator,OS=latest,name=iPhone 16' \
-              -derivedDataPath build \
-              build
+            BUILD_ARG="-project App.xcodeproj"
           fi
+          xcodebuild $BUILD_ARG \
+            -scheme App \
+            -configuration Debug \
+            -destination 'generic/platform=iOS Simulator' \
+            -derivedDataPath build \
+            build
 
       - name: Package simulator build
         run: |
