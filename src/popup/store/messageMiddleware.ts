@@ -44,8 +44,17 @@ import {
   setSuperStakerDelegations,
   setSignedPoD,
   setDelegateErrorMessage,
+  setIsSubmitting,
   setDelegationReadiness,
 } from './slices/delegateSlice';
+import {
+  notifyTxSubmitted,
+  notifyTxFailed,
+  trackTransactions,
+  trackTokenTransfers,
+  notifyDelegationConfirmed,
+  resetTxNotifications,
+} from './txNotifications';
 import {
   setRRCTokenDetails,
   setGetRRCTokenDetailsFailed,
@@ -96,6 +105,8 @@ export const messageMiddleware: Middleware = (storeApi) => {
       dispatch(setElectrumXStatus(requestData.electrumxStatus));
       break;
     case MESSAGE_TYPE.ACCOUNT_LOGIN_SUCCESS:
+      // Don't carry another account's pending transactions into this session.
+      resetTxNotifications();
       refreshSession();
       navigateFn?.('/account-detail');
       break;
@@ -105,9 +116,22 @@ export const messageMiddleware: Middleware = (storeApi) => {
     case MESSAGE_TYPE.GET_WALLET_INFO_RETURN:
       dispatch(setWalletInfo(requestData.info));
       break;
-    case MESSAGE_TYPE.GET_DELEGATION_INFO_RETURN:
+    case MESSAGE_TYPE.GET_DELEGATION_INFO_RETURN: {
+      // The background controller decides when a delegation transaction has
+      // actually landed; mirror its verdict rather than guessing here.
+      const wasPending = storeApi.getState().session.pendingDelegationAction;
+      const nowPending = requestData.pendingDelegation || undefined;
       dispatch(setDelegationInfo(requestData.delegationInfo));
+      dispatch(setPendingDelegationAction(nowPending));
+      if (wasPending && !nowPending) {
+        const staker = requestData.delegationInfo?.staker || '';
+        // Only celebrate a real change; an expired/abandoned attempt is silent.
+        if (staker !== (wasPending.stakerBefore ?? '')) {
+          notifyDelegationConfirmed(wasPending.type);
+        }
+      }
       break;
+    }
     case MESSAGE_TYPE.GET_BLOCKCHAIN_INFO_RETURN:
       dispatch(setBlockchainInfo(requestData.blockchainInfo));
       break;
@@ -142,14 +166,20 @@ export const messageMiddleware: Middleware = (storeApi) => {
       break;
 
       // === Account detail messages ===
-    case MESSAGE_TYPE.GET_TXS_RETURN:
-      dispatch(setTransactions(parseJsonOrFallback(requestData.transactions)));
+    case MESSAGE_TYPE.GET_TXS_RETURN: {
+      const txs = parseJsonOrFallback(requestData.transactions);
+      dispatch(setTransactions(txs));
       dispatch(setHasMore(requestData.hasMore));
+      trackTransactions(txs);
       break;
-    case MESSAGE_TYPE.GET_TOKEN_TXS_RETURN:
-      dispatch(setTokenTransfers(parseJsonOrFallback(requestData.tokenTransfers)));
+    }
+    case MESSAGE_TYPE.GET_TOKEN_TXS_RETURN: {
+      const transfers = parseJsonOrFallback(requestData.tokenTransfers);
+      dispatch(setTokenTransfers(transfers));
       dispatch(setHasMoreTokenTransfers(!!requestData.hasMoreTokenTransfers));
+      trackTokenTransfers(transfers);
       break;
+    }
     case MESSAGE_TYPE.GET_TX_DETAIL_RETURN:
       dispatch(setTxDetail(requestData.detail ? parseJsonOrFallback(requestData.detail) : null));
       break;
@@ -161,10 +191,12 @@ export const messageMiddleware: Middleware = (storeApi) => {
     case MESSAGE_TYPE.SEND_TOKENS_SUCCESS:
       navigateFn?.('/account-detail');
       dispatch(setSendState(SEND_STATE.INITIAL));
+      notifyTxSubmitted();
       break;
     case MESSAGE_TYPE.SEND_TOKENS_FAILURE:
       dispatch(setSendState(SEND_STATE.INITIAL));
       dispatch(setSendErrorMessage(requestData.error.message));
+      notifyTxFailed(requestData.error?.message);
       break;
     case MESSAGE_TYPE.GET_MAX_RUNEBASE_SEND_RETURN:
       dispatch(setMaxRunebaseSend(requestData.maxRunebaseAmount));
@@ -189,19 +221,39 @@ export const messageMiddleware: Middleware = (storeApi) => {
       const stakerAddr = delegateState.selectedSuperstaker?.address || delegateState.customSuperstakerAddress || '';
       const currentDelegation = storeApi.getState().session.delegationInfo;
       const actionType = currentDelegation?.staker && currentDelegation.staker !== '' ? 'change' : 'add';
-      dispatch(setPendingDelegationAction({ type: actionType, stakerAddress: stakerAddr }));
+      // Optimistic: the background sets the same thing, but this makes the
+      // controls lock immediately instead of on the next poll.
+      dispatch(setPendingDelegationAction({
+        type: actionType,
+        stakerAddress: stakerAddr,
+        stakerBefore: currentDelegation?.staker || '',
+        submittedAt: Date.now(),
+      }));
+      dispatch(setIsSubmitting(false));
+      notifyTxSubmitted('Delegation');
       navigateFn?.('/account-detail');
       break;
     }
     case MESSAGE_TYPE.SEND_DELEGATION_CONFIRM_FAILURE:
       dispatch(setDelegateErrorMessage(requestData.error.message));
+      notifyTxFailed(requestData.error?.message, 'Delegation');
       break;
-    case MESSAGE_TYPE.SEND_REMOVE_DELEGATION_CONFIRM_SUCCESS:
-      dispatch(setPendingDelegationAction({ type: 'remove', stakerAddress: '' }));
+    case MESSAGE_TYPE.SEND_REMOVE_DELEGATION_CONFIRM_SUCCESS: {
+      const stakerBefore = storeApi.getState().session.delegationInfo?.staker || '';
+      dispatch(setPendingDelegationAction({
+        type: 'remove',
+        stakerAddress: '',
+        stakerBefore,
+        submittedAt: Date.now(),
+      }));
+      dispatch(setIsSubmitting(false));
+      notifyTxSubmitted('Delegation removal');
       navigateFn?.('/account-detail');
       break;
+    }
     case MESSAGE_TYPE.SEND_REMOVE_DELEGATION_CONFIRM_FAILURE:
       dispatch(setDelegateErrorMessage(requestData.error.message));
+      notifyTxFailed(requestData.error?.message, 'Delegation removal');
       break;
     case MESSAGE_TYPE.GET_DELEGATION_READINESS_RETURN:
       dispatch(setDelegationReadiness(requestData.readiness));

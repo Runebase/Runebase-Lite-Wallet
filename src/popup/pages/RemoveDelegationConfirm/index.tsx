@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import PageLayout from '../../components/PageLayout';
 import BigNumber from 'bignumber.js';
 import {
@@ -15,10 +15,21 @@ import { useAppSelector, useAppDispatch } from '../../store/hooks';
 import {
   sendRemoveDelegationConfirm,
   selectDelegateButtonDisabled,
+  setIsSubmitting,
+  setDelegateErrorMessage,
 } from '../../store/slices/delegateSlice';
 
 const RemoveDelegationConfirm: React.FC = () => {
   const dispatch = useAppDispatch();
+
+  // Arriving here always starts a fresh attempt. Without this, a submit that
+  // never resolved (navigated away, popup closed) would leave the button
+  // permanently disabled on 'Confirming...'.
+  useEffect(() => {
+    dispatch(setIsSubmitting(false));
+    dispatch(setDelegateErrorMessage(undefined));
+  }, [dispatch]);
+
   const loggedInAccountName = useAppSelector((state) => state.session.loggedInAccountName);
   const walletInfo = useAppSelector((state) => state.session.walletInfo);
   const gasLimit = useAppSelector((state) => state.delegate.gasLimit);

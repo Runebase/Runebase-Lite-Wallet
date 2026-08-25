@@ -1,5 +1,3 @@
-import { validatePrivateKey } from '../services/wallet';
-
 import { TARGET_NAME } from '../constants';
 import { IExtensionMessageData } from '../types';
 
@@ -42,23 +40,6 @@ export const isValidAddress = (isMainNet: boolean, address?: string) => {
     return address.startsWith('R');
   }
   return address.startsWith('5');
-};
-
-export const isValidPrivateKey = (address?: string) => {
-  if (!address) {
-    return false;
-  }
-  if (!(address.length === 51 || address.length === 52)) {
-    return false;
-  }
-
-  try {
-    const privateKey = validatePrivateKey(address);
-    return privateKey;
-  } catch (e) {
-    console.error('Private Key Invalid', e);
-    return false;
-  }
 };
 
 export const isValidContractAddressLength = (address?: string) => {

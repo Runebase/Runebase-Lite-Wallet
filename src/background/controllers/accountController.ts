@@ -64,6 +64,10 @@ export default class AccountController extends IController {
   private static GET_WALLET_INFO_INTERVAL_MS: number = 30000;
   private static GET_BLOCKCHAIN_INFO_INTERVAL_MS: number = 120000;
   private static GET_DELEGATION_INFO_INTERVAL_MS: number = 120000;
+  // A delegation transaction is treated as in-flight until the contract shows
+  // a different staker. Bounded so a dropped transaction cannot lock the
+  // delegation controls forever.
+  private static PENDING_DELEGATION_TIMEOUT_MS: number = 30 * 60 * 1000;
   private static DELEGATION_CONFIRM_POLL_MS: number = 15000;
   private static DELEGATION_CONFIRM_POLL_MAX: number = 8;
 
@@ -90,6 +94,15 @@ export default class AccountController extends IController {
   private getDelegationInfoInterval?: any = INIT_VALUES.getDelegationInfoInterval;
   private delegationConfirmPollInterval?: any = INIT_VALUES.delegationConfirmPollInterval;
   private delegationConfirmPollCount: number = 0;
+  // Owned here rather than in the popup: the extension popup unmounts every
+  // time it closes, and this must survive that so a second delegation
+  // transaction cannot be submitted while the first is still unconfirmed.
+  private pendingDelegation?: {
+    type: 'add' | 'remove' | 'change';
+    stakerAddress: string;
+    stakerBefore: string;
+    submittedAt: number;
+  };
 
   constructor(main: RunebaseChromeController) {
     super('account', main);
@@ -121,6 +134,8 @@ export default class AccountController extends IController {
 
   public resetAccount = () => {
     this.loggedInAccount = INIT_VALUES.loggedInAccount;
+    this.pendingDelegation = undefined;
+    this.stopDelegationConfirmPoll();
   };
 
   public login = async (
@@ -468,7 +483,8 @@ export default class AccountController extends IController {
    */
   private getDelegationInfo = async () => {
     if (!this.loggedInAccount || !this.loggedInAccount.wallet) {
-      console.error('Could not get delegation info.');
+      // Expected while logged out / between sessions.
+      console.debug('Skipping delegation info fetch: no wallet instance.');
       return;
     }
 
@@ -488,9 +504,11 @@ export default class AccountController extends IController {
         // No delegation found or contract call failed — cache empty result
         // so subsequent GET_DELEGATION_INFO returns cached instead of re-fetching
         this.loggedInAccount.wallet.delegationInfo = { staker: '', fee: 0, blockHeight: 0, PoD: '' };
+        this.resolvePendingDelegation('');
         sendMessage({
           type: MESSAGE_TYPE.GET_DELEGATION_INFO_RETURN,
           delegationInfo: null,
+          pendingDelegation: this.pendingDelegation ?? null,
         });
         return;
       }
@@ -524,15 +542,21 @@ export default class AccountController extends IController {
       // undefined (not yet fetched).
       this.loggedInAccount.wallet.delegationInfo = delegationInfo ?? { staker: '', fee: 0, blockHeight: 0, PoD: '' };
 
+      this.resolvePendingDelegation(staker);
+
       sendMessage({
         type: MESSAGE_TYPE.GET_DELEGATION_INFO_RETURN,
         delegationInfo,
+        pendingDelegation: this.pendingDelegation ?? null,
       });
     } catch (err) {
       console.error('Error getting delegation info:', err);
+      // The call failed, so we learned nothing about the pending transaction —
+      // report it unchanged rather than treating this as "no delegation".
       sendMessage({
         type: MESSAGE_TYPE.GET_DELEGATION_INFO_RETURN,
         delegationInfo: null,
+        pendingDelegation: this.pendingDelegation ?? null,
       });
     }
   };
@@ -742,6 +766,23 @@ export default class AccountController extends IController {
    * Start a short-lived rapid poll after a delegation tx is broadcast.
    * Polls getDelegationInfo every 15s up to 8 times to catch the on-chain confirmation.
    */
+  /**
+   * Resolve the in-flight delegation against what the contract now reports.
+   * The contract is polled on a timer and returns the same value every tick, so
+   * "delegation info arrived" does not mean "the transaction confirmed" — only
+   * a staker different from the one at submit time does.
+   */
+  private resolvePendingDelegation = (staker: string) => {
+    const pending = this.pendingDelegation;
+    if (!pending) return;
+    const landed = staker !== pending.stakerBefore;
+    const expired = Date.now() - pending.submittedAt > AccountController.PENDING_DELEGATION_TIMEOUT_MS;
+    if (landed || expired) {
+      this.pendingDelegation = undefined;
+      this.stopDelegationConfirmPoll();
+    }
+  };
+
   private startDelegationConfirmPoll = () => {
     this.stopDelegationConfirmPoll();
     this.delegationConfirmPollCount = 0;
@@ -876,6 +917,14 @@ export default class AccountController extends IController {
       return;
     }
 
+    const stakerBefore = this.loggedInAccount.wallet.delegationInfo?.staker || '';
+    this.pendingDelegation = {
+      type: stakerBefore ? 'change' : 'add',
+      stakerAddress: signedPoD.superStakerAddress,
+      stakerBefore,
+      submittedAt: Date.now(),
+    };
+
     sendMessage({
       type: MESSAGE_TYPE.SEND_DELEGATION_CONFIRM_SUCCESS,
     });
@@ -920,6 +969,13 @@ export default class AccountController extends IController {
       });
       return;
     }
+
+    this.pendingDelegation = {
+      type: 'remove',
+      stakerAddress: '',
+      stakerBefore: this.loggedInAccount.wallet.delegationInfo?.staker || '',
+      submittedAt: Date.now(),
+    };
 
     sendMessage({
       type: MESSAGE_TYPE.SEND_REMOVE_DELEGATION_CONFIRM_SUCCESS,
@@ -1021,6 +1077,7 @@ export default class AccountController extends IController {
           sendMessage({
             type: MESSAGE_TYPE.GET_DELEGATION_INFO_RETURN,
             delegationInfo: this.loggedInAccount.wallet.delegationInfo,
+            pendingDelegation: this.pendingDelegation ?? null,
           });
         } else {
           this.getDelegationInfo();

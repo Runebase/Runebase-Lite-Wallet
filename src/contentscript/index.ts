@@ -158,6 +158,10 @@ function handleInPageMessage(event: MessageEvent) {
   case API_TYPE.GET_INPAGE_RUNEBASECHROME_ACCOUNT_VALUES:
     forwardInpageAccountRequest();
     break;
+  case API_TYPE.CONNECT_INPAGE_RUNEBASECHROME:
+    // Handled by setupLongLivedConnection, which listens on the same event.
+    // Without this case the default branch threw on every dApp connect.
+    break;
   default:
     throw Error(`Contentscript processing invalid type: ${JSON.stringify(message)}`);
   }

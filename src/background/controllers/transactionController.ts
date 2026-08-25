@@ -103,6 +103,9 @@ export default class TransactionController extends IController {
   };
 
   private startPolling = async () => {
+    // Nothing to poll for while logged out, and starting anyway would leave an
+    // interval running that logs on every tick.
+    if (!this.main.account.loggedInAccount?.wallet) return;
     this.fetchFirst();
     if (!this.getTransactionsInterval) {
       this.getTransactionsInterval = setInterval(() => {
@@ -121,7 +124,8 @@ export default class TransactionController extends IController {
       !this.main.account.loggedInAccount ||
       !this.main.account.loggedInAccount.wallet
     ) {
-      console.error('Cannot get transactions without a wallet instance.');
+      // Expected while logged out / between sessions.
+      console.debug('Skipping transaction fetch: no wallet instance.');
       return [];
     }
 

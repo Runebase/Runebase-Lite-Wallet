@@ -45,6 +45,8 @@ import TransactionDetail from './pages/TransactionDetail';
 import { MESSAGE_TYPE } from '../constants';
 import { isExtensionEnvironment, sendMessage } from './abstraction';
 import { setNavigateFunction, setLocationRef } from './store/messageMiddleware';
+import { setSnackbarFunction } from './store/txNotifications';
+import { useSnackbar } from './components/SnackbarProvider';
 import { useAppSelector, useAppDispatch } from './store/hooks';
 import { initSession, initWalletBackupInfo, selectElectrumXStatus } from './store/slices/sessionSlice';
 import { initAccountDetail, deinitAccountDetail } from './store/slices/accountDetailSlice';
@@ -65,6 +67,7 @@ const MainContainer: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
+  const { showSnackbar } = useSnackbar();
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -88,6 +91,12 @@ const MainContainer: React.FC = () => {
     // For exact matches or unknown sub-pages, return as-is (Wallet/Send/Receive/Settings will match directly)
     return pathname;
   };
+
+  // Let the message middleware raise transaction snackbars (submitted /
+  // confirmed / failed) from outside the React tree.
+  useEffect(() => {
+    setSnackbarFunction(showSnackbar);
+  }, [showSnackbar]);
 
   useEffect(() => {
     setNavigateFunction(navigate);
@@ -115,6 +124,13 @@ const MainContainer: React.FC = () => {
   }, [location]);
 
   useEffect(() => {
+    // walletInfo goes undefined on logout / session timeout. Without this
+    // guard the effect re-runs at that moment and re-sends START_TX_POLLING,
+    // restarting the poll the background just stopped — which then logs
+    // "Cannot get transactions without a wallet instance" once a minute
+    // forever. The previous run's cleanup still fires first, so polling is
+    // stopped correctly on the way out.
+    if (!walletInfo) return;
     initAccountDetail();
     return () => {
       deinitAccountDetail();

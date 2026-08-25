@@ -2,7 +2,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { isEmpty } from '../../../utils/collections';
 import { MESSAGE_TYPE, IMPORT_TYPE } from '../../../constants';
-import { isValidPrivateKey } from '../../../utils';
+import { isValidPrivateKey } from '../../../utils/privateKey';
 import { sendMessage } from '../../abstraction';
 import { getNavigateFunction } from '../messageMiddleware';
 import type { RootState } from '../index';

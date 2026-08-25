@@ -19,6 +19,9 @@ export interface ElectrumXStatus {
 export interface PendingDelegationAction {
   type: 'add' | 'remove' | 'change';
   stakerAddress: string;
+  /** Staker the contract reported when the transaction was submitted. */
+  stakerBefore?: string;
+  submittedAt?: number;
 }
 
 interface SessionState {
@@ -92,8 +95,10 @@ const sessionSlice = createSlice({
     },
     setDelegationInfo: (state, action: PayloadAction<any>) => {
       state.delegationInfo = action.payload;
-      // Clear pending state when real delegation info arrives from chain
-      state.pendingDelegationAction = undefined;
+      // Pending state is NOT cleared here. Delegation info is polled on a timer
+      // and returns the same value on every tick, so its arrival says nothing
+      // about whether the transaction confirmed. The background controller owns
+      // that decision and reports it alongside the info.
     },
     setPendingDelegationAction: (state, action: PayloadAction<PendingDelegationAction | undefined>) => {
       state.pendingDelegationAction = action.payload;
