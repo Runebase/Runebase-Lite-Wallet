@@ -11,10 +11,6 @@ const nm = (p: string) => path.resolve(__dirname, 'node_modules', p);
 const nodeAliases: Record<string, string> = {
   crypto: nm('crypto-browserify'),
   stream: nm('stream-browserify'),
-  http: nm('stream-http'),
-  https: nm('https-browserify'),
-  zlib: nm('browserify-zlib'),
-  url: nm('url'),
   assert: nm('assert'),
   util: nm('util'),
   buffer: nm('buffer'),
