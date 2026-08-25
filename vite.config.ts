@@ -36,10 +36,17 @@ function injectNodeGlobals(): Plugin {
                   if (!id.includes('node_modules')) return null;
                   if (id.endsWith('.json') || id.endsWith('.css')) return null;
                   if (!code.includes('process') && !code.includes('Buffer') && !code.includes('global')) return null;
+                  // nextTick MUST forward its extra arguments: readable-stream
+                  // calls process.nextTick(fn, stream), and dropping the stream
+                  // made bip38.decrypt blow up with "Cannot read properties of
+                  // undefined (reading '_readableState')" on login.
                   const shim = [
                     'if(typeof globalThis.process==="undefined"||!globalThis.process.version){',
                     '  globalThis.process=Object.assign({browser:true,version:"v20.0.0",env:{},',
-                    '    cwd:function(){return"/"},nextTick:function(c){setTimeout(c,0)}},',
+                    '    cwd:function(){return"/"},nextTick:function(c){',
+                    '      var a=Array.prototype.slice.call(arguments,1);',
+                    '      setTimeout(function(){c.apply(null,a);},0);',
+                    '    }},',
                     '    typeof globalThis.process==="object"?globalThis.process:{});',
                     '}',
                     'if(typeof globalThis.global==="undefined"){globalThis.global=globalThis;}',

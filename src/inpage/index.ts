@@ -1,3 +1,6 @@
+// Must be first: installs the real Buffer/process globals before any
+// dependency (bitcoinjs-lib, ecpair, bip38) touches them at module scope.
+import '../polyfills';
 import { IExtensionAPIMessage, IRPCCallRequest } from '../types';
 import { TARGET_NAME, API_TYPE } from '../constants';
 import { RunebaseChromeRPCProvider } from './RunebaseChromeRPCProvider';

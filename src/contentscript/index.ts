@@ -1,4 +1,7 @@
 // contentscript/index.ts
+// Must be first: installs the real Buffer/process globals before any
+// dependency (bitcoinjs-lib, ecpair, bip38) touches them at module scope.
+import '../polyfills';
 import { injectAllScripts } from './inject';
 import { IExtensionAPIMessage, IRPCCallRequest, IRPCCallResponse, ICurrentAccount, PodSignResponse, PodSignRequest } from '../types';
 import { TARGET_NAME, API_TYPE, MESSAGE_TYPE, RPC_METHOD, PORT_NAME } from '../constants';

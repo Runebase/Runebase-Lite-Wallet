@@ -72,12 +72,16 @@ export default defineConfig({
         const nodeShimPlugin = {
           name: 'prepend-node-shims',
           renderChunk(code: string) {
-            const shim = 'var global=typeof globalThis!=="undefined"?globalThis:self;' +
-              'var process=typeof process!=="undefined"?process:' +
-              '{browser:true,version:"v20.0.0",env:{},' +
-              'nextTick:function(c){setTimeout(c,0)},' +
-              'stdout:{},stderr:{}};' +
-              'var Buffer=typeof Buffer!=="undefined"?Buffer:{isBuffer:function(){return false}};';
+            // Only `global` is declared here. Do NOT declare `var process` or
+            // `var Buffer`: `var` hoists, so `typeof process`/`typeof Buffer`
+            // inside the initialiser always sees the (undefined) local binding
+            // and the real globals get shadowed by a stub — which is how
+            // `Buffer.from is not a function` and a nextTick that dropped its
+            // arguments ended up in these bundles. The entry imports
+            // `src/polyfills.ts` first, which installs the genuine
+            // buffer/process implementations on globalThis, and bare
+            // `Buffer`/`process` references then resolve to those.
+            const shim = 'var global=typeof globalThis!=="undefined"?globalThis:self;';
             return shim + code;
           },
         };
