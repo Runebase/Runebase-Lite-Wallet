@@ -15,8 +15,7 @@
     "experimentalDecorators": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
-    "types": ["vite/client", "chrome"],
-    "typeRoots": ["node_modules/@types"]
+    "types": ["vite/client", "chrome"]
   },
   "include": [
     "src/**/*.ts",
