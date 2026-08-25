@@ -1,6 +1,5 @@
 // addTokenSlice.ts
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { findIndex } from 'lodash';
 import { MESSAGE_TYPE } from '../../../constants';
 import { isValidContractAddressLength } from '../../../utils';
 import { sendMessage } from '../../abstraction';
@@ -63,7 +62,9 @@ export const selectContractAddressFieldError = (state: RootState): string | unde
     ? undefined : 'Not a valid contract address';
 
 export const selectTokenAlreadyInListError = (state: RootState): string | undefined => {
-  const index = findIndex(state.accountDetail.tokens, { address: state.addToken.contractAddress });
+  const index = state.accountDetail.tokens.findIndex(
+    (t) => t.address === state.addToken.contractAddress,
+  );
   return index !== -1 ? 'Token already in token list' : undefined;
 };
 

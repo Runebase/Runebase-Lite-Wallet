@@ -1,9 +1,30 @@
 /**
- * ABI encoding/decoding helpers using ethjs-abi directly.
- * Replaces the rweb3 dependency for contract interaction.
+ * ABI encoding/decoding helpers built on ethers v6.
+ *
+ * Replaces ethjs-abi (unmaintained, and the source of the bn.js /
+ * number-to-bn advisories). Encoded call data is byte-identical to what
+ * ethjs-abi produced for every method this app uses.
+ *
+ * One deliberate difference: ethers decodes integers to `bigint` where
+ * ethjs-abi produced BN instances. Callers that need a JS number must convert
+ * explicitly — `10 ** aBigInt` throws, whereas BN silently coerced.
  */
-import abi from 'ethjs-abi';
+import { Interface } from 'ethers';
 import { addressToHash160 } from '../services/wallet';
+
+// An Interface is built from the single resolved fragment rather than the whole
+// ABI. This matters: RRC223 overloads `transfer` three ways, and ethers throws
+// on an ambiguous name lookup, whereas ethjs-abi encoded whatever fragment it
+// was handed. Scoping to one fragment reproduces the old behaviour exactly.
+const interfaceCache = new WeakMap<object, Interface>();
+
+function getFragmentInterface(func: any): Interface {
+  const cached = interfaceCache.get(func);
+  if (cached) return cached;
+  const iface = new Interface([{ type: 'function', outputs: [], inputs: [], ...func }]);
+  interfaceCache.set(func, iface);
+  return iface;
+}
 
 /**
  * Find a function definition in an ABI by name.
@@ -23,10 +44,25 @@ function findAbiFunction(
  */
 function toHexAddress(address: string): string {
   // If already hex (0x prefixed or 40-char hex), return as-is
-  if (address.startsWith('0x')) return address;
-  if (/^[0-9a-fA-F]{40}$/.test(address)) return `0x${address}`;
+  if (address.startsWith('0x')) return address.toLowerCase();
+  if (/^[0-9a-fA-F]{40}$/.test(address)) return `0x${address.toLowerCase()}`;
   // Convert base58 Runebase address to hex
-  return `0x${addressToHash160(address)}`;
+  return `0x${addressToHash160(address)}`.toLowerCase();
+}
+
+/** Normalise args the way the previous ethjs-abi path did. */
+function convertArgs(inputs: any[] | undefined, args: any[]): any[] {
+  return args.map((arg, i) => {
+    const input = inputs?.[i];
+    if (input?.type === 'address' && typeof arg === 'string') {
+      return toHexAddress(arg);
+    }
+    // Convert BigNumber-like objects to string for safety
+    if (arg && typeof arg === 'object' && typeof arg.toString === 'function') {
+      return arg.toString(10);
+    }
+    return arg;
+  });
 }
 
 /**
@@ -45,40 +81,43 @@ export function encodeContractCall(
   const func = findAbiFunction(abiDef, methodName);
   if (!func) throw new Error(`Method ${methodName} not found in ABI`);
 
-  // Convert address args from base58 to hex
-  const convertedArgs = args.map((arg, i) => {
-    const input = func.inputs?.[i];
-    if (input?.type === 'address' && typeof arg === 'string') {
-      return toHexAddress(arg);
-    }
-    // Convert BigNumber-like objects to string for safety
-    if (typeof arg === 'object' && arg.toString) {
-      return arg.toString(10);
-    }
-    return arg;
-  });
-
-  const encoded = abi.encodeMethod(func, convertedArgs);
+  const encoded = getFragmentInterface(func)
+    .encodeFunctionData(methodName, convertArgs(func.inputs, args));
   // Strip 0x prefix for ElectrumX
+  return encoded.startsWith('0x') ? encoded.slice(2) : encoded;
+}
+
+/**
+ * ABI-encode a call from a standalone function fragment (one not present in a
+ * full ABI array), returning hex WITHOUT the 0x prefix.
+ */
+export function encodeMethodFragment(
+  fragment: { name: string; inputs?: any[]; outputs?: any[] },
+  args: any[],
+): string {
+  const full = { type: 'function', outputs: [], inputs: [], ...fragment };
+  const encoded = new Interface([full])
+    .encodeFunctionData(full.name, convertArgs(full.inputs, args));
   return encoded.startsWith('0x') ? encoded.slice(2) : encoded;
 }
 
 /**
  * Decode the output of a contract call.
  * Takes the raw hex output from executionResult.output and
- * returns the decoded values.
+ * returns the decoded values as a plain array.
  */
 export function decodeContractOutput(
   abiDef: any[],
   methodName: string,
   outputHex: string,
-): any {
+): any[] {
   const func = findAbiFunction(abiDef, methodName);
   if (!func) throw new Error(`Method ${methodName} not found in ABI`);
 
-  // Ensure 0x prefix for ethjs-abi
   const hex = outputHex.startsWith('0x') ? outputHex : `0x${outputHex}`;
-  return abi.decodeMethod(func, hex);
+  return Array.from(
+    getFragmentInterface(func).decodeFunctionResult(methodName, hex),
+  );
 }
 
 /**

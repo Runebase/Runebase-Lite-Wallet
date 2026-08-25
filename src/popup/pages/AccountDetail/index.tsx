@@ -13,7 +13,6 @@ import {
   Stack,
 } from '@mui/material';
 import { ArrowUpward, ArrowDownward, ElectricBolt, ReceiptLong, Inbox, Refresh } from '@mui/icons-material';
-import { isUndefined } from 'lodash';
 import { useNavigate } from 'react-router';
 import PageLayout from '../../components/PageLayout';
 import Transaction from '../../../models/Transaction';
@@ -220,7 +219,7 @@ const EmptyState: React.FC<{ message: string; icon?: React.ReactNode }> = ({ mes
 // ─── Helpers ──────────────────────────────────────────────────
 
 const formatAmount = (amount: number | undefined): string => {
-  if (isUndefined(amount)) return '...';
+  if (amount === undefined) return '...';
   if (amount > 0) return `+${amount}`;
   return `${amount}`;
 };

@@ -1,6 +1,6 @@
 // importSlice.ts
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { isEmpty } from 'lodash';
+import { isEmpty } from '../../../utils/collections';
 import { MESSAGE_TYPE, IMPORT_TYPE } from '../../../constants';
 import { isValidPrivateKey } from '../../../utils';
 import { sendMessage } from '../../abstraction';

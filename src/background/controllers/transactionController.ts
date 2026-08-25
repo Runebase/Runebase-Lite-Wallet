@@ -1,4 +1,4 @@
-import moment from 'moment';
+import dayjs from '../../utils/date';
 
 import RunebaseChromeController from '.';
 import IController from './iController';
@@ -151,8 +151,8 @@ export default class TransactionController extends IController {
       result.push(new Transaction({
         id: tx.txid,
         timestamp: tx.time
-          ? moment(new Date(tx.time * 1000)).format('MM-DD-YYYY, HH:mm')
-          : moment().format('MM-DD-YYYY, HH:mm'),
+          ? dayjs(new Date(tx.time * 1000)).format('MM-DD-YYYY, HH:mm')
+          : dayjs().format('MM-DD-YYYY, HH:mm'),
         confirmations: tx.confirmations || 0,
         amount: tx.amount,
         fee: tx.fee,
@@ -257,8 +257,8 @@ export default class TransactionController extends IController {
             fromCache.push({
               id: cached.txid,
               timestamp: cached.time
-                ? moment(new Date(cached.time * 1000)).format('MM-DD-YYYY, HH:mm')
-                : moment().format('MM-DD-YYYY, HH:mm'),
+                ? dayjs(new Date(cached.time * 1000)).format('MM-DD-YYYY, HH:mm')
+                : dayjs().format('MM-DD-YYYY, HH:mm'),
               confirmations: cached.confirmations,
               height: cached.height,
               from: cached.from,
@@ -306,7 +306,7 @@ export default class TransactionController extends IController {
                   decimals: result.value.decimals,
                   tokenAddress: result.value.tokenAddress,
                   time: result.value.timestamp
-                    ? moment(result.value.timestamp, 'MM-DD-YYYY, HH:mm').unix()
+                    ? dayjs(result.value.timestamp, 'MM-DD-YYYY, HH:mm').unix()
                     : undefined,
                   confirmations: result.value.confirmations,
                   cachedAt: now,
@@ -389,14 +389,14 @@ export default class TransactionController extends IController {
         } catch { /* burn */ }
 
         // Get timestamp from verbose tx
-        let timestamp = moment().format('MM-DD-YYYY, HH:mm');
+        let timestamp = dayjs().format('MM-DD-YYYY, HH:mm');
         let confirmations = 0;
         try {
           const verboseTx = await electrumx.getTransaction(
             event.tx_hash, true,
           ) as any;
           if (verboseTx?.time) {
-            timestamp = moment(new Date(verboseTx.time * 1000))
+            timestamp = dayjs(new Date(verboseTx.time * 1000))
               .format('MM-DD-YYYY, HH:mm');
           }
           confirmations = verboseTx?.confirmations || 0;

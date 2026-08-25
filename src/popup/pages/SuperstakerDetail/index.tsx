@@ -14,7 +14,7 @@ import SportsScoreIcon from '@mui/icons-material/SportsScore';
 import AppRegistrationIcon from '@mui/icons-material/AppRegistration';
 import NotificationAddIcon from '@mui/icons-material/NotificationAdd';
 import DynamicFormIcon from '@mui/icons-material/DynamicForm';
-import moment from 'moment';
+import dayjs from '../../../utils/date';
 import { useAppSelector, useAppDispatch } from '../../store/hooks';
 import { getSelectedSuperstakerDelegations, getDelegationReadiness } from '../../store/slices/delegateSlice';
 import { getNavigateFunction } from '../../store/messageMiddleware';
@@ -91,7 +91,7 @@ const SuperstakerDetail: React.FC = () => {
           <InfoRow
             icon={<AppRegistrationIcon sx={{ fontSize: 18 }} color="info" />}
             label="Registered"
-            value={moment(selectedSuperstaker.firstRegisteredOn).format('YYYY-MM-DD HH:mm')}
+            value={dayjs(selectedSuperstaker.firstRegisteredOn).format('YYYY-MM-DD HH:mm')}
           />
           <InfoRow
             icon={<DynamicFormIcon sx={{ fontSize: 18 }} color="success" />}
@@ -101,7 +101,7 @@ const SuperstakerDetail: React.FC = () => {
           <InfoRow
             icon={<NotificationAddIcon sx={{ fontSize: 18 }} color="warning" />}
             label="Last Block"
-            value={moment(selectedSuperstaker.lastProducedBlock).format('YYYY-MM-DD HH:mm')}
+            value={dayjs(selectedSuperstaker.lastProducedBlock).format('YYYY-MM-DD HH:mm')}
           />
           <InfoRow
             icon={<SportsScoreIcon sx={{ fontSize: 18 }} color="error" />}

@@ -1,4 +1,4 @@
-import { each, findIndex, isEmpty } from 'lodash';
+import { isEmpty } from '../../utils/collections';
 import BigNumber from 'bignumber.js';
 
 import RunebaseChromeController from '.';
@@ -16,7 +16,7 @@ import {
 } from '../../utils/abi';
 import { IRPCCallResponse } from '../../types';
 import { IContractCall, ISendRawTxResult } from '../../services/wallet/types';
-import moment from 'moment';
+import dayjs from '../../utils/date';
 import Transaction from '../../models/Transaction';
 import txCacheDB from '../../services/db/TransactionCache';
 import { getStorageValue, setStorageValue, addMessageListener, sendMessage, isExtensionEnvironment } from '../../popup/abstraction';
@@ -97,7 +97,7 @@ export default class TokenController extends IController {
   };
 
   private getBalances = () => {
-    each(this.tokens, async (token: RRCToken) => {
+    this.tokens?.forEach(async (token: RRCToken) => {
       await this.getRRCTokenBalance(token);
     });
   };
@@ -136,9 +136,9 @@ export default class TokenController extends IController {
       .toNumber();
 
     // Update token balance in place
-    const index = findIndex(this.tokens, {
-      name: token.name, symbol: token.symbol,
-    });
+    const index = this.tokens?.findIndex(
+      (t) => t.name === token.name && t.symbol === token.symbol,
+    ) ?? -1;
     if (index !== -1) {
       this.tokens![index].balance = balance;
     }
@@ -185,7 +185,9 @@ export default class TokenController extends IController {
       result = decodeContractCallResult(
         result, rrc223TokenABI, 'decimals',
       );
-      const decimals = (result as IContractCall).executionResult.formattedOutput![0];
+      // ethers decodes uint8 to bigint; RRCToken.decimals is a JS number and
+      // is used as `10 ** decimals`, which throws on a bigint.
+      const decimals = Number((result as IContractCall).executionResult.formattedOutput![0]);
 
       if (name && symbol && decimals) {
         const token = new RRCToken(name, symbol, decimals, contractAddress);
@@ -236,7 +238,7 @@ export default class TokenController extends IController {
 
       const newTransaction = new Transaction({
         id: result && result.txid ? result.txid : undefined,
-        timestamp: moment().format('MM-DD-YYYY, HH:mm'),
+        timestamp: dayjs().format('MM-DD-YYYY, HH:mm'),
         confirmations: 0,
         amount: -new BigNumber(gasLimit ?? 0)
           .times(gasPrice ?? 0).dp(0).toNumber(),
@@ -290,7 +292,7 @@ export default class TokenController extends IController {
 
   private removeToken = (contractAddress: string) => {
     if (contractAddress === CREDITS_CONTRACT_ADDRESS) return;
-    const index = findIndex(this.tokens, { address: contractAddress });
+    const index = this.tokens?.findIndex((t) => t.address === contractAddress) ?? -1;
     if (index < 0) return;
     this.tokens!.splice(index, 1);
     this.setTokenListInStorage();

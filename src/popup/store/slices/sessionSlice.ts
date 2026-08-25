@@ -1,6 +1,5 @@
 // sessionSlice.ts
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { isUndefined } from 'lodash';
 import { MESSAGE_TYPE, NETWORK_NAMES } from '../../../constants';
 import { sendMessage } from '../../abstraction';
 import type { RootState } from '../index';
@@ -117,7 +116,7 @@ const sessionSlice = createSlice({
 // Selectors
 export const selectRunebaseBalanceUSD = (state: RootState) => {
   const usd = state.session.runebaseUSD;
-  if (isUndefined(usd)) return 'Loading...';
+  if (usd === undefined) return 'Loading...';
   if (usd === null) return 'Price unavailable';
   return `(≈$${usd})`;
 };

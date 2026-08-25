@@ -1,4 +1,3 @@
-import { findIndex } from 'lodash';
 import Permission from './Permission';
 
 export default class SubAccount {
@@ -12,7 +11,7 @@ export default class SubAccount {
 
   public changePermission(permissionName: string, allowed: boolean) {
     const permission = new Permission(permissionName, allowed);
-    const index = findIndex(this.permissions, { name: permissionName });
+    const index = this.permissions.findIndex((p) => p.name === permissionName);
     if (index !== -1) {
       this.permissions[index] = permission;
     } else {

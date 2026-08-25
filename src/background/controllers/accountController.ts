@@ -1,5 +1,5 @@
 // background/controllers/accountController.ts
-import { isEmpty, find, cloneDeep } from 'lodash';
+import { isEmpty, cloneDeep } from '../../utils/collections';
 import assert from 'assert';
 import { Buffer } from 'buffer';
 import RunebaseChromeController from '.';
@@ -9,11 +9,11 @@ import Account from '../../models/Account';
 import Wallet from '../../models/Wallet';
 import { TRANSACTION_SPEED, DELEGATION_CONTRACT_ADDRESS } from '../../constants';
 import Transaction from '../../models/Transaction';
-import moment from 'moment';
+import dayjs from '../../utils/date';
 import BigNumber from 'bignumber.js';
 import { PodReturnResult } from '../../types';
 import { generateRequestId, parseJsonOrFallback } from '../../utils';
-import abi from 'ethjs-abi';
+import { encodeMethodFragment } from '../../utils/abi';
 import { addMessageListener, getMultipleStorageValues, isExtensionEnvironment, sendMessage, setStorageValue } from '../../popup/abstraction';
 import {
   fromMnemonic,
@@ -116,7 +116,7 @@ export default class AccountController extends IController {
   }
 
   public isWalletNameTaken = (name: string): boolean => {
-    return !!find(this.accounts, { name });
+    return !!this.accounts.find((a) => a.name === name);
   };
 
   public resetAccount = () => {
@@ -259,7 +259,7 @@ export default class AccountController extends IController {
   };
 
   public loginAccount = async (accountName: string) => {
-    const account = find(this.accounts, { name: accountName });
+    const account = this.accounts.find((a) => a.name === accountName);
     this.loggedInAccount = cloneDeep(account);
 
     if (!this.loggedInAccount) {
@@ -420,7 +420,7 @@ export default class AccountController extends IController {
   };
 
   private walletAlreadyExists = async (privateKeyHash: string): Promise<boolean> => {
-    return !!find(this.accounts, { privateKeyHash });
+    return !!this.accounts.find((a) => a.privateKeyHash === privateKeyHash);
   };
 
   private getElectrumX() {
@@ -787,7 +787,7 @@ export default class AccountController extends IController {
       );
       const newTransaction = new Transaction({
         id: transaction.txid,
-        timestamp: moment().format('MM-DD-YYYY, HH:mm'),
+        timestamp: dayjs().format('MM-DD-YYYY, HH:mm'),
         confirmations: 0,
         amount: new BigNumber(amount ?? 0).times(1e8).dp(0).toNumber(),
       });
@@ -838,14 +838,14 @@ export default class AccountController extends IController {
     }
     const hexAddress = addressToHash160(signedPoD.superStakerAddress);
     const params = [`0x${hexAddress}`, fee, signedPoD.podMessage];
-    const encodedData = abi.encodeMethod({
+    const encodedData = encodeMethodFragment({
       name: 'addDelegation',
       inputs: [
         { name: 'staker', type: 'address' },
         { name: 'fee', type: 'uint8' },
         { name: 'PoD', type: 'bytes' },
       ],
-    }, params).substr(2);
+    }, params);
 
     const args = [
       DELEGATION_CONTRACT_ADDRESS,
@@ -860,7 +860,7 @@ export default class AccountController extends IController {
     const { error, result } = response as { error: any, result: ISendRawTxResult };
     const newTransaction = new Transaction({
       id: result && result.txid ? result.txid : undefined,
-      timestamp: moment().format('MM-DD-YYYY, HH:mm'),
+      timestamp: dayjs().format('MM-DD-YYYY, HH:mm'),
       confirmations: 0,
       amount: -new BigNumber(gasLimit ?? 0).times(gasPrice ?? 0).dp(0).toNumber(),
       qrc20TokenTransfers: []
@@ -891,7 +891,7 @@ export default class AccountController extends IController {
     if (!this.loggedInAccount || !this.loggedInAccount.wallet) {
       throw Error('Cannot send with no wallet instance.');
     }
-    const encodedData = abi.encodeMethod({ name: 'removeDelegation', inputs: [] }, []).substr(2);
+    const encodedData = encodeMethodFragment({ name: 'removeDelegation', inputs: [] }, []);
     const args = [
       DELEGATION_CONTRACT_ADDRESS,
       encodedData,
@@ -905,7 +905,7 @@ export default class AccountController extends IController {
     const { error, result } = response as { error: any, result: ISendRawTxResult };
     const newTransaction = new Transaction({
       id: result && result.txid ? result.txid : undefined,
-      timestamp: moment().format('MM-DD-YYYY, HH:mm'),
+      timestamp: dayjs().format('MM-DD-YYYY, HH:mm'),
       confirmations: 0,
       amount: -new BigNumber(gasLimit ?? 0).times(gasPrice ?? 0).dp(0).toNumber(),
       qrc20TokenTransfers: []

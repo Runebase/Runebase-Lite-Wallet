@@ -1,11 +1,10 @@
-import { isEmpty, split } from 'lodash';
-import { pbkdf2 } from 'crypto';
+import { isEmpty } from '../../utils/collections';
 
 import RunebaseChromeController from '.';
 import IController from './iController';
 import { STORAGE } from '../../constants';
 import { getStorageValue, setStorageValue } from '../../popup/abstraction';
-import scrypt from 'scryptsy';
+import { pbkdf2Sha512, scryptHex } from '../../utils/kdf';
 import { Buffer } from 'buffer';
 
 globalThis.Buffer = Buffer;
@@ -22,7 +21,6 @@ export default class CryptoController extends IController {
   // PBKDF2
   private static PBKDF2_ITERATIONS = 500000;
   private static PBKDF2_KEY_LENGTH = 64;
-  private static PBKDF2_ALGORITHM = 'sha512';
   //
   private securityAlgorithm?: string = INIT_VALUES.securityAlgorithm;
   private appSalt?: Uint8Array = INIT_VALUES.appSalt;
@@ -32,7 +30,7 @@ export default class CryptoController extends IController {
     super('crypto', main);
     getStorageValue(STORAGE.APP_SALT).then((appSalt) => {
       if (!isEmpty(appSalt)) {
-        const array = split(appSalt, ',').map((str) => parseInt(str, 10));
+        const array = String(appSalt).split(',').map((str: string) => parseInt(str, 10));
         this.appSalt = Uint8Array.from(array);
       } else {
         // If no salt is stored, generate a new one
@@ -92,25 +90,13 @@ export default class CryptoController extends IController {
       pickSecurityAlgorithm = algorithm;
     }
     if (pickSecurityAlgorithm === 'PBKDF2') {
-      const pbkdf2Async = () => new Promise<string>((resolve, reject) => {
-        pbkdf2(
+      try {
+        this.passwordHash = await pbkdf2Sha512(
           password,
-          Buffer.from(this.appSalt || ''),
+          this.appSalt,
           CryptoController.PBKDF2_ITERATIONS,
           CryptoController.PBKDF2_KEY_LENGTH,
-          CryptoController.PBKDF2_ALGORITHM,
-          (err, derivedKey) => {
-            if (err) {
-              reject('Error calculating PBKDF2 derivedKey');
-            } else {
-              resolve(derivedKey.toString('hex'));
-            }
-          }
         );
-      });
-
-      try {
-        this.passwordHash = await pbkdf2Async();
         needsFinishLoginCallback && this.main.account.finishLogin();
       } catch (error) {
         throw new Error(error as any);
@@ -119,15 +105,14 @@ export default class CryptoController extends IController {
 
     if (pickSecurityAlgorithm === 'Scrypt') {
       try {
-        const derivedKey = scrypt(
+        this.passwordHash = scryptHex(
           password,
-          Buffer.from(this.appSalt),
+          this.appSalt,
           CryptoController.SCRYPT_PARAMS_PW.N,
           CryptoController.SCRYPT_PARAMS_PW.r,
           CryptoController.SCRYPT_PARAMS_PW.p,
-          64
+          64,
         );
-        this.passwordHash = derivedKey.toString('hex');
         needsFinishLoginCallback && this.main.account.finishLogin();
       } catch (error) {
         // Handle the error

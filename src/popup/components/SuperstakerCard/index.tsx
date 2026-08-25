@@ -12,7 +12,7 @@ import SportsScoreIcon from '@mui/icons-material/SportsScore';
 import AppRegistrationIcon from '@mui/icons-material/AppRegistration';
 import NotificationAddIcon from '@mui/icons-material/NotificationAdd';
 import DynamicFormIcon from '@mui/icons-material/DynamicForm';
-import moment from 'moment';
+import dayjs from '../../../utils/date';
 import { SuperStaker } from '../../../types';
 import { useNavigate } from 'react-router';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
@@ -81,7 +81,7 @@ const SuperStakerCard: React.FC<SuperStakerCardProps> = ({
         <InfoRow
           icon={<AppRegistrationIcon sx={{ fontSize: 16 }} color="info" />}
           label="Registered"
-          value={moment(superstaker.firstRegisteredOn).format('YYYY-MM-DD')}
+          value={dayjs(superstaker.firstRegisteredOn).format('YYYY-MM-DD')}
         />
         <InfoRow
           icon={<DynamicFormIcon sx={{ fontSize: 16 }} color="success" />}
@@ -91,7 +91,7 @@ const SuperStakerCard: React.FC<SuperStakerCardProps> = ({
         <InfoRow
           icon={<NotificationAddIcon sx={{ fontSize: 16 }} color="warning" />}
           label="Last Block"
-          value={moment(superstaker.lastProducedBlock).format('YYYY-MM-DD')}
+          value={dayjs(superstaker.lastProducedBlock).format('YYYY-MM-DD')}
         />
         <InfoRow
           icon={<SportsScoreIcon sx={{ fontSize: 16 }} color="error" />}

@@ -1,4 +1,3 @@
-import { isFinite } from 'lodash';
 import { validatePrivateKey } from '../services/wallet';
 
 import { TARGET_NAME } from '../constants';
@@ -73,7 +72,7 @@ export const isValidContractAddressLength = (address?: string) => {
 * @return {boolean} Returns if it is a valid send amount.
 */
 export const isValidAmount = (amount: number, maxAllowed: number) => {
-  if (!isFinite(amount) || !isFinite(maxAllowed)) {
+  if (!Number.isFinite(amount) || !Number.isFinite(maxAllowed)) {
     return false;
   }
   if (amount <= 0) {
@@ -86,11 +85,11 @@ export const isValidAmount = (amount: number, maxAllowed: number) => {
 };
 
 export const isValidGasLimit = (gasLimit: number) => {
-  return isFinite(gasLimit) && gasLimit > 0;
+  return Number.isFinite(gasLimit) && gasLimit > 0;
 };
 
 export const isValidGasPrice = (gasPrice: number) => {
-  return isFinite(gasPrice) && gasPrice > 0;
+  return Number.isFinite(gasPrice) && gasPrice > 0;
 };
 
 export const isValidDelegationFee = (delegationFee: number) => {

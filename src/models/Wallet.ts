@@ -1,5 +1,5 @@
-import createHash from 'create-hash';
-import secp256k1 from 'secp256k1';
+import { sha256 as nobleSha256 } from '@noble/hashes/sha2';
+import * as ecc from '@bitcoinerlab/secp256k1';
 import { Buffer } from 'buffer';
 
 import { ISigner } from '../types';
@@ -22,7 +22,7 @@ import { ElectrumXManager, ElectrumXTransaction, ElectrumXVout, ElectrumXUtxo } 
 import { proxyFetch } from '../utils/fetchProxy';
 
 function sha256(buffer: Buffer): Buffer {
-  return createHash('sha256').update(buffer).digest();
+  return Buffer.from(nobleSha256(buffer));
 }
 
 function sha256d(buffer: Buffer): Buffer {
@@ -543,19 +543,19 @@ export default class Wallet implements ISigner {
     );
 
     const privateKey = Buffer.from(this.wallet.keyPair.privateKey!);
-    const { signature, recid } = secp256k1.ecdsaSign(
+    const { signature, recoveryId } = ecc.signRecoverable(
       hash,
       privateKey,
     );
     const signed = Buffer.concat([
-      Buffer.from([recid + (this.wallet.compressed ? 31 : 27)]),
-      signature,
+      Buffer.from([recoveryId + (this.wallet.compressed ? 31 : 27)]),
+      Buffer.from(signature),
     ]);
     const podMessage = `0x${signed.toString('hex')}`;
 
     // Verify
-    const pubKey = secp256k1.publicKeyCreate(privateKey);
-    const verified = secp256k1.ecdsaVerify(signature, hash, pubKey);
+    const pubKey = ecc.pointFromScalar(privateKey, true)!;
+    const verified = ecc.verify(hash, pubKey, signature);
     if (!verified) throw new Error('Unable to verify signature');
     if (podMessage.length !== 132) throw new Error('Incorrect POD length');
 

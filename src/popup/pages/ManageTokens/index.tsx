@@ -6,7 +6,6 @@ import {
   Box,
   Stack,
 } from '@mui/material';
-import { isUndefined } from 'lodash';
 
 import useStyles from './styles';
 import PageLayout from '../../components/PageLayout';
@@ -95,7 +94,7 @@ const TokenList: React.FC<{ classes: Record<string, string> }> = ({ classes }) =
                 <Box sx={{ flex: 1 }}>
                   <Typography variant="body2" sx={{ fontWeight: 'bold' }}>{name}</Typography>
                   <Typography variant="caption" color="text.secondary">
-                    {isUndefined(balance) ? '...' : balance} {symbol}
+                    {balance === undefined ? '...' : balance} {symbol}
                   </Typography>
                 </Box>
               </Box>

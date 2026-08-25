@@ -1,6 +1,5 @@
 // sendSlice.ts
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { find } from 'lodash';
 import { SEND_STATE, MESSAGE_TYPE, TRANSACTION_SPEED } from '../../../constants';
 import { isValidAddress, isValidAmount, isValidGasLimit, isValidGasPrice } from '../../../utils';
 import Config from '../../../config';
@@ -97,7 +96,7 @@ const sendSlice = createSlice({
       state.errorMessage = action.payload;
     },
     changeToken: (state, action: PayloadAction<string>) => {
-      const token = find(state.tokens, { symbol: action.payload });
+      const token = state.tokens.find((t) => t.symbol === action.payload);
       if (token) {
         state.token = token;
       }

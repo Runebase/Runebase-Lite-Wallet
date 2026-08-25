@@ -1,4 +1,3 @@
-import { every } from 'lodash';
 
 import CryptoController from './cryptoController';
 import TokenController from './tokenController';
@@ -114,7 +113,7 @@ export default class RunebaseChromeController {
   public controllerInitialized = (name: string) => {
     this.initialized[name] = true;
 
-    if (every(this.initialized)) {
+    if (Object.values(this.initialized).every(Boolean)) {
       sendMessage({
         type: MESSAGE_TYPE.ROUTE_LOGIN
       });

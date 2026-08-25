@@ -1,6 +1,6 @@
 // accountLoginSlice.ts
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { isEmpty } from 'lodash';
+import { isEmpty } from '../../../utils/collections';
 import { MESSAGE_TYPE } from '../../../constants';
 import { sendMessage } from '../../abstraction';
 import { getNavigateFunction } from '../messageMiddleware';
