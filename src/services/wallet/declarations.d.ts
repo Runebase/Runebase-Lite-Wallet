@@ -42,16 +42,3 @@ declare module 'bip38' {
     scryptParams?: { N: number; r: number; p: number },
   ): { privateKey: Buffer; compressed: boolean };
 }
-
-declare module 'scryptsy' {
-  function scrypt(
-    password: string | Buffer,
-    salt: string | Buffer,
-    N: number,
-    r: number,
-    p: number,
-    keyLen: number,
-    progressCallback?: (status: { current: number; total: number }) => void,
-  ): Buffer;
-  export = scrypt;
-}

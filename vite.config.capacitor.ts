@@ -37,7 +37,6 @@ export default defineConfig({
 
   resolve: {
     alias: {
-      'scryptsy/browser': 'scryptsy',
       'bignumber.js': path.resolve(__dirname, 'node_modules/bignumber.js/dist/bignumber.mjs'),
       ...nodeBuiltinAliases,
     },

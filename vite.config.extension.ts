@@ -26,7 +26,6 @@ const nodeBuiltinAliases: Record<string, string> = {
 
 const sharedResolve = {
   alias: {
-    'scryptsy/browser': 'scryptsy',
     'bignumber.js': path.resolve(__dirname, 'node_modules/bignumber.js/dist/bignumber.mjs'),
     ...nodeBuiltinAliases,
   } as Record<string, string>,
