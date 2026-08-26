@@ -49,21 +49,3 @@ export interface IContractCall {
     log: unknown[];
   };
 }
-
-export interface IRawWalletTransactionInfo {
-  id: string;
-  timestamp: number;
-  confirmations: number;
-  inputs: Array<{ address: string; value: string }>;
-  outputs: Array<{ address: string; value: string }>;
-  qrc20TokenTransfers?: Array<{
-    address: string;
-    addressHex: string;
-    name: string;
-    symbol: string;
-    decimals: number;
-    value: string;
-    from: string;
-    to: string;
-  }>;
-}

@@ -13,19 +13,6 @@ function injectScript(src: string): Promise<void> {
   });
 }
 
-function injectStylesheet(src: string): Promise<void> {
-  return new Promise((resolve, reject) => {
-    const styleElement = document.createElement('link');
-    const headOrDocumentElement = document.head || document.documentElement;
-
-    styleElement.onload = () => resolve();
-    styleElement.onerror = (error) => reject(error);
-    styleElement.rel = 'stylesheet';
-    styleElement.href = src;
-    headOrDocumentElement.insertAdjacentElement('afterbegin', styleElement);
-  });
-}
-
 export async function injectAllScripts() {
   try {
     await injectScript(chrome.runtime.getURL('inpage.js'));
@@ -38,11 +25,5 @@ export async function injectAllScripts() {
     });
   } catch (error) {
     console.error('Error injecting scripts:', error);
-  }
-
-  try {
-    await injectStylesheet(chrome.runtime.getURL('css/modal.css'));
-  } catch (error) {
-    console.error('Error injecting stylesheet:', error);
   }
 }

@@ -6,9 +6,6 @@ export interface TabOpener {
   openUrlInNewTab(url: string): void;
 }
 
-const messageListeners: { callback: MessageCallback }[] = [];
-export const messageCallbacks = {};
-
 let targetOrigin = '*'; // Default to allow cross-origin communication
 if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.id) {
   targetOrigin = chrome.runtime.getURL('/');
@@ -73,21 +70,6 @@ export function addMessageListener(handleMessage: MessageCallback) {
   }
   return false;
 }
-
-export function removeMessageListener(callback: MessageCallback): void {
-  const index = messageListeners.findIndex((entry) => entry.callback === callback);
-  if (index !== -1) {
-    const listenerEntry = messageListeners.splice(index, 1)[0];
-
-    if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.onMessage) {
-      chrome.runtime.onMessage.removeListener(listenerEntry.callback);
-    } else if (typeof window !== 'undefined') {
-      // Web-compatible implementation
-      window.removeEventListener('message', listenerEntry.callback);
-    }
-  }
-}
-
 
 export function openUrlInNewTab(url: string, tabOpener: TabOpener): void {
   tabOpener.openUrlInNewTab(url);

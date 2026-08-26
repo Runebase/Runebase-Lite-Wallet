@@ -16,14 +16,6 @@ export const isMessageNotValid = (event: MessageEvent, targetName: TARGET_NAME):
 };
 
 /*
-* Generates a random string id.
-* @return The random string id.
-*/
-export const generateRandomId = (): string => {
-  return Math.random().toString().slice(-8);
-};
-
-/*
 * Validates the Runebase address based on length and starting character.
 * @param isMainNet {boolean} Flag if is a mainnet address (or else testnet address).
 * @param address {string} The Runebase address to validate.

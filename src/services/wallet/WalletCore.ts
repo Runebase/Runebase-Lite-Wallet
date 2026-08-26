@@ -432,7 +432,11 @@ export function buildContractSendTx(
 }
 
 /**
- * Build and sign a create-contract (OP_CREATE) transaction
+ * Build and sign a create-contract (OP_CREATE) transaction.
+ *
+ * Not currently reachable from the UI or the dApp message handlers — kept
+ * deliberately so contract deployment can be wired up in a future release.
+ * Please leave in place when pruning unused code.
  */
 export function buildContractCreateTx(
   wallet: WalletKeyPair,

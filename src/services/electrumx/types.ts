@@ -141,10 +141,3 @@ export interface ElectrumXServerFeatures {
 export type SubscriptionCallback = (params: unknown[]) => void;
 
 export type ConnectionState = 'disconnected' | 'connecting' | 'connected' | 'failed';
-
-export interface ElectrumXClientEvents {
-  connected: () => void;
-  disconnected: (reason?: string) => void;
-  error: (error: Error) => void;
-  notification: (method: string, params: unknown[]) => void;
-}

@@ -123,11 +123,6 @@ export const importSeedPhrase = () => (_dispatch: any, getState: any) => {
   }
 };
 
-export const cancelImport = () => {
-  const navigate = getNavigateFunction();
-  navigate?.(-1);
-};
-
 export const {
   setAccountName,
   setWalletNameTaken,

@@ -46,8 +46,7 @@
         "sign-tx.html",
         "images/logo.png",
         "images/runes.png",
-        "images/credits.png",
-        "css/modal.css"
+        "images/credits.png"
       ],
       "matches": ["<all_urls>"]
     }
